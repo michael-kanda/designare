@@ -1,0 +1,20 @@
+/* css/consent-extras.css – Zusätzliche Styles für Consent-Buttons */
+
+/* Akzeptieren-Button hervorheben */
+.consent-accept-highlight {
+  background: var(--accent-color, #4caf50) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.consent-accept-highlight:hover {
+  filter: brightness(1.1);
+}
+
+/* Cookie-Modal Text-Link */
+#cookie-info-lightbox .cookie-info-text a {
+  color: var(--link-color, #64b5f6);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
