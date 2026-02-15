@@ -1,5 +1,11 @@
-// js/analytics-proxy.js – Version 3.1
-// Korrigiert für GA4 Measurement Protocol + Neue Nutzer Tracking
+// js/analytics-proxy.js – Version 3.2 (Hybrid)
+// Cookieless Custom Event Tracking via Measurement Protocol
+//
+// Standard-Metriken (Nutzer, Traffic, Device) → gtag.js (mit Consent)
+// Custom Events (Scroll, Clicks, Conversions) → dieser Proxy (ohne Cookies)
+//
+// DSGVO: Kein localStorage, keine Cookies, keine persistenten IDs.
+// Jeder Pageload erzeugt eine neue anonyme Session.
 
 const Analytics = {
   startTime: Date.now(),
@@ -7,228 +13,49 @@ const Analytics = {
   scrollTracked: new Set(),
   maxScrollDepth: 0,
   isEngaged: false,
-  heartbeatInterval: null,
-  debugMode: localStorage.getItem('analytics_debug') === 'true',
+  debugMode: false,
+
+  // Anonyme IDs – nur im RAM, werden bei Pageload neu erzeugt
+  _sessionId: null,
+  _clientId: null,
 
   // ─────────────────────────────────────────────
-  // CORE: IDs & Session Management
+  // ANONYMOUS IDs (kein Cookie, kein localStorage)
   // ─────────────────────────────────────────────
 
-  /**
-   * Client ID im GA4-kompatiblen Format
-   * Format: timestamp.random (z.B. "1234567890.987654321")
-   */
   getClientId() {
-    let id = localStorage.getItem('ga_client_id');
-    if (!id) {
-      const timestamp = Math.floor(Date.now() / 1000);
-      const random = Math.floor(Math.random() * 1000000000);
-      id = `${timestamp}.${random}`;
-      localStorage.setItem('ga_client_id', id);
+    if (!this._clientId) {
+      const ts = Math.floor(Date.now() / 1000);
+      const rnd = Math.floor(Math.random() * 1000000000);
+      this._clientId = `${ts}.${rnd}`;
     }
-    return id;
+    return this._clientId;
   },
 
-  /**
-   * Prüft ob dies ein neuer Nutzer ist (noch nie besucht)
-   */
-  isNewUser() {
-    return !localStorage.getItem('ga_returning_user');
-  },
-
-  /**
-   * Markiert den Nutzer als wiederkehrend
-   */
-  markAsReturningUser() {
-    localStorage.setItem('ga_returning_user', 'true');
-  },
-
-  /**
-   * Session Management
-   * - Session ID muss eine Zahl sein (Unix Timestamp)
-   * - Session Number zählt die Sessions pro Client
-   * - Timeout: 30 Minuten Inaktivität
-   */
-  getSession() {
-    const now = Date.now();
-    const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 Minuten
-
-    let sessionId = localStorage.getItem('ga_session_id');
-    let sessionNumber = parseInt(localStorage.getItem('ga_session_number') || '0', 10);
-    let lastActive = parseInt(localStorage.getItem('ga_last_active') || '0', 10);
-    let isNewSession = false;
-
-    // Neue Session wenn: keine existiert ODER Timeout überschritten
-    if (!sessionId || (now - lastActive) > SESSION_TIMEOUT) {
-      sessionId = Math.floor(now / 1000).toString();
-      sessionNumber += 1;
-      isNewSession = true;
-
-      localStorage.setItem('ga_session_id', sessionId);
-      localStorage.setItem('ga_session_number', sessionNumber.toString());
+  getSessionId() {
+    if (!this._sessionId) {
+      this._sessionId = Math.floor(Date.now() / 1000);
     }
-
-    localStorage.setItem('ga_last_active', now.toString());
-
-    return {
-      id: parseInt(sessionId, 10),  // GA4 erwartet Number
-      number: sessionNumber,
-      isNew: isNewSession
-    };
+    return this._sessionId;
   },
 
-  /**
-   * Engagement Time berechnen
-   * GA4 braucht mindestens 1ms, aber realistischere Werte sind besser
-   */
   getEngagementTime() {
-    const timeOnPage = Date.now() - this.startTime;
-    return Math.max(100, timeOnPage); // Minimum 100ms
+    return Math.max(100, Date.now() - this.startTime);
   },
 
   // ─────────────────────────────────────────────
-  // TRACKING: Events senden
+  // TRACKING (cookieless via Proxy)
   // ─────────────────────────────────────────────
 
-  /**
-   * Sendet session_start und first_visit Events
-   * WICHTIG: Diese Events sind nötig für "Neue Nutzer" in GA4
-   */
-  async sendSessionStart(clientId, session) {
-    const events = [];
-    
-    // 1. session_start Event (für jede neue Session)
-    events.push({
-      name: 'session_start',
-      params: {
-        ga_session_id: session.id,
-        ga_session_number: session.number,
-        engagement_time_msec: 1,
-        page_location: window.location.href,
-        page_title: document.title,
-        debug_mode: this.debugMode
-      }
-    });
-
-    // 2. first_visit Event (nur beim allerersten Besuch)
-    if (this.isNewUser()) {
-      events.push({
-        name: 'first_visit',
-        params: {
-          ga_session_id: session.id,
-          ga_session_number: session.number,
-          engagement_time_msec: 1,
-          page_location: window.location.href,
-          page_title: document.title,
-          debug_mode: this.debugMode
-        }
-      });
-      this.markAsReturningUser();
-    }
-
-    const payload = {
-      client_id: clientId,
-      events: events
-    };
-
-    try {
-      await fetch('/api/metrics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      });
-
-      if (this.debugMode) {
-        console.log('📊 Session/First Visit Events sent:', events.map(e => e.name));
-      }
-    } catch (error) {
-      console.warn('Session start error:', error.message);
-    }
-  },
-
-  /**
-   * Haupt-Tracking-Methode
-   * Sendet Events an den Proxy-Endpoint
-   */
   async track(eventName, customParams = {}) {
     try {
-      const session = this.getSession();
-      const clientId = this.getClientId();
-
-      // Basis-Parameter die GA4 erwartet
-      const params = {
-        // Session-Parameter (WICHTIG: als Zahlen!)
-        ga_session_id: session.id,
-        ga_session_number: session.number,
-        
-        // Engagement
-        engagement_time_msec: this.getEngagementTime(),
-        
-        // Seiten-Infos
-        page_location: window.location.href,
-        page_title: document.title,
-        page_path: window.location.pathname,
-        page_referrer: document.referrer || '(direct)',
-        
-        // Browser/Device
-        language: navigator.language || 'de-DE',
-        screen_resolution: `${screen.width}x${screen.height}`,
-        
-        // Debug Mode – zeigt Events im GA4 DebugView
-        debug_mode: this.debugMode,
-        
-        // Custom Parameters überschreiben/ergänzen
-        ...customParams
-      };
-
-      // ✅ FIX: Session Start als SEPARATES Event senden
-      if (session.isNew && !sessionStorage.getItem('session_start_sent')) {
-        await this.sendSessionStart(clientId, session);
-        sessionStorage.setItem('session_start_sent', 'true');
-      }
-
       const payload = {
-        client_id: clientId,
-        events: [{
-          name: eventName,
-          params: params
-        }]
-      };
-
-      const response = await fetch('/api/metrics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true // Wichtig für beforeunload
-      });
-
-      if (!response.ok) {
-        console.warn(`Analytics: HTTP ${response.status}`);
-      }
-
-    } catch (error) {
-      // Silently fail – Analytics sollte nie die UX blockieren
-      console.warn('Analytics error:', error.message);
-    }
-  },
-
-  /**
-   * Beacon-Tracking für Page Exit
-   * sendBeacon ist zuverlässiger als fetch bei beforeunload/visibilitychange
-   */
-  trackBeacon(eventName, customParams = {}) {
-    try {
-      const session = this.getSession();
-      const clientId = this.getClientId();
-
-      const payload = {
-        client_id: clientId,
+        client_id: this.getClientId(),
         events: [{
           name: eventName,
           params: {
-            ga_session_id: session.id,
-            ga_session_number: session.number,
+            ga_session_id: this.getSessionId(),
+            ga_session_number: 1,
             engagement_time_msec: this.getEngagementTime(),
             page_location: window.location.href,
             page_title: document.title,
@@ -238,11 +65,40 @@ const Analytics = {
         }]
       };
 
-      // sendBeacon sendet als text/plain – der Server muss das parsen können
-      navigator.sendBeacon('/api/metrics', JSON.stringify(payload));
+      await fetch('/api/metrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      });
 
-    } catch (error) {
-      console.warn('Beacon error:', error.message);
+      if (this.debugMode) {
+        console.log(`📊 [Proxy] ${eventName}`, customParams);
+      }
+    } catch (err) {
+      if (this.debugMode) console.warn('Analytics proxy error:', err.message);
+    }
+  },
+
+  trackBeacon(eventName, customParams = {}) {
+    try {
+      const payload = {
+        client_id: this.getClientId(),
+        events: [{
+          name: eventName,
+          params: {
+            ga_session_id: this.getSessionId(),
+            ga_session_number: 1,
+            engagement_time_msec: this.getEngagementTime(),
+            page_location: window.location.href,
+            page_title: document.title,
+            ...customParams
+          }
+        }]
+      };
+      navigator.sendBeacon('/api/metrics', JSON.stringify(payload));
+    } catch (err) {
+      if (this.debugMode) console.warn('Beacon error:', err.message);
     }
   },
 
@@ -251,62 +107,30 @@ const Analytics = {
   // ─────────────────────────────────────────────
 
   getScrollPercentage() {
-    const docHeight = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight
-    );
-    const viewHeight = window.innerHeight;
+    const docH = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    const viewH = window.innerHeight;
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-    if (docHeight <= viewHeight) return 100;
-    return Math.round((scrollTop / (docHeight - viewHeight)) * 100);
+    if (docH <= viewH) return 100;
+    return Math.round((scrollTop / (docH - viewH)) * 100);
   },
 
   checkScrollMilestones() {
-    const percentage = this.getScrollPercentage();
+    const pct = this.getScrollPercentage();
+    if (pct > this.maxScrollDepth) this.maxScrollDepth = pct;
 
-    // Max Scroll Depth speichern
-    if (percentage > this.maxScrollDepth) {
-      this.maxScrollDepth = percentage;
-    }
-
-    // Milestone Events
-    for (const milestone of this.scrollMilestones) {
-      if (percentage >= milestone && !this.scrollTracked.has(milestone)) {
-        this.scrollTracked.add(milestone);
-        
-        this.track('scroll', {
-          percent_scrolled: milestone
-        });
-
-        // Ab 50% als engaged markieren
-        if (milestone >= 50) {
-          this.isEngaged = true;
-        }
+    for (const m of this.scrollMilestones) {
+      if (pct >= m && !this.scrollTracked.has(m)) {
+        this.scrollTracked.add(m);
+        this.track('scroll_depth', { percent_scrolled: m });
+        if (m >= 50) this.isEngaged = true;
       }
     }
   },
 
   // ─────────────────────────────────────────────
-  // ENGAGEMENT & HEARTBEAT
+  // EXIT EVENT
   // ─────────────────────────────────────────────
 
-  /**
-   * Heartbeat für aktive Verweildauer
-   * Sendet nur wenn Tab sichtbar ist
-   */
-  sendHeartbeat() {
-    if (document.visibilityState !== 'visible') return;
-
-    this.track('heartbeat', {
-      time_on_page_sec: Math.round((Date.now() - this.startTime) / 1000)
-    });
-  },
-
-  /**
-   * Page Exit Event
-   * Wird bei visibilitychange und beforeunload gefeuert
-   */
   sendExitEvent() {
     this.trackBeacon('page_exit', {
       time_on_page_sec: Math.round((Date.now() - this.startTime) / 1000),
@@ -316,269 +140,130 @@ const Analytics = {
   },
 
   // ─────────────────────────────────────────────
-  // CONVERSION TRACKING
+  // CONVERSIONS (Proxy + gtag.js wenn Consent)
   // ─────────────────────────────────────────────
 
-  /**
-   * Conversion Event
-   * Für Formulare, Kontakt-Klicks, etc.
-   */
+  hasConsent() {
+    const match = document.cookie.match(/(^| )analytics_consent=([^;]+)/);
+    return match && match[2] === 'granted';
+  },
+
   trackConversion(type, value = null, currency = 'EUR') {
-    const params = {
-      conversion_type: type
-    };
-
-    if (value !== null) {
-      params.value = value;
-      params.currency = currency;
-    }
-
+    const params = { conversion_type: type };
+    if (value !== null) { params.value = value; params.currency = currency; }
     this.track('conversion', params);
 
-    // Zusätzlich GA4 Standard-Events für bessere Reports
-    if (type === 'contact' || type === 'inquiry' || type === 'form') {
-      this.track('generate_lead', params);
+    // Auch an gtag senden wenn Consent vorhanden
+    if (this.hasConsent() && typeof gtag === 'function') {
+      gtag('event', 'generate_lead', { event_category: 'conversion', event_label: type, value: value });
     }
   },
 
   // ─────────────────────────────────────────────
-  // EVENT HANDLERS
+  // CLICK HANDLER
   // ─────────────────────────────────────────────
 
   handleClick(event) {
     const target = event.target;
-    
-    // Button Clicks
+
+    // Buttons
     const button = target.closest('button, [role="button"], .btn');
     if (button) {
-      const buttonText = (button.innerText || button.value || '').trim().substring(0, 100);
-      const buttonId = button.id || button.name || button.className?.split(' ')[0] || 'unknown';
+      const text = (button.innerText || button.value || '').trim().substring(0, 100);
+      const id = button.id || button.name || button.className?.split(' ')[0] || 'unknown';
+      const ctaWords = ['anfragen', 'kontakt', 'buchen', 'kaufen', 'bestellen', 'senden', 'submit', 'absenden'];
+      const isCta = ctaWords.some(kw => text.toLowerCase().includes(kw));
 
-      // CTA-Keywords für Conversions
-      const ctaKeywords = ['anfragen', 'kontakt', 'buchen', 'kaufen', 'bestellen', 'senden', 'submit', 'absenden'];
-      const isConversionCTA = ctaKeywords.some(kw => buttonText.toLowerCase().includes(kw));
-
-      this.track('cta_click', {
-        button_text: buttonText,
-        button_id: buttonId,
-        is_conversion_cta: isConversionCTA
-      });
-
-      if (isConversionCTA) {
-        this.trackConversion('cta_click');
-      }
-
+      this.track('cta_click', { button_text: text, button_id: id, is_conversion_cta: isCta });
+      if (isCta) this.trackConversion('cta_click');
       this.isEngaged = true;
       return;
     }
 
-    // Link Clicks
+    // Links
     const link = target.closest('a');
     if (!link || !link.href) return;
-
     const url = link.href;
     const linkText = (link.innerText || link.title || '').trim().substring(0, 100);
 
     // Downloads
-    const downloadExtensions = /\.(pdf|zip|docx?|xlsx?|pptx?|mp3|mp4|txt|csv|rar|7z)$/i;
-    if (downloadExtensions.test(url)) {
-      const fileName = url.split('/').pop() || 'unknown';
-      const fileExt = fileName.split('.').pop()?.toLowerCase() || 'unknown';
-
-      this.track('file_download', {
-        file_name: fileName,
-        file_extension: fileExt,
-        link_text: linkText,
-        link_url: url
-      });
+    if (/\.(pdf|zip|docx?|xlsx?|pptx?|mp3|mp4|csv|rar)$/i.test(url)) {
+      const name = url.split('/').pop() || 'unknown';
+      this.track('file_download', { file_name: name, file_extension: name.split('.').pop()?.toLowerCase(), link_text: linkText });
       this.isEngaged = true;
       return;
     }
 
-    // E-Mail Links
+    // mailto / tel
     if (url.startsWith('mailto:')) {
-      const email = url.replace('mailto:', '').split('?')[0];
-      this.track('contact_click', {
-        method: 'email',
-        contact_info: email
-      });
+      this.track('contact_click', { method: 'email', contact_info: url.replace('mailto:', '').split('?')[0] });
       this.trackConversion('contact_email');
       this.isEngaged = true;
       return;
     }
-
-    // Telefon Links
     if (url.startsWith('tel:')) {
-      const phone = url.replace('tel:', '');
-      this.track('contact_click', {
-        method: 'phone',
-        contact_info: phone
-      });
+      this.track('contact_click', { method: 'phone', contact_info: url.replace('tel:', '') });
       this.trackConversion('contact_phone');
       this.isEngaged = true;
       return;
     }
 
-    // Externe Links (Outbound)
+    // Outbound
     try {
-      const linkHost = new URL(url).hostname;
-      if (linkHost && linkHost !== window.location.hostname) {
-        this.track('outbound_click', {
-          link_url: url,
-          link_domain: linkHost,
-          link_text: linkText
-        });
+      const host = new URL(url).hostname;
+      if (host && host !== window.location.hostname) {
+        this.track('outbound_click', { link_url: url, link_domain: host, link_text: linkText });
       }
-    } catch {
-      // Invalid URL – ignorieren
-    }
+    } catch { /* ignore */ }
   },
 
   handleFormSubmit(event) {
     const form = event.target;
     if (!(form instanceof HTMLFormElement)) return;
-
-    const formId = form.id || form.name || form.action || 'unknown_form';
-
-    this.track('form_submit', {
-      form_id: formId,
-      form_destination: form.action || window.location.href,
-      form_method: form.method || 'GET'
-    });
-
+    this.track('form_submit', { form_id: form.id || form.name || 'unknown_form' });
     this.trackConversion('form_submission');
     this.isEngaged = true;
   },
 
   // ─────────────────────────────────────────────
-  // INITIALISIERUNG
+  // INIT
   // ─────────────────────────────────────────────
 
   init() {
-    // Verhindere doppelte Initialisierung
-    if (window.__analyticsInitialized) return;
-    window.__analyticsInitialized = true;
+    if (window.__analyticsProxyInit) return;
+    window.__analyticsProxyInit = true;
 
-    // 1. Page View
-    this.track('page_view');
-
-    // 2. Scroll Tracking (throttled)
-    let scrollTimeout = null;
+    // Scroll (throttled)
+    let st = null;
     window.addEventListener('scroll', () => {
-      if (scrollTimeout) return;
-      scrollTimeout = setTimeout(() => {
-        this.checkScrollMilestones();
-        scrollTimeout = null;
-      }, 200);
+      if (st) return;
+      st = setTimeout(() => { this.checkScrollMilestones(); st = null; }, 250);
     }, { passive: true });
 
-    // 3. Heartbeat alle 30 Sekunden
-    this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), 30000);
-
-    // 4. Exit Tracking
+    // Exit
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        this.sendExitEvent();
-      }
+      if (document.visibilityState === 'hidden') this.sendExitEvent();
     });
-
-    // Fallback für ältere Browser / iOS Safari
     window.addEventListener('pagehide', () => this.sendExitEvent());
 
-    // 5. Click Tracking
+    // Clicks & Forms
     document.addEventListener('click', (e) => this.handleClick(e), { capture: true });
-
-    // 6. Form Tracking
     document.addEventListener('submit', (e) => this.handleFormSubmit(e), { capture: true });
 
-    // Debug Info
-    if (this.debugMode) {
-      console.log('📊 Analytics v3.1 initialized', {
-        clientId: this.getClientId(),
-        session: this.getSession(),
-        isNewUser: this.isNewUser()
-      });
-    }
+    if (this.debugMode) console.log('📊 Analytics Proxy v3.2 (cookieless) initialized');
   },
 
-  /**
-   * Debug-Modus aktivieren
-   * Aufruf: Analytics.enableDebug()
-   */
-  enableDebug() {
-    localStorage.setItem('analytics_debug', 'true');
-    this.debugMode = true;
-    console.log('📊 Analytics Debug enabled. Events will appear in GA4 DebugView.');
-  },
-
-  /**
-   * Debug-Modus deaktivieren
-   */
-  disableDebug() {
-    localStorage.removeItem('analytics_debug');
-    this.debugMode = false;
-    console.log('📊 Analytics Debug disabled.');
-  },
-
-  /**
-   * Manuelles Event senden
-   * Aufruf: Analytics.event('custom_event', { key: 'value' })
-   */
-  event(name, params = {}) {
-    return this.track(name, params);
-  },
-
-  /**
-   * Reset für Tests (löscht alle gespeicherten Daten)
-   * Aufruf: Analytics.reset()
-   */
-  reset() {
-    localStorage.removeItem('ga_client_id');
-    localStorage.removeItem('ga_session_id');
-    localStorage.removeItem('ga_session_number');
-    localStorage.removeItem('ga_last_active');
-    localStorage.removeItem('ga_returning_user');
-    sessionStorage.removeItem('session_start_sent');
-    console.log('📊 Analytics reset. Reload page to start fresh.');
-  }
+  // Public
+  enableDebug() { this.debugMode = true; console.log('📊 Proxy debug ON'); },
+  disableDebug() { this.debugMode = false; },
+  event(name, params = {}) { return this.track(name, params); }
 };
 
-// ─────────────────────────────────────────────
 // AUTO-START
-// ─────────────────────────────────────────────
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => Analytics.init());
 } else {
   Analytics.init();
 }
 
-// Global verfügbar machen
 window.Analytics = Analytics;
-
-// ─────────────────────────────────────────────
-// USAGE EXAMPLES
-// ─────────────────────────────────────────────
-//
-// Automatisch getrackt:
-// - first_visit (nur beim allerersten Besuch)
-// - session_start (bei jeder neuen Session)
-// - page_view (beim Laden)
-// - scroll (25%, 50%, 75%, 90%)
-// - page_exit (beim Verlassen)
-// - cta_click (Button-Klicks)
-// - file_download (PDF, ZIP, etc.)
-// - contact_click (mailto:, tel:)
-// - outbound_click (externe Links)
-// - form_submit (Formulare)
-// - heartbeat (alle 30s)
-//
-// Manuell:
-// Analytics.event('video_play', { video_id: 'xyz', video_title: 'Demo' });
-// Analytics.trackConversion('purchase', 99.99);
-// Analytics.trackConversion('newsletter_signup');
-//
-// Debug:
-// Analytics.enableDebug();
-// Analytics.disableDebug();
-// Analytics.reset(); // Für Tests - simuliert neuen Nutzer
