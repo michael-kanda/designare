@@ -10,7 +10,7 @@
   // ─────────────────────────────────────────────
 
   const CONFIG = {
-    GA_MEASUREMENT_ID: 'G-161PPGNBYX', // ← HIER deine GA4 Measurement ID eintragen
+    GA_MEASUREMENT_ID: 'G-XXXXXXXXXX', // ← HIER deine GA4 Measurement ID eintragen
     COOKIE_NAME: 'analytics_consent',
     COOKIE_DAYS: 365,
     PRIVACY_URL: '/datenschutz'
@@ -91,7 +91,7 @@
       textEl.innerHTML = `
         Wir nutzen Google Analytics zur Verbesserung unserer Website.
         Technisch notwendige Cookies sind immer aktiv.
-        Mehr in unserer <a href="${CONFIG.PRIVACY_URL}" style="text-decoration: underline;">Datenschutzerklärung</a>.
+        Mehr in unserer <a href="${CONFIG.PRIVACY_URL}" style="color: #C4A35A; text-decoration: underline;">Datenschutzerklärung</a>.
       `;
     }
 
