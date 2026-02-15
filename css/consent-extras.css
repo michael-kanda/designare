@@ -14,7 +14,11 @@
 
 /* Cookie-Modal Text-Link */
 #cookie-info-lightbox .cookie-info-text a {
-  color: var(--link-color, #64b5f6);
-  text-decoration: underline;
+  color: #C4A35A !important;
+  text-decoration: none;
   text-underline-offset: 2px;
+}
+
+#cookie-info-lightbox .cookie-info-text a:hover {
+  color: #C4A35A !important;
 }
