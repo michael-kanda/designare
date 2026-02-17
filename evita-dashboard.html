@@ -349,6 +349,56 @@
       margin-top: 4px;
     }
 
+    /* EMAIL LOG */
+    .email-log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--green-bg);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 6px;
+    }
+
+    .email-log-item.failed {
+      background: var(--red-bg);
+      border-left-color: var(--red);
+    }
+
+    .email-log-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .email-log-status { font-size: 0.9rem; flex-shrink: 0; }
+
+    .email-log-to {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .email-log-subject {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-log-time {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+
     /* HEATMAP */
     .heatmap-grid {
       display: grid;
@@ -605,6 +655,11 @@
           <div class="kpi-value">${p.visibility_checks}</div>
           <div class="kpi-sub">${t.visibility_checks} heute</div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-label">📧 E-Mails gesendet</div>
+          <div class="kpi-value green">${p.emails_sent}</div>
+          <div class="kpi-sub">${t.emails_sent || 0} heute${p.emails_failed > 0 ? ` · ${p.emails_failed} fehlgeschlagen` : ''}</div>
+        </div>
       </div>`;
 
       // ===== CHART ROW 1: Messages Trend + Modell-Nutzung =====
@@ -697,6 +752,23 @@
         </div>`;
       }
 
+      // ===== E-MAIL LOG =====
+      if (data.recentEmails && data.recentEmails.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">📧 Letzte E-Mails via Evita</div>
+          ${data.recentEmails.map(e => `
+            <div class="email-log-item ${e.success ? '' : 'failed'}">
+              <div class="email-log-main">
+                <span class="email-log-status">${e.success ? '✅' : '❌'}</span>
+                <span class="email-log-to">${escHTML(e.to)}</span>
+                <span class="email-log-subject">${escHTML(e.subject)}</span>
+              </div>
+              ${e.timestamp ? `<div class="email-log-time">${new Date(e.timestamp).toLocaleString('de-AT')}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
       // ===== FALLBACKS =====
       html += `<div class="chart-card full-width">
         <div class="chart-title">⚠️ Letzte Fallbacks <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Wo Evita nicht weiter wusste)</span></div>
@@ -770,6 +842,17 @@
               tension: 0.3,
               pointRadius: 2,
               pointHoverRadius: 5
+            },
+            {
+              label: 'E-Mails',
+              data: daily.map(d => d.emails_sent || 0),
+              borderColor: '#00d68f',
+              backgroundColor: 'rgba(0, 214, 143, 0.05)',
+              fill: false,
+              tension: 0.3,
+              pointRadius: 3,
+              pointHoverRadius: 6,
+              borderDash: [4, 4]
             }
           ]
         },
