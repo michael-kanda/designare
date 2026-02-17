@@ -1,6 +1,7 @@
-// api/ask-gemini.js - MIT MEMORY-SYSTEM + DASHBOARD-TRACKING + EMAIL-VERSAND
-// Version: Memory + Dashboard + Email Integration
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// api/ask-gemini.js - FUNCTION CALLING VERSION
+// Gemini Native Tool Use statt Tag-Parsing
+// Tools: open_booking, compose_email, suggest_link, remember_user_name
+import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from "@google/generative-ai";
 import { Redis } from "@upstash/redis";
 import Brevo from '@getbrevo/brevo';
 import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
@@ -10,7 +11,7 @@ import path from 'path';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ===================================================================
-// REDIS-INITIALISIERUNG
+// REDIS
 // ===================================================================
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -27,16 +28,16 @@ brevoApi.setApiKey(
 );
 
 const EMAIL_SENDER = {
-  name: process.env.EMAIL_SENDER_NAME || 'Michael Kanda',
-  email: process.env.EMAIL_SENDER_ADDRESS || 'hello@designare.at'
+  name: process.env.EMAIL_SENDER_NAME || 'Evita | designare.at',
+  email: process.env.EMAIL_SENDER_ADDRESS || 'evita@designare.at'
 };
 
 const MAX_EMAILS_PER_SESSION = 3;
 
 // ===================================================================
-// MEMORY-HELPER FUNKTIONEN
+// MEMORY HELPERS
 // ===================================================================
-const MEMORY_TTL = 60 * 60 * 24 * 30; // 30 Tage
+const MEMORY_TTL = 60 * 60 * 24 * 30;
 
 async function getMemory(sessionId) {
   if (!sessionId) return null;
@@ -63,80 +64,31 @@ async function saveMemory(sessionId, memoryData) {
   }
 }
 
-function extractNameFromResponse(aiResponse) {
-  const match = aiResponse.match(/\[USER_NAME:([^\]]+)\]/);
-  if (match) {
-    const name = match[1].trim();
-    if (name.length >= 2 && name.length <= 20 && /^[A-Za-zÄÖÜäöüß\-]+$/.test(name)) {
-      return name;
-    }
-  }
-  return null;
-}
-
-function cleanAiResponse(text) {
-  return text
-    .replace(/\[USER_NAME:[^\]]+\]/g, '')
-    .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
-    .replace(/\[buchung_starten\]/g, '')
-    .replace(/\[booking_starten\]/g, '')
-    .trim();
-}
-
 // ===================================================================
-// E-MAIL HELPER FUNKTIONEN
+// E-MAIL HELPERS
 // ===================================================================
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function sanitizeHtml(text) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 function textToHtml(text) {
-  const escaped = sanitizeHtml(text);
-  return escaped
-    .split('\n\n')
-    .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
-    .join('');
+  return sanitizeHtml(text).split('\n\n')
+    .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 }
 
 function buildEmailHtml(bodyText, subject) {
-  return `<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${sanitizeHtml(subject)}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
-    .container { background: #fff; border-radius: 8px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .header { border-bottom: 2px solid #e0e0e0; padding-bottom: 16px; margin-bottom: 24px; }
-    .header h2 { margin: 0; color: #1a1a1a; font-size: 20px; }
-    .body p { margin: 0 0 16px 0; }
-    .footer { border-top: 1px solid #e0e0e0; padding-top: 16px; margin-top: 32px; font-size: 13px; color: #888; }
-    .footer a { color: #555; text-decoration: none; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header"><h2>${sanitizeHtml(subject)}</h2></div>
-    <div class="body">${textToHtml(bodyText)}</div>
-    <div class="footer">
-      <p>Michael Kanda · Web Purist &amp; SEO Expert<br><a href="https://designare.at">designare.at</a></p>
-    </div>
-  </div>
-</body>
-</html>`;
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${sanitizeHtml(subject)}</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5}.c{background:#fff;border-radius:8px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,.1)}.h{border-bottom:2px solid #e0e0e0;padding-bottom:16px;margin-bottom:24px}.h h2{margin:0;color:#1a1a1a;font-size:20px}.b p{margin:0 0 16px}.f{border-top:1px solid #e0e0e0;padding-top:16px;margin-top:32px;font-size:13px;color:#888}.f a{color:#555;text-decoration:none}</style>
+</head><body><div class="c"><div class="h"><h2>${sanitizeHtml(subject)}</h2></div><div class="b">${textToHtml(bodyText)}</div>
+<div class="f"><p>Michael Kanda · Web Purist &amp; SEO Expert<br><a href="https://designare.at">designare.at</a></p></div></div></body></html>`;
 }
 
-async function sendEmail({ to, toName, subject, body, replyTo, sessionId }) {
+async function sendEmail({ to, toName, subject, body, sessionId }) {
   const email = new Brevo.SendSmtpEmail();
   email.sender = EMAIL_SENDER;
   email.to = [{ email: to, name: toName || to.split('@')[0] }];
@@ -145,48 +97,88 @@ async function sendEmail({ to, toName, subject, body, replyTo, sessionId }) {
   email.textContent = body;
   email.tags = ['evita-composed'];
   email.headers = { 'X-Evita-Session': sessionId || 'unknown', 'X-Sent-By': 'Evita-AI' };
-
-  if (replyTo && isValidEmail(replyTo)) {
-    email.replyTo = { email: replyTo };
-  }
-
   return await brevoApi.sendTransacEmail(email);
 }
 
-function parseEmailDraft(text) {
-  const draftMatch = text.match(/\[EMAIL_DRAFT\]([\s\S]*?)\[\/EMAIL_DRAFT\]/);
-  if (!draftMatch) return null;
-
-  const content = draftMatch[1].trim();
-  const lines = content.split('\n');
-  let to = '', toName = '', subject = '', bodyLines = [];
-  let inBody = false;
-
-  for (const line of lines) {
-    if (line.startsWith('AN:')) to = line.replace('AN:', '').trim();
-    else if (line.startsWith('NAME:')) toName = line.replace('NAME:', '').trim();
-    else if (line.startsWith('BETREFF:')) subject = line.replace('BETREFF:', '').trim();
-    else if (line.trim() === '---') inBody = true;
-    else if (inBody) bodyLines.push(line);
+// ===================================================================
+// FUNCTION DECLARATIONS (Gemini Tools)
+// ===================================================================
+const toolDeclarations = [
+  {
+    name: "open_booking",
+    description: "Öffnet den Buchungskalender für einen Rückruf-Termin mit Michael. Aufrufen wenn der Nutzer einen Termin, Rückruf, Call oder ein Meeting mit Michael möchte.",
+    parameters: {
+      type: FunctionDeclarationSchemaType.OBJECT,
+      properties: {
+        reason: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Kurzer Grund für den Termin (optional)"
+        }
+      }
+    }
+  },
+  {
+    name: "compose_email",
+    description: "Verfasst eine E-Mail im Namen von Michael Kanda. Aufrufen wenn der Nutzer eine E-Mail senden, schreiben oder verfassen möchte. IMMER alle Pflichtfelder ausfüllen. Wenn Infos fehlen, NICHT dieses Tool aufrufen sondern zuerst nachfragen.",
+    parameters: {
+      type: FunctionDeclarationSchemaType.OBJECT,
+      properties: {
+        to: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "E-Mail-Adresse des Empfängers"
+        },
+        to_name: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Name des Empfängers (optional)"
+        },
+        subject: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Betreff der E-Mail"
+        },
+        body: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Vollständiger E-Mail-Text inklusive Anrede und Grußformel. Absender ist immer Michael Kanda."
+        }
+      },
+      required: ["to", "subject", "body"]
+    }
+  },
+  {
+    name: "suggest_link",
+    description: "Empfiehlt einen passenden Link zu einer Seite auf designare.at. Aufrufen wenn die Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk oder Begrüßungen.",
+    parameters: {
+      type: FunctionDeclarationSchemaType.OBJECT,
+      properties: {
+        url: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Relativer URL-Pfad der Seite, z.B. '/geo-seo'"
+        },
+        link_text: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Neugierig machender Linktext"
+        }
+      },
+      required: ["url", "link_text"]
+    }
+  },
+  {
+    name: "remember_user_name",
+    description: "Speichert den Vornamen des Nutzers wenn er sich vorstellt oder seinen Namen nennt. NUR bei echten Vornamen des Nutzers, NICHT bei erwähnten dritten Personen.",
+    parameters: {
+      type: FunctionDeclarationSchemaType.OBJECT,
+      properties: {
+        name: {
+          type: FunctionDeclarationSchemaType.STRING,
+          description: "Vorname des Nutzers"
+        }
+      },
+      required: ["name"]
+    }
   }
-
-  if (!to || !subject) return null;
-
-  return { to, toName, subject, body: bodyLines.join('\n').trim() };
-}
-
-function formatDraftForDisplay(text) {
-  return text
-    .replace(/\[EMAIL_DRAFT\]/, '\n📧 **E-Mail-Entwurf:**\n')
-    .replace(/\[\/EMAIL_DRAFT\]/, '')
-    .replace(/^AN:\s*(.+)$/m, '**An:** $1')
-    .replace(/^NAME:.*$/m, '')
-    .replace(/^BETREFF:\s*(.+)$/m, '**Betreff:** $1')
-    .replace(/^---$/m, '\n---\n');
-}
+];
 
 // ===================================================================
-// THEMEN-KEYWORDS FÜR TRACKING
+// TOPIC KEYWORDS
 // ===================================================================
 const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|speed|hosting|security|schema|css|html|javascript|react|php|python|datapeak|silas|evita|kuchen|rezept|blog|shop|woocommerce|dsgvo|daten|backup|ssl|domain|analytics|tracking|caching|cdn|responsive|mobile|design|ux|ui|server|deployment|git|docker|nginx|apache|core web vitals|pagespeed|lighthouse|sitemap|robots|meta|snippet|featured|backlinks?|keywords?|ranking|indexierung|crawl|search console|email|e-mail|brevo|newsletter)/g;
 
@@ -194,7 +186,6 @@ const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|sp
 // MAIN HANDLER
 // ===================================================================
 export default async function handler(req, res) {
-  // CORS-Header
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -204,11 +195,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
   try {
-    const { prompt, source, checkBookingIntent, history, message, sessionId, userName, pendingEmail, confirmEmailSend } = req.body;
+    const { prompt, source, history, message, sessionId, userName, pendingEmail, confirmEmailSend } = req.body;
     const userMessage = message || prompt;
 
     // ===================================================================
-    // MEMORY LADEN
+    // MEMORY
     // ===================================================================
     let memory = await getMemory(sessionId);
     const isReturningUser = memory !== null;
@@ -220,40 +211,84 @@ export default async function handler(req, res) {
 
     console.log(`🧠 Memory: Session=${sessionId?.substring(0,8)}... | Name=${knownName} | Visits=${visitCount} | Emails=${emailsSent}`);
 
-    // ===================================================================
-    // 📊 DASHBOARD: Neue Chat-Session tracken
-    // ===================================================================
     if (!history || history.length === 0) {
       trackChatSession(sessionId);
     }
 
-    // --- MODELL-KONFIGURATION ---
-    let usedModel = 'gemini-3-flash-preview';
+    // ===================================================================
+    // DIREKTER E-MAIL-VERSAND (Frontend-Bestätigung)
+    // ===================================================================
+    if (confirmEmailSend && pendingEmail) {
+      console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
+
+      if (emailsSent >= MAX_EMAILS_PER_SESSION) {
+        return res.status(200).json({
+          answer: `⚠️ Du hast bereits ${MAX_EMAILS_PER_SESSION} E-Mails in dieser Session gesendet. Das ist das Maximum pro Sitzung.`
+        });
+      }
+
+      if (!isValidEmail(pendingEmail.to)) {
+        return res.status(200).json({
+          answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus. Kannst du die nochmal prüfen?`
+        });
+      }
+
+      try {
+        const result = await sendEmail({ to: pendingEmail.to, toName: pendingEmail.toName || '', subject: pendingEmail.subject, body: pendingEmail.body, sessionId });
+
+        if (sessionId) {
+          await saveMemory(sessionId, { ...(memory || {}), emailsSent: emailsSent + 1, lastEmailAt: new Date().toISOString() });
+        }
+
+        trackChatMessage({ sessionId, userMessage: `[EMAIL_SENT] ${pendingEmail.to}`, isReturningUser, usedFallback: false, modelUsed: 'email', bookingIntent: false, bookingCompleted: false });
+        trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: true });
+
+        return res.status(200).json({
+          answer: `📧 Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
+          emailSent: true, messageId: result.messageId
+        });
+      } catch (emailError) {
+        console.error('📧 Brevo-Fehler:', emailError.message);
+        trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: false });
+        return res.status(200).json({
+          answer: `Da ist leider was schiefgelaufen beim Versand: ${emailError.message || 'Unbekannter Fehler'}. Soll ich es nochmal versuchen?`,
+          emailSent: false
+        });
+      }
+    }
+
+    // ===================================================================
+    // MODELL-KONFIGURATION MIT FUNCTION CALLING
+    // ===================================================================
+    let usedModel = 'gemini-2.5-flash';
+
+    const toolsConfig = { functionDeclarations: toolDeclarations };
     const commonConfig = { temperature: 0.7 };
 
-    const modelPrimary = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", generationConfig: commonConfig });
-    const modelFallback1 = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig });
-    const modelFallback2 = genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig });
+    const models = [
+      { name: 'gemini-2.5-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig, tools: [toolsConfig] }) },
+      { name: 'gemini-2.0-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
+    ];
 
-    async function generateContentSafe(inputText) {
-      try { return await modelPrimary.generateContent(inputText); }
-      catch (error) {
-        console.log("Primary failed, Fallback 1:", error.message);
-        usedModel = 'gemini-2.5-flash';
-        try { return await modelFallback1.generateContent(inputText); }
-        catch (error1) {
-          console.log("Fallback 1 failed, Fallback 2:", error1.message);
-          usedModel = 'gemini-2.0-flash';
-          return await modelFallback2.generateContent(inputText);
+    async function generateWithFallback(contents) {
+      for (let i = 0; i < models.length; i++) {
+        try {
+          usedModel = models[i].name;
+          return await models[i].instance.generateContent({ contents });
+        } catch (error) {
+          console.log(`${models[i].name} failed${i < models.length - 1 ? ', trying next' : ''}:`, error.message);
+          if (i === models.length - 1) throw error;
         }
       }
     }
 
-    // --- RAG KONTEXT-ABRUF ---
+    // ===================================================================
+    // RAG KONTEXT
+    // ===================================================================
     let additionalContext = "";
     let availableLinks = [];
     const knowledgePath = path.join(process.cwd(), 'knowledge.json');
-    
+
     if (fs.existsSync(knowledgePath)) {
       try {
         const kbData = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
@@ -265,358 +300,241 @@ export default async function handler(req, res) {
         if (searchIndex && searchTerms.length > 0) {
           const pageScores = {};
           searchTerms.forEach(term => {
-            if (searchIndex[term]) {
-              searchIndex[term].forEach(idx => { pageScores[idx] = (pageScores[idx] || 0) + 2; });
-            }
+            if (searchIndex[term]) searchIndex[term].forEach(idx => { pageScores[idx] = (pageScores[idx] || 0) + 2; });
             Object.keys(searchIndex).forEach(indexTerm => {
-              if (indexTerm.includes(term) || term.includes(indexTerm)) {
+              if (indexTerm.includes(term) || term.includes(indexTerm))
                 searchIndex[indexTerm].forEach(idx => { pageScores[idx] = (pageScores[idx] || 0) + 1; });
-              }
             });
           });
-          matchedPages = Object.entries(pageScores)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
-            .map(([idx]) => kb[parseInt(idx)])
-            .filter(Boolean);
+          matchedPages = Object.entries(pageScores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([idx]) => kb[parseInt(idx)]).filter(Boolean);
         }
 
         if (matchedPages.length === 0) {
           matchedPages = kb.filter(page => {
-            const pageText = `${page.title} ${page.text} ${(page.keywords || []).join(' ')}`.toLowerCase();
-            return searchTerms.some(term => pageText.includes(term));
+            const t = `${page.title} ${page.text} ${(page.keywords || []).join(' ')}`.toLowerCase();
+            return searchTerms.some(term => t.includes(term));
           }).slice(0, 3);
         }
 
         if (matchedPages.length > 0) {
           additionalContext = matchedPages.map(page => {
-            let ctx = `\n📄 QUELLE: ${page.title}`;
-            if (page.url) ctx += ` (URL: ${page.url})`;
+            let ctx = `📄 ${page.title}`;
+            if (page.url) ctx += ` (${page.url})`;
             if (page.sections?.length > 0) {
-              const relevant = page.sections
-                .filter(s => searchTerms.some(t => s.heading.toLowerCase().includes(t) || s.content.toLowerCase().includes(t)))
-                .slice(0, 2);
-              ctx += relevant.length > 0
-                ? '\n' + relevant.map(s => `[${s.heading}]: ${s.content.substring(0, 500)}`).join('\n')
-                : `\n${page.text.substring(0, 800)}`;
-            } else {
-              ctx += `\n${page.text.substring(0, 800)}`;
-            }
+              const rel = page.sections.filter(s => searchTerms.some(t => s.heading.toLowerCase().includes(t) || s.content.toLowerCase().includes(t))).slice(0, 2);
+              ctx += rel.length > 0 ? '\n' + rel.map(s => `[${s.heading}]: ${s.content.substring(0, 500)}`).join('\n') : `\n${page.text.substring(0, 800)}`;
+            } else ctx += `\n${page.text.substring(0, 800)}`;
             return ctx;
           }).join('\n\n');
 
-          const linkBlacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
-          availableLinks = matchedPages
-            .filter(page => page.url && !linkBlacklist.some(slug => page.url.includes(slug)))
-            .map(page => ({ url: page.url, title: page.title }));
+          const blacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
+          availableLinks = matchedPages.filter(p => p.url && !blacklist.some(s => p.url.includes(s))).map(p => ({ url: p.url, title: p.title }));
         }
-      } catch (error) {
-        console.error('RAG Fehler:', error.message);
-      }
+      } catch (error) { console.error('RAG Fehler:', error.message); }
     }
 
-    // =================================================================
-    // EMAIL-VERSAND BESTÄTIGUNG
-    // =================================================================
-    if (confirmEmailSend && pendingEmail) {
-      console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
-
-      // Rate-Limit prüfen
-      if (emailsSent >= MAX_EMAILS_PER_SESSION) {
-        return res.status(200).json({
-          answer: `⚠️ Du hast bereits ${MAX_EMAILS_PER_SESSION} E-Mails in dieser Session gesendet. Das ist das Maximum pro Sitzung.`
-        });
-      }
-
-      // E-Mail validieren
-      if (!isValidEmail(pendingEmail.to)) {
-        return res.status(200).json({
-          answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus. Kannst du die nochmal prüfen?`
-        });
-      }
-
-      try {
-        const result = await sendEmail({
-          to: pendingEmail.to,
-          toName: pendingEmail.toName || '',
-          subject: pendingEmail.subject,
-          body: pendingEmail.body,
-          sessionId
-        });
-
-        // Memory: E-Mail-Counter erhöhen
-        if (sessionId) {
-          const updatedMemory = {
-            ...(memory || {}),
-            emailsSent: emailsSent + 1,
-            lastEmailAt: new Date().toISOString()
-          };
-          await saveMemory(sessionId, updatedMemory);
-        }
-
-        console.log(`📧 E-Mail gesendet! MessageId: ${result.messageId}`);
-
-        trackChatMessage({
-          sessionId, userMessage: `[EMAIL_SENT] ${pendingEmail.to}`,
-          isReturningUser, usedFallback: false, modelUsed: 'email',
-          bookingIntent: false, bookingCompleted: false
-        });
-
-        trackEmailSent({
-          sessionId, to: pendingEmail.to,
-          subject: pendingEmail.subject, success: true
-        });
-
-        return res.status(200).json({
-          answer: `📧 Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
-          emailSent: true,
-          messageId: result.messageId
-        });
-      } catch (emailError) {
-        console.error('📧 Brevo-Fehler:', emailError.message);
-
-        trackEmailSent({
-          sessionId, to: pendingEmail.to,
-          subject: pendingEmail.subject, success: false
-        });
-
-        return res.status(200).json({
-          answer: `Da ist leider was schiefgelaufen beim Versand: ${emailError.message || 'Unbekannter Fehler'}. Soll ich es nochmal versuchen?`,
-          emailSent: false
-        });
-      }
-    }
-
-    // =================================================================
-    // BOOKING INTENT-ERKENNUNG (unverändert)
-    // =================================================================
-    if (checkBookingIntent === true) {
-      console.log('📅 Booking-Intent Prüfung für:', userMessage);
-      
-      const lastAiMessage = history && Array.isArray(history)
-        ? [...history].reverse().find(msg => msg.role === 'assistant' || msg.role === 'model')
-        : null;
-      
-      const wasBookingQuestion = lastAiMessage && 
-        (lastAiMessage.content.includes('[BOOKING_CONFIRM_REQUEST]') || 
-         lastAiMessage.content.toLowerCase().includes('rückruf-termin schauen'));
-      
-      if (wasBookingQuestion) {
-        const confirmationKeywords = [
-          'ja', 'gerne', 'okay', 'ok', 'bitte', 'genau', 'richtig',
-          'korrekt', 'stimmt', 'passt', 'mach das', 'hilf mir',
-          'super', 'perfekt', 'natürlich', 'klar', 'unbedingt',
-          'auf jeden fall', 'sicher', 'gern', 'würde ich', 'bitte sehr'
-        ];
-        
-        if (confirmationKeywords.some(kw => userMessage.toLowerCase().includes(kw))) {
-          trackChatMessage({ sessionId, userMessage, isReturningUser, usedFallback: false, modelUsed: 'booking', bookingIntent: true, bookingCompleted: true });
-          return res.status(200).json({
-            answer: "Gerne, ich öffne jetzt Michaels Kalender für dich! [buchung_starten]"
-          });
-        }
-      } else {
-        const contactKeywords = [
-          'termin', 'buchung', 'buchen', 'rückruf', 'anrufen',
-          'sprechen', 'kontakt', 'meeting', 'gespräch', 'erreichen',
-          'treffen', 'call', 'telefonat', 'beratung', 'projekt besprechen'
-        ];
-        
-        if (contactKeywords.some(kw => userMessage.toLowerCase().includes(kw))) {
-          trackChatMessage({ sessionId, userMessage, isReturningUser, usedFallback: false, modelUsed: 'booking-intent', bookingIntent: true, bookingCompleted: false });
-          return res.status(200).json({
-            answer: "Kein Problem! Soll ich in Michaels Kalender nach einem passenden Rückruf-Termin schauen? [BOOKING_CONFIRM_REQUEST]"
-          });
-        }
-      }
-    }
-
-    // =================================================================
-    // NORMALE CHAT-ANTWORTEN
-    // =================================================================
-    let finalPrompt = '';
-
+    // ===================================================================
+    // SILAS: Kein Function Calling
+    // ===================================================================
     if (source === 'silas') {
-      finalPrompt = userMessage;
-      console.log("Silas-Prompt verwendet");
+      const silaModels = [
+        genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig }),
+        genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig })
+      ];
+      for (let i = 0; i < silaModels.length; i++) {
+        try {
+          const r = await silaModels[i].generateContent(userMessage);
+          return res.status(200).send(r.response.text());
+        } catch (e) {
+          if (i === silaModels.length - 1) throw e;
+        }
+      }
+    }
+
+    // ===================================================================
+    // SYSTEM-PROMPT BAUEN
+    // ===================================================================
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('de-AT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Vienna' });
+    const formattedTime = today.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Vienna' });
+    const hour = parseInt(new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Europe/Vienna' }));
+    const dayOfWeek = new Date().toLocaleString('de-AT', { weekday: 'long', timeZone: 'Europe/Vienna' });
+
+    let timeContext = '';
+    if (hour >= 0 && hour < 5) timeContext = `Mitten in der Nacht (${formattedTime}). Lockerer Ton – NUR bei ERSTER Nachricht.`;
+    else if (hour >= 5 && hour < 9) timeContext = `Früher Morgen (${formattedTime}).`;
+    else if (hour >= 9 && hour < 12) timeContext = `Vormittag (${formattedTime}).${dayOfWeek === 'Montag' ? ' Montagmorgen!' : ''}`;
+    else if (hour >= 12 && hour < 14) timeContext = `Mittagszeit (${formattedTime}). Kurz halten.`;
+    else if (hour >= 17 && hour < 21) timeContext = `Abend (${formattedTime}). Entspannt.`;
+    else if (hour >= 21) timeContext = `Spätabends (${formattedTime}). Locker.`;
+    if (dayOfWeek === 'Samstag' || dayOfWeek === 'Sonntag') timeContext += ` ${dayOfWeek}.`;
+
+    let memoryContext = '';
+    if (isReturningUser && knownName) {
+      const timeSince = lastVisit ? getTimeSinceText(new Date(lastVisit)) : 'einiger Zeit';
+      memoryContext = `WIEDERKEHRENDER BESUCHER: ${knownName} (Besuch ${visitCount}, zuletzt vor ${timeSince}). Begrüße beim Namen, NICHT nach dem Namen fragen.${previousTopics.length > 0 ? ` Frühere Themen: ${previousTopics.slice(-5).join(', ')}` : ''}`;
+    } else if (isReturningUser) {
+      memoryContext = `WIEDERKEHRENDER BESUCHER (Name unbekannt, Besuch ${visitCount}). Ab der 3. Nachricht beiläufig nach Namen fragen.`;
     } else {
-      const today = new Date();
-      const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Vienna' };
-      const formattedDate = today.toLocaleDateString('de-AT', optionsDate);
-      const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Vienna' };
-      const formattedTime = today.toLocaleTimeString('de-AT', optionsTime);
+      memoryContext = `NEUER BESUCHER. Wenn der Nutzer seinen Namen nennt, rufe remember_user_name auf.`;
+    }
 
-      // Konversationshistorie
-      let conversationHistoryText = '';
-      if (history && Array.isArray(history) && history.length > 0) {
-        conversationHistoryText = '\n\n--- BISHERIGE KONVERSATION ---\n';
-        history.forEach(msg => {
-          const role = msg.role === 'user' ? 'NUTZER' : 'EVITA';
-          const clean = msg.content
-            .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
-            .replace(/\[buchung_starten\]/g, '')
-            .replace(/\[booking_starten\]/g, '')
-            .replace(/\[USER_NAME:[^\]]+\]/g, '')
-            .replace(/\[EMAIL_DRAFT\][\s\S]*?\[\/EMAIL_DRAFT\]/g, '[E-Mail-Entwurf wurde gezeigt]');
-          conversationHistoryText += `${role}: ${clean}\n`;
-        });
-        conversationHistoryText += '--- ENDE KONVERSATION ---\n\n';
-      }
-
-      // Memory-Kontext
-      let memoryContext = '';
-      if (isReturningUser && knownName) {
-        const timeSince = lastVisit ? getTimeSinceText(new Date(lastVisit)) : 'einiger Zeit';
-        memoryContext = `
---- MEMORY ---
-⚡ WIEDERKEHRENDER BESUCHER!
-- Name: ${knownName}
-- Besuch Nr.: ${visitCount}
-- Letzter Besuch: vor ${timeSince}
-${previousTopics.length > 0 ? `- Frühere Themen: ${previousTopics.slice(-5).join(', ')}` : ''}
-${emailsSent > 0 ? `- E-Mails gesendet: ${emailsSent}` : ''}
-VERHALTEN: Begrüße ${knownName} natürlich beim Namen. Du brauchst NICHT nach dem Namen fragen.
---- ENDE MEMORY ---`;
-      } else if (isReturningUser) {
-        memoryContext = `
---- MEMORY ---
-⚡ WIEDERKEHRENDER BESUCHER (Name unbekannt) | Besuch Nr.: ${visitCount}
-${previousTopics.length > 0 ? `- Frühere Themen: ${previousTopics.slice(-5).join(', ')}` : ''}
-VERHALTEN: Frage BEILÄUFIG nach dem Namen ab der 3. Nachricht.
---- ENDE MEMORY ---`;
-      } else {
-        memoryContext = `
---- MEMORY ---
-🆕 NEUER BESUCHER
-Wenn der Nutzer seinen Namen nennt → [USER_NAME:Vorname] am Ende anhängen.
---- ENDE MEMORY ---`;
-      }
-
-      // Tageszeit
-      const hour = parseInt(new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Europe/Vienna' }));
-      const dayOfWeek = new Date().toLocaleString('de-AT', { weekday: 'long', timeZone: 'Europe/Vienna' });
-      
-      let timeContext = '';
-      if (hour >= 0 && hour < 5) timeContext = `Mitten in der Nacht (${formattedTime}). Lockerer Ton, "Nachtcoder? 🦉" – NUR bei ERSTER Nachricht.`;
-      else if (hour >= 5 && hour < 9) timeContext = `Früher Morgen (${formattedTime}). Kurzes "Guten Morgen!".`;
-      else if (hour >= 9 && hour < 12) timeContext = `Vormittag (${formattedTime}).${dayOfWeek === 'Montag' ? ' Montagmorgen!' : ''}`;
-      else if (hour >= 12 && hour < 14) timeContext = `Mittagszeit (${formattedTime}). Halte dich kurz.`;
-      else if (hour >= 17 && hour < 21) timeContext = `Abend (${formattedTime}). Entspannter Ton.`;
-      else if (hour >= 21) timeContext = `Spätabends (${formattedTime}). Locker.`;
-      if (dayOfWeek === 'Samstag' || dayOfWeek === 'Sonntag') timeContext += ` ${dayOfWeek} – Freizeit-Investment anerkennen.`;
-
-      finalPrompt = `
---- ANWEISUNGEN FÜR DIE KI ---
-
---- DEINE ROLLE ---
-Du bist Evita, Michaels hochkompetente, technisch versierte digitale Assistentin.
+    const systemPrompt = `Du bist Evita, Michaels hochkompetente, technisch versierte digitale Assistentin.
 Charakter: Charmant, schlagfertig, professionell. Duze den Nutzer. Max. 3-4 Sätze.
 
---- FACHWISSEN ---
-Web-Purismus, WordPress-Performance, SEO, GEO/Schema.org, API/KI-Automatisierung, Kuchenrezepte.
+FACHWISSEN: Web-Purismus, WordPress-Performance, SEO, GEO/Schema.org, API/KI-Automatisierung, Kuchenrezepte.
 
---- MICHAEL-REGEL ---
-1. FACHFRAGEN → rein sachlich, Michael NICHT erwähnen
-2. FRAGEN ZU MICHAEL/SERVICES → charmant als Experte positionieren
-3. WERBEVERBOT: Keine Marketing-Floskeln
-4. NAMEN-SPERRE: "Michael" nur bei direktem Bezug
+MICHAEL-REGEL:
+- FACHFRAGEN → rein sachlich, Michael NICHT erwähnen
+- FRAGEN ZU MICHAEL/SERVICES → charmant als Experte positionieren
+- Keine Marketing-Floskeln. "Michael" nur bei direktem Bezug.
 
---- TERMINE & BUCHUNGEN (VERBOTE!) ---
-⛔ NIEMALS Termine vorschlagen/erfinden/bestätigen, nie nach Kontaktdaten für Buchungen fragen
-✅ Bei Terminwünschen NUR: "Soll ich in Michaels Kalender nach einem Rückruf-Termin schauen?"
+TOOLS – Du hast 4 Werkzeuge. Nutze sie AKTIV wenn passend:
+1. open_booking → Bei Terminwünschen aufrufen. Du hast KEINEN Kalenderzugriff. Das Tool öffnet den Buchungskalender im Frontend.
+2. compose_email → Zum E-Mail-Verfassen. Frage ZUERST nach fehlenden Infos (Empfänger, Betreff, Inhalt) bevor du das Tool aufrufst. Absender: Michael Kanda / designare.at. Max. ${MAX_EMAILS_PER_SESSION} pro Session (bisher: ${emailsSent}).
+3. suggest_link → Wenn deine Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk. Max. 1 pro Antwort.
+4. remember_user_name → Wenn der Nutzer seinen Vornamen nennt. NUR bei echten eigenen Vornamen des Nutzers.
 
---- E-MAIL SCHREIBEN & VERSENDEN ---
-Du kannst E-Mails im Namen von Michael verfassen und versenden!
-
-ABLAUF:
-1. Wenn der Nutzer eine E-Mail senden will, frage nach fehlenden Infos (An wen? Betreff? Inhalt?)
-2. Verfasse die E-Mail und zeige sie als Entwurf in diesem Format:
-
-[EMAIL_DRAFT]
-AN: empfaenger@email.com
-NAME: Empfänger Name
-BETREFF: Der Betreff
----
-E-Mail-Text hier...
-
-Mit freundlichen Grüßen
-Michael Kanda
-[/EMAIL_DRAFT]
-
-3. Frage: "Soll ich die E-Mail so abschicken, oder möchtest du etwas ändern?"
-
-E-MAIL REGELN:
-- Absender ist IMMER Michael Kanda / designare.at
-- Professionell aber nicht steif. "Sie" bei Geschäftskontakten, "Du" wenn gewünscht
-- IMMER Bestätigung vor dem Senden einholen
-- Maximal ${MAX_EMAILS_PER_SESSION} E-Mails pro Session (bisher gesendet: ${emailsSent})
-- KEINE beleidigenden, rechtswidrigen oder Spam-Inhalte
-- Wenn der Nutzer die E-Mail bestätigt, antworte: "Wird gesendet! ✈️ [EMAIL_CONFIRMED]"
---- ENDE E-MAIL ---
-
---- WEITERE REGELN ---
-- Bulletpoints bei mehr als 2 Punkten
-- Tabus: Politik, Religion, Rechtsberatung
-- Sei witzig und hilfsbereit
-
---- STIMMUNGS-ERKENNUNG ---
-😤 FRUSTRIERT → Kein Smalltalk, direkt zur Lösung
-🎉 BEGEISTERT → Mitfeiern!
+STIMMUNGS-ERKENNUNG:
+😤 FRUSTRIERT → Kein Smalltalk, direkt Lösung
+🎉 BEGEISTERT → Mitfeiern
 🤔 UNSICHER → Ermutigend, einfach erklären
-😐 NEUTRAL → Charmant, kompetent, prägnant
 
-${timeContext ? `--- TAGESZEIT ---\n${timeContext}\nNUR in ERSTER Nachricht, danach ignorieren.\n` : ''}
---- DATEN ---
+REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung.
+
 Datum: ${formattedDate} | Uhrzeit: ${formattedTime}
+${timeContext ? `Tageszeit: ${timeContext} (NUR in erster Nachricht erwähnen)` : ''}
 
 ${memoryContext}
 
---- NAMENS-ERKENNUNG (INTERN) ---
-Nutzer nennt Vornamen → [USER_NAME:Vorname] am Ende. NUR bei echten Vornamen des Nutzers!
+${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
+${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availableLinks.map(l => `• ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
-${conversationHistoryText}
+    // ===================================================================
+    // CHAT-CONTENTS AUFBAUEN (Gemini-Format)
+    // ===================================================================
+    const contents = [];
 
-${additionalContext ? `--- WEBSEITEN-KONTEXT ---
-${additionalContext}
-${availableLinks.length > 0 ? `--- LINKS ---
-${availableLinks.map(l => `• ${l.url} → "${l.title}"`).join('\n')}
-LINK-REGELN: Max 1 Link, Format: [LINK:url|Linktext], NUR wenn relevant.` : ''}
-` : ''}
+    // System-Prompt als initialer Dialog-Turn
+    contents.push({ role: 'user', parts: [{ text: `[SYSTEM-ANWEISUNG]\n${systemPrompt}` }] });
+    contents.push({ role: 'model', parts: [{ text: 'Verstanden! Ich bin Evita und nutze meine Tools wenn passend.' }] });
 
---- NACHRICHT ---
-"${userMessage}"
-      `;
+    // Chat-History (alte Tags bereinigen für Übergangsphase)
+    if (history && Array.isArray(history) && history.length > 0) {
+      for (const msg of history) {
+        const role = msg.role === 'user' ? 'user' : 'model';
+        const clean = (msg.content || '')
+          .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
+          .replace(/\[buchung_starten\]/g, '')
+          .replace(/\[booking_starten\]/g, '')
+          .replace(/\[USER_NAME:[^\]]+\]/g, '')
+          .replace(/\[EMAIL_DRAFT\][\s\S]*?\[\/EMAIL_DRAFT\]/g, '')
+          .replace(/\[EMAIL_CONFIRMED\]/g, '')
+          .replace(/\[LINK:[^\]]+\]/g, '')
+          .trim();
+        if (clean) contents.push({ role, parts: [{ text: clean }] });
+      }
     }
 
-    // =================================================================
-    // ANTWORT GENERIEREN
-    // =================================================================
-    const result = await generateContentSafe(finalPrompt);
-    const response = await result.response;
-    let text = response.text();
+    // Aktuelle Nachricht
+    contents.push({ role: 'user', parts: [{ text: userMessage }] });
 
-    // =================================================================
-    // POST-PROCESSING
-    // =================================================================
-    if (source !== 'silas' && sessionId) {
-      const detectedName = extractNameFromResponse(text);
+    // ===================================================================
+    // GENERIEREN + FUNCTION CALLS VERARBEITEN
+    // ===================================================================
+    const result = await generateWithFallback(contents);
+    const response = result.response;
+
+    // Parts auslesen: Text + Function Calls
+    let answerText = '';
+    const functionCalls = [];
+
+    for (const candidate of response.candidates || []) {
+      for (const part of candidate.content?.parts || []) {
+        if (part.text) answerText += part.text;
+        if (part.functionCall) functionCalls.push(part.functionCall);
+      }
+    }
+
+    // Fallback
+    if (!answerText && functionCalls.length === 0) {
+      try { answerText = response.text(); } catch (e) {}
+    }
+
+    console.log(`🤖 ${usedModel} | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
+
+    // ===================================================================
+    // FUNCTION CALLS AUSFÜHREN
+    // ===================================================================
+    const responsePayload = { answer: answerText.trim() };
+
+    for (const fc of functionCalls) {
+      const args = fc.args || {};
+      console.log(`🔧 Tool: ${fc.name}(${JSON.stringify(args)})`);
+
+      switch (fc.name) {
+
+        case 'open_booking': {
+          responsePayload.openBooking = true;
+          responsePayload.bookingReason = args.reason || null;
+          // Wenn kein Text dabei ist, Standardantwort
+          if (!answerText.trim()) {
+            responsePayload.answer = 'Klar, ich öffne Michaels Kalender für dich!';
+          }
+          break;
+        }
+
+        case 'compose_email': {
+          if (!args.to || !args.subject || !args.body) {
+            console.warn('⚠️ compose_email: Pflichtfelder fehlen – ignoriert');
+            break;
+          }
+          responsePayload.emailDraft = {
+            to: args.to,
+            toName: args.to_name || '',
+            subject: args.subject,
+            body: args.body
+          };
+          // Draft als lesbaren Text anhängen
+          const draftDisplay = `\n\n📧 **E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
+          if (!responsePayload.answer) {
+            responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
+          } else if (!responsePayload.answer.includes(args.subject)) {
+            responsePayload.answer += draftDisplay;
+          }
+          break;
+        }
+
+        case 'suggest_link': {
+          if (args.url && args.link_text) {
+            responsePayload.answer = (responsePayload.answer + `\n\n[${args.link_text} →](${args.url})`).trim();
+            responsePayload.suggestedLink = { url: args.url, text: args.link_text };
+          }
+          break;
+        }
+
+        case 'remember_user_name': {
+          const n = args.name;
+          if (n && n.length >= 2 && n.length <= 20 && /^[A-Za-zÄÖÜäöüß\- ]+$/.test(n)) {
+            responsePayload.detectedName = n.trim();
+            console.log(`🧠 Name via Tool: ${n}`);
+          }
+          break;
+        }
+
+        default:
+          console.warn(`⚠️ Unbekannter Tool: ${fc.name}`);
+      }
+    }
+
+    // ===================================================================
+    // POST-PROCESSING + MEMORY
+    // ===================================================================
+    if (sessionId) {
       const topicKeywords = userMessage.toLowerCase().match(TOPIC_REGEX) || [];
 
-      // E-Mail-Draft extrahieren
-      let emailDraft = parseEmailDraft(text);
-      
-      // E-Mail-Bestätigung erkennen
-      const emailConfirmed = text.includes('[EMAIL_CONFIRMED]');
-      text = text.replace(/\[EMAIL_CONFIRMED\]/g, '');
-
-      // Draft für Display formatieren
-      if (emailDraft) {
-        text = formatDraftForDisplay(text);
-      }
-
-      // Memory aktualisieren
       const updatedMemory = {
-        name: detectedName || knownName || null,
+        name: responsePayload.detectedName || knownName || null,
         visitCount,
         lastVisit: new Date().toISOString(),
         topics: [...new Set([...previousTopics, ...topicKeywords])].slice(-15),
@@ -624,35 +542,26 @@ LINK-REGELN: Max 1 Link, Format: [LINK:url|Linktext], NUR wenn relevant.` : ''}
           ...(memory?.lastMessages || []).slice(-8),
           { role: 'user', content: userMessage.substring(0, 200), timestamp: new Date().toISOString() }
         ],
-        emailsSent: emailsSent
+        emailsSent
       };
       await saveMemory(sessionId, updatedMemory);
 
-      if (detectedName) console.log(`🧠 Name erkannt: ${detectedName}`);
-
-      // Dashboard-Tracking
-      trackChatMessage({ sessionId, userMessage, isReturningUser, usedFallback: false, modelUsed: usedModel, bookingIntent: checkBookingIntent || false, bookingCompleted: false });
+      trackChatMessage({
+        sessionId, userMessage, isReturningUser, usedFallback: false,
+        modelUsed: usedModel,
+        bookingIntent: !!responsePayload.openBooking,
+        bookingCompleted: !!responsePayload.openBooking
+      });
       trackQuestion(userMessage);
       if (topicKeywords.length > 0) trackTopics(topicKeywords);
 
-      // Interne Tags entfernen
-      text = cleanAiResponse(text);
-
-      // Response zusammenbauen
-      const responsePayload = { answer: text };
-      const finalName = extractNameFromResponse(response.text()) || knownName;
-      if (finalName) responsePayload.detectedName = finalName;
-      if (emailDraft) responsePayload.emailDraft = emailDraft;
-      if (emailConfirmed) responsePayload.emailConfirmed = true;
-
-      return res.status(200).json(responsePayload);
+      // Name aus Memory fallback
+      if (!responsePayload.detectedName && knownName) {
+        responsePayload.detectedName = knownName;
+      }
     }
 
-    if (source === 'silas') {
-      res.status(200).send(text);
-    } else {
-      res.status(200).json({ answer: cleanAiResponse(text) });
-    }
+    return res.status(200).json(responsePayload);
 
   } catch (error) {
     console.error("API Error:", error);
@@ -671,7 +580,6 @@ function getTimeSinceText(lastDate) {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
-  
   if (diffMins < 5) return 'wenigen Minuten';
   if (diffMins < 60) return `${diffMins} Minuten`;
   if (diffHours < 24) return `${diffHours} Stunden`;
