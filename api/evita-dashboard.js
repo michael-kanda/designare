@@ -80,6 +80,8 @@ export default async function handler(req, res) {
         new_users: parseInt(stats?.new_users || 0),
         returning_users: parseInt(stats?.returning_users || 0),
         visibility_checks: parseInt(stats?.visibility_checks || 0),
+        emails_sent: parseInt(stats?.emails_sent || 0),
+        emails_failed: parseInt(stats?.emails_failed || 0),
         unique_visitors: uniqueCount || 0
       });
     }
@@ -96,11 +98,14 @@ export default async function handler(req, res) {
       new_users: acc.new_users + day.new_users,
       returning_users: acc.returning_users + day.returning_users,
       visibility_checks: acc.visibility_checks + day.visibility_checks,
+      emails_sent: acc.emails_sent + day.emails_sent,
+      emails_failed: acc.emails_failed + day.emails_failed,
       unique_visitors: acc.unique_visitors + day.unique_visitors
     }), {
       total_chats: 0, total_messages: 0, booking_intents: 0,
       booking_completions: 0, fallback_count: 0, new_users: 0,
-      returning_users: 0, visibility_checks: 0, unique_visitors: 0
+      returning_users: 0, visibility_checks: 0, emails_sent: 0,
+      emails_failed: 0, unique_visitors: 0
     });
 
     // Heute separat
@@ -196,6 +201,18 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 9. E-MAIL-VERSAND LOG (letzte 20)
+    // ===============================================================
+    let recentEmails = [];
+    try {
+      const raw = await redis.lrange('evita:stats:emails', 0, 19);
+      recentEmails = raw.map(entry => {
+        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+        catch { return { to: '?', subject: '?', success: false, timestamp: null }; }
+      });
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -209,7 +226,9 @@ export default async function handler(req, res) {
           messages: today.total_messages || 0,
           unique_visitors: today.unique_visitors || 0,
           fallbacks: today.fallback_count || 0,
-          visibility_checks: today.visibility_checks || 0
+          visibility_checks: today.visibility_checks || 0,
+          emails_sent: today.emails_sent || 0,
+          emails_failed: today.emails_failed || 0
         },
         period: {
           ...totals,
@@ -233,6 +252,7 @@ export default async function handler(req, res) {
       topTopics,
       modelUsage: modelAgg,
       recentFallbacks,
+      recentEmails,
       heatmap,
 
       visibility: {
