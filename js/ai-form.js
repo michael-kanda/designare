@@ -1165,7 +1165,7 @@ const FollowupChips = {
                     a.href = chip.url;
                     a.target = '_blank';
                     a.rel = 'noopener';
-                    a.innerHTML = '<img src="/public/link.svg" alt="" class="evita-chip-icon">' + this.esc(chip.text);
+                    a.innerHTML = '<img src="/images/link.svg" alt="" class="evita-chip-icon">' + this.esc(chip.text);
                     container.appendChild(a);
                 } else {
                     const btn = document.createElement('button');
