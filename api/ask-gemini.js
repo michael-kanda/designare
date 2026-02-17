@@ -525,8 +525,9 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
 
         case 'suggest_link': {
           if (args.url && args.link_text) {
-            responsePayload.answer = (responsePayload.answer + `\n\n[${args.link_text} →](${args.url})`).trim();
-            responsePayload.suggestedLink = { url: args.url, text: args.link_text };
+            // Link als Chip-Eintrag speichern (type: 'link')
+            if (!responsePayload.chips) responsePayload.chips = [];
+            responsePayload.chips.push({ type: 'link', text: args.link_text, url: args.url });
           }
           break;
         }
@@ -540,8 +541,11 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
         }
 
         case 'suggest_followups': {
-          if (args.suggestions && Array.isArray(args.suggestions) && args.suggestions.length > 0) {
-            responsePayload.followups = args.suggestions.slice(0, 3);
+          if (args.suggestions && Array.isArray(args.suggestions)) {
+            if (!responsePayload.chips) responsePayload.chips = [];
+            args.suggestions.slice(0, 3).forEach(text => {
+              responsePayload.chips.push({ type: 'question', text });
+            });
           }
           break;
         }
