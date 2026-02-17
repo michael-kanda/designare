@@ -310,42 +310,12 @@ export const initAiForm = () => {
                     isFallback: true
                 };
             }
-            
-            const bookingTriggers = [
-                'termin', 'buchung', 'buchen', 'rückruf', 'anrufen', 
-                'sprechen', 'kontakt', 'meeting', 'appointment', 'erreichen', 'treffen', 'call', 'telefonat', 'beratung', 'projekt besprechen'
-            ];
-            
-            const confirmationKeywords = [
-                'ja', 'gerne', 'okay', 'ok', 'bitte', 'genau', 'richtig', 
-                'korrekt', 'stimmt', 'passt', 'mach das', 'hilf mir', 'super', 'perfekt', 'natürlich', 'klar', 'unbedingt'
-            ];
-            
-            const hasBookingIntent = bookingTriggers.some(trigger => 
-                userInput.toLowerCase().includes(trigger)
-            );
-            
-            const hasConfirmation = confirmationKeywords.some(keyword => 
-                userInput.toLowerCase().includes(keyword)
-            );
-            
-            // Suche letzte KI-Nachricht (flexibel für assistant oder model)
-            const lastAiMessage = state.chatHistory
-                .filter(msg => msg.role === 'assistant' || msg.role === 'model')
-                .pop();
-            
-            const wasBookingQuestion = lastAiMessage && 
-                (lastAiMessage.content.includes('[BOOKING_CONFIRM_REQUEST]') || 
-                 lastAiMessage.content.toLowerCase().includes('rückruf-termin schauen'));
 
-            // KORREKTUR: checkBookingIntent muss true sein, wenn es eine Bestätigung ist!
-            const checkIntent = hasBookingIntent || (wasBookingQuestion && hasConfirmation);
-
+            // Kein clientseitiges Keyword-Matching mehr nötig –
+            // Gemini entscheidet via Function Calling selbst über Booking/Email/etc.
             const requestData = {
                 history: state.chatHistory,
                 message: userInput,
-                checkBookingIntent: checkIntent,
-                isConfirmation: wasBookingQuestion && hasConfirmation,
                 sessionId: SessionManager.getSessionId(),
                 userName: SessionManager.getUserName()
             };
@@ -425,12 +395,14 @@ export const initAiForm = () => {
 
             let cleanMessage = message;
             if (sender === 'ai') {
+                // Legacy-Tags bereinigen (Übergangsphase, können langfristig entfernt werden)
                 cleanMessage = message
                     .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
                     .replace(/\[buchung_starten\]/g, '')
                     .replace(/\[booking_starten\]/g, '')
                     .replace(/\[USER_NAME:[^\]]+\]/g, '')
                     .replace(/\[EMAIL_CONFIRMED\]/g, '')
+                    .replace(/\[EMAIL_DRAFT\][\s\S]*?\[\/EMAIL_DRAFT\]/g, '')
                     .trim();
             }
 
@@ -834,14 +806,10 @@ export const initAiForm = () => {
         if (chatInput) chatInput.disabled = true;
         if (submitButton) submitButton.disabled = true;
 
-        // Kontext VOR der Antwort prüfen (War die letzte Nachricht eine Buchungs-Frage?)
+        // Kontext VOR der Antwort merken (für Legacy-Kompatibilität)
         const lastAiBefore = state.chatHistory
             .filter(msg => msg.role === 'assistant' || msg.role === 'model')
             .pop();
-        const wasBookingQuestionBefore = lastAiBefore && (
-            lastAiBefore.content.includes('[BOOKING_CONFIRM_REQUEST]') ||
-            lastAiBefore.content.toLowerCase().includes('rückruf-termin schauen')
-        );
 
         ChatUI.addMessage(userInput, 'user');
         ChatUI.showTypingIndicator();
@@ -862,7 +830,7 @@ export const initAiForm = () => {
             } else if (data?.answer) {
                 answer = data.answer;
                 isFallback = data.isFallback || false;
-                // Name vom Backend erkannt? → lokal speichern
+                // Name vom Backend erkannt (via remember_user_name Tool)
                 if (data.detectedName) {
                     SessionManager.setUserName(data.detectedName);
                 }
@@ -870,51 +838,37 @@ export const initAiForm = () => {
                 answer = data.message;
             }
 
-            const textToAnimate = answer
-                .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
-                .replace(/\[buchung_starten\]/g, '')
-                .replace(/\[booking_starten\]/g, '')
-                .replace(/\[USER_NAME:[^\]]+\]/g, '')
-                .replace(/\[EMAIL_CONFIRMED\]/g, '')
-                .trim();
-
+            // Antwort anzeigen (keine Tag-Bereinigung mehr nötig)
             const aiMsgElement = ChatUI.addMessage(answer, 'ai');
             if (aiMsgElement) {
-                await typeWriterEffect(aiMsgElement, textToAnimate, 25);
+                await typeWriterEffect(aiMsgElement, answer.trim(), 25);
             }
 
             // Verarbeitung abgeschlossen
             ModalController.isProcessing = false;
 
             // ============================================
-            // EMAIL-DRAFT ERKENNUNG
+            // FUNCTION CALL RESULTS VERARBEITEN
             // ============================================
+
+            // 📅 BOOKING: open_booking Tool wurde aufgerufen
+            if (data?.openBooking) {
+                console.log('📅 Booking via Function Call:', data.bookingReason || 'kein Grund');
+                setTimeout(() => {
+                    BookingModal.launch();
+                }, 800);
+            }
+
+            // 📧 EMAIL DRAFT: compose_email Tool wurde aufgerufen
             if (data?.emailDraft) {
                 state.pendingEmailDraft = data.emailDraft;
                 EmailUI.showConfirmation(data.emailDraft);
             }
 
-            // EMAIL-BESTÄTIGUNG (Evita sagt "[EMAIL_CONFIRMED]")
-            if (data?.emailConfirmed && state.pendingEmailDraft) {
-                EmailUI.showConfirmation(state.pendingEmailDraft);
-            }
-
-            // EMAIL ERFOLGREICH VERSENDET
+            // 📧 EMAIL VERSENDET (nach Frontend-Bestätigung)
             if (data?.emailSent) {
                 state.pendingEmailDraft = null;
                 EmailUI.hideConfirmation();
-            }
-
-            // Trigger Booking Modal (falls Bestätigung erfolgt ist)
-            const shouldLaunch = wasBookingQuestionBefore && (
-                answer.includes('[buchung_starten]') ||
-                answer.includes('[booking_starten]')
-            );
-
-            if (shouldLaunch) {
-                setTimeout(() => {
-                    BookingModal.launch();
-                }, 800);
             }
 
         } catch (error) {
