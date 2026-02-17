@@ -1,6 +1,34 @@
 // js/ai-form.js - MIT DIREKTEM MODAL-ÖFFNEN BEI KLICK AUF #ai-question
 let isKeyboardListenerActive = false;
 
+// ===================================================================
+// DEPENDENCY LOADER: marked.js + DOMPurify (automatisch, kein HTML nötig)
+// ===================================================================
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            return resolve(); // Bereits geladen
+        }
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => {
+            console.warn(`⚠️ CDN-Script nicht ladbar: ${src}`);
+            resolve(); // Nicht rejecten – Fallback greift
+        };
+        document.head.appendChild(s);
+    });
+}
+
+const depsReady = Promise.all([
+    typeof marked === 'undefined'
+        ? loadScript('https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js')
+        : Promise.resolve(),
+    typeof DOMPurify === 'undefined'
+        ? loadScript('https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js')
+        : Promise.resolve()
+]);
+
 export const initAiForm = () => {
     console.log("🚀 Initialisiere AI-Form-Modul");
 
@@ -70,54 +98,54 @@ export const initAiForm = () => {
     const FallbackResponses = {
         responses: {
             greeting: [
-                "Hallo! Ich bin Evita, Michaels digitale Assistentin. Gerade bin ich etwas überlastet, aber ich helfe dir trotzdem gerne! Was möchtest du wissen?",
+                "Hallo! 👋 Ich bin Evita, Michaels digitale Assistentin. Gerade bin ich etwas überlastet, aber ich helfe dir trotzdem gerne! Was möchtest du wissen?",
                 "Hi! Schön, dass du da bist! Mein KI-Gehirn macht gerade eine kleine Pause, aber die Basics kann ich dir trotzdem verraten.",
                 "Hey! Willkommen bei designare. Ich bin Evita – aktuell im Energiesparmodus, aber für dich da!"
             ],
             
             contact: [
-                "**Michael erreichst du am besten so:**\n\n• E-Mail: michael@designare.at\n• Oder nutze das Kontaktformular auf der Seite\n\nEr meldet sich normalerweise innerhalb von 24 Stunden!",
+                "📧 **Michael erreichst du am besten so:**\n\n• E-Mail: michael@designare.at\n• Oder nutze das Kontaktformular auf der Seite\n\nEr meldet sich normalerweise innerhalb von 24 Stunden!",
                 "Du willst direkt mit Michael sprechen? Kein Problem!\n\n**E-Mail:** michael@designare.at\n\nFür einen Rückruf-Termin sag einfach Bescheid!"
             ],
             
             services: [
-                "**Michaels Spezialgebiete:**\n\n• **WordPress-Entwicklung** – Custom Themes & Plugins\n• **Performance-Optimierung** – Schnelle Ladezeiten\n• **KI-Integration** – Chatbots & Automatisierung\n• **SEO** – Technische Optimierung\n\nFür Details schreib ihm eine Mail an michael@designare.at!",
+                "🛠️ **Michaels Spezialgebiete:**\n\n• **WordPress-Entwicklung** – Custom Themes & Plugins\n• **Performance-Optimierung** – Schnelle Ladezeiten\n• **KI-Integration** – Chatbots & Automatisierung\n• **SEO** – Technische Optimierung\n\nFür Details schreib ihm eine Mail an michael@designare.at!",
                 "Michael ist Web-Purist und KI-Komplize! Er macht:\n\n• Maßgeschneiderte WordPress-Lösungen\n• Performance-Tuning (Core Web Vitals)\n• KI-Assistenten wie mich 😊\n• Technisches SEO\n\nInteressiert? → michael@designare.at"
             ],
             
             pricing: [
-                "**Zu Preisen:**\n\nJedes Projekt ist individuell, daher gibt's keine Pauschalpreise. Am besten beschreibst du Michael dein Vorhaben per Mail (michael@designare.at) und er macht dir ein faires Angebot!",
+                "💰 **Zu Preisen:**\n\nJedes Projekt ist individuell, daher gibt's keine Pauschalpreise. Am besten beschreibst du Michael dein Vorhaben per Mail (michael@designare.at) und er macht dir ein faires Angebot!",
                 "Preise hängen vom Projektumfang ab. Michael arbeitet transparent und fair. Schreib ihm einfach, was du brauchst: michael@designare.at"
             ],
             
             booking: [
-                "**Termin vereinbaren?**\n\nSuper Idee! Schreib Michael eine kurze Mail an michael@designare.at mit:\n• Worum geht's?\n• Wann passt es dir?\n\nEr meldet sich schnell zurück!",
+                "📅 **Termin vereinbaren?**\n\nSuper Idee! Schreib Michael eine kurze Mail an michael@designare.at mit:\n• Worum geht's?\n• Wann passt es dir?\n\nEr meldet sich schnell zurück!",
                 "Einen Rückruf oder Termin kannst du direkt per Mail anfragen: michael@designare.at\n\nMichael ist flexibel und findet sicher einen passenden Slot!"
             ],
             
             about: [
-                "**Über Michael:**\n\nMichael Kanda ist Web-Purist aus Wien. Tagsüber zähmt er WordPress für maxonline Marketing, in seiner Freizeit baut er eigene Tools – wie mich!\n\nSein Motto: *Sauberer Code, kaum Wartung, smarte Lösungen.*",
+                "👨‍💻 **Über Michael:**\n\nMichael Kanda ist Web-Purist aus Wien. Tagsüber zähmt er WordPress für maxonline Marketing, in seiner Freizeit baut er eigene Tools – wie mich!\n\nSein Motto: *Sauberer Code, kaum Wartung, smarte Lösungen.*",
                 "Michael ist ein Code-Tüftler aus Wien, der WordPress liebt (fast so sehr wie seinen Hund Evita 🐕). Er entwickelt performante Websites und KI-Lösungen.\n\nMehr auf: designare.at"
             ],
             
             evita: [
-                "**Das bin ich – Evita!**\n\nIch bin Michaels digitale Assistentin, benannt nach seinem Hund (ja, wirklich!). Ich basiere auf einer RAG-Architektur und helfe hier auf der Website.\n\nDie echte Evita ist übrigens eine Tierschutz-Export-Hundedame und die wahre Chefin! 🐕",
+                "🤖 **Das bin ich – Evita!**\n\nIch bin Michaels digitale Assistentin, benannt nach seinem Hund (ja, wirklich!). Ich basiere auf einer RAG-Architektur und helfe hier auf der Website.\n\nDie echte Evita ist übrigens eine Tierschutz-Export-Hundedame und die wahre Chefin! 🐕",
                 "Ich bin Evita, die digitale Version! Mein Namensvetter ist ein Hund – Michaels vierbeinige Chefin. Ich bin die geduldige Variante und beantworte Fragen rund um die Uhr... naja, meistens. 😅"
             ],
             
             tools: [
-                "**Michaels Tools:**\n\n• **DataPeak** – Sein eigenes SEO-Dashboard mit KI\n• **Silas** – Content-Generator für Keywords\n• **Evita** (das bin ich!) – KI-Assistentin\n\nAlle selbst entwickelt, weil: *Wenn's kein passendes Tool gibt, baut man es halt selbst!*"
+                "🔧 **Michaels Tools:**\n\n• **DataPeak** – Sein eigenes SEO-Dashboard mit KI\n• **Silas** – Content-Generator für Keywords\n• **Evita** (das bin ich!) – KI-Assistentin\n\nAlle selbst entwickelt, weil: *Wenn's kein passendes Tool gibt, baut man es halt selbst!*"
             ],
             
             error: [
-                "Hmm, mein KI-Gehirn stockt gerade etwas. Kannst du die Frage anders formulieren oder es gleich nochmal versuchen?",
+                "🔄 Hmm, mein KI-Gehirn stockt gerade etwas. Kannst du die Frage anders formulieren oder es gleich nochmal versuchen?",
                 "Ups, da hab ich kurz gehakt! Versuch's bitte nochmal – manchmal brauche ich einen zweiten Anlauf.",
                 "Entschuldige, ich bin gerade etwas verwirrt. Probier's in ein paar Sekunden noch einmal!"
             ],
             
             rateLimit: [
-                "**Kurze Verschnaufpause!**\n\nIch bin gerade sehr gefragt und muss kurz durchatmen. Bitte versuch es in etwa einer Minute noch einmal.\n\n*Dringende Fragen? → michael@designare.at*",
-                "Puh, ganz schön viel los hier! Mein API-Kontingent ist kurz erschöpft. Gib mir eine Minute, dann bin ich wieder fit!\n\nOder schreib direkt an: michael@designare.at"
+                "⏳ **Kurze Verschnaufpause!**\n\nIch bin gerade sehr gefragt und muss kurz durchatmen. Bitte versuch es in etwa einer Minute noch einmal.\n\n*Dringende Fragen? → michael@designare.at*",
+                "🫠 Puh, ganz schön viel los hier! Mein API-Kontingent ist kurz erschöpft. Gib mir eine Minute, dann bin ich wieder fit!\n\nOder schreib direkt an: michael@designare.at"
             ],
             
             default: [
@@ -910,11 +938,118 @@ export const initAiForm = () => {
     // ===================================================================
     // TYPEWRITER EFFECT MIT MARKDOWN
     // ===================================================================
+    // ===================================================================
+    // MARKDOWN RENDERING (marked.js + DOMPurify)
+    // ===================================================================
+
+    let markedConfigured = false;
+
+    function ensureMarkedConfigured() {
+        if (markedConfigured) return;
+        if (typeof marked === 'undefined') return;
+
+        marked.setOptions({
+            breaks: true,       // \n → <br>
+            gfm: true,          // GitHub Flavored Markdown
+            headerIds: false,   // Keine IDs für Headlines (XSS-Schutz)
+            mangle: false       // E-Mail-Adressen nicht verschleiern
+        });
+
+        // Custom Renderer für Links: target="_blank" + rel="noopener"
+        const renderer = new marked.Renderer();
+        const origLink = renderer.link.bind(renderer);
+        renderer.link = function(href, title, text) {
+            const html = origLink(href, title, text);
+            return html.replace('<a ', '<a target="_blank" rel="noopener" ');
+        };
+        marked.use({ renderer });
+
+        markedConfigured = true;
+        console.log('✅ marked.js konfiguriert');
+    }
+
+    // Konfiguriere sobald geladen
+    depsReady.then(() => ensureMarkedConfigured());
+
+    /**
+     * Vorverarbeitung: Evita-Custom-Tags in Standard-Markdown umwandeln
+     * BEVOR marked.js den Text parst
+     */
+    function preprocessEvitaTags(text) {
+        return text
+            // [LINK:url|Linktext] → Markdown-Link
+            .replace(/\[LINK:([^\]|]+)\|([^\]]+)\]/g, '[$2 →]($1)')
+            // E-Mail-Entwurf-Header
+            .replace(/📧 \*\*E-Mail-Entwurf:\*\*/g, '<div class="evita-email-draft"><div class="email-draft-header">📧 <strong>E-Mail-Entwurf</strong></div>');
+    }
+
+    /**
+     * Sanitize: DOMPurify mit erlaubten Tags/Attributen
+     */
+    function sanitizeHtml(html) {
+        if (typeof DOMPurify === 'undefined') return html;
+        return DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: [
+                'p', 'br', 'strong', 'em', 'b', 'i', 'a', 'ul', 'ol', 'li',
+                'code', 'pre', 'blockquote', 'h3', 'h4', 'h5', 'h6',
+                'div', 'span', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td'
+            ],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
+            ALLOW_DATA_ATTR: false
+        });
+    }
+
+    /**
+     * Haupt-Rendering-Funktion: Text → sicheres HTML
+     */
+    function formatMarkdown(text) {
+        // 1. Custom-Tags vorverarbeiten
+        let processed = preprocessEvitaTags(text);
+
+        // 2. Markdown → HTML
+        let html;
+        ensureMarkedConfigured();
+        if (typeof marked !== 'undefined') {
+            try {
+                html = marked.parse(processed);
+            } catch (e) {
+                console.warn('marked.js Parse-Fehler, Fallback:', e.message);
+                html = fallbackFormat(processed);
+            }
+        } else {
+            html = fallbackFormat(processed);
+        }
+
+        // 3. Sanitize
+        html = sanitizeHtml(html);
+
+        // 4. Evita-Links nachträglich mit Klasse versehen
+        html = html.replace(/<a /g, '<a class="evita-link" ');
+
+        return html;
+    }
+
+    /**
+     * Fallback falls marked.js nicht geladen ist
+     */
+    function fallbackFormat(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^\* (.*$)/gm, '<li>$1</li>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ===================================================================
+    // TYPEWRITER EFFECT
+    // ===================================================================
     async function typeWriterEffect(element, text, speed = 20) {
         if (!element) return;
         
-        let currentContent = "";
         const words = text.split(" ");
+        let currentContent = "";
         
         for (let i = 0; i < words.length; i++) {
             currentContent += words[i] + " ";
@@ -927,15 +1062,9 @@ export const initAiForm = () => {
             
             await new Promise(resolve => setTimeout(resolve, speed));
         }
-    }
 
-    function formatMarkdown(text) {
-        return text
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/^\* (.*$)/gm, '<li>$1</li>')
-            .replace(/\[LINK:([^\]|]+)\|([^\]]+)\]/g, '<a href="$1" class="evita-link" target="_blank" rel="noopener">$2 →</a>')
-            .replace(/📧 \*\*E-Mail-Entwurf:\*\*/g, '<div class="evita-email-draft"><div class="email-draft-header">📧 <strong>E-Mail-Entwurf</strong></div>')
-            .replace(/\n/g, '<br>');
+        // Finaler Render mit vollständigem Text (behebt unvollständige Tags)
+        element.innerHTML = formatMarkdown(text);
     }
 
     // ===================================================================
@@ -1275,7 +1404,7 @@ export const initAiForm = () => {
     ];
 
     const returningWelcomeMessages = [
-        "Hey {name}, schön dich wiederzusehen! Was kann ich heute für dich tun?",
+        "Hey {name}, schön dich wiederzusehen! 👋 Was kann ich heute für dich tun?",
         "Hallo {name}! Da bist du ja wieder. Womit kann ich dir diesmal helfen?",
         "Servus {name}! Schön, dass du wieder vorbeischaust. Was liegt an?",
         "{name}! Willkommen zurück. Ich bin bereit – schieß los!",
