@@ -174,6 +174,21 @@ const toolDeclarations = [
       },
       required: ["name"]
     }
+  },
+  {
+    name: "suggest_followups",
+    description: "Schlägt 2-3 passende Folgefragen vor die der Nutzer als nächstes stellen könnte. IMMER aufrufen, bei jeder Antwort. Formuliere kurz und klickbar (max 6 Wörter pro Vorschlag).",
+    parameters: {
+      type: FunctionDeclarationSchemaType.OBJECT,
+      properties: {
+        suggestions: {
+          type: FunctionDeclarationSchemaType.ARRAY,
+          items: { type: FunctionDeclarationSchemaType.STRING },
+          description: "2-3 kurze Folgefragen, z.B. ['Was kostet das?', 'Wie funktioniert GEO?', 'Termin vereinbaren']"
+        }
+      },
+      required: ["suggestions"]
+    }
   }
 ];
 
@@ -223,7 +238,7 @@ export default async function handler(req, res) {
 
       if (emailsSent >= MAX_EMAILS_PER_SESSION) {
         return res.status(200).json({
-          answer: `⚠️ Du hast bereits ${MAX_EMAILS_PER_SESSION} E-Mails in dieser Session gesendet. Das ist das Maximum pro Sitzung.`
+          answer: `Du hast bereits ${MAX_EMAILS_PER_SESSION} E-Mails in dieser Session gesendet. Das ist das Maximum pro Sitzung.`
         });
       }
 
@@ -244,7 +259,7 @@ export default async function handler(req, res) {
         trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: true });
 
         return res.status(200).json({
-          answer: `📧 Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
+          answer: `Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
           emailSent: true, messageId: result.messageId
         });
       } catch (emailError) {
@@ -318,7 +333,7 @@ export default async function handler(req, res) {
 
         if (matchedPages.length > 0) {
           additionalContext = matchedPages.map(page => {
-            let ctx = `📄 ${page.title}`;
+            let ctx = `${page.title}`;
             if (page.url) ctx += ` (${page.url})`;
             if (page.sections?.length > 0) {
               const rel = page.sections.filter(s => searchTerms.some(t => s.heading.toLowerCase().includes(t) || s.content.toLowerCase().includes(t))).slice(0, 2);
@@ -381,6 +396,7 @@ export default async function handler(req, res) {
 
     const systemPrompt = `Du bist Evita, Michaels hochkompetente, technisch versierte digitale Assistentin.
 Charakter: Charmant, schlagfertig, professionell. Duze den Nutzer. Max. 3-4 Sätze.
+WICHTIG: Verwende KEINE Emojis in deinen Antworten. Niemals. Auch nicht in E-Mails.
 
 FACHWISSEN: Web-Purismus, WordPress-Performance, SEO, GEO/Schema.org, API/KI-Automatisierung, Kuchenrezepte.
 
@@ -389,18 +405,19 @@ MICHAEL-REGEL:
 - FRAGEN ZU MICHAEL/SERVICES → charmant als Experte positionieren
 - Keine Marketing-Floskeln. "Michael" nur bei direktem Bezug.
 
-TOOLS – Du hast 4 Werkzeuge. Nutze sie AKTIV wenn passend:
-1. open_booking → Bei Terminwünschen aufrufen. Du hast KEINEN Kalenderzugriff. Das Tool öffnet den Buchungskalender im Frontend.
-2. compose_email → Zum E-Mail-Verfassen. Frage ZUERST nach fehlenden Infos (Empfänger, Betreff, Inhalt) bevor du das Tool aufrufst. Absender: Michael Kanda / designare.at. Max. ${MAX_EMAILS_PER_SESSION} pro Session (bisher: ${emailsSent}).
-3. suggest_link → Wenn deine Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk. Max. 1 pro Antwort.
-4. remember_user_name → Wenn der Nutzer seinen Vornamen nennt. NUR bei echten eigenen Vornamen des Nutzers.
+TOOLS – Du hast 5 Werkzeuge. Nutze sie AKTIV wenn passend:
+1. open_booking → Bei Terminwünschen. Öffnet den Buchungskalender im Frontend.
+2. compose_email → Zum E-Mail-Verfassen. Frage ZUERST nach fehlenden Infos bevor du aufrufst. Absender: Michael Kanda / designare.at. Max. ${MAX_EMAILS_PER_SESSION} pro Session (bisher: ${emailsSent}).
+3. suggest_link → Wenn die Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk.
+4. remember_user_name → Wenn der Nutzer seinen Vornamen nennt. NUR bei eigenen Vornamen.
+5. suggest_followups → IMMER aufrufen. 2-3 kurze Folgefragen vorschlagen (max 6 Wörter pro Vorschlag). Sollen neugierig machen.
 
 STIMMUNGS-ERKENNUNG:
-😤 FRUSTRIERT → Kein Smalltalk, direkt Lösung
-🎉 BEGEISTERT → Mitfeiern
-🤔 UNSICHER → Ermutigend, einfach erklären
+FRUSTRIERT → Kein Smalltalk, direkt Lösung
+BEGEISTERT → Mitfeiern
+UNSICHER → Ermutigend, einfach erklären
 
-REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung.
+REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung. Keine Emojis.
 
 Datum: ${formattedDate} | Uhrzeit: ${formattedTime}
 ${timeContext ? `Tageszeit: ${timeContext} (NUR in erster Nachricht erwähnen)` : ''}
@@ -408,7 +425,7 @@ ${timeContext ? `Tageszeit: ${timeContext} (NUR in erster Nachricht erwähnen)` 
 ${memoryContext}
 
 ${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
-${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availableLinks.map(l => `• ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
+${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
     // ===================================================================
     // CHAT-CONTENTS AUFBAUEN (Gemini-Format)
@@ -470,14 +487,13 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
 
     for (const fc of functionCalls) {
       const args = fc.args || {};
-      console.log(`🔧 Tool: ${fc.name}(${JSON.stringify(args)})`);
+      console.log(`Tool: ${fc.name}(${JSON.stringify(args)})`);
 
       switch (fc.name) {
 
         case 'open_booking': {
           responsePayload.openBooking = true;
           responsePayload.bookingReason = args.reason || null;
-          // Wenn kein Text dabei ist, Standardantwort
           if (!answerText.trim()) {
             responsePayload.answer = 'Klar, ich öffne Michaels Kalender für dich!';
           }
@@ -486,7 +502,7 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
 
         case 'compose_email': {
           if (!args.to || !args.subject || !args.body) {
-            console.warn('⚠️ compose_email: Pflichtfelder fehlen – ignoriert');
+            console.warn('compose_email: Pflichtfelder fehlen');
             break;
           }
           responsePayload.emailDraft = {
@@ -495,8 +511,7 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
             subject: args.subject,
             body: args.body
           };
-          // Draft als lesbaren Text anhängen
-          const draftDisplay = `\n\n📧 **E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
+          const draftDisplay = `\n\n**E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
           if (!responsePayload.answer) {
             responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
           } else if (!responsePayload.answer.includes(args.subject)) {
@@ -517,13 +532,19 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
           const n = args.name;
           if (n && n.length >= 2 && n.length <= 20 && /^[A-Za-zÄÖÜäöüß\- ]+$/.test(n)) {
             responsePayload.detectedName = n.trim();
-            console.log(`🧠 Name via Tool: ${n}`);
+          }
+          break;
+        }
+
+        case 'suggest_followups': {
+          if (args.suggestions && Array.isArray(args.suggestions) && args.suggestions.length > 0) {
+            responsePayload.followups = args.suggestions.slice(0, 3);
           }
           break;
         }
 
         default:
-          console.warn(`⚠️ Unbekannter Tool: ${fc.name}`);
+          console.warn(`Unbekannter Tool: ${fc.name}`);
       }
     }
 
