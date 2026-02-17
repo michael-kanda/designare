@@ -872,9 +872,9 @@ export const initAiForm = () => {
                 EmailUI.hideConfirmation();
             }
 
-            // FOLLOWUP CHIPS rendern (suggest_followups Tool)
-            if (data?.followups && data.followups.length > 0) {
-                FollowupChips.render(data.followups, aiMsgElement);
+            // CHIPS rendern (Folgefragen + Links)
+            if (data?.chips && data.chips.length > 0) {
+                FollowupChips.render(data.chips, aiMsgElement);
             }
 
         } catch (error) {
@@ -1146,43 +1146,51 @@ export const initAiForm = () => {
     // ===================================================================
     // FOLLOWUP CHIPS (Quick Suggestions)
     // ===================================================================
-    const FollowupChips = {
+const FollowupChips = {
         remove() {
             document.querySelectorAll('.evita-followup-chips').forEach(el => el.remove());
         },
 
-        render(suggestions, afterElement) {
-            if (!suggestions || suggestions.length === 0) return;
-
-            // Alte Chips entfernen
+        render(chips, aiMsgElement) {
+            if (!chips || chips.length === 0) return;
             this.remove();
 
             const container = document.createElement('div');
             container.className = 'evita-followup-chips';
 
-            suggestions.forEach(text => {
-                const chip = document.createElement('button');
-                chip.className = 'evita-followup-chip';
-                chip.type = 'button';
-                chip.textContent = text;
-                chip.addEventListener('click', () => {
-                    this.remove();
-                    handleUserMessage(text);
-                });
-                container.appendChild(chip);
+            chips.forEach(chip => {
+                if (chip.type === 'link' && chip.url) {
+                    const a = document.createElement('a');
+                    a.className = 'evita-followup-chip evita-chip-link';
+                    a.href = chip.url;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.innerHTML = '<img src="/public/link.svg" alt="" class="evita-chip-icon">' + this.esc(chip.text);
+                    container.appendChild(a);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.className = 'evita-followup-chip';
+                    btn.type = 'button';
+                    btn.textContent = chip.text;
+                    btn.addEventListener('click', () => {
+                        this.remove();
+                        handleUserMessage(chip.text);
+                    });
+                    container.appendChild(btn);
+                }
             });
 
-            // Direkt NACH der AI-Nachricht einfügen
-            if (afterElement && afterElement.parentNode) {
-                afterElement.parentNode.insertBefore(container, afterElement.nextSibling);
+            // INNERHALB der AI-Message (erbt Alignment)
+            if (aiMsgElement) {
+                aiMsgElement.appendChild(container);
             } else {
-                // Fallback: ans Ende des Chat-Containers
-                const chatHistory = document.getElementById('ai-chat-history');
-                if (chatHistory) chatHistory.appendChild(container);
+                const ch = document.getElementById('ai-chat-history');
+                if (ch) ch.appendChild(container);
             }
-
             ChatUI.scrollToBottom();
-        }
+        },
+
+        esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
     };
 
     // Styles injizieren: Corporate Design (accent-color, Poppins, border-radius)
@@ -1318,6 +1326,25 @@ export const initAiForm = () => {
             }
             .evita-followup-chip:active {
                 transform: scale(0.96);
+            }
+            /* Link-Chips: dezentes Icon */
+            .evita-chip-link {
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .evita-chip-icon {
+                width: 11px;
+                height: 11px;
+                opacity: 0.5;
+                flex-shrink: 0;
+                filter: brightness(0) invert(0.7);
+                transition: opacity 0.25s;
+            }
+            .evita-chip-link:hover .evita-chip-icon {
+                opacity: 0.9;
+                filter: brightness(0) invert(1);
             }
 
             /* ============================================ */
