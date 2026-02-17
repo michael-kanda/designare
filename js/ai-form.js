@@ -874,7 +874,7 @@ export const initAiForm = () => {
 
             // FOLLOWUP CHIPS rendern (suggest_followups Tool)
             if (data?.followups && data.followups.length > 0) {
-                FollowupChips.render(data.followups);
+                FollowupChips.render(data.followups, aiMsgElement);
             }
 
         } catch (error) {
@@ -1151,14 +1151,11 @@ export const initAiForm = () => {
             document.querySelectorAll('.evita-followup-chips').forEach(el => el.remove());
         },
 
-        render(suggestions) {
+        render(suggestions, afterElement) {
             if (!suggestions || suggestions.length === 0) return;
 
             // Alte Chips entfernen
             this.remove();
-
-            const chatHistory = document.getElementById('ai-chat-history');
-            if (!chatHistory) return;
 
             const container = document.createElement('div');
             container.className = 'evita-followup-chips';
@@ -1170,15 +1167,20 @@ export const initAiForm = () => {
                 chip.textContent = text;
                 chip.addEventListener('click', () => {
                     this.remove();
-                    // Chip-Text als User-Message senden
-                    const input = document.getElementById('ai-chat-input');
-                    if (input) input.value = text;
                     handleUserMessage(text);
                 });
                 container.appendChild(chip);
             });
 
-            chatHistory.appendChild(container);
+            // Direkt NACH der AI-Nachricht einfügen
+            if (afterElement && afterElement.parentNode) {
+                afterElement.parentNode.insertBefore(container, afterElement.nextSibling);
+            } else {
+                // Fallback: ans Ende des Chat-Containers
+                const chatHistory = document.getElementById('ai-chat-history');
+                if (chatHistory) chatHistory.appendChild(container);
+            }
+
             ChatUI.scrollToBottom();
         }
     };
@@ -1290,23 +1292,25 @@ export const initAiForm = () => {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 6px;
-                margin: 8px 0 4px 0;
-                padding: 0 4px;
+                margin: 6px 0 2px 0;
+                padding: 0;
                 animation: chipsSlideUp 0.4s ease-out;
+                justify-content: flex-start;
             }
             .evita-followup-chip {
-                padding: 6px 14px;
+                padding: 5px 12px;
                 background: transparent;
                 color: var(--accent-color, #c4a35a);
                 border: 1px solid var(--accent-color, #c4a35a);
                 border-radius: 2px;
                 cursor: pointer;
                 font-family: 'Poppins', sans-serif;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 500;
-                letter-spacing: 0.01em;
-                transition: all 0.3s ease;
+                letter-spacing: 0.02em;
+                transition: all 0.25s ease;
                 white-space: nowrap;
+                line-height: 1.4;
             }
             .evita-followup-chip:hover {
                 background: var(--accent-color, #c4a35a);
