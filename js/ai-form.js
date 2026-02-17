@@ -16,7 +16,8 @@ export const initAiForm = () => {
         lastApiError: null,
         initialized: false,
         sessionId: null,
-        userName: null
+        userName: null,
+        pendingEmailDraft: null
     };
 
     // ===================================================================
@@ -69,54 +70,54 @@ export const initAiForm = () => {
     const FallbackResponses = {
         responses: {
             greeting: [
-                "Hallo! 👋 Ich bin Evita, Michaels digitale Assistentin. Gerade bin ich etwas überlastet, aber ich helfe dir trotzdem gerne! Was möchtest du wissen?",
+                "Hallo! Ich bin Evita, Michaels digitale Assistentin. Gerade bin ich etwas überlastet, aber ich helfe dir trotzdem gerne! Was möchtest du wissen?",
                 "Hi! Schön, dass du da bist! Mein KI-Gehirn macht gerade eine kleine Pause, aber die Basics kann ich dir trotzdem verraten.",
                 "Hey! Willkommen bei designare. Ich bin Evita – aktuell im Energiesparmodus, aber für dich da!"
             ],
             
             contact: [
-                "📧 **Michael erreichst du am besten so:**\n\n• E-Mail: michael@designare.at\n• Oder nutze das Kontaktformular auf der Seite\n\nEr meldet sich normalerweise innerhalb von 24 Stunden!",
+                "**Michael erreichst du am besten so:**\n\n• E-Mail: michael@designare.at\n• Oder nutze das Kontaktformular auf der Seite\n\nEr meldet sich normalerweise innerhalb von 24 Stunden!",
                 "Du willst direkt mit Michael sprechen? Kein Problem!\n\n**E-Mail:** michael@designare.at\n\nFür einen Rückruf-Termin sag einfach Bescheid!"
             ],
             
             services: [
-                "🛠️ **Michaels Spezialgebiete:**\n\n• **WordPress-Entwicklung** – Custom Themes & Plugins\n• **Performance-Optimierung** – Schnelle Ladezeiten\n• **KI-Integration** – Chatbots & Automatisierung\n• **SEO** – Technische Optimierung\n\nFür Details schreib ihm eine Mail an michael@designare.at!",
+                "**Michaels Spezialgebiete:**\n\n• **WordPress-Entwicklung** – Custom Themes & Plugins\n• **Performance-Optimierung** – Schnelle Ladezeiten\n• **KI-Integration** – Chatbots & Automatisierung\n• **SEO** – Technische Optimierung\n\nFür Details schreib ihm eine Mail an michael@designare.at!",
                 "Michael ist Web-Purist und KI-Komplize! Er macht:\n\n• Maßgeschneiderte WordPress-Lösungen\n• Performance-Tuning (Core Web Vitals)\n• KI-Assistenten wie mich 😊\n• Technisches SEO\n\nInteressiert? → michael@designare.at"
             ],
             
             pricing: [
-                "💰 **Zu Preisen:**\n\nJedes Projekt ist individuell, daher gibt's keine Pauschalpreise. Am besten beschreibst du Michael dein Vorhaben per Mail (michael@designare.at) und er macht dir ein faires Angebot!",
+                "**Zu Preisen:**\n\nJedes Projekt ist individuell, daher gibt's keine Pauschalpreise. Am besten beschreibst du Michael dein Vorhaben per Mail (michael@designare.at) und er macht dir ein faires Angebot!",
                 "Preise hängen vom Projektumfang ab. Michael arbeitet transparent und fair. Schreib ihm einfach, was du brauchst: michael@designare.at"
             ],
             
             booking: [
-                "📅 **Termin vereinbaren?**\n\nSuper Idee! Schreib Michael eine kurze Mail an michael@designare.at mit:\n• Worum geht's?\n• Wann passt es dir?\n\nEr meldet sich schnell zurück!",
+                "**Termin vereinbaren?**\n\nSuper Idee! Schreib Michael eine kurze Mail an michael@designare.at mit:\n• Worum geht's?\n• Wann passt es dir?\n\nEr meldet sich schnell zurück!",
                 "Einen Rückruf oder Termin kannst du direkt per Mail anfragen: michael@designare.at\n\nMichael ist flexibel und findet sicher einen passenden Slot!"
             ],
             
             about: [
-                "👨‍💻 **Über Michael:**\n\nMichael Kanda ist Web-Purist aus Wien. Tagsüber zähmt er WordPress für maxonline Marketing, in seiner Freizeit baut er eigene Tools – wie mich!\n\nSein Motto: *Sauberer Code, kaum Wartung, smarte Lösungen.*",
+                "**Über Michael:**\n\nMichael Kanda ist Web-Purist aus Wien. Tagsüber zähmt er WordPress für maxonline Marketing, in seiner Freizeit baut er eigene Tools – wie mich!\n\nSein Motto: *Sauberer Code, kaum Wartung, smarte Lösungen.*",
                 "Michael ist ein Code-Tüftler aus Wien, der WordPress liebt (fast so sehr wie seinen Hund Evita 🐕). Er entwickelt performante Websites und KI-Lösungen.\n\nMehr auf: designare.at"
             ],
             
             evita: [
-                "🤖 **Das bin ich – Evita!**\n\nIch bin Michaels digitale Assistentin, benannt nach seinem Hund (ja, wirklich!). Ich basiere auf einer RAG-Architektur und helfe hier auf der Website.\n\nDie echte Evita ist übrigens eine Tierschutz-Export-Hundedame und die wahre Chefin! 🐕",
+                "**Das bin ich – Evita!**\n\nIch bin Michaels digitale Assistentin, benannt nach seinem Hund (ja, wirklich!). Ich basiere auf einer RAG-Architektur und helfe hier auf der Website.\n\nDie echte Evita ist übrigens eine Tierschutz-Export-Hundedame und die wahre Chefin! 🐕",
                 "Ich bin Evita, die digitale Version! Mein Namensvetter ist ein Hund – Michaels vierbeinige Chefin. Ich bin die geduldige Variante und beantworte Fragen rund um die Uhr... naja, meistens. 😅"
             ],
             
             tools: [
-                "🔧 **Michaels Tools:**\n\n• **DataPeak** – Sein eigenes SEO-Dashboard mit KI\n• **Silas** – Content-Generator für Keywords\n• **Evita** (das bin ich!) – KI-Assistentin\n\nAlle selbst entwickelt, weil: *Wenn's kein passendes Tool gibt, baut man es halt selbst!*"
+                "**Michaels Tools:**\n\n• **DataPeak** – Sein eigenes SEO-Dashboard mit KI\n• **Silas** – Content-Generator für Keywords\n• **Evita** (das bin ich!) – KI-Assistentin\n\nAlle selbst entwickelt, weil: *Wenn's kein passendes Tool gibt, baut man es halt selbst!*"
             ],
             
             error: [
-                "🔄 Hmm, mein KI-Gehirn stockt gerade etwas. Kannst du die Frage anders formulieren oder es gleich nochmal versuchen?",
+                "Hmm, mein KI-Gehirn stockt gerade etwas. Kannst du die Frage anders formulieren oder es gleich nochmal versuchen?",
                 "Ups, da hab ich kurz gehakt! Versuch's bitte nochmal – manchmal brauche ich einen zweiten Anlauf.",
                 "Entschuldige, ich bin gerade etwas verwirrt. Probier's in ein paar Sekunden noch einmal!"
             ],
             
             rateLimit: [
-                "⏳ **Kurze Verschnaufpause!**\n\nIch bin gerade sehr gefragt und muss kurz durchatmen. Bitte versuch es in etwa einer Minute noch einmal.\n\n*Dringende Fragen? → michael@designare.at*",
-                "🫠 Puh, ganz schön viel los hier! Mein API-Kontingent ist kurz erschöpft. Gib mir eine Minute, dann bin ich wieder fit!\n\nOder schreib direkt an: michael@designare.at"
+                "**Kurze Verschnaufpause!**\n\nIch bin gerade sehr gefragt und muss kurz durchatmen. Bitte versuch es in etwa einer Minute noch einmal.\n\n*Dringende Fragen? → michael@designare.at*",
+                "Puh, ganz schön viel los hier! Mein API-Kontingent ist kurz erschöpft. Gib mir eine Minute, dann bin ich wieder fit!\n\nOder schreib direkt an: michael@designare.at"
             ],
             
             default: [
@@ -362,6 +363,21 @@ export const initAiForm = () => {
                 method: 'POST',
                 body: JSON.stringify(bookingData)
             });
+        },
+
+        // E-Mail über Evita versenden (Bestätigung)
+        sendEmailConfirmation(emailDraft) {
+            return this.safeFetch('/api/ask-gemini', {
+                method: 'POST',
+                body: JSON.stringify({
+                    message: 'E-Mail senden bestätigt',
+                    sessionId: SessionManager.getSessionId(),
+                    userName: SessionManager.getUserName(),
+                    confirmEmailSend: true,
+                    pendingEmail: emailDraft,
+                    history: state.chatHistory
+                })
+            });
         }
     };
 
@@ -386,6 +402,7 @@ export const initAiForm = () => {
                     .replace(/\[buchung_starten\]/g, '')
                     .replace(/\[booking_starten\]/g, '')
                     .replace(/\[USER_NAME:[^\]]+\]/g, '')
+                    .replace(/\[EMAIL_CONFIRMED\]/g, '')
                     .trim();
             }
 
@@ -458,6 +475,7 @@ export const initAiForm = () => {
             state.chatHistory = [];
             state.apiFailureCount = 0;
             state.lastApiError = null;
+            state.pendingEmailDraft = null;
             // sessionId und userName bleiben erhalten!
             console.log(`🔄 Chat zurückgesetzt (Session: ${state.sessionId?.substring(0,8)}... | Name: ${state.userName || 'unbekannt'})`);
         }
@@ -829,6 +847,7 @@ export const initAiForm = () => {
                 .replace(/\[buchung_starten\]/g, '')
                 .replace(/\[booking_starten\]/g, '')
                 .replace(/\[USER_NAME:[^\]]+\]/g, '')
+                .replace(/\[EMAIL_CONFIRMED\]/g, '')
                 .trim();
 
             const aiMsgElement = ChatUI.addMessage(answer, 'ai');
@@ -838,6 +857,25 @@ export const initAiForm = () => {
 
             // Verarbeitung abgeschlossen
             ModalController.isProcessing = false;
+
+            // ============================================
+            // EMAIL-DRAFT ERKENNUNG
+            // ============================================
+            if (data?.emailDraft) {
+                state.pendingEmailDraft = data.emailDraft;
+                EmailUI.showConfirmation(data.emailDraft);
+            }
+
+            // EMAIL-BESTÄTIGUNG (Evita sagt "[EMAIL_CONFIRMED]")
+            if (data?.emailConfirmed && state.pendingEmailDraft) {
+                EmailUI.showConfirmation(state.pendingEmailDraft);
+            }
+
+            // EMAIL ERFOLGREICH VERSENDET
+            if (data?.emailSent) {
+                state.pendingEmailDraft = null;
+                EmailUI.hideConfirmation();
+            }
 
             // Trigger Booking Modal (falls Bestätigung erfolgt ist)
             const shouldLaunch = wasBookingQuestionBefore && (
@@ -896,7 +934,218 @@ export const initAiForm = () => {
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/^\* (.*$)/gm, '<li>$1</li>')
             .replace(/\[LINK:([^\]|]+)\|([^\]]+)\]/g, '<a href="$1" class="evita-link" target="_blank" rel="noopener">$2 →</a>')
+            .replace(/📧 \*\*E-Mail-Entwurf:\*\*/g, '<div class="evita-email-draft"><div class="email-draft-header">📧 <strong>E-Mail-Entwurf</strong></div>')
             .replace(/\n/g, '<br>');
+    }
+
+    // ===================================================================
+    // EMAIL UI - Bestätigungs-Bar für E-Mail-Entwürfe
+    // ===================================================================
+    const EmailUI = {
+        showConfirmation(draft) {
+            this.hideConfirmation();
+
+            const chatHistory = document.getElementById('ai-chat-history');
+            if (!chatHistory) return;
+
+            const bar = document.createElement('div');
+            bar.id = 'evita-email-confirm';
+            bar.className = 'evita-email-confirm';
+            bar.innerHTML = `
+                <div class="email-confirm-info">
+                    <span class="email-confirm-icon">📧</span>
+                    <span>E-Mail an <strong>${this.escapeHtml(draft.to)}</strong> bereit</span>
+                </div>
+                <div class="email-confirm-actions">
+                    <button class="btn-email-send" id="btn-email-send">✈️ Absenden</button>
+                    <button class="btn-email-edit" id="btn-email-edit">✏️ Ändern</button>
+                    <button class="btn-email-cancel" id="btn-email-cancel">✕</button>
+                </div>
+            `;
+
+            // Nach dem Chat-History Container einfügen (vor dem Input-Form)
+            const chatForm = document.getElementById('ai-chat-form');
+            if (chatForm) {
+                chatForm.parentElement.insertBefore(bar, chatForm);
+            } else {
+                chatHistory.parentElement.appendChild(bar);
+            }
+
+            // Event Listener
+            document.getElementById('btn-email-send')?.addEventListener('click', () => this.confirmSend());
+            document.getElementById('btn-email-edit')?.addEventListener('click', () => this.editDraft());
+            document.getElementById('btn-email-cancel')?.addEventListener('click', () => this.cancelDraft());
+
+            ChatUI.scrollToBottom();
+        },
+
+        hideConfirmation() {
+            const bar = document.getElementById('evita-email-confirm');
+            if (bar) bar.remove();
+        },
+
+        async confirmSend() {
+            if (!state.pendingEmailDraft) return;
+
+            const btn = document.getElementById('btn-email-send');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ Wird gesendet...';
+            }
+
+            try {
+                const data = await ApiHandler.sendEmailConfirmation(state.pendingEmailDraft);
+
+                let answer = data?.answer || 'E-Mail wurde verarbeitet.';
+
+                const aiMsgElement = ChatUI.addMessage(answer, 'ai');
+                if (aiMsgElement) {
+                    await typeWriterEffect(aiMsgElement, answer, 25);
+                }
+
+                if (data?.emailSent) {
+                    state.pendingEmailDraft = null;
+                    this.hideConfirmation();
+                } else {
+                    // Fehler – Button wieder aktivieren
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '✈️ Absenden';
+                    }
+                }
+            } catch (error) {
+                console.error('📧 E-Mail-Versand fehlgeschlagen:', error);
+                const errMsg = 'Ups, beim Senden ist etwas schiefgelaufen. Versuch es bitte nochmal.';
+                const aiMsgElement = ChatUI.addMessage(errMsg, 'ai');
+                if (aiMsgElement) {
+                    await typeWriterEffect(aiMsgElement, errMsg, 25);
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '✈️ Absenden';
+                }
+            }
+        },
+
+        editDraft() {
+            this.hideConfirmation();
+            const chatInput = document.getElementById('ai-chat-input');
+            if (chatInput) {
+                chatInput.focus();
+                chatInput.placeholder = 'Was soll geändert werden?';
+            }
+            // Draft bleibt in state.pendingEmailDraft – Evita erstellt neuen Draft
+        },
+
+        cancelDraft() {
+            state.pendingEmailDraft = null;
+            this.hideConfirmation();
+
+            const msg = 'Alles klar, E-Mail verworfen! 🗑️';
+            const aiMsgElement = ChatUI.addMessage(msg, 'ai');
+            if (aiMsgElement) {
+                typeWriterEffect(aiMsgElement, msg, 25);
+            }
+        },
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    };
+
+    // Email-Confirm CSS injizieren
+    if (!document.getElementById('evita-email-styles')) {
+        const style = document.createElement('style');
+        style.id = 'evita-email-styles';
+        style.textContent = `
+            .evita-email-confirm {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 10px 14px;
+                margin: 6px 12px;
+                background: linear-gradient(135deg, #f0f7ff, #e8f0fe);
+                border: 1px solid #c2d9f2;
+                border-radius: 10px;
+                animation: emailSlideUp 0.3s ease-out;
+                font-size: 13px;
+            }
+            .email-confirm-info {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .email-confirm-icon { font-size: 16px; }
+            .email-confirm-actions {
+                display: flex;
+                gap: 6px;
+            }
+            .btn-email-send {
+                padding: 5px 14px;
+                background: #2563eb;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+                transition: background 0.2s;
+            }
+            .btn-email-send:hover { background: #1d4ed8; }
+            .btn-email-send:disabled { background: #94a3b8; cursor: wait; }
+            .btn-email-edit {
+                padding: 5px 10px;
+                background: transparent;
+                color: #475569;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s;
+            }
+            .btn-email-edit:hover { background: #f1f5f9; }
+            .btn-email-cancel {
+                padding: 5px 8px;
+                background: transparent;
+                color: #94a3b8;
+                border: none;
+                cursor: pointer;
+                font-size: 15px;
+                line-height: 1;
+            }
+            .btn-email-cancel:hover { color: #ef4444; }
+            .evita-email-draft {
+                background: #f8fafc;
+                border-left: 3px solid #2563eb;
+                padding: 8px 12px;
+                margin: 6px 0;
+                border-radius: 0 6px 6px 0;
+                font-size: 13px;
+            }
+            .email-draft-header {
+                margin-bottom: 4px;
+                font-size: 14px;
+            }
+            @keyframes emailSlideUp {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @media (prefers-color-scheme: dark) {
+                .evita-email-confirm {
+                    background: linear-gradient(135deg, #1e293b, #1e3a5f);
+                    border-color: #334155;
+                    color: #e2e8f0;
+                }
+                .btn-email-edit { color: #94a3b8; border-color: #475569; }
+                .btn-email-edit:hover { background: #334155; }
+                .evita-email-draft { background: #1e293b; border-left-color: #3b82f6; color: #e2e8f0; }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     // ===================================================================
@@ -1026,7 +1275,7 @@ export const initAiForm = () => {
     ];
 
     const returningWelcomeMessages = [
-        "Hey {name}, schön dich wiederzusehen! 👋 Was kann ich heute für dich tun?",
+        "Hey {name}, schön dich wiederzusehen! Was kann ich heute für dich tun?",
         "Hallo {name}! Da bist du ja wieder. Womit kann ich dir diesmal helfen?",
         "Servus {name}! Schön, dass du wieder vorbeischaust. Was liegt an?",
         "{name}! Willkommen zurück. Ich bin bereit – schieß los!",
@@ -1068,6 +1317,8 @@ export const initAiForm = () => {
     window.closeCallbackModal = () => BookingModal.remove();
     window.launchBookingFromChat = () => BookingModal.launch();
     window.openEvitaChat = () => openEvitaChatWithWelcome();
+    window.confirmEvitaEmail = () => EmailUI.confirmSend();
+    window.cancelEvitaEmail = () => EmailUI.cancelDraft();
 
     // ===================================================================
     // INITIALISIERUNG
