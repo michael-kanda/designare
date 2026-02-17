@@ -3,7 +3,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Redis } from "@upstash/redis";
 import Brevo from '@getbrevo/brevo';
-import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics } from './evita-track.js';
+import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -362,6 +362,11 @@ export default async function handler(req, res) {
           bookingIntent: false, bookingCompleted: false
         });
 
+        trackEmailSent({
+          sessionId, to: pendingEmail.to,
+          subject: pendingEmail.subject, success: true
+        });
+
         return res.status(200).json({
           answer: `📧 Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
           emailSent: true,
@@ -369,6 +374,12 @@ export default async function handler(req, res) {
         });
       } catch (emailError) {
         console.error('📧 Brevo-Fehler:', emailError.message);
+
+        trackEmailSent({
+          sessionId, to: pendingEmail.to,
+          subject: pendingEmail.subject, success: false
+        });
+
         return res.status(200).json({
           answer: `Da ist leider was schiefgelaufen beim Versand: ${emailError.message || 'Unbekannter Fehler'}. Soll ich es nochmal versuchen?`,
           emailSent: false
