@@ -1,11 +1,77 @@
 {
   "generated_at": "2026-01-03T16:08:18.592Z",
   "stats": {
-    "total_pages": 11,
+    "total_pages": 12,
     "total_keywords": 184,
     "total_sections": 55
   },
   "pages": [
+    {
+      "title": "Startseite – Michael Kanda | Komplize für Web & KI",
+      "url": "https://designare.at/",
+      "keywords": [
+        "michael",
+        "kanda",
+        "evita",
+        "hund",
+        "name",
+        "wer bist du",
+        "über",
+        "about",
+        "web-purist",
+        "ki-komplize",
+        "wien",
+        "designare",
+        "maxonline",
+        "datapeak",
+        "silas",
+        "wunderkiste",
+        "csv importer",
+        "tools",
+        "wordpress",
+        "performance",
+        "seo",
+        "geo",
+        "schema",
+        "ki-integration",
+        "serverless",
+        "pagebuilder",
+        "plugin",
+        "was machst du",
+        "was kannst du"
+      ],
+      "text": "Michael Kanda ist Web-Purist und KI-Komplize aus Wien. Tagsüber zähmt er WordPress für maxonline Marketing, abends baut er eigene Tools und Ideen.",
+      "sections": [
+        {
+          "heading": "Über Evita",
+          "content": "Achtung, Verwechslungsgefahr! Uns gibt's im Doppelpack: Die vierbeinige Evita ist die Chefin (und für Leckerlis zuständig), ich bin die digitale Komplizin. Ich unterstütze Michael bei seinen Projekten – schneller, geduldiger und ohne Haare auf dem Sofa. Die echte Evita ist eine Tierschutz-Export-Hundedame, Sofa-Diktatorin und Apportier-Profi. Frech wie sonst was – aber Königin unseres Herzens. Evita die Digitale: Vorlaut? Ja. Kompetent? Definitiv. Ich kenne Michaels Projekte in- und auswendig und helfe wo ich kann."
+        },
+        {
+          "heading": "Über Michael",
+          "content": "Michael Kanda – Web-Purist für WordPress und KI aus Wien. Code-Tüftler, Kaffee-Junkie, Sport-Affin. Er liebt sauberen Code fast so sehr wie seinen Hund. Würde für einen Pfotenblick alles stehen und liegen lassen. Motto: Sauberer Code, kaum Wartung und smarte KI-Lösungen. 15+ Jahre WordPress. Aktuell bei maxonline Marketing (SEO/GEO-Agentur). Skills: Custom WP-Plugins & Gutenberg Blocks, Knowledge-Base-Systeme mit Kontext-Injection, Programmatic SEO (Schema.org Automation)."
+        },
+        {
+          "heading": "Michaels Spezialgebiete",
+          "content": "Deep-Dive WordPress: Eigene Plugins, sauber, schnell, ohne Ballast. Minimalistische Themes ohne PageBuilder. KI & API: KI-Integrationen laufen serverless über Edge Functions – kein PHP-Overhead, keine Plugin-Abhängigkeiten. Knowledge-Base für Evita läuft über Kontext-Injection statt teurer Vektor-Datenbanken, Latenz unter 500ms. Performance-First: Ladezeiten, SEO und GEO in Perfektion. Daten strukturiert für Suchmaschinen und KIs."
+        },
+        {
+          "heading": "Eigene Tools",
+          "content": "Evita – KI-Assistentin (das bin ich!). DataPeak – eigenes SEO-Dashboard mit KI-Insights. Silas – Content-Generator für KI-strukturierte CSV-Daten. Michaels Wunderkiste – All-in-One WordPress Performance Plugin, ersetzt 17 Einzel-Plugins. CSV Importer PRO – Landingpages programmatisch aus Excel-Listen erstellen. Alle selbst entwickelt, weil: Wenn's kein passendes Tool gibt, baut man es halt selbst!"
+        },
+        {
+          "heading": "FAQ – Web-Purismus",
+          "content": "Was ist ein Web-Purist? Keine PageBuilder, keine 47 Plugins, kein aufgeblähtes Theme. WordPress wird auf ein schlankes CMS reduziert, das in unter einer Sekunde lädt. Bessere Core Web Vitals, bessere Rankings, sauberer Code den auch KI-Crawler parsen können. Warum killen PageBuilder die Performance? Sie kochen eine fatale Div-Suppe. Ab 2026 sprengen aufgeblähte DOM-Strukturen oft das PHP-Memory-Limit. Was ist die WordPress-Diät? Radikale Rückbesinnung auf Performance und Sicherheit. Schwere Frameworks durch native Funktionen wie Gutenberg ersetzen, 30+ Plugins auf das Wesentliche reduzieren."
+        },
+        {
+          "heading": "FAQ – KI und GEO",
+          "content": "KI-Integration: Serverless gewinnt. WordPress-Plugins schleppen bei jedem Request den ganzen CMS-Ballast mit, Serverless feuert KI-Antworten isoliert und ohne Overhead raus. Welche KI-Features lohnen sich? Smarte Service-Chatbots die wirklich Probleme lösen, und Personalisierung. Alles andere ist Spielerei. SEO vs GEO: SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) optimiert Content so, dass KI-Modelle wie ChatGPT ihn direkt zitieren. Schema.org liefert strukturierte Daten via JSON-LD – Fast Food für LLMs."
+        },
+        {
+          "heading": "Seiten auf designare.at",
+          "content": "KI-Sichtbarkeits-Check (/ki-sichtbarkeit.html): Prüft wie gut KIs deine Website sehen. GEO vs SEO (/geo-seo.html): Strategie-Vergleich. Semantisches Markup (/semantisches-markup.html): Guide. Schema.org (/schema-org-meta-description.html): Guide. KI-Integration (/KI-Integration-auf-Webseiten.html): Tech-Vergleich. KI für Unternehmen (/ki-fuer-unternehmenswebseiten.html): Analyse. WordPress-Diät (/wordpress-diaet-guide.html): Guide. PageBuilder-Rant (/wordpress-pagebuilder-ressourcenverbrauch-2026.html). Maschinenlesbarkeit (/geo-maschinenlesbarkeit-guide.html): Guide. DataPeak (/data-peak-dashboard.html). Silas (/silas.html). Wunderkiste (/seo-wunderkiste.html). CSV Importer PRO (/CSV-Importer-PRO.html)."
+        }
+      ]
+    },
     {
       "title": "Silas – Digitaler Komplize für SEO-Text Power!",
       "slug": "CSV-Creator",
@@ -955,630 +1021,1145 @@
   ],
   "search_index": {
     "2026": [
-      10
+      11
     ],
     "content": [
       0,
       1,
-      3,
+      2,
       4,
-      9
+      5,
+      10
     ],
     "silas": [
       0,
-      9
+      1,
+      10
     ],
     "text": [
-      0,
-      9
+      1,
+      10
     ],
     "texte": [
-      0,
-      9
+      1,
+      10
     ],
     "keywords": [
-      0,
-      9
+      1,
+      10
     ],
     "perfekt": [
-      0,
-      9
+      1,
+      10
     ],
     "download": [
-      0
+      1
     ],
     "import": [
-      0,
       1,
-      9
+      2,
+      10
     ],
     "html": [
-      0,
-      7,
-      9
+      1,
+      8,
+      10
     ],
     "vorlage": [
-      0
+      1
     ],
     "digitaler": [
-      0
+      1
     ],
     "komplize": [
-      0,
-      5,
-      9
+      1,
+      6,
+      10
     ],
     "power": [
-      0
+      1
     ],
     "landingpage": [
-      0,
-      9
+      1,
+      10
     ],
     "liefert": [
-      0
-    ],
-    "CSV": [
       0,
       1
     ],
+    "CSV": [
+      1,
+      2
+    ],
     "Creator": [
-      0
+      1
     ],
     "für": [
-      0,
-      7,
-      9
+      1,
+      8,
+      10
     ],
     "seo": [
       0,
-      4,
-      7,
-      8
+      1,
+      5,
+      8,
+      9
     ],
     "importer": [
-      1
+      0,
+      2
     ],
     "wordpress": [
-      1,
+      0,
       2,
-      8,
-      10
+      3,
+      9,
+      11
     ],
     "direkt": [
-      1,
-      3
+      0,
+      2,
+      4
     ],
     "templates": [
-      1
+      2
     ],
     "dropbox": [
-      1
+      2
     ],
     "page": [
-      1
+      2
     ],
     "builder": [
-      1
+      2
     ],
     "tool": [
-      1
+      0,
+      2
     ],
     "erstellt": [
-      1
+      2
     ],
     "datei": [
-      1
+      2
     ],
     "daten": [
-      1,
-      3,
-      6
+      0,
+      2,
+      4,
+      7
     ],
     "landingpages": [
-      1
+      0,
+      2
     ],
     "schnell": [
-      1
+      0,
+      2
     ],
     "Importer": [
-      1
+      2
     ],
     "PRO": [
-      1
+      2
     ],
     "csv": [
-      1
+      0,
+      2
     ],
     "pro": [
-      1
+      2
     ],
     "schnelles": [
-      1
+      2
     ],
     "sauberes": [
-      1
+      2
     ],
     "management": [
-      1
+      2
     ],
     "serverless": [
-      2
+      0,
+      3
     ],
     "läuft": [
-      2
+      0,
+      3
     ],
     "plugin": [
-      2
+      0,
+      3
     ],
     "plugins": [
-      2,
-      10
+      0,
+      3,
+      11
     ],
     "gasthaus": [
-      2
+      3
     ],
     "warum": [
-      2,
-      7,
-      10
+      0,
+      3,
+      8,
+      11
     ],
     "ballast": [
-      2,
-      8
+      0,
+      3,
+      9
     ],
     "code": [
-      2,
-      5,
-      7,
+      0,
+      3,
+      6,
       8,
-      10
+      9,
+      11
     ],
     "performance": [
-      2,
+      0,
       3,
-      10
+      4,
+      11
     ],
     "antwort": [
-      2,
-      4
+      3,
+      5
     ],
     "restaurant": [
-      2
+      3
     ],
     "architektur": [
-      2,
-      10
+      3,
+      11
     ],
     "blitzschnell": [
-      2
+      3
     ],
     "speed": [
-      2
+      3
     ],
     "Integration": [
-      2
+      3
     ],
     "auf": [
-      2,
-      6
+      3,
+      7
     ],
     "Webseiten": [
-      2
+      3
     ],
     "meine": [
-      2,
-      5
+      3,
+      6
     ],
     "assistentin": [
-      2
+      3
     ],
     "schneller": [
-      2
+      0,
+      3
     ],
     "antwortet": [
-      2
+      3
     ],
     "als": [
-      2,
-      6
+      3,
+      7
     ],
     "deine": [
-      2
+      0,
+      3
     ],
     "ein": [
-      2,
-      6,
-      10
+      3,
+      7,
+      11
     ],
     "blick": [
-      2
+      3
     ],
     "hinter": [
-      2
+      3
     ],
     "die": [
-      2,
-      10
+      3,
+      11
     ],
     "digitale": [
-      2,
-      5
+      0,
+      3,
+      6
     ],
     "küche": [
-      2
+      3
     ],
     "datapeak": [
-      3
+      0,
+      4
     ],
     "sondern": [
-      3,
-      5,
-      6
+      4,
+      6,
+      7
     ],
     "google": [
-      3,
-      4
+      0,
+      4,
+      5
     ],
     "trends": [
-      3
+      4
     ],
     "tools": [
-      3,
-      6
+      0,
+      4,
+      7
     ],
     "search": [
-      3
+      4
     ],
     "console": [
-      3
+      4
     ],
     "optimierte": [
-      3
+      4
     ],
     "workflow": [
-      3
+      4
     ],
     "während": [
-      3
+      4
     ],
     "klassische": [
-      3
+      4
     ],
     "data": [
-      3
+      4
     ],
     "peak": [
-      3
+      4
     ],
     "dashboard": [
-      3
+      4
     ],
     "vom": [
-      3
+      4
     ],
     "chaos": [
-      3
+      4
     ],
     "zur": [
-      3
+      4
     ],
     "gestützten": [
-      3
+      4
     ],
     "strategie": [
-      3
+      4
     ],
     "schritt": [
-      4,
-      7
+      5,
+      8
     ],
     "quelle": [
-      4
+      5
     ],
     "bist": [
-      4
+      0,
+      5
     ],
     "fakten": [
-      4
+      5
     ],
     "antworten": [
-      4
+      5
     ],
     "links": [
-      4
+      0,
+      5
     ],
     "website": [
-      4
+      0,
+      5
     ],
     "marke": [
-      4
+      5
     ],
     "nutzer": [
-      4
+      5
     ],
     "chatgpt": [
-      4
+      0,
+      5
     ],
     "gemini": [
-      4
+      5
     ],
     "gehen": [
-      4
+      5
     ],
     "geo": [
-      4
+      0,
+      5
     ],
     "ist": [
-      4,
-      7
+      5,
+      8
     ],
     "das": [
-      4,
-      7
+      5,
+      8
     ],
     "neue": [
-      4
+      5
     ],
     "landest": [
-      4
+      5
     ],
     "der": [
-      4
+      5
     ],
     "evita": [
-      5
+      0,
+      6
     ],
     "michael": [
-      5
+      0,
+      6
     ],
     "komplizin": [
-      5
+      0,
+      6
     ],
     "kein": [
-      5
+      0,
+      6
     ],
     "purist": [
-      5
+      6
     ],
     "gibt": [
-      5
+      0,
+      6
     ],
     "vierbeinige": [
-      5
+      0,
+      6
     ],
     "seinen": [
-      5
+      0,
+      6
     ],
     "sofa": [
-      5
+      0,
+      6
     ],
     "sport": [
-      5
+      6
     ],
     "fast": [
-      5
+      0,
+      6
     ],
     "index": [
-      5
+      6
     ],
     "kanda": [
-      5
+      0,
+      6
     ],
     "web": [
-      5
+      6
     ],
     "aus": [
-      5
+      6
     ],
     "wien": [
-      5
+      0,
+      6
     ],
     "service": [
-      6
+      7
     ],
     "webseite": [
-      6
+      7
     ],
     "chatbots": [
-      6
+      7
     ],
     "besucher": [
-      6
+      7
     ],
     "analysieren": [
-      6
+      7
     ],
     "startseite": [
-      6
+      7
     ],
     "inhalte": [
-      6
+      7
     ],
     "erstellung": [
-      6,
-      9
+      7,
+      10
     ],
     "partner": [
-      6
+      7
     ],
     "immer": [
-      6
+      7
     ],
     "muster": [
-      6
+      7
     ],
     "bringt": [
-      6
+      7
     ],
     "fuer": [
-      6
+      7
     ],
     "unternehmenswebseiten": [
-      6
+      7
     ],
     "deiner": [
-      6
+      7
     ],
     "mehr": [
-      6
+      7
     ],
     "nur": [
-      6
+      7
     ],
     "gimmick": [
-      6
+      7
     ],
     "nutze": [
-      7
+      8
     ],
     "markup": [
-      7
+      0,
+      8
     ],
     "tags": [
-      7
+      8
     ],
     "semantisches": [
-      7
+      0,
+      8
     ],
     "semantische": [
-      7
+      8
     ],
     "article": [
-      7
+      8
     ],
     "struktur": [
-      7
+      8
     ],
     "generative": [
-      7
+      0,
+      8
     ],
     "crawler": [
-      7
+      8
     ],
     "seite": [
-      7,
-      8
+      8,
+      9
     ],
     "suche": [
-      7
+      8
     ],
     "kontext": [
-      7
+      8
     ],
     "sauberer": [
-      7
+      0,
+      8
     ],
     "fundament": [
-      7
+      8
     ],
     "und": [
-      7
+      8
     ],
     "wunderkiste": [
-      8
+      0,
+      9
     ],
     "mein": [
-      8
+      9
     ],
     "upload": [
-      8
+      9
     ],
     "automatisch": [
-      8
+      9
     ],
     "programmiert": [
-      8
+      9
     ],
     "nichts": [
-      8
+      9
     ],
     "kontrolle": [
-      8
+      9
     ],
     "schema": [
-      8
+      0,
+      9
     ],
     "json": [
-      8
+      9
     ],
     "fügt": [
-      8
+      9
     ],
     "seiten": [
-      8
+      9
     ],
     "hinzu": [
-      8
+      9
     ],
     "werkzeuge": [
-      8
+      9
     ],
     "null": [
-      8
+      9
     ],
     "massen": [
-      9
+      10
     ],
     "keyword": [
-      9
+      10
     ],
     "klick": [
-      9
+      10
     ],
     "zielgruppe": [
-      9
+      10
     ],
     "vollständige": [
-      9
+      10
     ],
     "dein": [
-      9
+      10
     ],
     "pagebuilder": [
-      10
+      0,
+      11
     ],
     "memory": [
-      10
+      11
     ],
     "server": [
-      10
+      11
     ],
     "limit": [
-      10
+      11
     ],
     "side": [
-      10
+      11
     ],
     "browser": [
-      10
+      11
     ],
     "ressourcen": [
-      10
+      11
     ],
     "standard": [
-      10
+      11
     ],
     "serverseitige": [
-      10
+      11
     ],
     "logik": [
-      10
+      11
     ],
     "ressourcenverbrauch": [
-      10
+      11
     ],
     "völlerei": [
-      10
+      11
     ],
     "eigenes": [
-      10
+      0,
+      11
     ],
     "kraftwerk": [
-      10
+      11
     ],
     "brauchen": [
-      10
+      11
+    ],
+    "keine": [
+      0
+    ],
+    "kochen": [
+      0
+    ],
+    "schleppen": [
+      0
+    ],
+    "unter": [
+      0
+    ],
+    "minimalistische": [
+      0
+    ],
+    "schlankes": [
+      0
+    ],
+    "herzens": [
+      0
+    ],
+    "sehen": [
+      0
+    ],
+    "jedem": [
+      0
+    ],
+    "optimization": [
+      0
+    ],
+    "unternehmen": [
+      0
+    ],
+    "kämpft": [
+      0
+    ],
+    "jahre": [
+      0
+    ],
+    "würde": [
+      0
+    ],
+    "leckerlis": [
+      0
+    ],
+    "königin": [
+      0
+    ],
+    "baut": [
+      0
+    ],
+    "vitals": [
+      0
+    ],
+    "kompetent": [
+      0
+    ],
+    "lösen": [
+      0
+    ],
+    "guide": [
+      0
+    ],
+    "auch": [
+      0
+    ],
+    "engine": [
+      0
+    ],
+    "sich": [
+      0
+    ],
+    "functions": [
+      0
+    ],
+    "machst": [
+      0
+    ],
+    "sauber": [
+      0
+    ],
+    "ki-komplize": [
+      0
+    ],
+    "helfe": [
+      0
+    ],
+    "blocks": [
+      0
+    ],
+    "alle": [
+      0
+    ],
+    "wirklich": [
+      0
+    ],
+    "about": [
+      0
+    ],
+    "stehen": [
+      0
+    ],
+    "feuert": [
+      0
+    ],
+    "kannst": [
+      0
+    ],
+    "eigene": [
+      0
+    ],
+    "andere": [
+      0
+    ],
+    "sehr": [
+      0
+    ],
+    "spielerei": [
+      0
+    ],
+    "zitieren": [
+      0
+    ],
+    "verwechslungsgefahr": [
+      0
+    ],
+    "lädt": [
+      0
+    ],
+    "reduziert": [
+      0
+    ],
+    "name": [
+      0
+    ],
+    "einer": [
+      0
+    ],
+    "perfektion": [
+      0
+    ],
+    "michaels": [
+      0
+    ],
+    "probleme": [
+      0
+    ],
+    "chefin": [
+      0
+    ],
+    "vorlaut": [
+      0
+    ],
+    "motto": [
+      0
+    ],
+    "halt": [
+      0
+    ],
+    "rückbesinnung": [
+      0
+    ],
+    "durch": [
+      0
+    ],
+    "doppelpack": [
+      0
+    ],
+    "kenne": [
+      0
+    ],
+    "food": [
+      0
+    ],
+    "laufen": [
+      0
+    ],
+    "frameworks": [
+      0
+    ],
+    "bessere": [
+      0
+    ],
+    "ki-integration": [
+      0
+    ],
+    "radikale": [
+      0
+    ],
+    "blauen": [
+      0
+    ],
+    "parsen": [
+      0
+    ],
+    "entwickelt": [
+      0
+    ],
+    "zuständig": [
+      0
+    ],
+    "sprengen": [
+      0
+    ],
+    "frech": [
+      0
+    ],
+    "passendes": [
+      0
+    ],
+    "sauberen": [
+      0
+    ],
+    "core": [
+      0
+    ],
+    "theme": [
+      0
+    ],
+    "hund": [
+      0
+    ],
+    "einen": [
+      0
+    ],
+    "pfotenblick": [
+      0
+    ],
+    "llms": [
+      0
+    ],
+    "schwere": [
+      0
+    ],
+    "native": [
+      0
+    ],
+    "gutenberg": [
+      0
+    ],
+    "können": [
+      0
+    ],
+    "killen": [
+      0
+    ],
+    "aktuell": [
+      0
+    ],
+    "automation": [
+      0
+    ],
+    "programmatic": [
+      0
+    ],
+    "sekunde": [
+      0
+    ],
+    "ersetzt": [
+      0
+    ],
+    "marketing": [
+      0
+    ],
+    "funktionen": [
+      0
+    ],
+    "ohne": [
+      0
+    ],
+    "unseres": [
+      0
+    ],
+    "custom": [
+      0
+    ],
+    "ladezeiten": [
+      0
+    ],
+    "aufgeblähtes": [
+      0
+    ],
+    "strukturierte": [
+      0
+    ],
+    "skills": [
+      0
+    ],
+    "personalisierung": [
+      0
+    ],
+    "eine": [
+      0
+    ],
+    "prüft": [
+      0
+    ],
+    "fatale": [
+      0
+    ],
+    "gewinnt": [
+      0
+    ],
+    "optimiert": [
+      0
+    ],
+    "aufgeblähte": [
+      0
+    ],
+    "overhead": [
+      0
+    ],
+    "rankings": [
+      0
+    ],
+    "haare": [
+      0
+    ],
+    "maxonline": [
+      0
+    ],
+    "dass": [
+      0
+    ],
+    "teurer": [
+      0
+    ],
+    "edge": [
+      0
+    ],
+    "smarte": [
+      0
+    ],
+    "wer": [
+      0
+    ],
+    "definitiv": [
+      0
+    ],
+    "sonst": [
+      0
+    ],
+    "projekten": [
+      0
+    ],
+    "suchmaschinen": [
+      0
+    ],
+    "erstellen": [
+      0
+    ],
+    "designare": [
+      0
+    ],
+    "isoliert": [
+      0
+    ],
+    "über": [
+      0
+    ],
+    "web-purist": [
+      0
+    ],
+    "achtung": [
+      0
+    ],
+    "projekte": [
+      0
+    ],
+    "auswendig": [
+      0
+    ],
+    "strukturiert": [
+      0
+    ],
+    "analyse": [
+      0
+    ],
+    "lassen": [
+      0
+    ],
+    "latenz": [
+      0
+    ],
+    "weil": [
+      0
+    ],
+    "raus": [
+      0
+    ],
+    "ersetzen": [
+      0
+    ],
+    "themes": [
+      0
+    ],
+    "kaum": [
+      0
+    ],
+    "lohnen": [
+      0
+    ],
+    "wird": [
+      0
+    ],
+    "unterstütze": [
+      0
+    ],
+    "kann": [
+      0
+    ],
+    "wesentliche": [
+      0
+    ],
+    "echte": [
+      0
+    ],
+    "was": [
+      0
+    ],
+    "wartung": [
+      0
+    ],
+    "maschinenlesbarkeit": [
+      0
+    ],
+    "reduzieren": [
+      0
+    ],
+    "geduldiger": [
+      0
+    ],
+    "request": [
+      0
+    ],
+    "alles": [
+      0
+    ],
+    "programmatisch": [
+      0
+    ],
+    "welche": [
+      0
+    ],
+    "sicherheit": [
+      0
+    ],
+    "liegen": [
+      0
+    ],
+    "selbst": [
+      0
+    ],
+    "liebt": [
+      0
+    ],
+    "ganzen": [
+      0
+    ],
+    "aber": [
+      0
+    ],
+    "statt": [
+      0
     ]
   }
 }
