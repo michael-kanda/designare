@@ -1,6 +1,6 @@
 // api/ask-gemini.js - FUNCTION CALLING VERSION
 // Gemini Native Tool Use statt Tag-Parsing
-// Tools: open_booking, compose_email, suggest_link, remember_user_name
+// Tools: open_booking, compose_email, remember_user_name, suggest_chips
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from "@google/generative-ai";
 import { Redis } from "@upstash/redis";
 import Brevo from '@getbrevo/brevo';
@@ -144,24 +144,6 @@ const toolDeclarations = [
     }
   },
   {
-    name: "suggest_link",
-    description: "Empfiehlt einen passenden Link zu einer Seite auf designare.at. Aufrufen wenn die Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk oder Begrüßungen.",
-    parameters: {
-      type: FunctionDeclarationSchemaType.OBJECT,
-      properties: {
-        url: {
-          type: FunctionDeclarationSchemaType.STRING,
-          description: "Relativer URL-Pfad der Seite, z.B. '/geo-seo'"
-        },
-        link_text: {
-          type: FunctionDeclarationSchemaType.STRING,
-          description: "Neugierig machender Linktext"
-        }
-      },
-      required: ["url", "link_text"]
-    }
-  },
-  {
     name: "remember_user_name",
     description: "Speichert den Vornamen des Nutzers wenn er sich vorstellt oder seinen Namen nennt. NUR bei echten Vornamen des Nutzers, NICHT bei erwähnten dritten Personen.",
     parameters: {
@@ -176,18 +158,35 @@ const toolDeclarations = [
     }
   },
   {
-    name: "suggest_followups",
-    description: "Schlägt 2-3 passende Folgefragen vor die der Nutzer als nächstes stellen könnte. IMMER aufrufen, bei jeder Antwort. Formuliere kurz und klickbar (max 6 Wörter pro Vorschlag).",
+    name: "suggest_chips",
+    description: "Zeigt dem Nutzer exakt 3 klickbare Vorschläge unter der Antwort. IMMER aufrufen, bei JEDER Antwort. Genau 1 Folgefrage + 2 interne Links. KEINE doppelten Links. Folgefragen max 6 Wörter.",
     parameters: {
       type: FunctionDeclarationSchemaType.OBJECT,
       properties: {
-        suggestions: {
+        chips: {
           type: FunctionDeclarationSchemaType.ARRAY,
-          items: { type: FunctionDeclarationSchemaType.STRING },
-          description: "2-3 kurze Folgefragen, z.B. ['Was kostet das?', 'Wie funktioniert GEO?', 'Termin vereinbaren']"
+          items: {
+            type: FunctionDeclarationSchemaType.OBJECT,
+            properties: {
+              type: {
+                type: FunctionDeclarationSchemaType.STRING,
+                description: "'question' für eine Folgefrage oder 'link' für einen internen Link"
+              },
+              text: {
+                type: FunctionDeclarationSchemaType.STRING,
+                description: "Kurzer klickbarer Text (max 6 Wörter)"
+              },
+              url: {
+                type: FunctionDeclarationSchemaType.STRING,
+                description: "URL-Pfad, NUR bei type 'link', z.B. '/ki-sichtbarkeit'"
+              }
+            },
+            required: ["type", "text"]
+          },
+          description: "Exakt 3 Chips: 1x type 'question' + 2x type 'link'. Keine doppelten URLs."
         }
       },
-      required: ["suggestions"]
+      required: ["chips"]
     }
   }
 ];
@@ -405,15 +404,14 @@ MICHAEL-REGEL:
 - FRAGEN ZU MICHAEL/SERVICES → charmant als Experte positionieren
 - Keine Marketing-Floskeln. "Michael" nur bei direktem Bezug.
 
-TOOLS – Du hast 5 Werkzeuge. Nutze sie AKTIV wenn passend:
+TOOLS – Du hast 4 Werkzeuge. Nutze sie AKTIV wenn passend:
 1. open_booking → Bei Terminwünschen. Öffnet den Buchungskalender im Frontend.
 2. compose_email → Zum E-Mail-Verfassen. Frage ZUERST nach fehlenden Infos bevor du aufrufst. Absender: Michael Kanda / designare.at. Max. ${MAX_EMAILS_PER_SESSION} pro Session (bisher: ${emailsSent}).
-3. suggest_link → Wenn die Antwort thematisch zu einem verfügbaren Artikel passt. NICHT bei Smalltalk.
-4. remember_user_name → Wenn der Nutzer seinen Vornamen nennt. NUR bei eigenen Vornamen.
-5. suggest_followups → IMMER aufrufen. 2-3 kurze Folgefragen vorschlagen (max 6 Wörter pro Vorschlag). Sollen neugierig machen. Bei Themen rund um SEO, Sichtbarkeit, KI oder Google immer "KI-Sichtbarkeit prüfen" als einen Vorschlag einbauen.
+3. remember_user_name → Wenn der Nutzer seinen Vornamen nennt. NUR bei eigenen Vornamen.
+4. suggest_chips → IMMER aufrufen, bei JEDER Antwort. Exakt 3 Chips: 1 Folgefrage + 2 interne Links. KEINE doppelten Links. Folgefragen max 6 Wörter. Sollen neugierig machen.
 
-FESTE LINKS (immer verfügbar):
-- /ki-sichtbarkeit → "KI-Sichtbarkeits-Check" (kostenloser Check wie gut eine Website für KI-Systeme sichtbar ist)
+FESTE LINKS (immer für suggest_chips verfügbar):
+- /ki-sichtbarkeit → "KI-Sichtbarkeits-Check"
 
 STIMMUNGS-ERKENNUNG:
 FRUSTRIERT → Kein Smalltalk, direkt Lösung
@@ -428,7 +426,7 @@ ${timeContext ? `Tageszeit: ${timeContext} (NUR in erster Nachricht erwähnen)` 
 ${memoryContext}
 
 ${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
-${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
+${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_chips:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
     // ===================================================================
     // CHAT-CONTENTS AUFBAUEN (Gemini-Format)
@@ -523,15 +521,6 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
           break;
         }
 
-        case 'suggest_link': {
-          if (args.url && args.link_text) {
-            // Link als Chip-Eintrag speichern (type: 'link')
-            if (!responsePayload.chips) responsePayload.chips = [];
-            responsePayload.chips.push({ type: 'link', text: args.link_text, url: args.url });
-          }
-          break;
-        }
-
         case 'remember_user_name': {
           const n = args.name;
           if (n && n.length >= 2 && n.length <= 20 && /^[A-Za-zÄÖÜäöüß\- ]+$/.test(n)) {
@@ -540,12 +529,19 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS für suggest_link:\n${availab
           break;
         }
 
-        case 'suggest_followups': {
-          if (args.suggestions && Array.isArray(args.suggestions)) {
-            if (!responsePayload.chips) responsePayload.chips = [];
-            args.suggestions.slice(0, 3).forEach(text => {
-              responsePayload.chips.push({ type: 'question', text });
-            });
+        case 'suggest_chips': {
+          if (args.chips && Array.isArray(args.chips)) {
+            const seen = new Set();
+            responsePayload.chips = args.chips
+              .filter(c => {
+                // Duplikat-Check für Links
+                if (c.type === 'link' && c.url) {
+                  if (seen.has(c.url)) return false;
+                  seen.add(c.url);
+                }
+                return c.text && c.text.length > 0;
+              })
+              .slice(0, 3);
           }
           break;
         }
