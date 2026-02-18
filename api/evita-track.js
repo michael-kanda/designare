@@ -1,5 +1,5 @@
-// api/evita-track.js - Tracking-Helper für das Evita-Dashboard
-// Wird von ask-gemini.js und ai-visibility-check.js importiert
+// api/evita-track.js - Tracking-Helper für das Evita- & Silas-Dashboard
+// Wird von ask-gemini.js, ai-visibility-check.js und generate.js importiert
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -9,6 +9,7 @@ const redis = new Redis({
 
 // ===================================================================
 // KEYS nach Schema: evita:stats:{category}:{YYYY-MM-DD}
+//                   silas:stats:{category}:{YYYY-MM-DD}
 // ===================================================================
 function todayKey() {
   return new Date().toISOString().split('T')[0]; // z.B. "2026-02-14"
@@ -208,5 +209,140 @@ export async function trackEmailSent({ sessionId, to, subject, success }) {
     await pipeline.exec();
   } catch (error) {
     console.error('📊 Tracking-Fehler (Email):', error.message);
+  }
+}
+
+
+// ###################################################################
+// ###################################################################
+//                    SILAS CONTENT-GENERATOR TRACKING
+// ###################################################################
+// ###################################################################
+
+// ===================================================================
+// SILAS GENERIERUNG TRACKEN (aufgerufen in /api/generate.js)
+// ===================================================================
+export async function trackSilasGeneration({ sessionId, keywords, successCount, failCount, rateLimitHits, isMasterMode, modelUsed }) {
+  const day = todayKey();
+  const hour = hourKey();
+
+  try {
+    const pipeline = redis.pipeline();
+
+    // Tägliche Zähler
+    pipeline.hincrby(`silas:stats:daily:${day}`, 'total_generations', 1);
+    pipeline.hincrby(`silas:stats:daily:${day}`, 'total_keywords', keywords?.length || 0);
+    pipeline.hincrby(`silas:stats:daily:${day}`, 'successful', successCount || 0);
+    pipeline.hincrby(`silas:stats:daily:${day}`, 'failed', failCount || 0);
+
+    if (rateLimitHits > 0) {
+      pipeline.hincrby(`silas:stats:daily:${day}`, 'rate_limit_hits', rateLimitHits);
+    }
+
+    if (isMasterMode) {
+      pipeline.hincrby(`silas:stats:daily:${day}`, 'master_mode_uses', 1);
+    }
+
+    // Modell-Tracking (falls generate.js verschiedene Modelle nutzt)
+    if (modelUsed) {
+      pipeline.hincrby(`silas:stats:models:${day}`, modelUsed, 1);
+    }
+
+    // Heatmap: Wochentag + Stunde
+    pipeline.hincrby('silas:stats:heatmap', hour, 1);
+
+    // Unique Sessions (HyperLogLog)
+    if (sessionId) {
+      pipeline.pfadd(`silas:stats:unique:${day}`, sessionId);
+    }
+
+    // Top-Keywords (Sorted Set, alle Keywords dieser Generierung)
+    if (keywords && keywords.length > 0) {
+      for (const kw of keywords) {
+        const normalized = (kw.keyword || kw).toString().toLowerCase().trim().substring(0, 100);
+        if (normalized.length >= 2) {
+          pipeline.zincrby('silas:stats:top_keywords', 1, normalized);
+        }
+      }
+    }
+
+    // TTL: 90 Tage
+    pipeline.expire(`silas:stats:daily:${day}`, 60 * 60 * 24 * 90);
+    pipeline.expire(`silas:stats:models:${day}`, 60 * 60 * 24 * 90);
+    pipeline.expire(`silas:stats:unique:${day}`, 60 * 60 * 24 * 90);
+
+    await pipeline.exec();
+  } catch (error) {
+    console.error('📊 Silas Tracking-Fehler (Generation):', error.message);
+  }
+}
+
+// ===================================================================
+// SILAS INTENT-VERTEILUNG TRACKEN
+// ===================================================================
+export async function trackSilasIntents(keywords) {
+  if (!keywords || keywords.length === 0) return;
+  const day = todayKey();
+
+  try {
+    const pipeline = redis.pipeline();
+    for (const kw of keywords) {
+      const intent = kw.intent || 'informational';
+      pipeline.hincrby(`silas:stats:intents:${day}`, intent, 1);
+    }
+    pipeline.expire(`silas:stats:intents:${day}`, 60 * 60 * 24 * 90);
+    await pipeline.exec();
+  } catch (error) {
+    console.error('📊 Silas Tracking-Fehler (Intents):', error.message);
+  }
+}
+
+// ===================================================================
+// SILAS DOWNLOADS TRACKEN (aufgerufen via /api/silas-track.js)
+// ===================================================================
+export async function trackSilasDownload({ type, count }) {
+  const day = todayKey();
+
+  try {
+    const field = `downloads_${type}`; // downloads_csv, downloads_txt, downloads_html
+    await redis.hincrby(`silas:stats:daily:${day}`, field, 1);
+    
+    if (count) {
+      await redis.hincrby(`silas:stats:daily:${day}`, 'downloaded_items', count);
+    }
+  } catch (error) {
+    console.error('📊 Silas Tracking-Fehler (Download):', error.message);
+  }
+}
+
+// ===================================================================
+// SILAS FEHLER LOGGEN (für Analyse)
+// ===================================================================
+export async function trackSilasError({ keyword, error, errorType }) {
+  try {
+    const entry = JSON.stringify({
+      keyword: (keyword || '').substring(0, 100),
+      error: (error || '').substring(0, 300),
+      type: errorType || 'unknown', // 'rate_limit', 'api_error', 'validation', 'timeout'
+      timestamp: new Date().toISOString()
+    });
+
+    await redis.lpush('silas:stats:errors', entry);
+    await redis.ltrim('silas:stats:errors', 0, 199); // Max 200 Einträge
+  } catch (err) {
+    console.error('📊 Silas Tracking-Fehler (Error-Log):', err.message);
+  }
+}
+
+// ===================================================================
+// SILAS TEMPLATE-NUTZUNG TRACKEN
+// ===================================================================
+export async function trackSilasTemplate(templateName) {
+  if (!templateName) return;
+  
+  try {
+    await redis.zincrby('silas:stats:templates', 1, templateName);
+  } catch (error) {
+    console.error('📊 Silas Tracking-Fehler (Template):', error.message);
   }
 }
