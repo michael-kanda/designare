@@ -1,4 +1,4 @@
-// js/silas-form.js - VERSION MIT VERBESSERTER RATE-LIMIT-BEHANDLUNG
+// js/silas-form.js - VERSION MIT VERBESSERTER RATE-LIMIT-BEHANDLUNG + DASHBOARD-TRACKING
 // Passwort-Authentifizierung über Lightbox & API (check-auth.js)
 
 export function initSilasForm() {
@@ -48,6 +48,20 @@ export function initSilasForm() {
 
     let keywordList = [];
     let allGeneratedData = [];
+
+    // ===================================================================
+    // DASHBOARD TRACKING HELPER (Fire & Forget)
+    // ===================================================================
+    
+    function trackEvent(event, data = {}) {
+        try {
+            fetch('/api/silas-track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event, data })
+            }).catch(() => {}); // Fire & Forget – Fehler ignorieren
+        } catch (_) {}
+    }
 
     // ===================================================================
     // RATE LIMIT HANDLING
@@ -402,7 +416,11 @@ export function initSilasForm() {
     };
     if (templateSelector && customStyleInput) {
         templateSelector.addEventListener('change', e => {
-            if (STYLE_TEMPLATES[e.target.value]) customStyleInput.value = STYLE_TEMPLATES[e.target.value];
+            if (STYLE_TEMPLATES[e.target.value]) {
+                customStyleInput.value = STYLE_TEMPLATES[e.target.value];
+                // 📊 Template-Wahl tracken
+                trackEvent('template', { template: e.target.value });
+            }
             else if (e.target.value === '') customStyleInput.value = '';
         });
     }
@@ -769,7 +787,7 @@ export function initSilasForm() {
     }
 
     // ===================================================================
-    // DOWNLOADS
+    // DOWNLOADS (mit Dashboard-Tracking)
     // ===================================================================
     const ALL_HEADERS = [
         "keyword","intent","post_title","post_name","meta_title","meta_description",
@@ -805,6 +823,9 @@ export function initSilasForm() {
         if (!data || data.error) return alert('Keine Daten verfügbar.');
         const html = '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>' + (data.meta_title || 'Landingpage') + '</title><style>:root{--bg-color:#0d0d0d;--text-color:#e8e8e8;--text-color-muted:#a0a0a0;--accent-color:#c4a35a;--border-color:rgba(255,255,255,0.1);}body{font-family:sans-serif;background:var(--bg-color);color:var(--text-color);margin:0;padding:20px;}ul{padding-left:20px;}</style></head><body>' + generateLandingpageHtml(data) + '</body></html>';
         downloadFile(html, (data.post_name || 'landingpage') + '.html', 'text/html;charset=utf-8;');
+        
+        // 📊 HTML-Download tracken
+        trackEvent('download', { type: 'html', count: 1 });
     }
     
     function downloadTxt() {
@@ -822,6 +843,9 @@ export function initSilasForm() {
         });
         downloadFile(txt, 'silas_content.txt', 'text/plain;charset=utf-8;');
         showNotification(`TXT mit ${successfulData.length} Einträgen exportiert!`, 'success');
+        
+        // 📊 TXT-Download tracken
+        trackEvent('download', { type: 'txt', count: successfulData.length });
     }
     
     function downloadCsv() {
@@ -837,6 +861,9 @@ export function initSilasForm() {
         });
         downloadFile(csv, 'silas_content.csv', 'text/csv;charset=utf-8;');
         showNotification(`CSV mit ${successfulData.length} Einträgen exportiert!`, 'success');
+        
+        // 📊 CSV-Download tracken
+        trackEvent('download', { type: 'csv', count: successfulData.length });
     }
 
     // ===================================================================
@@ -851,5 +878,5 @@ export function initSilasForm() {
     showDemoStatus();
     createMasterPasswordUI();
     
-    console.log('[Silas] Initialisiert mit verbesserter Rate-Limit-Behandlung');
+    console.log('[Silas] Initialisiert mit Dashboard-Tracking + Rate-Limit-Behandlung');
 }
