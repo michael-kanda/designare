@@ -281,7 +281,7 @@ export default async function handler(req, res) {
 
     const models = [
       { name: 'gemini-2.5-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig, tools: [toolsConfig] }) },
-      { name: 'gemini-2.0-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
+      { name: 'gemini-2.5-flash-lite', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
     ];
 
     async function generateWithFallback(contents) {
