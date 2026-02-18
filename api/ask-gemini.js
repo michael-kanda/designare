@@ -85,7 +85,7 @@ function buildEmailHtml(bodyText, subject) {
   return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${sanitizeHtml(subject)}</title>
 <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5}.c{background:#fff;border-radius:8px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,.1)}.h{border-bottom:2px solid #e0e0e0;padding-bottom:16px;margin-bottom:24px}.h h2{margin:0;color:#1a1a1a;font-size:20px}.b p{margin:0 0 16px}.f{border-top:1px solid #e0e0e0;padding-top:16px;margin-top:32px;font-size:13px;color:#888}.f a{color:#555;text-decoration:none}</style>
 </head><body><div class="c"><div class="h"><h2>${sanitizeHtml(subject)}</h2></div><div class="b">${textToHtml(bodyText)}</div>
-<div class="f"><p>Michael Kanda · Web Purist &amp; SEO Expert<br><a href="https://designare.at">designare.at</a></p></div></div></body></html>`;
+<div class="f"><p>Gesendet via Evita &middot; <a href="https://designare.at">designare.at</a></p></div></div></body></html>`;
 }
 
 async function sendEmail({ to, toName, subject, body, sessionId }) {
@@ -119,7 +119,7 @@ const toolDeclarations = [
   },
   {
     name: "compose_email",
-    description: "Verfasst eine E-Mail im Namen von Michael Kanda. Aufrufen wenn der Nutzer eine E-Mail senden, schreiben oder verfassen möchte. IMMER alle Pflichtfelder ausfüllen. Wenn Infos fehlen, NICHT dieses Tool aufrufen sondern zuerst nachfragen.",
+    description: "Verfasst und versendet eine E-Mail für den Nutzer. Das ist ein allgemeiner E-Mail-Service. Aufrufen wenn der Nutzer eine E-Mail senden, schreiben oder verfassen möchte. IMMER alle Pflichtfelder ausfüllen. Wenn Infos fehlen (Empfänger, Betreff, Inhalt), NICHT dieses Tool aufrufen sondern zuerst nachfragen.",
     parameters: {
       type: FunctionDeclarationSchemaType.OBJECT,
       properties: {
@@ -137,7 +137,7 @@ const toolDeclarations = [
         },
         body: {
           type: FunctionDeclarationSchemaType.STRING,
-          description: "Vollständiger E-Mail-Text inklusive Anrede und Grußformel. Absender ist immer Michael Kanda."
+          description: "Vollständiger E-Mail-Text inklusive Anrede und Grußformel. Verfasse die E-Mail im Stil und Ton den der Nutzer wünscht."
         }
       },
       required: ["to", "subject", "body"]
@@ -408,7 +408,7 @@ MICHAEL-REGEL:
 
 TOOLS:
 1. open_booking → Bei Terminwünschen
-2. compose_email → E-Mail-Verfassen. Vorher fehlende Infos erfragen. Absender: Michael Kanda / designare.at. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
+2. compose_email → E-Mail-Service für den Nutzer. Vorher fehlende Infos erfragen (An wen? Betreff? Inhalt?). Versendet wird über Evita. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
 3. remember_user_name → Wenn Nutzer Vornamen nennt
 4. suggest_chips → IMMER aufrufen. Exakt 3 Chips: 1 Folgefrage + 2 interne Links. KEINE doppelten Links. Nur URLs aus dem WEBSEITEN-KONTEXT verwenden.
 
