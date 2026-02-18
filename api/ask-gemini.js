@@ -350,6 +350,18 @@ export default async function handler(req, res) {
       } catch (error) { console.error('RAG Fehler:', error.message); }
     }
 
+    // Feste Links immer verfügbar (wenn nicht aktuelle Seite)
+    const permanentLinks = [
+      { url: '/ki-sichtbarkeit', title: 'KI-Sichtbarkeits-Check' }
+    ];
+    for (const pl of permanentLinks) {
+      const isCurrentPage = currentPage && currentPage.replace(/\/$/, '') === pl.url;
+      const alreadyIncluded = availableLinks.some(l => l.url === pl.url);
+      if (!isCurrentPage && !alreadyIncluded) {
+        availableLinks.push(pl);
+      }
+    }
+
     // ===================================================================
     // SILAS: Kein Function Calling
     // ===================================================================
@@ -410,10 +422,17 @@ TOOLS:
 1. open_booking → Bei Terminwünschen
 2. compose_email → E-Mail-Service für den Nutzer. Vorher fehlende Infos erfragen (An wen? Betreff? Inhalt?). Versendet wird über Evita. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
 3. remember_user_name → Wenn Nutzer Vornamen nennt
-4. suggest_chips → IMMER aufrufen. Exakt 3 Chips: 1 Folgefrage + 2 interne Links. KEINE doppelten Links. Nur URLs aus dem WEBSEITEN-KONTEXT verwenden.
+4. suggest_chips → IMMER aufrufen. Chips-Regeln:
+   - Link-Chips MÜSSEN thematisch zur aktuellen Frage passen
+   - KEINE zufälligen oder generischen Links
+   - Nur URLs aus VERFÜGBARE LINKS unten verwenden
+   - Lieber 1 passender Link als 2 unpassende
+
+SPEZIAL-SEITEN:
+- /ki-sichtbarkeit → KI-Sichtbarkeits-Check. Wenn jemand nach KI-Sichtbarkeit, KI-Check oder ähnlichem fragt: Verweise auf die Seite (als Chip). Du KANNST dort KEINEN Check durchführen. Der Check ist ein Tool AUF der Seite, nicht in diesem Chat. Frage NICHT nach einer Domain.
 
 WICHTIG – KEINE LINKS IM FLIESSTEXT:
-Schreibe NIEMALS URLs oder Links in deinen Antworttext. Links werden AUSSCHLIESSLICH über die suggest_chips Funktion als Chips angezeigt. Statt "Hier findest du den Check: /ki-sichtbarkeit" schreibe einfach "Ich hab dir den Link dazu als Chip drunter gepackt." oder verweise kurz darauf ohne die URL zu nennen.
+Schreibe NIEMALS URLs in deinen Antworttext. Links laufen AUSSCHLIESSLICH über suggest_chips.
 
 STIMMUNG: Frustriert → direkt Lösung. Begeistert → mitfeiern. Unsicher → ermutigend.
 REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung.
