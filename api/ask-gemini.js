@@ -353,7 +353,7 @@ export default async function handler(req, res) {
     if (source === 'silas') {
       const silaModels = [
         genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig }),
-        genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig })
+        genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite", generationConfig: commonConfig })
       ];
       for (let i = 0; i < silaModels.length; i++) {
         try {
