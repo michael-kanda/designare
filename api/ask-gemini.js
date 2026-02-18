@@ -209,7 +209,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
   try {
-    const { prompt, source, history, message, sessionId, userName, pendingEmail, confirmEmailSend } = req.body;
+    const { prompt, source, history, message, sessionId, userName, pendingEmail, confirmEmailSend, currentPage } = req.body;
     const userMessage = message || prompt;
 
     // ===================================================================
@@ -281,7 +281,7 @@ export default async function handler(req, res) {
 
     const models = [
       { name: 'gemini-2.5-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig, tools: [toolsConfig] }) },
-      { name: 'gemini-2.5-flash-lite', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
+      { name: 'gemini-2.0-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
     ];
 
     async function generateWithFallback(contents) {
@@ -342,7 +342,10 @@ export default async function handler(req, res) {
           }).join('\n\n');
 
           const blacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
-          availableLinks = matchedPages.filter(p => p.url && !blacklist.some(s => p.url.includes(s))).map(p => ({ url: p.url, title: p.title }));
+          availableLinks = matchedPages
+            .filter(p => p.url && !blacklist.some(s => p.url.includes(s)))
+            .filter(p => !currentPage || !p.url.includes(currentPage.replace(/\/$/, '')))
+            .map(p => ({ url: p.url, title: p.title }));
         }
       } catch (error) { console.error('RAG Fehler:', error.message); }
     }
@@ -353,7 +356,7 @@ export default async function handler(req, res) {
     if (source === 'silas') {
       const silaModels = [
         genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig }),
-        genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite", generationConfig: commonConfig })
+        genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig })
       ];
       for (let i = 0; i < silaModels.length; i++) {
         try {
@@ -415,7 +418,7 @@ REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung.
 Datum: ${formattedDate} | ${formattedTime}
 ${timeContext ? `${timeContext} (NUR erste Nachricht)` : ''}
 ${memoryContext}
-
+${currentPage ? `\nDer Nutzer ist gerade auf: ${currentPage} – schlage diese Seite NIEMALS als Link-Chip vor.` : ''}
 ${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
 ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
@@ -523,10 +526,12 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
         case 'suggest_chips': {
           if (args.chips && Array.isArray(args.chips)) {
             const seen = new Set();
+            const currentPath = currentPage ? currentPage.replace(/\/$/, '') : '';
             responsePayload.chips = args.chips
               .filter(c => {
-                // Duplikat-Check für Links
                 if (c.type === 'link' && c.url) {
+                  // Keine Links zur aktuellen Seite
+                  if (currentPath && c.url.replace(/\/$/, '').includes(currentPath)) return false;
                   if (seen.has(c.url)) return false;
                   seen.add(c.url);
                 }
