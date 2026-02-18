@@ -1,4 +1,4 @@
-// api/evita-dashboard.js - Dashboard-API für Evita-Statistiken
+// api/evita-dashboard.js - Dashboard-API für Evita- & Silas-Statistiken
 // Authentifizierung via Bearer Token (EVITA_DASHBOARD_TOKEN in Vercel Env)
 import { Redis } from "@upstash/redis";
 
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     const days = getLastNDays(range);
 
     // ===============================================================
-    // 1. DAILY STATS (Nachrichten, Chats, Bookings, Fallbacks)
+    // 1. DAILY STATS – EVITA (Nachrichten, Chats, Bookings, Fallbacks)
     // ===============================================================
     const dailyStats = [];
     
@@ -87,7 +87,34 @@ export default async function handler(req, res) {
     }
 
     // ===============================================================
-    // 2. AGGREGIERTE ZUSAMMENFASSUNG
+    // 1b. DAILY STATS – SILAS
+    // ===============================================================
+    const silasDailyStats = [];
+
+    for (const day of days) {
+      const [stats, uniqueCount] = await Promise.all([
+        redis.hgetall(`silas:stats:daily:${day}`),
+        redis.pfcount(`silas:stats:unique:${day}`)
+      ]);
+
+      silasDailyStats.push({
+        date: day,
+        total_generations: parseInt(stats?.total_generations || 0),
+        total_keywords: parseInt(stats?.total_keywords || 0),
+        successful: parseInt(stats?.successful || 0),
+        failed: parseInt(stats?.failed || 0),
+        rate_limit_hits: parseInt(stats?.rate_limit_hits || 0),
+        master_mode_uses: parseInt(stats?.master_mode_uses || 0),
+        downloads_csv: parseInt(stats?.downloads_csv || 0),
+        downloads_txt: parseInt(stats?.downloads_txt || 0),
+        downloads_html: parseInt(stats?.downloads_html || 0),
+        downloaded_items: parseInt(stats?.downloaded_items || 0),
+        unique_users: uniqueCount || 0
+      });
+    }
+
+    // ===============================================================
+    // 2. AGGREGIERTE ZUSAMMENFASSUNG – EVITA
     // ===============================================================
     const totals = dailyStats.reduce((acc, day) => ({
       total_chats: acc.total_chats + day.total_chats,
@@ -108,16 +135,40 @@ export default async function handler(req, res) {
       emails_failed: 0, unique_visitors: 0
     });
 
-    // Heute separat
+    // Heute separat – Evita
     const today = dailyStats[dailyStats.length - 1] || {};
 
     // ===============================================================
-    // 3. TOP-FRAGEN (Sorted Set, Top 20)
+    // 2b. AGGREGIERTE ZUSAMMENFASSUNG – SILAS
+    // ===============================================================
+    const silasTotals = silasDailyStats.reduce((acc, day) => ({
+      total_generations: acc.total_generations + day.total_generations,
+      total_keywords: acc.total_keywords + day.total_keywords,
+      successful: acc.successful + day.successful,
+      failed: acc.failed + day.failed,
+      rate_limit_hits: acc.rate_limit_hits + day.rate_limit_hits,
+      master_mode_uses: acc.master_mode_uses + day.master_mode_uses,
+      downloads_csv: acc.downloads_csv + day.downloads_csv,
+      downloads_txt: acc.downloads_txt + day.downloads_txt,
+      downloads_html: acc.downloads_html + day.downloads_html,
+      downloaded_items: acc.downloaded_items + day.downloaded_items,
+      unique_users: acc.unique_users + day.unique_users
+    }), {
+      total_generations: 0, total_keywords: 0, successful: 0,
+      failed: 0, rate_limit_hits: 0, master_mode_uses: 0,
+      downloads_csv: 0, downloads_txt: 0, downloads_html: 0,
+      downloaded_items: 0, unique_users: 0
+    });
+
+    // Heute separat – Silas
+    const silasToday = silasDailyStats[silasDailyStats.length - 1] || {};
+
+    // ===============================================================
+    // 3. TOP-FRAGEN – EVITA (Sorted Set, Top 20)
     // ===============================================================
     let topQuestions = [];
     try {
       const raw = await redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true });
-      // Upstash gibt [member, score, member, score, ...] zurück
       for (let i = 0; i < raw.length; i += 2) {
         topQuestions.push({
           question: raw[i],
@@ -129,7 +180,23 @@ export default async function handler(req, res) {
     }
 
     // ===============================================================
-    // 4. THEMEN-AGGREGATION (letzte 30 Tage)
+    // 3b. TOP-KEYWORDS – SILAS (Sorted Set, Top 30)
+    // ===============================================================
+    let silasTopKeywords = [];
+    try {
+      const raw = await redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true });
+      for (let i = 0; i < raw.length; i += 2) {
+        silasTopKeywords.push({
+          keyword: raw[i],
+          count: parseInt(raw[i + 1])
+        });
+      }
+    } catch (e) {
+      console.error('Silas Top-Keywords Fehler:', e.message);
+    }
+
+    // ===============================================================
+    // 4. THEMEN-AGGREGATION – EVITA (letzte N Tage)
     // ===============================================================
     const topicAgg = {};
     for (const day of days) {
@@ -149,7 +216,22 @@ export default async function handler(req, res) {
       .map(([topic, count]) => ({ topic, count }));
 
     // ===============================================================
-    // 5. MODELL-NUTZUNG (letzte 30 Tage aggregiert)
+    // 4b. INTENT-VERTEILUNG – SILAS (letzte N Tage)
+    // ===============================================================
+    const silasIntentAgg = {};
+    for (const day of days) {
+      try {
+        const intents = await redis.hgetall(`silas:stats:intents:${day}`);
+        if (intents) {
+          Object.entries(intents).forEach(([intent, count]) => {
+            silasIntentAgg[intent] = (silasIntentAgg[intent] || 0) + parseInt(count);
+          });
+        }
+      } catch (e) {}
+    }
+
+    // ===============================================================
+    // 5. MODELL-NUTZUNG – EVITA (letzte N Tage aggregiert)
     // ===============================================================
     const modelAgg = {};
     for (const day of days) {
@@ -164,7 +246,22 @@ export default async function handler(req, res) {
     }
 
     // ===============================================================
-    // 6. FALLBACK-NACHRICHTEN (letzte 20)
+    // 5b. MODELL-NUTZUNG – SILAS
+    // ===============================================================
+    const silasModelAgg = {};
+    for (const day of days) {
+      try {
+        const models = await redis.hgetall(`silas:stats:models:${day}`);
+        if (models) {
+          Object.entries(models).forEach(([model, count]) => {
+            silasModelAgg[model] = (silasModelAgg[model] || 0) + parseInt(count);
+          });
+        }
+      } catch (e) {}
+    }
+
+    // ===============================================================
+    // 6. FALLBACK-NACHRICHTEN – EVITA (letzte 20)
     // ===============================================================
     let recentFallbacks = [];
     try {
@@ -176,11 +273,31 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
-    // 7. HEATMAP (Wochentag × Stunde)
+    // 6b. FEHLER-LOG – SILAS (letzte 20)
+    // ===============================================================
+    let silasRecentErrors = [];
+    try {
+      const raw = await redis.lrange('silas:stats:errors', 0, 19);
+      silasRecentErrors = raw.map(entry => {
+        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+        catch { return { keyword: '?', error: entry, timestamp: null }; }
+      });
+    } catch (e) {}
+
+    // ===============================================================
+    // 7. HEATMAP – EVITA (Wochentag × Stunde)
     // ===============================================================
     let heatmap = {};
     try {
       heatmap = await redis.hgetall('evita:stats:heatmap') || {};
+    } catch (e) {}
+
+    // ===============================================================
+    // 7b. HEATMAP – SILAS
+    // ===============================================================
+    let silasHeatmap = {};
+    try {
+      silasHeatmap = await redis.hgetall('silas:stats:heatmap') || {};
     } catch (e) {}
 
     // ===============================================================
@@ -213,6 +330,20 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 9b. TEMPLATE-NUTZUNG – SILAS
+    // ===============================================================
+    let silasTemplates = [];
+    try {
+      const raw = await redis.zrange('silas:stats:templates', 0, 9, { rev: true, withScores: true });
+      for (let i = 0; i < raw.length; i += 2) {
+        silasTemplates.push({
+          template: raw[i],
+          count: parseInt(raw[i + 1])
+        });
+      }
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -220,6 +351,7 @@ export default async function handler(req, res) {
       generated_at: new Date().toISOString(),
       range_days: range,
 
+      // ── EVITA ──────────────────────────────────────────────────
       summary: {
         today: {
           chats: today.total_chats || 0,
@@ -262,6 +394,41 @@ export default async function handler(req, res) {
           niedrig: parseInt(visibilityScores?.niedrig || 0)
         },
         recentChecks: recentVisibilityChecks
+      },
+
+      // ── SILAS ──────────────────────────────────────────────────
+      silas: {
+        summary: {
+          today: {
+            generations: silasToday.total_generations || 0,
+            keywords: silasToday.total_keywords || 0,
+            successful: silasToday.successful || 0,
+            failed: silasToday.failed || 0,
+            rate_limit_hits: silasToday.rate_limit_hits || 0,
+            unique_users: silasToday.unique_users || 0,
+            downloads: (silasToday.downloads_csv || 0) + (silasToday.downloads_txt || 0) + (silasToday.downloads_html || 0)
+          },
+          period: {
+            ...silasTotals,
+            total_downloads: silasTotals.downloads_csv + silasTotals.downloads_txt + silasTotals.downloads_html,
+            success_rate: (silasTotals.successful + silasTotals.failed) > 0
+              ? Math.round((silasTotals.successful / (silasTotals.successful + silasTotals.failed)) * 1000) / 10
+              : 0,
+            avg_keywords_per_generation: silasTotals.total_generations > 0
+              ? Math.round((silasTotals.total_keywords / silasTotals.total_generations) * 10) / 10
+              : 0,
+            master_mode_rate: silasTotals.total_generations > 0
+              ? Math.round((silasTotals.master_mode_uses / silasTotals.total_generations) * 1000) / 10
+              : 0
+          }
+        },
+        daily: silasDailyStats,
+        topKeywords: silasTopKeywords,
+        intentDistribution: silasIntentAgg,
+        modelUsage: silasModelAgg,
+        templates: silasTemplates,
+        recentErrors: silasRecentErrors,
+        heatmap: silasHeatmap
       }
     });
 
