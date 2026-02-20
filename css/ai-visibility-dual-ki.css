@@ -132,3 +132,180 @@ h3 .engine-badge {
     content: '';
     margin-top: 0.4em;
 }
+
+
+/* =================================================================
+   ai-visibility-fixes.css
+   Ersetzt alle Inline-Styles die aus ai-visibility.js entfernt wurden.
+   Einbinden NACH ai-visibility-dual-ki.css
+   ================================================================= */
+
+/* -----------------------------------------------------------------
+   STATUS PILLS (ersetzt statusPill() Inline-Styles)
+   ----------------------------------------------------------------- */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-pill i {
+    font-size: 0.7rem;
+}
+
+.status-mentioned {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.status-not-mentioned {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.status-none {
+    color: #555;
+}
+
+/* -----------------------------------------------------------------
+   SENTIMENT INDICATORS (ersetzt sentimentDot() Inline-Styles)
+   ----------------------------------------------------------------- */
+.sentiment-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.sentiment-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.sentiment-indicator.sentiment-positiv { color: #22c55e; }
+.sentiment-indicator.sentiment-positiv .sentiment-dot { background: #22c55e; }
+
+.sentiment-indicator.sentiment-neutral { color: #f59e0b; }
+.sentiment-indicator.sentiment-neutral .sentiment-dot { background: #f59e0b; }
+
+.sentiment-indicator.sentiment-negativ { color: #ef4444; }
+.sentiment-indicator.sentiment-negativ .sentiment-dot { background: #ef4444; }
+
+.sentiment-indicator.sentiment-fehler { color: #666; }
+.sentiment-indicator.sentiment-fehler .sentiment-dot { background: #666; }
+
+/* -----------------------------------------------------------------
+   COMPARISON TABLE (ersetzt die thStyle/tdStyle Inline-Styles)
+   ----------------------------------------------------------------- */
+.comparison-table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.comparison-table thead tr {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.comparison-th,
+.comparison-th-left {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 400;
+    color: #999;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.comparison-th { text-align: center; }
+.comparison-th-left { text-align: left; }
+
+.comparison-td,
+.comparison-td-left {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comparison-td { text-align: center; }
+
+.comparison-td-left {
+    text-align: left;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.comparison-icon {
+    color: #c4a35a;
+    margin-right: 6px;
+    width: 16px;
+}
+
+.comparison-na {
+    color: #555;
+    font-size: 0.8rem;
+}
+
+/* -----------------------------------------------------------------
+   ENGINE LOGOS (in Vergleichstabelle)
+   ----------------------------------------------------------------- */
+.engine-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.engine-logo-badge {
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.engine-logo-badge.engine-gemini { background: #4285f4; }
+.engine-logo-badge.engine-chatgpt { background: #10a37f; }
+
+/* -----------------------------------------------------------------
+   CHATGPT INSIGHT BOXES (ersetzt die Inline-Style divs)
+   ----------------------------------------------------------------- */
+.chatgpt-insight-negative,
+.chatgpt-insight-positive {
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.chatgpt-insight-negative {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+}
+
+.chatgpt-insight-negative strong {
+    color: #ef4444;
+}
+
+.chatgpt-insight-positive {
+    background: rgba(34, 197, 94, 0.08);
+    border-left: 3px solid #22c55e;
+}
+
+.chatgpt-insight-positive strong {
+    color: #22c55e;
+}
