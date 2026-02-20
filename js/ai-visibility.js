@@ -1,4 +1,6 @@
 // js/ai-visibility.js - Frontend für KI-Sichtbarkeits-Check (Dual-KI: Gemini + ChatGPT)
+// Fixes: XSS-Escaping, AbortController, Doppel-Submit-Schutz, Backend-Counter-Sync,
+//        Inline-Styles → CSS-Klassen, Link-Validierung, Timestamp-Fallback
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('visibility-form');
@@ -10,6 +12,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Accessibility: Screenreader informieren wenn Ergebnisse geladen
     resultsContainer.setAttribute('aria-live', 'polite');
+
+    // =================================================================
+    // FIX 1: XSS-SCHUTZ — escapeHTML für ALLE dynamischen Werte
+    // =================================================================
+    function esc(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
+    // FIX 6: Nur sichere Links erlauben (relativ oder https)
+    function safeHref(url) {
+        if (!url || typeof url !== 'string') return '#';
+        const trimmed = url.trim();
+        // Relative Pfade erlauben
+        if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed;
+        // Nur https erlauben
+        if (trimmed.startsWith('https://')) return trimmed;
+        return '#';
+    }
+
+    // Classname-sicher: nur erlaubte Werte durchlassen
+    function safeClass(value, allowed) {
+        return allowed.includes(value) ? value : allowed[0];
+    }
 
     // =================================================================
     // RATE LIMITING - 3 Abfragen pro Tag
@@ -56,6 +87,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // FIX 4: Backend-Counter übernehmen wenn vorhanden
+    function syncWithBackend(remainingFromServer) {
+        if (typeof remainingFromServer !== 'number') return;
+        const today = getTodayString();
+        const used = DAILY_LIMIT - remainingFromServer;
+        setUsageData({ date: today, count: Math.max(0, used) });
+    }
+
     function canMakeRequest() {
         return getRemainingChecks() > 0;
     }
@@ -100,7 +139,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Form Submit
+    // =================================================================
+    // FIX 2 & 3: AbortController + Doppel-Submit-Schutz
+    // =================================================================
+    let currentController = null;
+    const REQUEST_TIMEOUT_MS = 60000; // 60 Sekunden
+
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -115,6 +159,18 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // FIX 3: Vorherigen Request abbrechen falls noch laufend
+        if (currentController) {
+            currentController.abort();
+        }
+        currentController = new AbortController();
+        const signal = currentController.signal;
+
+        // FIX 2: Timeout
+        const timeoutId = setTimeout(() => {
+            currentController.abort();
+        }, REQUEST_TIMEOUT_MS);
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analysiere...';
         loadingOverlay.classList.add('visible');
@@ -127,9 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     domain: domain,
                     industry: industryInput.value.trim() || null
-                })
+                }),
+                signal
             });
 
+            clearTimeout(timeoutId);
             const data = await response.json();
 
             if (response.status === 429) {
@@ -141,13 +199,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             incrementUsage();
+
+            // FIX 4: Backend-Counter synchronisieren
+            if (data.meta && typeof data.meta.remainingChecks === 'number') {
+                syncWithBackend(data.meta.remainingChecks);
+            }
+
             updateLimitDisplay();
             renderResults(data);
 
         } catch (error) {
-            console.error('Fehler:', error);
-            showError(error.message || 'Ein Fehler ist aufgetreten.');
+            if (error.name === 'AbortError') {
+                showError('Analyse abgebrochen – Zeitlimit überschritten. Bitte erneut versuchen.');
+            } else {
+                console.error('Fehler:', error);
+                showError(error.message || 'Ein Fehler ist aufgetreten.');
+            }
         } finally {
+            clearTimeout(timeoutId);
+            currentController = null;
             submitBtn.disabled = getRemainingChecks() === 0;
             submitBtn.innerHTML = getRemainingChecks() === 0 
                 ? '<i class="fa-solid fa-lock"></i> Limit erreicht'
@@ -178,35 +248,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =================================================================
-    // HELPER: Status-Pill HTML
+    // FIX 5: Status-Pill & Sentiment-Dot → CSS-Klassen statt Inline
     // =================================================================
     function statusPill(test) {
-        if (!test) return '<span style="color:#555;">–</span>';
+        if (!test) return '<span class="status-pill status-none">–</span>';
         if (test.mentioned) {
-            return `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.15);color:#22c55e;padding:4px 12px;border-radius:20px;font-size:0.85rem;font-weight:500;">
-                <i class="fa-solid fa-check" style="font-size:0.7rem;"></i> Erwähnt
+            return `<span class="status-pill status-mentioned">
+                <i class="fa-solid fa-check"></i> Erwähnt
             </span>`;
         }
-        return `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,0.15);color:#ef4444;padding:4px 12px;border-radius:20px;font-size:0.85rem;font-weight:500;">
-            <i class="fa-solid fa-xmark" style="font-size:0.7rem;"></i> Nicht erwähnt
+        return `<span class="status-pill status-not-mentioned">
+            <i class="fa-solid fa-xmark"></i> Nicht erwähnt
         </span>`;
     }
 
     function sentimentDot(test) {
         if (!test) return '';
-        const colors = { positiv: '#22c55e', neutral: '#f59e0b', negativ: '#ef4444', fehler: '#666' };
-        const color = colors[test.sentiment] || '#666';
-        return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.8rem;color:${color};margin-top:4px;">
-            <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;"></span>
-            ${test.sentiment}
+        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+        return `<span class="sentiment-indicator sentiment-${safeSentiment}">
+            <span class="sentiment-dot"></span>
+            ${esc(safeSentiment)}
         </span>`;
     }
 
     // =================================================================
-    // RENDER RESULTS
-    // Hinweis: Die KI-Antworten (test.response) werden bereits im Backend
-    // durch escapeHTML() sanitized. Das Frontend rendert nur bereits
-    // bereinigte HTML-Fragmente (<strong>, <p>, <br>, <ul>, <li>).
+    // FIX 7: Timestamp sicher formatieren
+    // =================================================================
+    function formatTimestamp(ts) {
+        if (!ts) return 'Unbekannt';
+        const date = new Date(ts);
+        if (isNaN(date.getTime())) return 'Unbekannt';
+        return date.toLocaleString('de-AT');
+    }
+
+    // =================================================================
+    // RENDER RESULTS (alle dynamischen Werte escaped)
+    //
+    // Hinweis: test.response wird im Backend durch escapeHTML() sanitized
+    // und enthält erlaubte Tags (<strong>, <p>, <br>, <ul>, <li>).
+    // Alle ANDEREN Felder werden hier im Frontend via esc() escaped.
     // =================================================================
     function renderResults(data) {
         const { score, domainAnalysis, aiTests, competitors, recommendations } = data;
@@ -217,9 +297,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasChatGPT = chatgptTests.length > 0;
 
         // Score Ring
-        const scoreColor = score.color;
+        const scoreColor = esc(score.color);
         const circumference = 2 * Math.PI * 54;
-        const offset = circumference - (score.total / 100) * circumference;
+        const scoreTotal = Math.max(0, Math.min(100, parseInt(score.total) || 0));
+        const offset = circumference - (scoreTotal / 100) * circumference;
 
         let html = `
             <!-- Score Overview -->
@@ -231,14 +312,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             style="stroke: ${scoreColor}; stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};" />
                     </svg>
                     <div class="score-value">
-                        <span class="score-number">${score.total}</span>
+                        <span class="score-number">${scoreTotal}</span>
                         <span class="score-max">/100</span>
                     </div>
                 </div>
                 <div class="score-details">
-                    <h3 style="color: ${scoreColor}">${score.label}</h3>
-                    <p class="score-domain">${data.domain}</p>
-                    ${data.industry ? `<p class="score-industry"><i class="fa-solid fa-tag"></i> ${data.industry}</p>` : ''}
+                    <h3 style="color: ${scoreColor}">${esc(score.label)}</h3>
+                    <p class="score-domain">${esc(data.domain)}</p>
+                    ${data.industry ? `<p class="score-industry"><i class="fa-solid fa-tag"></i> ${esc(data.industry)}</p>` : ''}
                     ${hasChatGPT ? '<p class="score-engines"><i class="fa-solid fa-robot"></i> Geprüft mit Gemini + ChatGPT</p>' : ''}
                 </div>
             </div>
@@ -252,16 +333,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (item.category.includes('Gemini')) icon = '<span class="breakdown-engine engine-gemini">G</span>';
                         else if (item.category.includes('ChatGPT')) icon = '<span class="breakdown-engine engine-chatgpt">C</span>';
                         
+                        const points = parseInt(item.points) || 0;
+                        const maxPoints = parseInt(item.maxPoints) || 1;
+                        const fillWidth = Math.min(100, (points / maxPoints) * 100);
+                        
                         return `
                             <div class="breakdown-item">
                                 <div class="breakdown-header">
-                                    <span class="breakdown-label">${icon} ${item.category}</span>
-                                    <span class="breakdown-points">${item.points}/${item.maxPoints}</span>
+                                    <span class="breakdown-label">${icon} ${esc(item.category)}</span>
+                                    <span class="breakdown-points">${points}/${maxPoints}</span>
                                 </div>
                                 <div class="breakdown-bar">
-                                    <div class="breakdown-fill" style="width: ${(item.points / item.maxPoints) * 100}%"></div>
+                                    <div class="breakdown-fill" style="width: ${fillWidth}%"></div>
                                 </div>
-                                <p class="breakdown-detail">${item.detail}</p>
+                                <p class="breakdown-detail">${esc(item.detail)}</p>
                             </div>
                         `;
                     }).join('')}
@@ -271,6 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // =================================================================
         // KI-VERGLEICH (wenn ChatGPT vorhanden)
+        // FIX 5: Inline-Styles → CSS-Klassen
         // =================================================================
         if (hasChatGPT) {
             const geminiKnowledge = geminiTests.find(t => t.id === 'knowledge');
@@ -278,66 +364,59 @@ document.addEventListener('DOMContentLoaded', function() {
             const geminiReputation = geminiTests.find(t => t.id === 'reviews');
             const geminiExternal = geminiTests.find(t => t.id === 'mentions');
 
-            const thStyle = 'padding:12px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);font-weight:400;color:#999;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px;';
-            const thLeftStyle = 'padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);font-weight:400;color:#999;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px;';
-            const tdStyle = 'padding:14px 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);';
-            const tdLeftStyle = 'padding:14px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.05);color:#e0e0e0;font-weight:500;';
-            const geminiLogo = '<span style="display:inline-flex;align-items:center;gap:6px;"><span style="background:#4285f4;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">G</span> Gemini</span>';
-            const chatgptLogo = '<span style="display:inline-flex;align-items:center;gap:6px;"><span style="background:#10a37f;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">C</span> ChatGPT</span>';
-
             html += `
                 <div class="result-section">
                     <h3><i class="fa-solid fa-code-compare"></i> KI-Vergleich: Gemini vs. ChatGPT</h3>
                     <p class="section-intro">Kennen die großen KI-Systeme deine Domain?</p>
                     
-                    <div style="overflow-x:auto;margin-top:1rem;">
-                        <table style="width:100%;border-collapse:collapse;background:rgba(255,255,255,0.02);border-radius:10px;overflow:hidden;">
+                    <div class="comparison-table-wrapper">
+                        <table class="comparison-table">
                             <thead>
-                                <tr style="background:rgba(255,255,255,0.04);">
-                                    <th style="${thLeftStyle}">Test</th>
-                                    <th style="${thStyle}">${geminiLogo}</th>
-                                    <th style="${thStyle}">${chatgptLogo}</th>
+                                <tr>
+                                    <th class="comparison-th-left">Test</th>
+                                    <th class="comparison-th"><span class="engine-logo"><span class="engine-logo-badge engine-gemini">G</span> Gemini</span></th>
+                                    <th class="comparison-th"><span class="engine-logo"><span class="engine-logo-badge engine-chatgpt">C</span> ChatGPT</span></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td style="${tdLeftStyle}">
-                                        <i class="fa-solid fa-magnifying-glass" style="color:#c4a35a;margin-right:6px;width:16px;"></i>
+                                    <td class="comparison-td-left">
+                                        <i class="fa-solid fa-magnifying-glass comparison-icon"></i>
                                         Bekanntheit
                                     </td>
-                                    <td style="${tdStyle}">
+                                    <td class="comparison-td">
                                         ${statusPill(geminiKnowledge)}
                                         <br>${sentimentDot(geminiKnowledge)}
                                     </td>
-                                    <td style="${tdStyle}">
+                                    <td class="comparison-td">
                                         ${statusPill(chatgptKnowledge)}
                                         <br>${sentimentDot(chatgptKnowledge)}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="${tdLeftStyle}">
-                                        <i class="fa-solid fa-star" style="color:#c4a35a;margin-right:6px;width:16px;"></i>
+                                    <td class="comparison-td-left">
+                                        <i class="fa-solid fa-star comparison-icon"></i>
                                         Reputation
                                     </td>
-                                    <td style="${tdStyle}">
+                                    <td class="comparison-td">
                                         ${statusPill(geminiReputation)}
                                         <br>${sentimentDot(geminiReputation)}
                                     </td>
-                                    <td style="${tdStyle}">
-                                        <span style="color:#555;font-size:0.8rem;">nur Gemini</span>
+                                    <td class="comparison-td">
+                                        <span class="comparison-na">nur Gemini</span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="${tdLeftStyle}">
-                                        <i class="fa-solid fa-link" style="color:#c4a35a;margin-right:6px;width:16px;"></i>
+                                    <td class="comparison-td-left">
+                                        <i class="fa-solid fa-link comparison-icon"></i>
                                         Ext. Erwähnungen
                                     </td>
-                                    <td style="${tdStyle}">
+                                    <td class="comparison-td">
                                         ${statusPill(geminiExternal)}
                                         <br>${sentimentDot(geminiExternal)}
                                     </td>
-                                    <td style="${tdStyle}">
-                                        <span style="color:#555;font-size:0.8rem;">nur Gemini</span>
+                                    <td class="comparison-td">
+                                        <span class="comparison-na">nur Gemini</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -363,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         ${domainAnalysis.schema.types.length > 0 ? `
                             <div class="schema-types">
-                                ${domainAnalysis.schema.types.map(t => `<span class="schema-tag">${t}</span>`).join('')}
+                                ${domainAnalysis.schema.types.map(t => `<span class="schema-tag">${esc(t)}</span>`).join('')}
                             </div>
                         ` : ''}
                     </div>
@@ -398,14 +477,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="section-intro">Gemini durchsucht das Web live (Grounding) und prüft deine Sichtbarkeit:</p>
                 
                 <div class="tests-accordion">
-                    ${geminiTests.map((test, index) => `
+                    ${geminiTests.map((test, index) => {
+                        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+                        return `
                         <details class="test-item ${test.mentioned ? 'mentioned' : 'not-mentioned'}" ${index === 0 ? 'open' : ''}>
                             <summary>
                                 <span class="test-status">
                                     <i class="fa-solid ${test.mentioned ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                                 </span>
-                                <span class="test-name">${test.description}</span>
-                                <span class="test-sentiment sentiment-${test.sentiment}">${test.sentiment}</span>
+                                <span class="test-name">${esc(test.description)}</span>
+                                <span class="test-sentiment sentiment-${safeSentiment}">${esc(safeSentiment)}</span>
                                 <span class="test-toggle"><i class="fa-solid fa-chevron-down"></i></span>
                             </summary>
                             <div class="test-content">
@@ -413,53 +494,53 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${test.competitors.length > 0 ? `
                                     <div class="test-competitors">
                                         <strong>Erwähnte Alternativen:</strong>
-                                        ${test.competitors.map(c => `<span class="competitor-tag">${c}</span>`).join('')}
+                                        ${test.competitors.map(c => `<span class="competitor-tag">${esc(c)}</span>`).join('')}
                                     </div>
                                 ` : ''}
                             </div>
                         </details>
-                    `).join('')}
+                    `}).join('')}
                 </div>
             </div>
         `;
 
         // =================================================================
         // CHATGPT TESTS (wenn vorhanden)
+        // FIX 5: Inline-Styles → CSS-Klassen
         // =================================================================
         if (hasChatGPT) {
             const chatgptKnown = chatgptTests.find(t => t.id === 'chatgpt_knowledge')?.mentioned;
             
-            let chatgptInsight = '';
-            if (!chatgptKnown) {
-                chatgptInsight = `
-                    <div style="background:rgba(239,68,68,0.08);border-left:3px solid #ef4444;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:1rem;font-size:0.9rem;color:#ccc;">
-                        <strong style="color:#ef4444;">⚠ Nicht in ChatGPTs Wissensbasis</strong><br>
-                        ChatGPT kennt deine Domain nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur deine Konkurrenten. Mehr externe Erwähnungen und strukturierte Daten können helfen.
-                    </div>`;
-            } else {
-                chatgptInsight = `
-                    <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:1rem;font-size:0.9rem;color:#ccc;">
-                        <strong style="color:#22c55e;">✅ In ChatGPTs Wissensbasis</strong><br>
-                        ChatGPT kennt dein Unternehmen. Du bist auch für ChatGPT-Nutzer sichtbar.
-                    </div>`;
-            }
+            const chatgptInsightClass = chatgptKnown ? 'chatgpt-insight-positive' : 'chatgpt-insight-negative';
+            const chatgptInsightIcon = chatgptKnown ? '✅' : '⚠';
+            const chatgptInsightTitle = chatgptKnown 
+                ? 'In ChatGPTs Wissensbasis' 
+                : 'Nicht in ChatGPTs Wissensbasis';
+            const chatgptInsightText = chatgptKnown 
+                ? 'ChatGPT kennt dein Unternehmen. Du bist auch für ChatGPT-Nutzer sichtbar.'
+                : 'ChatGPT kennt deine Domain nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur deine Konkurrenten. Mehr externe Erwähnungen und strukturierte Daten können helfen.';
 
             html += `
                 <div class="result-section">
                     <h3><span class="engine-badge engine-chatgpt">ChatGPT</span> Wissens-Check</h3>
                     <p class="section-intro">ChatGPT antwortet aus seinem Trainings&shy;wissen – ohne Live-Suche:</p>
                     
-                    ${chatgptInsight}
+                    <div class="${chatgptInsightClass}">
+                        <strong>${chatgptInsightIcon} ${chatgptInsightTitle}</strong><br>
+                        ${chatgptInsightText}
+                    </div>
                     
                     <div class="tests-accordion">
-                        ${chatgptTests.map((test, index) => `
+                        ${chatgptTests.map((test, index) => {
+                            const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+                            return `
                             <details class="test-item ${test.mentioned ? 'mentioned' : 'not-mentioned'}" ${index === 0 ? 'open' : ''}>
                                 <summary>
                                     <span class="test-status">
                                         <i class="fa-solid ${test.mentioned ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                                     </span>
-                                    <span class="test-name">${test.description}</span>
-                                    <span class="test-sentiment sentiment-${test.sentiment}">${test.sentiment}</span>
+                                    <span class="test-name">${esc(test.description)}</span>
+                                    <span class="test-sentiment sentiment-${safeSentiment}">${esc(safeSentiment)}</span>
                                     <span class="test-toggle"><i class="fa-solid fa-chevron-down"></i></span>
                                 </summary>
                                 <div class="test-content">
@@ -467,19 +548,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${test.competitors.length > 0 ? `
                                         <div class="test-competitors">
                                             <strong>Erwähnte Alternativen:</strong>
-                                            ${test.competitors.map(c => `<span class="competitor-tag">${c}</span>`).join('')}
+                                            ${test.competitors.map(c => `<span class="competitor-tag">${esc(c)}</span>`).join('')}
                                         </div>
                                     ` : ''}
                                 </div>
                             </details>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                 </div>
             `;
         }
 
         // =================================================================
-        // KONKURRENTEN
+        // KONKURRENTEN (FIX 1: escaped, FIX 6: safeHref)
         // =================================================================
         if (competitors.length > 0) {
             html += `
@@ -488,8 +569,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p class="section-intro">Diese Domains werden statt deiner erwähnt:</p>
                     <div class="competitors-list">
                         ${competitors.map(c => `
-                            <a href="https://${c}" target="_blank" rel="noopener" class="competitor-link">
-                                <i class="fa-solid fa-external-link"></i> ${c}
+                            <a href="${safeHref('https://' + c)}" target="_blank" rel="noopener noreferrer" class="competitor-link">
+                                <i class="fa-solid fa-external-link"></i> ${esc(c)}
                             </a>
                         `).join('')}
                     </div>
@@ -498,32 +579,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // =================================================================
-        // EMPFEHLUNGEN
+        // EMPFEHLUNGEN (FIX 1: escaped, FIX 6: safeHref)
         // =================================================================
         if (recommendations.length > 0) {
             html += `
                 <div class="result-section">
                     <h3><i class="fa-solid fa-lightbulb"></i> Empfehlungen</h3>
                     <div class="recommendations-list">
-                        ${recommendations.map(rec => `
-                            <div class="recommendation-card priority-${rec.priority}">
-                                <div class="rec-priority">${rec.priority === 'hoch' ? 'Priorität: Hoch' : 'Priorität: Mittel'}</div>
-                                <h4>${rec.title}</h4>
-                                <p>${rec.description}</p>
-                                ${rec.link ? `<a href="${rec.link}" class="rec-link">Mehr erfahren <i class="fa-solid fa-arrow-right"></i></a>` : ''}
+                        ${recommendations.map(rec => {
+                            const safePriority = safeClass(rec.priority, ['hoch', 'mittel']);
+                            return `
+                            <div class="recommendation-card priority-${safePriority}">
+                                <div class="rec-priority">${safePriority === 'hoch' ? 'Priorität: Hoch' : 'Priorität: Mittel'}</div>
+                                <h4>${esc(rec.title)}</h4>
+                                <p>${esc(rec.description)}</p>
+                                ${rec.link ? `<a href="${safeHref(rec.link)}" class="rec-link">Mehr erfahren <i class="fa-solid fa-arrow-right"></i></a>` : ''}
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                 </div>
             `;
         }
 
         // =================================================================
-        // FOOTER
+        // FOOTER (FIX 7: sicherer Timestamp)
         // =================================================================
         html += `
             <div class="result-footer">
-                <p><i class="fa-solid fa-clock"></i> Analyse vom ${new Date(data.timestamp).toLocaleString('de-AT')}</p>
+                <p><i class="fa-solid fa-clock"></i> Analyse vom ${formatTimestamp(data.timestamp)}</p>
                 <p class="disclaimer">Hinweis: KI-Antworten variieren. Dieser Test ist eine Momentaufnahme.${hasChatGPT ? ' ChatGPT nutzt Trainingswissen, Gemini durchsucht das Web live.' : ''}</p>
             </div>
         `;
