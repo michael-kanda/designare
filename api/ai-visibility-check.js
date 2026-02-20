@@ -314,6 +314,17 @@ function formatResponseText(text) {
   // SCHRITT 1: Boring Intros entfernen (noch auf Rohtext)
   let formatted = removeBoringIntros(text);
   
+  // SCHRITT 1b: Gemini Grounding Citations entfernen
+  // Spezifische Patterns zuerst (bevor [cite diese teilweise matcht)
+  formatted = formatted.replace(/\[citation[^\]]*\]/gi, '');
+  formatted = formatted.replace(/\[source[^\]]*\]/gi, '');
+  // Vollständig: [cite: 2, 22, 23, 40] — Abgeschnitten: [cite: 2, 22  oder  [cite
+  formatted = formatted.replace(/\[cite(?::[\d,\s]*)?(?:\]|(?=\s)|$)/gi, '');
+  // Angeklebt: [citeExterne → entferne nur "[cite", behalte den Rest
+  formatted = formatted.replace(/\[cite(?=[A-Za-zÄÖÜäöü])/gi, '');
+  // Aufräumen: doppelte Leerzeichen die durch Entfernung entstehen
+  formatted = formatted.replace(/\s{2,}/g, ' ');
+  
   // SCHRITT 2: Markdown-Fett extrahieren BEVOR wir escapen
   // Wir merken uns die fetten Stellen mit einem Platzhalter
   const boldParts = [];
