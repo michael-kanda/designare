@@ -492,165 +492,167 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
 }
 
 // =================================================================
-// NEU: VERBESSERTE SENTIMENT-ANALYSE
+// SENTIMENT-ANALYSE (LLM-basiert mit Keyword-Fallback)
 // =================================================================
-function analyzeSentiment(text, testType, domainMentioned) {
+
+/**
+ * LLM-basierte Sentiment-Analyse via gpt-4o-mini.
+ * Erkennt Negationen, Ironie und Kontext korrekt.
+ * Fällt bei Fehler automatisch auf Keyword-Analyse zurück.
+ */
+async function analyzeSentiment(text, testType, domainMentioned) {
+  // Shortcut: Domain nicht erwähnt + kein relevanter Inhalt → immer negativ
+  if (!domainMentioned && ['knowledge', 'mentions'].includes(testType)) {
+    return 'negativ';
+  }
+
+  try {
+    // Kein API-Key → direkt Fallback
+    if (!process.env.OPENAI_API_KEY) {
+      return analyzeSentimentFallback(text, testType, domainMentioned);
+    }
+
+    // Nur relevanten Text senden (spart Tokens)
+    const cleanText = text
+      .replace(/<[^>]*>/g, '')      // HTML-Tags entfernen
+      .substring(0, 800)             // Max 800 Zeichen
+      .trim();
+
+    if (!cleanText || cleanText.length < 10) {
+      return 'neutral';
+    }
+
+    const testLabels = {
+      knowledge: 'Bekanntheit/Wissen über ein Unternehmen',
+      reviews: 'Online-Bewertungen und Reputation',
+      mentions: 'Externe Erwähnungen auf anderen Websites'
+    };
+
+    const prompt = `Du bist ein Sentiment-Analyzer. Bewerte den folgenden Text über ein Unternehmen.
+
+Kontext: ${testLabels[testType] || 'Allgemeine Information'}
+Domain erwähnt: ${domainMentioned ? 'Ja' : 'Nein'}
+
+Text:
+"""
+${cleanText}
+"""
+
+Regeln:
+- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen
+- "neutral" = Unternehmen wird erwähnt aber ohne klare Wertung, gemischte Signale, wenig Substanz
+- "negativ" = Unternehmen nicht gefunden, keine Informationen vorhanden, schlechte Bewertungen, negative Kritik
+
+WICHTIG: Achte auf Negationen! "nicht zufrieden", "keine guten Bewertungen", "früher gut aber jetzt schlecht" = negativ.
+
+Antworte mit EXAKT einem Wort: positiv, neutral oder negativ`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0,
+        max_tokens: 5
+      })
+    });
+
+    if (!response.ok) {
+      console.warn(`⚠️ Sentiment-LLM HTTP ${response.status}, Fallback auf Keywords`);
+      return analyzeSentimentFallback(text, testType, domainMentioned);
+    }
+
+    const data = await response.json();
+    const result = (data.choices?.[0]?.message?.content || '').trim().toLowerCase();
+
+    if (['positiv', 'neutral', 'negativ'].includes(result)) {
+      return result;
+    }
+
+    // LLM hat etwas anderes geantwortet → Fallback
+    console.warn(`⚠️ Sentiment-LLM unerwartete Antwort: "${result}", Fallback auf Keywords`);
+    return analyzeSentimentFallback(text, testType, domainMentioned);
+
+  } catch (error) {
+    console.warn(`⚠️ Sentiment-LLM Fehler: ${error.message}, Fallback auf Keywords`);
+    return analyzeSentimentFallback(text, testType, domainMentioned);
+  }
+}
+
+/**
+ * Keyword-basierter Fallback (wird nur bei LLM-Fehler verwendet).
+ * Behält die bisherige Logik als Sicherheitsnetz.
+ */
+function analyzeSentimentFallback(text, testType, domainMentioned) {
   const textLower = text.toLowerCase();
   
-  // ============================================================
-  // NEGATIVE INDIKATOREN (universell)
-  // ============================================================
   const notFoundIndicators = [
-    'keine informationen',
-    'nicht gefunden',
-    'keine ergebnisse',
-    'nicht bekannt',
-    'konnte ich keine',
-    'wurden keine',
-    'nichts gefunden',
-    'nicht zu finden',
-    'keine daten',
-    'nicht auffindbar'
+    'keine informationen', 'nicht gefunden', 'keine ergebnisse',
+    'nicht bekannt', 'konnte ich keine', 'wurden keine',
+    'nichts gefunden', 'nicht zu finden', 'keine daten', 'nicht auffindbar'
   ];
   
   const hasNotFound = notFoundIndicators.some(indicator => textLower.includes(indicator));
   
-  // ============================================================
-  // TEST-SPEZIFISCHE LOGIK
-  // ============================================================
-  
-  // --- TEST 1: BEKANNTHEIT ---
   if (testType === 'knowledge') {
-    if (!domainMentioned) {
-      return 'negativ';
-    }
+    if (!domainMentioned) return 'negativ';
     
     const hasSubstantialInfo = 
-      textLower.includes('bietet') ||
-      textLower.includes('anbieter') ||
-      textLower.includes('dienstleistung') ||
-      textLower.includes('produkt') ||
-      textLower.includes('unternehmen') ||
-      textLower.includes('firma') ||
-      textLower.includes('standort') ||
-      textLower.includes('spezialisiert') ||
-      textLower.includes('tätig') ||
-      textLower.includes('gegründet') ||
-      textLower.includes('seit') ||
-      textLower.includes('agentur') ||
+      textLower.includes('bietet') || textLower.includes('anbieter') ||
+      textLower.includes('dienstleistung') || textLower.includes('produkt') ||
+      textLower.includes('unternehmen') || textLower.includes('firma') ||
+      textLower.includes('standort') || textLower.includes('spezialisiert') ||
+      textLower.includes('tätig') || textLower.includes('gegründet') ||
+      textLower.includes('seit') || textLower.includes('agentur') ||
       textLower.includes('service');
     
-    // Domain erwähnt + substanzielle Informationen = positiv
-    if (hasSubstantialInfo) {
-      return 'positiv';
-    }
-    
-    // Domain erwähnt, aber nur "nicht gefunden" o.ä. = negativ
-    if (hasNotFound && !hasSubstantialInfo) {
-      return 'negativ';
-    }
-    
+    if (hasSubstantialInfo) return 'positiv';
+    if (hasNotFound && !hasSubstantialInfo) return 'negativ';
     return 'neutral';
   }
   
-  // --- TEST 2: REPUTATION / BEWERTUNGEN ---
   if (testType === 'reviews') {
     const noBewertungen = [
-      'keine bewertungen',
-      'keine rezensionen',
-      'keine online-bewertungen',
-      'wurden keine bewertungen',
-      'keine bewertungen gefunden',
-      'keine rezensionen gefunden'
+      'keine bewertungen', 'keine rezensionen', 'keine online-bewertungen',
+      'wurden keine bewertungen', 'keine bewertungen gefunden', 'keine rezensionen gefunden'
     ];
+    if (noBewertungen.some(phrase => textLower.includes(phrase))) return 'negativ';
     
-    if (noBewertungen.some(phrase => textLower.includes(phrase))) {
-      return 'negativ';
-    }
+    const hasLowRating = [
+      /\b[1-2][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[12]\s*von\s*5/i,
+      /bewertung[:\s]+1/i, /[12]\.0\s*(sterne|von)/i
+    ].some(p => p.test(text));
+    if (hasLowRating) return 'negativ';
     
-    const lowRatingPatterns = [
-      /\b[1-2][.,]\d?\s*(sterne|stars|von\s*5)/i,
-      /\b1\s*von\s*5/i,
-      /\b2\s*von\s*5/i,
-      /bewertung[:\s]+1/i,
-      /1\.0\s*(sterne|von)/i,
-      /2\.0\s*(sterne|von)/i
-    ];
+    const hasHighRating = [
+      /\b[4-5][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[45]\s*von\s*5/i,
+      /4\.[5-9]/, /5\.0/
+    ].some(p => p.test(text));
     
-    const hasLowRating = lowRatingPatterns.some(pattern => pattern.test(text));
+    const hasPositiveWords = ['zufrieden','empfehlen','positiv','sehr gut','hervorragend','ausgezeichnet']
+      .some(w => textLower.includes(w));
     
-    if (hasLowRating) {
-      return 'negativ';
-    }
-    
-    const highRatingPatterns = [
-      /\b[4-5][.,]\d?\s*(sterne|stars|von\s*5)/i,
-      /\b4\s*von\s*5/i,
-      /\b5\s*von\s*5/i,
-      /4\.5/,
-      /4\.[5-9]/,
-      /5\.0/
-    ];
-    
-    const hasHighRating = highRatingPatterns.some(pattern => pattern.test(text));
-    
-    const positiveReviewWords = [
-      'zufrieden',
-      'empfehlen',
-      'positiv',
-      'gut',
-      'sehr gut',
-      'hervorragend',
-      'ausgezeichnet',
-      'top',
-      'super'
-    ];
-    
-    const hasPositiveWords = positiveReviewWords.some(word => textLower.includes(word));
-    
-    const midRatingPatterns = [
-      /\b3[.,]\d?\s*(sterne|stars|von\s*5)/i,
-      /\b3\s*von\s*5/i
-    ];
-    
-    const hasMidRating = midRatingPatterns.some(pattern => pattern.test(text));
-    
-    if (hasHighRating || hasPositiveWords) {
-      return 'positiv';
-    } else if (hasMidRating) {
-      return 'neutral';
-    }
-    
-    if (/nur\s*(eine|1)\s*bewertung/i.test(text) || /1\s*bewertung/i.test(text)) {
-      if (hasLowRating) return 'negativ';
-      return 'neutral';
-    }
-    
+    if (hasHighRating || hasPositiveWords) return 'positiv';
+    if ([/\b3[.,]\d?\s*(sterne|stars|von\s*5)/i, /\b3\s*von\s*5/i].some(p => p.test(text))) return 'neutral';
     return 'neutral';
   }
   
-  // --- TEST 4: EXTERNE ERWÄHNUNGEN ---
   if (testType === 'mentions') {
-    if (hasNotFound || !domainMentioned) {
-      return 'negativ';
-    }
+    if (hasNotFound || !domainMentioned) return 'negativ';
     
-    const sourceIndicators = [
-      'herold', 'wko', 'gelbe seiten', 'facebook', 'instagram', 
-      'linkedin', 'twitter', 'xing', 'trustpilot', 'provenexpert',
-      'branchenverzeichnis', 'artikel', 'blog', 'presse', 'erwähnung'
-    ];
+    const sourceCount = [
+      'herold','wko','gelbe seiten','facebook','instagram','linkedin',
+      'twitter','xing','trustpilot','provenexpert','branchenverzeichnis',
+      'artikel','blog','presse','erwähnung'
+    ].filter(s => textLower.includes(s)).length;
     
-    const sourceCount = sourceIndicators.filter(source => textLower.includes(source)).length;
-    
-    if (sourceCount >= 4) {
-      return 'positiv';
-    }
-    
-    return 'neutral';
+    return sourceCount >= 4 ? 'positiv' : 'neutral';
   }
   
-  // Fallback
   return 'neutral';
 }
 
@@ -886,7 +888,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       
       const mentioned = isDomainMentioned(formattedKnowledge, cleanDomain);
       
-      const sentiment = analyzeSentiment(formattedKnowledge, 'knowledge', mentioned);
+      const sentiment = await analyzeSentiment(formattedKnowledge, 'knowledge', mentioned);
       
       testResults.push({
         id: 'knowledge',
@@ -950,7 +952,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung wie "Okay" oder "Ich we
       
       const mentioned = isDomainMentioned(text, cleanDomain);
       
-      const sentiment = analyzeSentiment(text, 'reviews', mentioned);
+      const sentiment = await analyzeSentiment(text, 'reviews', mentioned);
       
       testResults.push({
         id: 'reviews',
@@ -1012,7 +1014,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       
       const mentioned = isDomainMentioned(text, cleanDomain);
       
-      const sentiment = analyzeSentiment(text, 'mentions', mentioned);
+      const sentiment = await analyzeSentiment(text, 'mentions', mentioned);
       
       const domainBase = cleanDomain.replace(/\.[^.]+$/, '');
       const domainRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)/gi;
@@ -1082,7 +1084,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
           
           let mentioned = isDomainMentioned(text, cleanDomain);
           
-          const sentiment = analyzeSentiment(text, 'knowledge', mentioned);
+          const sentiment = await analyzeSentiment(text, 'knowledge', mentioned);
           
           // Konkurrenten extrahieren
           const domainBase = cleanDomain.replace(/\.[^.]+$/, '');
