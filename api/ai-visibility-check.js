@@ -568,8 +568,10 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
  * Fällt bei Fehler automatisch auf Keyword-Analyse zurück.
  */
 async function analyzeSentiment(text, testType, domainMentioned) {
-  // Shortcut: Domain nicht erwähnt + kein relevanter Inhalt → immer negativ
-  if (!domainMentioned && ['knowledge', 'mentions'].includes(testType)) {
+  // Shortcut: Bei Bekanntheit ist fehlende Erwähnung eindeutig negativ.
+  // Bei Mentions/Reviews NICHT shortcutten — Gemini listet oft externe Quellen
+  // auf, ohne die Domain nochmal wörtlich zu wiederholen.
+  if (!domainMentioned && testType === 'knowledge') {
     return 'negativ';
   }
 
@@ -606,11 +608,14 @@ ${cleanText}
 """
 
 Regeln:
-- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen
+- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen, oder es werden mehrere externe Quellen/Verzeichnisse aufgelistet
 - "neutral" = Unternehmen wird erwähnt aber ohne klare Wertung, gemischte Signale, wenig Substanz
-- "negativ" = Unternehmen nicht gefunden, keine Informationen vorhanden, schlechte Bewertungen, negative Kritik
+- "negativ" = Unternehmen nicht gefunden, KEINE Informationen vorhanden, schlechte Bewertungen, negative Kritik, oder Text sagt explizit dass nichts gefunden wurde
 
-WICHTIG: Achte auf Negationen! "nicht zufrieden", "keine guten Bewertungen", "früher gut aber jetzt schlecht" = negativ.
+WICHTIG: 
+- Achte auf Negationen! "nicht zufrieden", "keine guten Bewertungen" = negativ.
+- Wenn der Text externe Quellen auflistet (z.B. herold.at, YouTube, WKO), ist das POSITIV — auch wenn der Domainname nicht wörtlich wiederholt wird.
+- "negativ" NUR wenn wirklich nichts gefunden wurde oder explizit schlechte Bewertungen vorliegen.
 
 Antworte mit EXAKT einem Wort: positiv, neutral oder negativ`;
 
@@ -709,15 +714,19 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
   }
   
   if (testType === 'mentions') {
-    if (hasNotFound || !domainMentioned) return 'negativ';
+    if (hasNotFound) return 'negativ';
     
     const sourceCount = [
       'herold','wko','gelbe seiten','facebook','instagram','linkedin',
       'twitter','xing','trustpilot','provenexpert','branchenverzeichnis',
-      'artikel','blog','presse','erwähnung'
+      'artikel','blog','presse','erwähnung','youtube','firmenabc',
+      'meinanwalt','anwalt.de','kununu','xing','yelp'
     ].filter(s => textLower.includes(s)).length;
     
-    return sourceCount >= 4 ? 'positiv' : 'neutral';
+    if (sourceCount >= 4) return 'positiv';
+    if (sourceCount >= 1) return 'neutral';
+    if (!domainMentioned) return 'negativ';
+    return 'neutral';
   }
   
   return 'neutral';
