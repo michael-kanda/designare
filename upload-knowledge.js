@@ -1,13 +1,14 @@
 import fs from 'fs';
 import { Index } from "@upstash/vector";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import 'dotenv/config'; // Lädt deine .env Datei automatisch
+// Die dotenv-Zeile können wir hier sogar löschen, da wir sie umgehen
 
-// 1. Initialisiere die Clients
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// 1. Initialisiere die Clients mit FESTEN Werten (Achtung: Anführungszeichen nicht vergessen!)
+const genAI = new GoogleGenerativeAI("HIER_DEIN_GEMINI_KEY_EINTRAGEN");
+
 const vectorIndex = new Index({
-  url: process.env.UPSTASH_VECTOR_REST_URL,
-  token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+  url: "https://destined-robin-11976-eu1-vector.upstash.io", // Deine echte URL
+  token: "ABgFMGRlc3RpbmVkLXJvYmluLTExOTc2LWV1MWFkbWluWVRneU9HWTRPRFV0TnpOaFlpMDBOREF4TFRnMll6UXRPV1k0WTJRNU9XSTJNR0kw", // Dein echter Token
 });
 
 async function uploadKnowledge() {
@@ -21,7 +22,6 @@ async function uploadKnowledge() {
     }
 
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
-    // Falls deine JSON in einem "pages"-Objekt verpackt ist, ansonsten direkt das Array nutzen
     const pages = kbData.pages || kbData; 
 
     const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
@@ -29,30 +29,25 @@ async function uploadKnowledge() {
     // 3. Verarbeite jeden Eintrag
     for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
-        
-        // Den Text zusammenbauen, der vektorisiert werden soll
         const textToEmbed = `${page.title}\n${page.text || page.content}`;
         
         try {
             console.log(`⏳ Verarbeite [${i + 1}/${pages.length}]: ${page.title}`);
             
-            // A. Dense Vektor von Gemini holen (Semantik)
             const result = await embeddingModel.embedContent(textToEmbed);
             const denseVector = result.embedding.values;
 
-            // B. An Upstash Vector senden (Hybrid Upload)
             await vectorIndex.upsert({
-                id: `page_${i}`,          // Eindeutige ID
-                vector: denseVector,      // Dense Vektor für inhaltliche Suche
-                data: textToEmbed,        // Rohtext für Sparse Vektor (Keywords)
-                metadata: {               // Metadaten für die spätere Ausgabe an Evita
+                id: `page_${i}`,
+                vector: denseVector,
+                data: textToEmbed,
+                metadata: {
                     title: page.title,
                     url: page.url,
                     content: page.text || page.content
                 }
             });
 
-            // Kleines Delay, um API-Ratelimits bei Gemini zu vermeiden
             await new Promise(res => setTimeout(res, 500)); 
 
         } catch (error) {
