@@ -62,7 +62,6 @@ function isDomainMentioned(text, cleanDomain) {
   
   // Exakte Domain (stempel-lobenhofer.at)
   if (lower.includes(cleanDomain)) {
-    // Prüfe ob die Erwähnung eine NEGATION ist
     if (isNegationContext(lower)) return false;
     return true;
   }
@@ -81,11 +80,68 @@ function isDomainMentioned(text, cleanDomain) {
     return true;
   }
   
-  // Einzelteile prüfen: Wenn alle signifikanten Teile vorkommen
+  // =================================================================
+  // EINZELTEILE-PRÜFUNG (mit Schutz gegen False Positives)
+  // =================================================================
+  // Problem: "hotel-wien.at" → ["hotel", "wien"] matcht jeden Text über Hotels in Wien.
+  // Lösung: (1) generische Wörter ignorieren, (2) Proximity-Check
   const parts = domainBase.split(/[-.]/).filter(p => p.length >= 4);
-  if (parts.length >= 2 && parts.every(part => lower.includes(part))) {
-    if (isNegationContext(lower)) return false;
-    return true;
+  
+  if (parts.length >= 2) {
+    // Generische Wörter, die in KI-Antworten natürlich vorkommen
+    const genericWords = new Set([
+      // Branchen & Berufe
+      'auto', 'hotel', 'shop', 'design', 'digital', 'online', 'service',
+      'agentur', 'group', 'media', 'consulting', 'tech', 'studio', 'team',
+      'partner', 'expert', 'profi', 'center', 'haus', 'werk', 'plus',
+      'best', 'first', 'smart', 'easy', 'global', 'premium', 'prime',
+      'rechtsanwalt', 'steuerberater', 'immobilien', 'versicherung',
+      'marketing', 'software', 'development', 'solutions', 'systems',
+      'handwerk', 'elektro', 'transport', 'logistik', 'bauer', 'garten',
+      'restaurant', 'gastro', 'sport', 'fitness', 'beauty', 'dental',
+      // Orte (DACH)
+      'wien', 'graz', 'linz', 'salzburg', 'innsbruck', 'bregenz', 'klagenfurt',
+      'berlin', 'hamburg', 'münchen', 'muenchen', 'frankfurt', 'köln', 'koeln',
+      'stuttgart', 'düsseldorf', 'duesseldorf', 'dortmund', 'essen', 'leipzig',
+      'zürich', 'zuerich', 'bern', 'basel', 'genf',
+      'austria', 'österreich', 'oesterreich', 'deutschland', 'germany', 'schweiz',
+      // Generische Begriffe
+      'info', 'data', 'home', 'page', 'site', 'mail', 'news', 'blog',
+      'book', 'deal', 'sale', 'fair', 'pure', 'real', 'true', 'good',
+      'north', 'south', 'east', 'west', 'city', 'land', 'park'
+    ]);
+    
+    // Wie viele Teile sind NICHT generisch?
+    const uniqueParts = parts.filter(p => !genericWords.has(p));
+    
+    // Fall 1: Alle Teile generisch → kein Match über Einzelteile
+    // "hotel-wien" → beide generisch → zu unsicher
+    if (uniqueParts.length === 0) {
+      return false;
+    }
+    
+    // Fall 2: Mindestens ein Teil ist unique → Proximity-Check
+    // Die Teile müssen im Text nahe beieinander stehen (max 60 Zeichen Abstand)
+    if (parts.every(part => lower.includes(part))) {
+      const positions = parts.map(part => {
+        const idx = lower.indexOf(part);
+        return { part, start: idx, end: idx + part.length };
+      });
+      
+      // Sortiere nach Position im Text
+      positions.sort((a, b) => a.start - b.start);
+      
+      // Maximaler Abstand zwischen dem Ende des ersten und Anfang des letzten Teils
+      const first = positions[0];
+      const last = positions[positions.length - 1];
+      const distance = last.start - first.end;
+      
+      // Max 60 Zeichen Abstand (≈ ein kurzer Nebensatz)
+      if (distance <= 60) {
+        if (isNegationContext(lower)) return false;
+        return true;
+      }
+    }
   }
   
   return false;
