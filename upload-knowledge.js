@@ -7,8 +7,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI("HIER_DEIN_GEMINI_KEY_EINTRAGEN");
 
 const vectorIndex = new Index({
-  url: "https://tender-dolphin-52973-eu1-vector.upstash.io", // Deine echte URL
-  token: "ABgFMHRlbmRlci1kb2xwaGluLTUyOTczLWV1MWFkbWluWmpNd04yVTNOell0WVRjeU5pMDBPRFJrTFRrMk5EZ3RZVEEwWXpRek5qVmlNVGd6", // Dein echter Token
+  url: "HIER_KEY_EINTRAGEN", // Deine echte URL
+  token: "HIER_KEY_EINTRAGEN", // Dein echter Token
 });
 
 async function uploadKnowledge() {
