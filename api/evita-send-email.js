@@ -1,7 +1,7 @@
 // api/evita-send-email.js - E-Mail-Versand via Brevo (Sendinblue)
 // Evita kann E-Mails im Namen von Michael versenden
 // Authentifizierung: Interner Aufruf oder via Session-Validierung
-
+import { Redis } from "@upstash/redis";
 import Brevo from '@getbrevo/brevo';
 
 // ===================================================================
@@ -106,16 +106,28 @@ export default async function handler(req, res) {
     // ---------------------------------------------------------------
     // 3. RATE-LIMITING (pro Session)
     // ---------------------------------------------------------------
-    if (sessionId) {
-      const count = sessionEmailCounts.get(sessionId) || 0;
-      if (count >= MAX_EMAILS_PER_SESSION) {
-        return res.status(429).json({
-          error: 'E-Mail-Limit erreicht',
-          message: `Maximal ${MAX_EMAILS_PER_SESSION} E-Mails pro Session.`
-        });
-      }
-      sessionEmailCounts.set(sessionId, count + 1);
-    }
+    // ---------------------------------------------------------------
+// 3. RATE-LIMITING (pro Session via Redis)
+// ---------------------------------------------------------------
+if (sessionId) {
+  const rateLimitKey = `rate_limit:email:${sessionId}`;
+  
+  // Erhöhe den Zähler in Redis um 1
+  const count = await redis.incr(rateLimitKey);
+  
+  // Wenn es der erste Eintrag ist, setze ein Verfallsdatum (z.B. 1 Stunde / 3600 Sekunden)
+  // Das verhindert, dass die Redis-Datenbank auf Dauer vollläuft
+  if (count === 1) {
+    await redis.expire(rateLimitKey, 3600); 
+  }
+
+  if (count > MAX_EMAILS_PER_SESSION) {
+    return res.status(429).json({
+      error: 'E-Mail-Limit erreicht',
+      message: `Maximal ${MAX_EMAILS_PER_SESSION} E-Mails pro Session.`
+    });
+  }
+}
 
     // ---------------------------------------------------------------
     // 4. E-MAIL ZUSAMMENBAUEN
