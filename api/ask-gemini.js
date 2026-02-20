@@ -1,8 +1,9 @@
-// api/ask-gemini.js - FUNCTION CALLING VERSION
+// api/ask-gemini.js - FUNCTION CALLING VERSION (Mit Upstash Vector RAG)
 // Gemini Native Tool Use statt Tag-Parsing
 // Tools: open_booking, compose_email, remember_user_name, suggest_chips
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from "@google/generative-ai";
 import { Redis } from "@upstash/redis";
+import { Index } from "@upstash/vector"; // <-- NEU: Vector Client
 import Brevo from '@getbrevo/brevo';
 import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
 import fs from 'fs';
@@ -11,11 +12,19 @@ import path from 'path';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ===================================================================
-// REDIS
+// REDIS (Kurzzeitgedächtnis)
 // ===================================================================
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
+// ===================================================================
+// UPSTASH VECTOR (Langzeitgedächtnis / RAG) <-- NEU
+// ===================================================================
+const vectorIndex = new Index({
+  url: process.env.UPSTASH_VECTOR_REST_URL,
+  token: process.env.UPSTASH_VECTOR_REST_TOKEN,
 });
 
 // ===================================================================
@@ -297,57 +306,51 @@ export default async function handler(req, res) {
     }
 
     // ===================================================================
-    // RAG KONTEXT
+    // RAG KONTEXT (NEU: UPSTASH VECTOR SEARCH)
     // ===================================================================
     let additionalContext = "";
     let availableLinks = [];
-    const knowledgePath = path.join(process.cwd(), 'knowledge.json');
 
-    if (fs.existsSync(knowledgePath)) {
-      try {
-        const kbData = JSON.parse(fs.readFileSync(knowledgePath, 'utf8'));
-        const kb = kbData.pages || kbData;
-        const searchIndex = kbData.search_index || null;
-        const searchTerms = userMessage.toLowerCase().match(/[a-zäöüß]{3,}/g) || [];
-        let matchedPages = [];
+    try {
+      console.log("🔍 Suche in Vector-DB nach:", userMessage);
+      
+      // 1. Frage in Vektor umwandeln (auf 768 gekürzt für Free-Plan Kompatibilität)
+      const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+      const embedResult = await embeddingModel.embedContent(userMessage);
+      const queryVector = embedResult.embedding.values.slice(0, 768);
 
-        if (searchIndex && searchTerms.length > 0) {
-          const pageScores = {};
-          searchTerms.forEach(term => {
-            if (searchIndex[term]) searchIndex[term].forEach(idx => { pageScores[idx] = (pageScores[idx] || 0) + 2; });
-            Object.keys(searchIndex).forEach(indexTerm => {
-              if (indexTerm.includes(term) || term.includes(indexTerm))
-                searchIndex[indexTerm].forEach(idx => { pageScores[idx] = (pageScores[idx] || 0) + 1; });
-            });
-          });
-          matchedPages = Object.entries(pageScores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([idx]) => kb[parseInt(idx)]).filter(Boolean);
-        }
+      // 2. Ähnliche Dokumente aus Upstash Vector abrufen
+      const queryResult = await vectorIndex.query({
+          vector: queryVector,
+          topK: 3,
+          includeMetadata: true
+      });
 
-        if (matchedPages.length === 0) {
-          matchedPages = kb.filter(page => {
-            const t = `${page.title} ${page.text} ${(page.keywords || []).join(' ')}`.toLowerCase();
-            return searchTerms.some(term => t.includes(term));
-          }).slice(0, 3);
-        }
+      // 3. Nur gute Treffer filtern (>70% Ähnlichkeit)
+      const matchedPages = queryResult
+          .filter(match => match.score > 0.70)
+          .map(match => match.metadata);
 
-        if (matchedPages.length > 0) {
-          additionalContext = matchedPages.map(page => {
-            let ctx = `${page.title}`;
-            if (page.url) ctx += ` (${page.url})`;
-            if (page.sections?.length > 0) {
-              const rel = page.sections.filter(s => searchTerms.some(t => s.heading.toLowerCase().includes(t) || s.content.toLowerCase().includes(t))).slice(0, 2);
-              ctx += rel.length > 0 ? '\n' + rel.map(s => `[${s.heading}]: ${s.content.substring(0, 500)}`).join('\n') : `\n${page.text.substring(0, 800)}`;
-            } else ctx += `\n${page.text.substring(0, 800)}`;
-            return ctx;
-          }).join('\n\n');
+      if (matchedPages.length > 0) {
+        // Kontext für den System Prompt bauen
+        additionalContext = matchedPages.map(page => {
+          let ctx = `${page.title}`;
+          if (page.url) ctx += ` (${page.url})`;
+          // Content auf 800 Zeichen kürzen, um das Kontextfenster zu schonen
+          const contentToUse = page.content ? page.content.substring(0, 800) : '';
+          ctx += `\n${contentToUse}`;
+          return ctx;
+        }).join('\n\n');
 
-          const blacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
-          availableLinks = matchedPages
-            .filter(p => p.url && !blacklist.some(s => p.url.includes(s)))
-            .filter(p => !currentPage || !p.url.includes(currentPage.replace(/\/$/, '')))
-            .map(p => ({ url: p.url, title: p.title }));
-        }
-      } catch (error) { console.error('RAG Fehler:', error.message); }
+        // Links für die Chips-Vorschläge sammeln
+        const blacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
+        availableLinks = matchedPages
+          .filter(p => p.url && !blacklist.some(s => p.url.includes(s)))
+          .filter(p => !currentPage || !p.url.includes(currentPage.replace(/\/$/, '')))
+          .map(p => ({ url: p.url, title: p.title }));
+      }
+    } catch (error) { 
+      console.error('❌ RAG / Vector Fehler:', error.message); 
     }
 
     // Feste Links immer verfügbar (wenn nicht aktuelle Seite)
