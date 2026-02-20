@@ -31,7 +31,6 @@ const ALLOWED_RECIPIENT_DOMAINS = []; // z.B. ['gmail.com', 'gmx.at'] oder leer 
 
 // Max. E-Mails pro Session (Rate-Limiting)
 const MAX_EMAILS_PER_SESSION = 3;
-const sessionEmailCounts = new Map(); // In-Memory, resets bei Redeploy
 
 // ===================================================================
 // VALIDIERUNG
