@@ -458,10 +458,8 @@ TOOLS:
 2. compose_email → E-Mail-Service für den Nutzer. Vorher fehlende Infos erfragen (An wen? Betreff? Inhalt?). Versendet wird über Evita. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
 3. remember_user_name → Wenn Nutzer Vornamen nennt
 4. suggest_chips → IMMER aufrufen. Chips-Regeln:
-   - Link-Chips MÜSSEN thematisch zur aktuellen Frage passen
-   - KEINE zufälligen oder generischen Links
-   - Nur URLs aus VERFÜGBARE LINKS unten verwenden
-   - Lieber 1 passender Link als 2 unpassende
+   - Frage-Chip (type: 'question'): Muss eine absolut logische, natürliche Folgefrage sein, die der Nutzer als NÄCHSTES stellen würde (max 6 Wörter). Bezieht sich zwingend auf deine letzte Antwort. Erfinde keinen unsinnigen Kontext!
+   - Link-Chips (type: 'link'): MÜSSEN thematisch zur aktuellen Frage passen. KEINE zufälligen Links. Nur URLs aus VERFÜGBARE LINKS nutzen. Lieber nur 1 Link als unpassende aufzufüllen.
 
 SPEZIAL-SEITEN:
 - /ki-sichtbarkeit → KI-Sichtbarkeits-Check. Wenn jemand nach KI-Sichtbarkeit, KI-Check oder ähnlichem fragt: Verweise auf die Seite (als Chip). Du KANNST dort KEINEN Check durchführen. Der Check ist ein Tool AUF der Seite, nicht in diesem Chat. Frage NICHT nach einer Domain.
@@ -601,8 +599,8 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
       }
     }
 
-    // Chips unterdrücken wenn E-Mail-Entwurf aktiv (kontraproduktiv)
-    if (responsePayload.emailDraft) {
+// Chips unterdrücken, wenn E-Mail-Entwurf ODER Booking aktiv ist (verhindert Ablenkung)
+    if (responsePayload.emailDraft || responsePayload.openBooking) {
       delete responsePayload.chips;
     }
 
