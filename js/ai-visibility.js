@@ -232,6 +232,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.message || 'Analyse fehlgeschlagen');
             }
 
+            // NEU: Bei Cache-Hit Timer abbrechen und UI updaten
+            if (data.cached) {
+                progressTimers.forEach(t => clearTimeout(t));
+                if (statusEl) {
+                    statusEl.textContent = 'Ergebnis aus dem Cache geladen! ⚡';
+                    statusEl.style.opacity = '1';
+                }
+            }
+
             incrementUsage();
 
             // FIX 4: Backend-Counter synchronisieren
@@ -252,13 +261,20 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             clearTimeout(timeoutId);
             progressTimers.forEach(t => clearTimeout(t));
-            if (statusEl) { statusEl.textContent = ''; statusEl.style.opacity = '0'; }
+            if (statusEl && (!currentController || currentController.signal.aborted)) { 
+                statusEl.textContent = ''; 
+                statusEl.style.opacity = '0'; 
+            }
             currentController = null;
             submitBtn.disabled = getRemainingChecks() === 0;
             submitBtn.innerHTML = getRemainingChecks() === 0 
                 ? '<i class="fa-solid fa-lock"></i> Limit erreicht'
                 : '<i class="fa-solid fa-robot"></i> KI-Sichtbarkeit prüfen';
-            loadingOverlay.classList.remove('visible');
+            
+            // Kleine Verzögerung, damit man die Cache-Meldung kurz sieht
+            setTimeout(() => {
+                loadingOverlay.classList.remove('visible');
+            }, 800);
         }
     });
 
@@ -300,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sentimentDot(test) {
         if (!test) return '';
-        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehlend', 'fehler']);
         return `<span class="sentiment-indicator sentiment-${safeSentiment}">
             <span class="sentiment-dot"></span>
             ${esc(safeSentiment)}
@@ -339,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const offset = circumference - (scoreTotal / 100) * circumference;
 
         let html = `
-            <!-- Score Overview -->
             <div class="result-section score-section">
                 <div class="score-ring-container">
                     <svg class="score-ring" viewBox="0 0 120 120">
@@ -360,7 +375,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
 
-            <!-- Score Breakdown -->
             <div class="result-section">
                 <h3><i class="fa-solid fa-chart-pie"></i> Score-Zusammensetzung</h3>
                 <div class="breakdown-grid">
@@ -388,7 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // =================================================================
         // KI-VERGLEICH (wenn ChatGPT vorhanden)
-        // FIX 5: Inline-Styles → CSS-Klassen
         // =================================================================
         if (hasChatGPT) {
             const geminiKnowledge = geminiTests.find(t => t.id === 'knowledge');
@@ -510,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 <div class="tests-accordion">
                     ${geminiTests.map((test, index) => {
-                        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+                        const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehlend', 'fehler']);
                         return `
                         <details class="test-item ${test.mentioned ? 'mentioned' : 'not-mentioned'}" ${index === 0 ? 'open' : ''}>
                             <summary>
@@ -538,7 +551,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // =================================================================
         // CHATGPT TESTS (wenn vorhanden)
-        // FIX 5: Inline-Styles → CSS-Klassen
         // =================================================================
         if (hasChatGPT) {
             const chatgptKnown = chatgptTests.find(t => t.id === 'chatgpt_knowledge')?.mentioned;
@@ -564,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="tests-accordion">
                         ${chatgptTests.map((test, index) => {
-                            const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehler']);
+                            const safeSentiment = safeClass(test.sentiment, ['positiv', 'neutral', 'negativ', 'fehlend', 'fehler']);
                             return `
                             <details class="test-item ${test.mentioned ? 'mentioned' : 'not-mentioned'}" ${index === 0 ? 'open' : ''}>
                                 <summary>
@@ -592,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // =================================================================
-        // KONKURRENTEN (FIX 1: escaped, FIX 6: safeHref)
+        // KONKURRENTEN
         // =================================================================
         if (competitors.length > 0) {
             html += `
@@ -611,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // =================================================================
-        // EMPFEHLUNGEN (FIX 1: escaped, FIX 6: safeHref)
+        // EMPFEHLUNGEN
         // =================================================================
         if (recommendations.length > 0) {
             html += `
@@ -664,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         // =================================================================
-        // FOOTER (FIX 7: sicherer Timestamp)
+        // FOOTER 
         // =================================================================
         html += `
             <div class="result-footer">
