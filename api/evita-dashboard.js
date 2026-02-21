@@ -44,16 +44,33 @@ function getLastNDays(n) {
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   // Auth prüfen
   if (!isAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized. Token required.' });
   }
+
+  // ── POST: Blocklist-Eintrag entfernen ──
+  if (req.method === 'POST') {
+    const { action, email } = req.body || {};
+    
+    if (action === 'remove_blocklist' && email) {
+      try {
+        await redis.srem('evita:email:blocklist', email.toLowerCase().trim());
+        return res.status(200).json({ success: true, removed: email });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+    
+    return res.status(400).json({ error: 'Unknown action' });
+  }
+
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const range = parseInt(req.query?.range || '30'); // Default: 30 Tage
@@ -358,6 +375,14 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 10. E-MAIL BLOCKLIST
+    // ===============================================================
+    let emailBlocklist = [];
+    try {
+      emailBlocklist = await redis.smembers('evita:email:blocklist') || [];
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -401,6 +426,7 @@ export default async function handler(req, res) {
       recentFallbacks,
       recentEmails,
       visibilityEmails,
+      emailBlocklist,
       heatmap,
 
       visibility: {
