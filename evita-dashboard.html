@@ -467,6 +467,46 @@
       margin-left: 12px;
     }
 
+    /* BLOCKLIST */
+    .blocklist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(239, 68, 68, 0.06);
+      border-left: 3px solid var(--red);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 4px;
+    }
+
+    .blocklist-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .blocklist-remove {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--red);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .blocklist-remove:hover {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
     /* HEATMAP */
     .heatmap-grid {
       display: grid;
@@ -942,6 +982,19 @@
         </div>`;
       }
 
+      // ===== EMAIL BLOCKLIST =====
+      if (data.emailBlocklist && data.emailBlocklist.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">🚫 E-Mail Blocklist <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${data.emailBlocklist.length} blockiert)</span></div>
+          ${data.emailBlocklist.map(email => `
+            <div class="blocklist-item">
+              <span class="blocklist-email">${escHTML(email)}</span>
+              <button class="blocklist-remove" onclick="removeFromBlocklist('${escHTML(email)}')" title="Entsperren">✕</button>
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
       // ===== FALLBACKS =====
       html += `<div class="chart-card full-width">
         <div class="chart-title">⚠️ Letzte Fallbacks <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Wo Evita nicht weiter wusste)</span></div>
@@ -1368,6 +1421,25 @@
     // ============================================================
     // HELPERS
     // ============================================================
+    async function removeFromBlocklist(email) {
+      if (!confirm(`"${email}" wirklich entsperren?`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_blocklist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDashboard(); // Refresh
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
     function escHTML(str) {
       if (!str) return '';
       const d = document.createElement('div');
