@@ -99,7 +99,7 @@ body.page-loaded {
    NO-SCROLL MIT FALLBACK
    =================== */
 
-body.no-scroll { overflow-y: hidden !important; }
+/*body.no-scroll { overflow-y: hidden !important; }*/
 body.no-scroll.page-loaded { overflow-y: auto !important; }
 body.no-scroll.page-loaded:has(.modal-overlay.visible),
 body.no-scroll.page-loaded:has(#side-menu-panel.visible) {
