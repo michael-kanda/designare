@@ -1,4 +1,4 @@
-// js/main.js - KORRIGIERTE VERSION (CSS-gesteuerter Scroll-Lock)
+// js/main.js - KORRIGIERTE VERSION (Zentraler Scroll-Manager)
 
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
@@ -22,6 +22,23 @@ import { setupSearchModal } from './search.js';
 
 let globalAiFormInstance = null;
 
+// === DER NEUE ZENTRALE SCROLL MANAGER ===
+window.updateScrollState = () => {
+    const isMenuOpen = document.getElementById('side-menu-panel')?.classList.contains('visible');
+    const isModalOpen = document.querySelector('.modal-overlay.visible') !== null;
+    
+    const isHomePage = document.getElementById('hero-flip-wrapper') !== null;
+    const hash = window.location.hash;
+    const isHomeStartView = isHomePage && (hash === '' || hash === '#');
+
+    // Sperren WENN: Menü offen ODER Modal offen ODER wir sind auf der Startseite ganz vorne
+    if (isMenuOpen || isModalOpen || isHomeStartView) {
+        document.body.classList.add('no-scroll');
+    } else {
+        document.body.classList.remove('no-scroll');
+    }
+};
+
 const loadFeedback = async () => {
     const placeholder = document.getElementById('feedback-placeholder');
     if (!placeholder) return;
@@ -29,7 +46,7 @@ const loadFeedback = async () => {
         const response = await fetch('blog-feedback.html');
         if (response.ok) placeholder.innerHTML = await response.text();
     } catch (e) {
-        console.log("Info: Feedback-Sektion nicht geladen.");
+        console.log("Info: Feedback-Sektion nicht geladen (optional).");
     }
 };
 
@@ -75,12 +92,12 @@ const setupSideMenu = () => {
         menuButton.addEventListener('click', (e) => {
             e.preventDefault(); e.stopPropagation();
             sideMenu.classList.add('visible');
-            document.body.classList.add('no-scroll'); // Temporärer Lock fürs Menü
+            window.updateScrollState();
         });
 
         const closeMenu = () => {
             sideMenu.classList.remove('visible');
-            document.body.classList.remove('no-scroll'); // Lock aufheben. CSS kümmert sich um den Rest!
+            window.updateScrollState();
         };
 
         if (closeMenuButton) closeMenuButton.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeMenu(); });
@@ -91,7 +108,12 @@ const setupSideMenu = () => {
 
 const setupEvitaChatButton = () => {
     const evitaChatButton = document.getElementById('evita-chat-button');
-    if (evitaChatButton) evitaChatButton.addEventListener('click', async (e) => { e.preventDefault(); await launchEvitaChat(); });
+    if (evitaChatButton) {
+        evitaChatButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await launchEvitaChat();
+        });
+    }
 };
 
 window.launchEvitaChatFromAnywhere = async () => { await launchEvitaChat(); };
@@ -99,12 +121,13 @@ window.launchEvitaChatFromAnywhere = async () => { await launchEvitaChat(); };
 const launchEvitaChat = async () => {
     await ensureAiFormAvailable();
     await new Promise(resolve => setTimeout(resolve, 100));
+    
     const aiResponseModal = document.getElementById('ai-response-modal');
     if (!aiResponseModal) return;
     
     aiResponseModal.style.display = 'flex';
     aiResponseModal.classList.add('visible');
-    document.body.classList.add('no-scroll'); // Temporärer Lock fürs Modal
+    window.updateScrollState(); 
     
     setTimeout(() => {
         const chatHistory = document.getElementById('ai-chat-history');
@@ -132,10 +155,7 @@ const addWelcomeMessage = (message) => {
 // === 6. HERO FLIP LOGIK ===
 const initHeroFlip = () => {
     const heroFlipWrapper = document.getElementById('hero-flip-wrapper');
-    if (!heroFlipWrapper) return; // Wenn nicht vorhanden, sind wir nicht auf der Startseite
-
-    // Wir SIND auf der Startseite! Klasse für CSS setzen:
-    document.body.classList.add('is-home-page');
+    if (!heroFlipWrapper) return;
 
     const btnToBack = document.getElementById('flip-info-btn');
     const btnBackToStart = document.getElementById('flip-back-btn');
@@ -153,6 +173,8 @@ const initHeroFlip = () => {
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
             heroFlipWrapper.classList.add('flipped');
+            window.updateScrollState();
+            
             setTimeout(() => {
                 const target = document.getElementById('michael');
                 if (target) {
@@ -165,6 +187,8 @@ const initHeroFlip = () => {
             if (viewMain) viewMain.style.display = 'none';
             if (viewThird) viewThird.style.display = 'flex';
             heroFlipWrapper.classList.remove('flipped');
+            window.updateScrollState();
+            
             setTimeout(() => {
                 const target = document.getElementById('evita');
                 if (target) {
@@ -177,27 +201,54 @@ const initHeroFlip = () => {
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
             heroFlipWrapper.classList.remove('flipped');
+            window.updateScrollState();
+            
             window.scrollTo(0, 0);
+            setTimeout(() => window.scrollTo(0, 0), 100);
         }
     };
 
     checkHashAndFlip();
     window.addEventListener('hashchange', checkHashAndFlip);
 
-    if (btnToBack) btnToBack.addEventListener('click', (e) => { e.preventDefault(); heroFlipWrapper.classList.add('flipped'); });
-    if (btnBackToStart) btnBackToStart.addEventListener('click', (e) => { e.preventDefault(); history.pushState("", document.title, window.location.pathname + window.location.search); if(viewMain) viewMain.style.display = 'flex'; if(viewThird) viewThird.style.display = 'none'; heroFlipWrapper.classList.remove('flipped'); window.scrollTo({ top: 0, behavior: 'instant' }); });
-    if (btnToThird) btnToThird.addEventListener('click', (e) => { e.preventDefault(); if (viewMain) viewMain.style.display = 'none'; if (viewThird) viewThird.style.display = 'flex'; heroFlipWrapper.classList.remove('flipped'); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { const target = document.getElementById('evita'); if (target) { const offsetPosition = target.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('.main-header')?.offsetHeight || 80) - 40; window.scrollTo({ top: offsetPosition, behavior: 'smooth' }); } }, 850); });
-    if (btnThirdToBack) btnThirdToBack.addEventListener('click', (e) => { e.preventDefault(); if(viewMain) viewMain.style.display = 'flex'; if(viewThird) viewThird.style.display = 'none'; heroFlipWrapper.classList.add('flipped'); window.location.hash = '#michael'; setTimeout(() => { const target = document.getElementById('michael'); if (target) { const offsetPosition = target.getBoundingClientRect().top + window.pageYOffset - (document.querySelector('.main-header')?.offsetHeight || 80) - 40; window.scrollTo({ top: offsetPosition, behavior: 'smooth' }); } }, 300); });
-    if (btnThirdToStart) btnThirdToStart.addEventListener('click', async (e) => { e.preventDefault(); if (btnThirdToStart.dataset.action === 'open-evita-chat') { await launchEvitaChat(); } else { if(viewMain) viewMain.style.display = 'flex'; if(viewThird) viewThird.style.display = 'none'; heroFlipWrapper.classList.remove('flipped'); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+    // Buttons nutzen jetzt einfach die Standard-Hash-Logik des Browsers
+    if (btnToBack) btnToBack.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = 'michael'; });
+    
+    if (btnBackToStart) btnBackToStart.addEventListener('click', (e) => { 
+        e.preventDefault(); 
+        history.pushState("", document.title, window.location.pathname + window.location.search); 
+        checkHashAndFlip(); 
+    });
+    
+    if (btnToThird) btnToThird.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = 'evita'; });
+    if (btnThirdToBack) btnThirdToBack.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = 'michael'; });
+    
+    if (btnThirdToStart) btnThirdToStart.addEventListener('click', async (e) => { 
+        e.preventDefault(); 
+        if (btnThirdToStart.dataset.action === 'open-evita-chat') { 
+            await launchEvitaChat(); 
+        } else { 
+            history.pushState("", document.title, window.location.pathname + window.location.search); 
+            checkHashAndFlip(); 
+        } 
+    });
 };
 
-// === 7. INITIALISIERUNG ===
 const initializeDynamicScripts = () => {
-    initModals(); initHeaderScrollEffect(); setupSideMenu(); setupEvitaChatButton(); initHeroFlip(); initTheme(); initMenuInteractions();
+    initModals();
+    initHeaderScrollEffect(); 
+    setupSideMenu();
+    setupEvitaChatButton();
+    initHeroFlip();
+    initTheme(); 
+    initMenuInteractions();
     if (typeof setupSearchModal === 'function') setupSearchModal();
 };
 
-const initializeStaticScripts = () => { initEffects(); initTypewriters(); };
+const initializeStaticScripts = () => {
+    initEffects();
+    initTypewriters();
+};
 
 const initializeForms = async () => {
     try { await initAiForm(); globalAiFormInstance = true; } catch (e) { console.warn(e); }
@@ -205,8 +256,15 @@ const initializeForms = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    if (!window.location.hash) { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
-    if (localStorage.getItem('theme') === 'dark' || !localStorage.getItem('theme')) document.body.classList.add('dark-mode');
+    if (!window.location.hash) {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }
+    
+    if (localStorage.getItem('theme') === 'dark' || !localStorage.getItem('theme')) {
+        document.body.classList.add('dark-mode');
+    }
 
     initializeStaticScripts();
     await loadFeedback();
@@ -215,18 +273,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
             initializeDynamicScripts();
             initializeForms();
-            // Wir entfernen hier GANZ BEWUSST KEIN .no-scroll ! 
-            // Modals haben es eh nicht am Start, und die Startseite sperrt sich übers CSS selbst!
-            requestAnimationFrame(() => { document.body.classList.add('page-loaded'); });
+            
+            // HIER ENTSPERRT DER ZENTRALE MANAGER (falls wir z.B. auf einer Unterseite sind!)
+            window.updateScrollState();
+            
+            requestAnimationFrame(() => {
+                document.body.classList.add('page-loaded');
+            });
         }, 50);
     });
 });
 
 setTimeout(() => {
-    if (!document.body.classList.contains('page-loaded')) document.body.classList.add('page-loaded');
+    if (!document.body.classList.contains('page-loaded')) {
+        document.body.classList.add('page-loaded');
+        window.updateScrollState(); // Fallback-Prüfung
+    }
 }, 5000);
 
 const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } });
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+        }
+    });
 }, { threshold: 0.1 });
+
 document.querySelectorAll('.performance-tip').forEach(el => observer.observe(el));
