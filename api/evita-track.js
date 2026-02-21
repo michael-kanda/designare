@@ -176,6 +176,40 @@ export async function trackVisibilityCheckStats({ domain, score, scoreLabel, men
 }
 
 // ===================================================================
+// VISIBILITY-REPORT E-MAIL TRACKEN
+// ===================================================================
+export async function trackVisibilityEmail({ domain, email, score, scoreLabel, industry }) {
+  const day = todayKey();
+
+  try {
+    const pipeline = redis.pipeline();
+
+    // Täglicher Zähler
+    pipeline.hincrby(`evita:stats:daily:${day}`, 'visibility_emails', 1);
+
+    // Detail-Log (letzte 200 Report-Mails)
+    const entry = JSON.stringify({
+      domain,
+      email: email.replace(/(.{2}).*(@.*)/, '$1***$2'), // Anonymisiert
+      score,
+      scoreLabel,
+      industry: industry || null,
+      timestamp: new Date().toISOString()
+    });
+
+    pipeline.lpush('evita:stats:visibility_emails', entry);
+    pipeline.ltrim('evita:stats:visibility_emails', 0, 199);
+
+    // TTL
+    pipeline.expire(`evita:stats:daily:${day}`, 60 * 60 * 24 * 90);
+
+    await pipeline.exec();
+  } catch (error) {
+    console.error('📊 Tracking-Fehler (Visibility-Email):', error.message);
+  }
+}
+
+// ===================================================================
 // E-MAIL-VERSAND TRACKEN
 // ===================================================================
 export async function trackEmailSent({ sessionId, to, subject, success }) {
