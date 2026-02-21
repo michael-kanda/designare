@@ -96,9 +96,16 @@ const setupSideMenu = () => {
 
         const closeMenu = () => {
             sideMenu.classList.remove('visible');
-            const heroFlipped = document.querySelector('.hero-flip-wrapper.flipped'); 
-            if (!heroFlipped) {
+            
+            // FIX: Prüfen ob wir auf der Landingpage "vorne" sind. Wenn ja, bleibt Scrollen gesperrt!
+            const heroFlipped = document.getElementById('hero-flip-wrapper');
+            const isFlipped = heroFlipped && heroFlipped.classList.contains('flipped');
+            const hasHash = window.location.hash !== '';
+            
+            if (isFlipped || hasHash) {
                 document.body.classList.remove('no-scroll');
+            } else {
+                document.body.classList.add('no-scroll');
             }
         };
 
@@ -146,7 +153,6 @@ const launchEvitaChat = async () => {
     
     await ensureAiFormAvailable();
     
-    // Warte bis DOM-Elemente sicher verfügbar sind
     await new Promise(resolve => setTimeout(resolve, 100));
     
     const aiResponseModal = document.getElementById('ai-response-modal');
@@ -156,12 +162,10 @@ const launchEvitaChat = async () => {
         return;
     }
     
-    // Modal öffnen
     aiResponseModal.style.display = 'flex';
     aiResponseModal.classList.add('visible');
     document.body.classList.add('no-scroll');
     
-    // Warte kurz, dann Begrüßung hinzufügen - NUR wenn Chat leer ist
     setTimeout(() => {
         const chatHistory = document.getElementById('ai-chat-history');
         if (chatHistory && chatHistory.children.length === 0) {
@@ -169,7 +173,6 @@ const launchEvitaChat = async () => {
             console.log("✅ Begrüßung von launchEvitaChat hinzugefügt");
         }
         
-        // Focus auf Input
         setTimeout(() => {
             const chatInput = document.getElementById('ai-chat-input');
             if (chatInput) chatInput.focus();
@@ -219,12 +222,10 @@ const initHeroFlip = () => {
     const viewMain = document.getElementById('view-main');
     const viewThird = document.getElementById('view-third');
 
-    // Hash-Check Funktion mit Scroll-Freigabe
     const checkHashAndFlip = () => {
         const hash = window.location.hash;
         
         if (hash === '#michael') {
-            // Michael anzeigen (Back-Face)
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
             heroFlipWrapper.classList.add('flipped');
@@ -246,7 +247,6 @@ const initHeroFlip = () => {
             }, 300);
         } 
         else if (hash === '#evita') {
-            // Evita anzeigen (Front-Face, view-third)
             if (viewMain) viewMain.style.display = 'none';
             if (viewThird) viewThird.style.display = 'flex';
             heroFlipWrapper.classList.remove('flipped');
@@ -268,36 +268,20 @@ const initHeroFlip = () => {
             }, 300);
         }
         else {
-            // Startseite (kein Hash) - view-main anzeigen
+            // Startseite (kein Hash) - MUSS gesperrt sein!
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
             heroFlipWrapper.classList.remove('flipped');
+            document.body.classList.add('no-scroll'); // HIER SPERREN!
             
             window.scrollTo(0, 0);
-            
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 10);
-            
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 100);
-            
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 300);
+            setTimeout(() => window.scrollTo(0, 0), 100);
         }
     };
 
-    // Check beim Initialisieren
     checkHashAndFlip();
-
-    // Reagiere auf Hash-Änderungen
     window.addEventListener('hashchange', checkHashAndFlip);
 
-    // === EVENT LISTENERS ===
-
-    // Button: "Neugierig geworden?" → Flip zu Michael (Back-Face)
     if (btnToBack) {
         btnToBack.addEventListener('click', (e) => {
             e.preventDefault();
@@ -306,20 +290,15 @@ const initHeroFlip = () => {
         });
     }
 
-    // Button "Home" → Zurück zur Startseite (Front-Face, view-main)
     if (btnBackToStart) {
         btnBackToStart.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Hash aus URL entfernen
             history.pushState("", document.title, window.location.pathname + window.location.search);
             
-            // Views setzen
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
-            
-            // Karte zurückdrehen
             heroFlipWrapper.classList.remove('flipped');
+            document.body.classList.add('no-scroll'); // HIER SPERREN!
             
             setTimeout(() => {
                 if(viewMain) {
@@ -329,52 +308,35 @@ const initHeroFlip = () => {
         });
     }
     
-    // Button "Evita" → Flip zurück zur Front-Face und Evita-View anzeigen
     if (btnToThird) {
         btnToThird.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Views VOR dem Flip setzen
             if (viewMain) viewMain.style.display = 'none';
             if (viewThird) viewThird.style.display = 'flex';
-            
-            // Karte zurückdrehen (zur Front-Face)
             heroFlipWrapper.classList.remove('flipped');
+            document.body.classList.remove('no-scroll');
             
-            // Nach oben scrollen
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Nach Flip-Animation zum Evita-Header scrollen
             setTimeout(() => {
                 const target = document.getElementById('evita');
                 if (target) {
                     const headerOffset = document.querySelector('.main-header')?.offsetHeight || 80;
                     const elementPosition = target.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 40;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                 }
             }, 850);
         });
     }
 
-    // Button: Evita → Michael (von Evita-View zur Back-Face)
     if (btnThirdToBack) {
         btnThirdToBack.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Views setzen für nach dem Flip
             if(viewMain) viewMain.style.display = 'flex';
             if(viewThird) viewThird.style.display = 'none';
-            
-            // Flippen zur Back-Face
             heroFlipWrapper.classList.add('flipped');
-            
-            // Hash setzen
             window.location.hash = '#michael';
+            document.body.classList.remove('no-scroll');
             
             setTimeout(() => {
                 const target = document.getElementById('michael');
@@ -382,17 +344,12 @@ const initHeroFlip = () => {
                     const headerOffset = document.querySelector('.main-header')?.offsetHeight || 80;
                     const elementPosition = target.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 40;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                 }
             }, 300);
         });
     }
 
-    // Button: "Her mit deinen Fragen" → Chat öffnen ODER zurück zur Startseite
     if (btnThirdToStart) {
         btnThirdToStart.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -402,6 +359,7 @@ const initHeroFlip = () => {
                 if(viewMain) viewMain.style.display = 'flex';
                 if(viewThird) viewThird.style.display = 'none';
                 heroFlipWrapper.classList.remove('flipped');
+                document.body.classList.add('no-scroll'); // HIER SPERREN!
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
@@ -419,6 +377,11 @@ const initializeDynamicScripts = () => {
     initHeroFlip();
     initTheme(); 
     initMenuInteractions();
+    
+    // Check ob die Funktion existiert, bevor sie aufgerufen wird
+    if (typeof setupSearchModal === 'function') {
+        setupSearchModal();
+    }
     console.log("✅ Dynamische Scripte initialisiert");
 };
 
@@ -441,14 +404,20 @@ const initializeForms = async () => {
     }
 };
 
-// === UNLOCK SCROLL FALLBACK ===
+// === UNLOCK SCROLL FALLBACK (Muss ignoriert werden, wenn auf Home) ===
 const unlockScrollFallback = () => {
     if (document.body.classList.contains('no-scroll')) {
         const modal = document.querySelector('.modal-overlay.visible');
         const sideMenu = document.getElementById('side-menu-panel');
         const sideMenuVisible = sideMenu?.classList.contains('visible');
         
-        if (!modal && !sideMenuVisible) {
+        // FIX: Auch prüfen, ob wir auf der Landingpage ganz am Anfang sind
+        const heroFlipped = document.getElementById('hero-flip-wrapper');
+        const isFlipped = heroFlipped && heroFlipped.classList.contains('flipped');
+        const isEvitaView = window.location.hash === '#evita';
+        
+        // Nur entsperren, wenn KEIN Modal, KEIN Menü offen ist UND wir NICHT mehr auf der Front-Page sind
+        if (!modal && !sideMenuVisible && (isFlipped || isEvitaView)) {
             document.body.classList.remove('no-scroll');
             console.log("🔓 no-scroll Klasse entfernt (Fallback)");
         }
@@ -459,54 +428,46 @@ const unlockScrollFallback = () => {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("🚀 DOMContentLoaded - Starte Initialisierung...");
     
-    // SOFORT nach oben scrollen (verhindert Browser Scroll-Restore)
     if (!window.location.hash) {
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
     }
     
-    // Theme vorab setzen
     if (localStorage.getItem('theme') === 'dark' || !localStorage.getItem('theme')) {
         document.body.classList.add('dark-mode');
     }
 
-    // Statische Scripts initialisieren (Partikel, Typewriter)
     initializeStaticScripts();
-
-    // Optional: Feedback laden (falls Placeholder existiert)
     await loadFeedback();
 
-    // Scripte initialisieren (Header, Footer, Modals, Side-Menu sind bereits im HTML via Build-Script)
     requestAnimationFrame(() => {
-    setTimeout(() => {
-        initializeDynamicScripts();
-        initializeForms();
-        
-        document.body.classList.remove('no-scroll');
-        
-        requestAnimationFrame(() => {
-            document.body.classList.add('page-loaded');
-        });
-        
-        console.log("✅ Seite vollständig initialisiert");
-    }, 50);
-});
+        setTimeout(() => {
+            initializeDynamicScripts();
+            initializeForms();
+            
+            // FIX: Hier haben wir vorher pauschal "no-scroll" entfernt! Das darf nicht sein.
+            // Die Logik dafür übernimmt jetzt "checkHashAndFlip" in der initHeroFlip() Funktion.
+            
+            requestAnimationFrame(() => {
+                document.body.classList.add('page-loaded');
+            });
+            
+            console.log("✅ Seite vollständig initialisiert");
+        }, 50);
+    });
     
-    // Zusätzlicher Fallback-Timer
     setTimeout(unlockScrollFallback, 2000);
 });
 
-// Globaler Fallback: Falls nach 5 Sekunden noch nicht geladen
 setTimeout(() => {
     if (!document.body.classList.contains('page-loaded')) {
         console.warn("⚠️ Fallback: Seite nach 5s nicht geladen, erzwinge Anzeige");
-        document.body.classList.remove('no-scroll');
+        // FIX: Auch hier nicht pauschal entsperren, wenn auf Landingpage!
         document.body.classList.add('page-loaded');
     }
 }, 5000);
 
-// Intersection Observer für Performance-Tipps
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
