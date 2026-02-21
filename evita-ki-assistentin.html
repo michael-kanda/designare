@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>Meet Evita: Meine KI-Assistentin mit Gedächtnis & RAG | Michael Kanda</title>
+    <meta name="description" content="Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Gemini, Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preload" href="font/poppins-regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-semibold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+    
+    <link rel="canonical" href="https://designare.at/evita-ki-assistentin"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": "https://designare.at/evita-ki-assistentin#article",
+      "headline": "Meet Evita: Meine KI-Assistentin mit Gedächtnis & RAG",
+      "description": "Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.",
+      "image": "https://designare.at/images/evita-chat.webp",
+      "datePublished": "2026-02-21",
+      "dateModified": "2026-02-21",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Kanda",
+        "url": "https://designare.at/#michael"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Michael Kanda",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://designare.at/images/favicon.webp"
+        }
+      },
+      "articleSection": "Künstliche Intelligenz & Webentwicklung",
+      "keywords": [
+        "KI Assistent",
+        "RAG",
+        "Upstash Vector",
+        "Redis",
+        "Gemini API",
+        "Function Calling"
+      ],
+      "hasPart": {
+        "@id": "https://designare.at/evita-ki-assistentin#faq-heading"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://designare.at/evita-ki-assistentin#faq-heading",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist RAG (Retrieval-Augmented Generation)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "RAG ist eine Technik, bei der eine KI vor dem Antworten in einer Datenbank nachliest. So erfindet sie keine Fakten, sondern nutzt exakt die Informationen der Website."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie merkt sich die KI meinen Namen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Durch eine Kombination aus Function Calling und einer schnellen Redis-Datenbank. Die KI extrahiert den Namen aus dem Chat und speichert ihn für zukünftige Besuche."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js"></script>
+</head>
+
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                 <div id="breadcrumb-placeholder"></div>
+                <h1>Meet Evita: <span class="article-white">Meine KI-Assistentin mit Gedächtnis & RAG</span></h1>
+      
+                <div class="article-meta">
+                    <time datetime="2026-02-21">21. Februar 2026</time>
+                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <section class="article-summary" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+                
+                <div class="summary-box">
+                    <div class="summary-content">
+                        <h3>Das Wichtigste in Kürze:</h3>
+                        <ul>
+                            <li><strong>Mehr als ein Chatbot:</strong> Evita ist eine Agentur-Kollegin, benannt nach meiner Tierschutzhündin. Sie führt Smalltalk, macht Termine aus und schreibt Mails.</li>
+                            <li><strong>RAG (Retrieval-Augmented Generation):</strong> Durch eine Vektordatenbank kennt Evita die gesamte Website auswendig und halluziniert nicht.</li>
+                            <li><strong>Function Calling:</strong> Evita ist nicht nur passiv. Sie nutzt aktiv Tools (Kalender öffnen, dynamische Chips vorschlagen).</li>
+                            <li><strong>Langzeitgedächtnis:</strong> Über Redis merkt sie sich Namen ("Servus Alfred!") und Lieblingsthemen von wiederkehrenden Besuchern.</li>
+                        </ul>
+                    </div>
+
+                    <div class="summary-image">
+                        <figure>
+                            <img src="images/evita-chat.webp" 
+                                 alt="Chatverlauf mit Evita, in dem sie den Nutzer beim Namen nennt" 
+                                 title="Evita KI-Assistentin im Einsatz"
+                                 loading="lazy" 
+                                 width="300" 
+                                 height="300">
+                            <figcaption class="visually-hidden">Evita KI-Assistentin Interface</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>Standard-Chatbots sind oft frustrierend. Sie geben generische Antworten, vergessen nach zwei Sätzen, worum es ging, und leiten einen am Ende doch nur auf eine Kontaktseite weiter. Als Webentwickler wollte ich das auf meiner eigenen Seite besser machen.</p>
+
+                <p>Darf ich vorstellen? <strong>Evita</strong>. Benannt nach meiner Tierschutzhündin, agiert sie als meine digitale Assistentin. Sie ist keine sterile "Wie-kann-ich-Ihnen-helfen"-Maschine, sondern hat Charakter: Sie ist charmant, schlagfertig und duzt den Nutzer konsequent – verzichtet dabei aber streng auf Emojis. In diesem Artikel zeige ich dir – sowohl aus Sicht des Nutzers als auch des Entwicklers –, was passiert, wenn man Google Gemini mit Vektordatenbanken und aktivem Werkzeuggebrauch verknüpft.</p>
+            </section>
+
+            <section aria-labelledby="mechanics-heading">
+                <h2 id="mechanics-heading">Was Evita kann: <span class="article-white">Die Features im Überblick</span></h2>
+                
+                <div class="info-box">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                    <div>
+                        <strong>User Experience:</strong>
+                        <p>Für den Nutzer fühlt sich Evita an wie ein echter Mensch am anderen Ende der Leitung. Sie fragt beiläufig nach dem Namen, passt ihre Begrüßung an die Tageszeit an und merkt sich, was man beim letzten Besuch besprochen hat.</p>
+                    </div>
+                </div>
+
+                <p>Evitas Fähigkeiten gehen weit über einfaches Frage-Antwort-Ping-Pong hinaus:</p>
+
+                <dl class="feature-list">
+                    <dt>🧠 Sitzungs- & Namensgedächtnis</dt>
+                    <dd>Wenn du Evita deinen Namen verrätst ("Ich bin Alfred"), merkt sie sich diesen. Kommst du Wochen später wieder auf die Webseite, begrüßt sie dich mit "Servus Alfred! Schön, dass du wieder vorbeischaust."</dd>
+                    
+                    <dt>📅 Aktive Terminbuchung</dt>
+                    <dd>Fragst du nach einem Termin, schickt sie dir keinen Link, sondern öffnet direkt mein Buchungs-Widget in der Oberfläche.</dd>
+                    
+                    <dt>📧 E-Mail-Service</dt>
+                    <dd>Du bist zu faul, das Kontaktformular auszufüllen? Sag Evita einfach: "Schreib Michael, dass ich Hilfe bei SEO brauche". Sie verfasst einen perfekten Entwurf und sendet ihn nach deiner Freigabe direkt über die API ab.</dd>
+                    
+                    <dt>🎯 Dynamische "Chips"</dt>
+                    <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema passen.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="importance-heading">
+                <h2 id="importance-heading">Unter der Haube: <span class="article-white">Der Tech-Stack</span></h2>
+                
+                <div class="tech-box">
+                    <i class="fa-solid fa-server"></i>
+                    <div>
+                        <strong>Architektur:</strong>
+                        <p>Das System läuft komplett Serverless. Es basiert auf <strong>Google Gemini (2.5-flash)</strong> als "Gehirn", gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis) und <strong>Upstash Vector</strong> (für RAG).</p>
+                    </div>
+                </div>
+
+                <p>Wie macht man ein Large Language Model (LLM) zu einer zuverlässigen Agentur-Mitarbeiterin? Hier sind die drei technischen Säulen:</p>
+
+                <article class="step-guide">
+                    <h3>1. RAG (Retrieval-Augmented Generation)</h3>
+                    <p>Damit Evita keine Fakten über meine Dienstleistungen erfindet ("Halluzinationen"), nutzt sie eine Vektordatenbank.</p>
+                    <ul>
+                        <li><strong>Der Vektor-Upload:</strong> Jede Nacht um 3:00 Uhr crawlt ein Cronjob meine Website. Er zerlegt alle HTML-Seiten in Textabschnitte, wandelt diese über die Gemini Embedding API in Zahlenkolonnen (Vektoren) um und speichert sie in Upstash Vector.</li>
+                        <li><strong>Die Abfrage:</strong> Stellt der Nutzer eine Frage, wandelt Evita diese ebenfalls in einen Vektor um, sucht in Millisekunden die ähnlichsten Textbausteine aus der Datenbank und nutzt diese als "Kontext" für ihre Antwort.</li>
+                        <li><strong>Der Vorteil:</strong> Ändere ich heute einen Preis auf meiner Website, weiß Evita morgen früh automatisch davon, ohne dass ich den Bot neu programmieren muss!</li>
+                    </ul>
+                </article>
+
+                <article class="step-guide">
+                    <h3>2. Native Function Calling (Tools)</h3>
+                    <p>Evita ist nicht auf Textausgabe beschränkt. Ich habe ihr über die Gemini API Werkzeuge (Tools) in die Hand gegeben:</p>
+                    <ul>
+                        <li><code>remember_user_name</code>: Ein Tool, das im Hintergrund anspringt, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
+                        <li><code>suggest_chips</code>: Ein Tool, das die KI zwingt, ein JSON-Objekt mit exakt drei sinnvollen Folge-Aktionen zurückzugeben.</li>
+                        <li>Der System-Prompt steuert hart, <em>wann</em> sie welches Tool verwenden darf.</li>
+                    </ul>
+                </article>
+
+                <article class="step-guide">
+                    <h3>3. Context-Aware System Prompting</h3>
+                    <p>Damit Evita menschlich wirkt, wird ihr initialer "System Prompt" bei jedem Seitenaufruf dynamisch zusammengebaut:</p>
+                    <ul>
+                        <li>Sie weiß, wie spät es in Wien ist. Um 23:00 Uhr begrüßt sie dich anders als am Montagmorgen um 08:00 Uhr.</li>
+                        <li>Sie kennt die aktuelle URL. Bist du gerade auf der SEO-Seite, wird sie dir diesen Link nicht mehr als "Chip" vorschlagen.</li>
+                        <li>Sie kennt deine Historie. Warst du schon 5x im Chat, fragt sie dich nicht mehr nach deinem Anliegen, sondern steigt direkt locker ein.</li>
+                    </ul>
+                </article>
+
+                <aside class="expert-tip">
+                    <i class="fa-solid fa-code"></i>
+                    <div>
+                        <strong>Entwickler-Tipp:</strong>
+                        <p>Das größte Problem bei Folgefragen (Chips) in KIs ist, dass sie oft unsinnig halluzinieren. Der Trick liegt in der Schema-Definition des Tools: Man muss der KI im Description-Feld des Parameters extrem strenge Leitplanken geben (z.B. "Zwingend aus der Ich-Perspektive des Nutzers formulieren").</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="mistakes-heading">
+                <h2 id="mistakes-heading">Warum klassische Chatbots aussterben</h2>
+                
+                <p>Der Unterschied zwischen einem traditionellen Regel-Bot (If-Then-Else) und einer RAG-gestützten KI ist gewaltig:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="th-wrong">Klassischer Chatbot <i class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Evita (KI Agent) <i class="fa-solid fa-check"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Versteht nur exakte Keywords</td>
+                            <td>Versteht Kontext, Synonyme und umgangssprachliche Fragen</td>
+                        </tr>
+                        <tr>
+                            <td>Muss manuell mit FAQ-Bäumen gepflegt werden</td>
+                            <td>Lernt automatisch durch nächtliche Indexierung (RAG) der Website</td>
+                        </tr>
+                        <tr>
+                            <td>Jeder Chat beginnt bei Null (Amnesie)</td>
+                            <td>Langzeitgedächtnis (Redis) für Namen und vorherige Themen</td>
+                        </tr>
+                        <tr>
+                            <td>Gibt oft tote Links oder Textwüsten aus</td>
+                            <td>Bietet smarte Aktionen via Function Calling (E-Mail, Kalender)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group">
+                        <summary>Kann Evita wirklich E-Mails verschicken?</summary>
+                        <div class="faq-content">
+                            <p>Ja! Über das Tool <code>compose_email</code> formuliert sie einen Text, zeigt ihn dir an, und wenn du bestätigst, sendet das Backend die Nachricht via Brevo-API direkt an mich. Du musst deine E-Mail-Adresse nicht einmal extra in ein Formularfeld tippen.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was passiert, wenn die KI etwas Falsches sagt?</summary>
+                        <div class="faq-content">
+                            <p>Das RAG-System verhindert das fast komplett. Bevor sie antwortet, liest sie die Fakten in der Vektordatenbank nach. Außerdem gibt es im System-Prompt die eiserne Regel: "Erfinde keine Fakten über Michael". Weiß sie etwas nicht, blockt sie charmant ab.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wo liegen die Daten?</summary>
+                        <div class="faq-content">
+                            <p>Das Kurzzeitgedächtnis (für Namen etc.) liegt in einer extrem schnellen Redis-Datenbank (Upstash). Es ist komplett anonymisiert an eine Session-ID geknüpft und verfällt automatisch nach 30 Tagen Inaktivität.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Das Web wird interaktiv<span></h2>
+                
+                <p>Eine Webseite muss heute keine statische Broschüre mehr sein. Mit modernen KI-APIs können wir Interfaces bauen, die sich an den Nutzer anpassen, mit ihm mitdenken und echte Aufgaben abnehmen.</p>
+
+                <div class="key-points">
+                    <h3>Zusammenfassung:</h3>
+                    <ul>
+                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Bot hält Besucher länger auf der Seite.</li>
+                        <li><strong>Automatisierung:</strong> Termine und erste Qualifizierungs-E-Mails werden direkt im Chat abgewickelt.</li>
+                        <li><strong>Zero Maintenance:</strong> Durch den Cronjob und die Vektordatenbank füttert sich die KI komplett selbstständig mit Updates.</li>
+                    </ul>
+                </div>
+
+                <p>Probier es einfach selbst aus! Klicke unten rechts auf den Chat-Button und sag Evita "Hallo" – mal sehen, ob sie sich beim nächsten Mal an dich erinnert.</p>
+            </section>
+
+            <section class="blog-cta-wrapper">
+                <h2>Willst du deine eigene KI-Assistenz?</h2>
+                <p>Egal ob für deinen Online-Shop, deine Kanzlei oder dein Portfolio. Wenn du einen Bot brauchst, der deine Website auswendig kennt und aktiv für dich arbeitet, lass uns sprechen.</p>
+                
+                <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+                    <i class="fa-solid fa-code"></i> Projekt anfragen
+                </button>
+            </section>
+            
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+    
+</body>
+</html>
