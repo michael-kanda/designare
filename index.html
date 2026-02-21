@@ -168,14 +168,14 @@
             "text": "Weil KIs keine Teaser-Texte lesen, sondern Fakten extrahieren. Schema.org liefert strukturierte Daten via JSON-LD – das ist Fast Food für LLMs. Ohne valides Markup riskierst du, dass ChatGPT & Co. deine Inhalte ignorieren oder falsch interpretieren. <a href=\"https://designare.at/schema-org-meta-description.html\">Zum Guide</a>"
           }
         },
-    {
-  "@type": "Question",
-  "name": "Kann man viele SEO-Texte auf einmal generieren?",
-  "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Ja, das ist technisch möglich. Mein Tech-Showcase 'Silas' demonstriert, wie man KIs dazu bringt, strukturierte Massen-Daten (CSV) für den Import zu liefern, statt nur einfachen Text. <a href=\"https://designare.at/silas.html\">Zur Tech-Demo</a>"
-  }
-},
+        {
+          "@type": "Question",
+          "name": "Kann man viele SEO-Texte auf einmal generieren?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, das ist technisch möglich. Mein Tech-Showcase 'Silas' demonstriert, wie man KIs dazu bringt, strukturierte Massen-Daten (CSV) für den Import zu liefern, statt nur einfachen Text. <a href=\"https://designare.at/silas.html\">Zur Tech-Demo</a>"
+          }
+        },
         {
           "@type": "Question",
           "name": "Können WordPress Plugins reduziert werden?",
@@ -186,10 +186,10 @@
         },
         {
           "@type": "Question",
-          "name": "Kann man Landingpages aus Excel erstellen?",
+          "name": "Wie funktioniert die KI-Assistentin Evita?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Ja, der CSV Importer PRO ermöglicht es, vollständige Landingpages direkt aus Excel-Listen oder CSV-Dateien programmatisch zu erstellen. <a href=\"https://designare.at/CSV-Importer-PRO.html\">Zum CSV Importer PRO</a>"
+            "text": "Evita basiert auf einem RAG-System (Retrieval-Augmented Generation) mit Upstash Vector und Redis. Sie greift in Echtzeit auf die Website-Daten zu und merkt sich Themen und Namen für wiederkehrende Besucher. <a href=\"https://designare.at/evita-ki-assistentin.html\">Zum Tech-Stack von Evita</a>"
           }
         }
       ]
@@ -294,16 +294,16 @@
                                         <div class="terminal-body-content">
                                             
                                            <div class="tech-fact-item">
-    <span class="prompt-sign">$</span>
-    <p class="cmd-text">echo "Fact_01: No_More_CopyPaste"</p>
-    <p class="output-text">
-        Chatten ist nett, Machen ist besser. Mein Projekt <strong>Silas</strong> zeigt als Tech-Demo, wie man LLMs dazu bringt, <strong>komplette Landingpages</strong> im Bulk zu schreiben – sauber strukturiert statt kreativ chaotisch.
-        <a href="silas.html" 
-           class="terminal-link"
-           title="Silas: Experimentelle Content-Generierung"
-           aria-label="Zur Tech-Demo Silas">>> sh run_silas_demo.sh</a>
-    </p>
-</div>
+                                                <span class="prompt-sign">$</span>
+                                                <p class="cmd-text">echo "Fact_01: No_More_CopyPaste"</p>
+                                                <p class="output-text">
+                                                    Chatten ist nett, Machen ist besser. Mein Projekt <strong>Silas</strong> zeigt als Tech-Demo, wie man LLMs dazu bringt, <strong>komplette Landingpages</strong> im Bulk zu schreiben – sauber strukturiert statt kreativ chaotisch.
+                                                    <a href="silas.html" 
+                                                       class="terminal-link"
+                                                       title="Silas: Experimentelle Content-Generierung"
+                                                       aria-label="Zur Tech-Demo Silas">>> sh run_silas_demo.sh</a>
+                                                </p>
+                                            </div>
 
                                             <div class="tech-fact-item">
                                                 <span class="prompt-sign">$</span>
@@ -319,13 +319,13 @@
 
                                             <div class="tech-fact-item">
                                                 <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">import "Excel-to-Web"</p>
+                                                <p class="cmd-text">cat tech_stack.md</p>
                                                 <p class="output-text">
-                                                    Wusstest du, dass man Landingpages direkt aus Excel-Listen bauen kann? Der <strong>CSV Importer PRO</strong> erledigt das.
-                                                    <a href="CSV-Importer-PRO.html" 
+                                                    Wusstest du, wie ich mir Dinge merke und antworten kann, ohne zu halluzinieren? Ein Blick unter meine Haube: <strong>Meet Evita</strong>.
+                                                    <a href="evita-ki-assistentin.html" 
                                                        class="terminal-link"
-                                                       title="CSV Importer PRO: Landingpages generieren"
-                                                       aria-label="Zum CSV Importer PRO: Landingpages aus Excel erstellen">>> init import_pro</a>
+                                                       title="Meet Evita: KI-Assistentin mit Gedächtnis & RAG"
+                                                       aria-label="Zum Artikel: Tech-Stack der KI-Assistentin Evita">>> open tech_stack</a>
                                                 </p>
                                             </div>
 
@@ -352,7 +352,7 @@
                                                        aria-label="Zum Tool: KI-Sichtbarkeit prüfen">>> run check.exe</a>
                                                 </p>
                                             </div>
-               <div class="tech-fact-item">
+                                            <div class="tech-fact-item">
                                                 <span class="prompt-sign">$</span>
                                                 <p class="cmd-text">git clone --plugins wordpress/</p>
                                                 <p class="output-text">
