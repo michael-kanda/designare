@@ -85,6 +85,7 @@
 /* ===================
    TOC (Inhaltsverzeichnis) LAYOUT
    =================== */
+/* === TOC AUSKOMMENTIERT ===
 .toc-container {
     width: 100%;
 }
@@ -104,17 +105,17 @@
 #toc-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 10px; /* 8px vertikal, 10px horizontal */
+    gap: 8px 10px;
 }
 
-/* Mini-Buttons im TOC etwas kleiner */
 .toc-mini {
     padding: 4px 10px;
     font-size: 14px;
-    text-align: left; /* NEU: Linksbündig statt zentriert */
-    display: flex;    /* Optional: Hilft bei der Ausrichtung von Inhalten */
+    text-align: left;
+    display: flex;
     align-items: center;
 }
+=== ENDE TOC AUSKOMMENTIERT ===*/
 
 /* ============================
    LIGHT MODE SPECIFICS (MENU)
