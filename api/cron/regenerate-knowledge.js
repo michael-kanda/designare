@@ -1,10 +1,12 @@
 // api/cron/regenerate-knowledge.js
-// Automatische Regenerierung der Knowledge-Base via Vercel Cron
+// Automatische Regenerierung der Knowledge-Base UND Vektor-DB Upload via Vercel Cron
 // Läuft täglich um 3:00 Uhr nachts (Europe/Vienna)
 
 import fs from 'fs';
 import path from 'path';
 import * as cheerio from 'cheerio';
+import { Index } from "@upstash/vector";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Konfiguration
 const CONFIG = {
@@ -18,6 +20,13 @@ const CONFIG = {
 
 // Cron-Secret für Sicherheit (verhindert unbefugte Aufrufe)
 const CRON_SECRET = process.env.CRON_SECRET;
+
+// API Clients initialisieren (Upstash & Gemini)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const vectorIndex = new Index({
+  url: process.env.UPSTASH_VECTOR_REST_URL,
+  token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+});
 
 /**
  * Bereinigt Text von HTML und übermäßigen Whitespaces
@@ -174,11 +183,13 @@ export default async function handler(req, res) {
         });
     }
 
-    console.log('🚀 Cron: Starte Knowledge-Base Regenerierung...');
+    console.log('🚀 Cron: Starte Knowledge-Base Regenerierung & Vektor-Upload...');
     const startTime = Date.now();
 
     try {
-        // Finde alle HTML-Dateien
+        // ==========================================
+        // TEIL 1: LOKALES CRAWLING & JSON ERSTELLUNG
+        // ==========================================
         let files = [];
         try {
             const allFiles = fs.readdirSync(CONFIG.htmlDir);
@@ -224,12 +235,12 @@ export default async function handler(req, res) {
                     console.log(`✅ Indexiert: ${file} (${content.keywords.length} Keywords)`);
                 }
             } catch (fileError) {
-                errors.push({ file, error: fileError.message });
+                errors.push({ file, type: 'parsing_error', error: fileError.message });
                 console.error(`❌ Fehler bei ${file}:`, fileError.message);
             }
         }
 
-        // Generiere Such-Index
+        // Generiere Such-Index (WICHTIG: War in meiner alten Antwort vergessen)
         const searchIndex = generateSearchIndex(knowledgeBase);
 
         // Erstelle Output
@@ -240,27 +251,68 @@ export default async function handler(req, res) {
                 total_pages: knowledgeBase.length,
                 total_keywords: knowledgeBase.reduce((sum, p) => sum + p.keywords.length, 0),
                 total_sections: knowledgeBase.reduce((sum, p) => sum + p.sections.length, 0),
-                processing_time_ms: Date.now() - startTime
+                processing_time_ms: 0 // Wird am Ende aktualisiert
             },
             pages: knowledgeBase,
             search_index: searchIndex
         };
 
-        // Speichere Datei
+        // Speichere JSON lokal
         fs.writeFileSync(CONFIG.outputFile, JSON.stringify(output, null, 2));
-        
-        console.log(`✅ Knowledge-Base aktualisiert: ${knowledgeBase.length} Seiten in ${Date.now() - startTime}ms`);
+        console.log(`✅ Lokale knowledge.json aktualisiert: ${knowledgeBase.length} Seiten`);
+
+        // ==========================================
+        // TEIL 2: UPSTASH VECTOR DATENBANK UPLOAD
+        // ==========================================
+        console.log("🚀 Starte Upload in die Upstash Vector Datenbank...");
+        const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+        let uploadErrorsCount = 0;
+
+        for (let i = 0; i < knowledgeBase.length; i++) {
+            const page = knowledgeBase[i];
+            const textToEmbed = `${page.title}\n${page.text}`;
+            
+            try {
+                const result = await embeddingModel.embedContent(textToEmbed);
+                const denseVector = result.embedding.values;
+
+                await vectorIndex.upsert({
+                    id: `page_${page.slug}`, // Eindeutige ID basierend auf dem Slug
+                    vector: denseVector,
+                    data: textToEmbed,
+                    metadata: {
+                        title: page.title,
+                        url: page.url,
+                        content: page.text
+                    }
+                });
+
+                // Vermeide Rate-Limits der Gemini API (300ms warten)
+                await new Promise(res => setTimeout(res, 300)); 
+
+            } catch (uploadError) {
+                console.error(`❌ Vector-Upload Fehler bei ${page.title}:`, uploadError.message);
+                uploadErrorsCount++;
+                errors.push({ file: page.slug, type: 'vector_upload_error', error: uploadError.message });
+            }
+        }
+
+        // Gesamtzeit updaten
+        output.stats.processing_time_ms = Date.now() - startTime;
+        output.stats.vector_upload_errors = uploadErrorsCount;
+
+        console.log(`✅ Cron Job abgeschlossen in ${output.stats.processing_time_ms}ms`);
 
         return res.status(200).json({
             success: true,
-            message: `Knowledge-Base erfolgreich regeneriert`,
+            message: `Knowledge-Base erfolgreich regeneriert und in Vektor-DB geladen`,
             stats: output.stats,
             errors: errors.length > 0 ? errors : undefined,
             timestamp: new Date().toISOString()
         });
 
     } catch (error) {
-        console.error('❌ Cron Fehler:', error);
+        console.error('❌ Cron Komplettausfall:', error);
         return res.status(500).json({
             success: false,
             error: error.message,
