@@ -6,6 +6,7 @@ import { Redis } from "@upstash/redis";
 import { Index } from "@upstash/vector"; // <-- NEU: Vector Client
 import Brevo from '@getbrevo/brevo';
 import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
+import { emailShell, unsubscribeFooter } from './email-template.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -90,11 +91,35 @@ function textToHtml(text) {
     .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 }
 
-function buildEmailHtml(bodyText, subject) {
-  return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${sanitizeHtml(subject)}</title>
-<style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background:#f5f5f5}.c{background:#fff;border-radius:8px;padding:32px;box-shadow:0 1px 3px rgba(0,0,0,.1)}.h{border-bottom:2px solid #e0e0e0;padding-bottom:16px;margin-bottom:24px}.h h2{margin:0;color:#1a1a1a;font-size:20px}.b p{margin:0 0 16px}.f{border-top:1px solid #e0e0e0;padding-top:16px;margin-top:32px;font-size:13px;color:#888}.f a{color:#555;text-decoration:none}</style>
-</head><body><div class="c"><div class="h"><h2>${sanitizeHtml(subject)}</h2></div><div class="b">${textToHtml(bodyText)}</div>
-<div class="f"><p>Gesendet via Evita &middot; <a href="https://designare.at">designare.at</a></p></div></div></body></html>`;
+function buildEmailHtml(bodyText, subject, recipientEmail) {
+  const bodyHtml = sanitizeHtml(bodyText).split('\n\n')
+    .map(p => `<p style="margin:0 0 16px;font-size:14px;color:#333;line-height:1.7;">${p.replace(/\n/g, '<br>')}</p>`).join('');
+
+  const innerHtml = `
+    <!-- HEADER -->
+    <tr><td style="padding:24px 32px 20px;border-bottom:1px solid #eee;">
+      <span style="font-size:17px;font-weight:700;color:#1a1a1a;">${sanitizeHtml(subject)}</span>
+    </td></tr>
+    <!-- BODY -->
+    <tr><td style="padding:28px 32px;">
+      ${bodyHtml}
+    </td></tr>`;
+
+  const footer = recipientEmail 
+    ? unsubscribeFooter(recipientEmail)
+    : 'Diese E-Mail wurde einmalig über <a href="https://designare.at" style="color:#bbb;text-decoration:underline;">designare.at</a> versendet.';
+
+  return emailShell(innerHtml, { footerExtra: footer, showSlogan: false });
+}
+
+// Blocklist-Check: Prüft ob eine E-Mail-Adresse gesperrt ist
+async function isEmailBlocked(email) {
+  try {
+    return await redis.sismember('evita:email:blocklist', email.toLowerCase().trim());
+  } catch (e) {
+    console.error('Blocklist-Check Fehler:', e.message);
+    return false; // Bei Fehler nicht blockieren
+  }
 }
 
 async function sendEmail({ to, toName, subject, body, sessionId }) {
@@ -102,7 +127,7 @@ async function sendEmail({ to, toName, subject, body, sessionId }) {
   email.sender = EMAIL_SENDER;
   email.to = [{ email: to, name: toName || to.split('@')[0] }];
   email.subject = subject;
-  email.htmlContent = buildEmailHtml(body, subject);
+  email.htmlContent = buildEmailHtml(body, subject, to);
   email.textContent = body;
   email.tags = ['evita-composed'];
   email.headers = { 'X-Evita-Session': sessionId || 'unknown', 'X-Sent-By': 'Evita-AI' };
@@ -253,6 +278,13 @@ export default async function handler(req, res) {
       if (!isValidEmail(pendingEmail.to)) {
         return res.status(200).json({
           answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus. Kannst du die nochmal prüfen?`
+        });
+      }
+
+      // Blocklist prüfen
+      if (await isEmailBlocked(pendingEmail.to)) {
+        return res.status(200).json({
+          answer: `Die Adresse **${pendingEmail.to}** hat den Empfang von E-Mails über designare.at blockiert. Ich kann leider nicht dorthin senden.`
         });
       }
 
