@@ -96,34 +96,25 @@ body.page-loaded {
 }
 
 /* ===================
-   NO-SCROLL MIT FALLBACK
+   SCROLL-MANAGEMENT (KORRIGIERT & VEREINFACHT)
    =================== */
 
-/*body.no-scroll { overflow-y: hidden !important; }*/
-body.no-scroll.page-loaded { overflow-y: auto !important; }
-body.no-scroll.page-loaded:has(.modal-overlay.visible),
-body.no-scroll.page-loaded:has(#side-menu-panel.visible) {
+/* 1. Generelle Sperre für Overlays (Menü, Modals, Ladescreens)
+   Diese Klasse wird NUR noch temporär via JS gesetzt, wenn etwas offen ist. 
+*/
+body.no-scroll { 
+    overflow-y: hidden !important; 
+}
+
+/* 2. Die Startseiten-Sperre (Die "App-View")
+   Wir sperren den Body auf der Index-Seite STANDARDMÄSSIG, 
+   aber NUR, wenn die Flip-Karte NICHT gekippt ist und wir uns nicht 
+   auf der Evita-Ansicht befinden.
+*/
+body.is-home-page:not(:has(#hero-flip-wrapper.flipped)):not(:has(#view-third[style*="display: flex"])) {
     overflow-y: hidden !important;
 }
 
-@keyframes unlock-scroll-fallback {
-    from { overflow-y: hidden; }
-    to { overflow-y: auto; }
-}
-
-body.no-scroll:not(.page-loaded) {
-    animation: unlock-scroll-fallback 0s 5s forwards;
-}
-
-a {
-    text-decoration: none !important;
-    color: var(--text-color);
-    transition: color 0.3s ease;
-}
-
-a:hover {
-    color: var(--accent-color);
-}
 
 /* ===================
    2. FONTS
