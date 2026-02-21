@@ -1,5 +1,6 @@
 // api/ai-visibility-check.js - KI-Sichtbarkeits-Check mit Grounding + Formatierung
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { emailShell, esc as escTpl } from './email-template.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
