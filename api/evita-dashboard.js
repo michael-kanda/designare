@@ -80,6 +80,7 @@ export default async function handler(req, res) {
         new_users: parseInt(stats?.new_users || 0),
         returning_users: parseInt(stats?.returning_users || 0),
         visibility_checks: parseInt(stats?.visibility_checks || 0),
+        visibility_emails: parseInt(stats?.visibility_emails || 0),
         emails_sent: parseInt(stats?.emails_sent || 0),
         emails_failed: parseInt(stats?.emails_failed || 0),
         unique_visitors: uniqueCount || 0
@@ -125,14 +126,15 @@ export default async function handler(req, res) {
       new_users: acc.new_users + day.new_users,
       returning_users: acc.returning_users + day.returning_users,
       visibility_checks: acc.visibility_checks + day.visibility_checks,
+      visibility_emails: acc.visibility_emails + day.visibility_emails,
       emails_sent: acc.emails_sent + day.emails_sent,
       emails_failed: acc.emails_failed + day.emails_failed,
       unique_visitors: acc.unique_visitors + day.unique_visitors
     }), {
       total_chats: 0, total_messages: 0, booking_intents: 0,
       booking_completions: 0, fallback_count: 0, new_users: 0,
-      returning_users: 0, visibility_checks: 0, emails_sent: 0,
-      emails_failed: 0, unique_visitors: 0
+      returning_users: 0, visibility_checks: 0, visibility_emails: 0,
+      emails_sent: 0, emails_failed: 0, unique_visitors: 0
     });
 
     // Heute separat – Evita
@@ -330,6 +332,18 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 9a. VISIBILITY REPORT-MAILS (letzte 20)
+    // ===============================================================
+    let visibilityEmails = [];
+    try {
+      const raw = await redis.lrange('evita:stats:visibility_emails', 0, 19);
+      visibilityEmails = raw.map(entry => {
+        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+        catch { return null; }
+      }).filter(Boolean);
+    } catch (e) {}
+
+    // ===============================================================
     // 9b. TEMPLATE-NUTZUNG – SILAS
     // ===============================================================
     let silasTemplates = [];
@@ -359,6 +373,7 @@ export default async function handler(req, res) {
           unique_visitors: today.unique_visitors || 0,
           fallbacks: today.fallback_count || 0,
           visibility_checks: today.visibility_checks || 0,
+          visibility_emails: today.visibility_emails || 0,
           emails_sent: today.emails_sent || 0,
           emails_failed: today.emails_failed || 0
         },
@@ -385,6 +400,7 @@ export default async function handler(req, res) {
       modelUsage: modelAgg,
       recentFallbacks,
       recentEmails,
+      visibilityEmails,
       heatmap,
 
       visibility: {
