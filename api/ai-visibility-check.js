@@ -1263,11 +1263,12 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
     });
     
     // 4. Sentiment & Reputation (max 20 Punkte)
-    // Fairere Bewertung: negativ ≠ 0, sondern anteilig
-    // positiv = volle Punkte, neutral = 60%, negativ = 20%
-    const positiveCount = allTests.filter(t => t.sentiment === 'positiv').length;
-    const neutralCount = allTests.filter(t => t.sentiment === 'neutral').length;
-    const negativeCount = allTests.filter(t => t.sentiment === 'negativ').length;
+    // Nicht-erwähnte Tests zählen im Nenner mit, bekommen aber 0 Punkte.
+    // So koppelt Reputation an Sichtbarkeit: keine Erwähnung = keine Reputation.
+    const mentionedTests = allTests.filter(t => t.mentioned);
+    const positiveCount = mentionedTests.filter(t => t.sentiment === 'positiv').length;
+    const neutralCount = mentionedTests.filter(t => t.sentiment === 'neutral').length;
+    const negativeCount = mentionedTests.filter(t => t.sentiment === 'negativ').length;
     
     const maxRepPoints = 20;
     const sentimentScore = allTests.length > 0
