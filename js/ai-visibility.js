@@ -329,10 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3><i class="fa-solid fa-chart-pie"></i> Score-Zusammensetzung</h3>
                 <div class="breakdown-grid">
                     ${score.breakdown.map(item => {
-                        let icon = '';
-                        if (item.category.includes('Gemini')) icon = '<span class="breakdown-engine engine-gemini">G</span>';
-                        else if (item.category.includes('ChatGPT')) icon = '<span class="breakdown-engine engine-chatgpt">C</span>';
-                        
                         const points = parseInt(item.points) || 0;
                         const maxPoints = parseInt(item.maxPoints) || 1;
                         const fillWidth = Math.min(100, (points / maxPoints) * 100);
@@ -340,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         return `
                             <div class="breakdown-item">
                                 <div class="breakdown-header">
-                                    <span class="breakdown-label">${icon} ${esc(item.category)}</span>
+                                    <span class="breakdown-label">${esc(item.category)}</span>
                                     <span class="breakdown-points">${points}/${maxPoints}</span>
                                 </div>
                                 <div class="breakdown-bar">
