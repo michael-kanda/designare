@@ -598,6 +598,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // =================================================================
+        // E-MAIL REPORT FORMULAR
+        // =================================================================
+        html += `
+            <div class="result-section email-report-section">
+                <h3><i class="fa-solid fa-envelope"></i> Ergebnis per E-Mail sichern</h3>
+                <p class="section-intro">Erhalte deine komplette Auswertung als E-Mail – inkl. Score, KI-Tests und Empfehlungen.</p>
+                
+                <form id="email-report-form" class="email-report-form">
+                    <div class="email-report-row">
+                        <input 
+                            type="email" 
+                            id="report-email-input" 
+                            class="form-input email-report-input"
+                            placeholder="deine@email.at"
+                            required
+                        >
+                        <button type="submit" id="send-report-btn" class="send-report-btn">
+                            <i class="fa-solid fa-paper-plane"></i> Senden
+                        </button>
+                    </div>
+                    <label class="email-consent-label">
+                        <input type="checkbox" id="email-consent" required>
+                        <span>Ich bin damit einverstanden, dass meine E-Mail-Adresse zur Zustellung der Auswertung verwendet wird. <a href="/datenschutz" target="_blank">Datenschutz</a></span>
+                    </label>
+                    <div id="email-report-status" class="email-report-status"></div>
+                </form>
+            </div>
+        `;
+
+        // =================================================================
         // FOOTER (FIX 7: sicherer Timestamp)
         // =================================================================
         html += `
@@ -615,5 +645,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
 
         resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // =================================================================
+        // E-MAIL REPORT HANDLER
+        // =================================================================
+        const emailForm = document.getElementById('email-report-form');
+        if (emailForm) {
+            emailForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const emailInput = document.getElementById('report-email-input');
+                const consentBox = document.getElementById('email-consent');
+                const sendBtn = document.getElementById('send-report-btn');
+                const statusEl = document.getElementById('email-report-status');
+                const email = emailInput.value.trim();
+
+                if (!email || !consentBox.checked) return;
+
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird gesendet...';
+                statusEl.className = 'email-report-status';
+                statusEl.textContent = '';
+
+                try {
+                    const res = await fetch('/api/send-visibility-report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email,
+                            domain: data.domain,
+                            industry: data.industry,
+                            score: data.score,
+                            domainAnalysis: data.domainAnalysis,
+                            aiTests: data.aiTests,
+                            competitors: data.competitors,
+                            recommendations: data.recommendations,
+                            timestamp: data.timestamp
+                        })
+                    });
+
+                    const result = await res.json();
+
+                    if (result.success) {
+                        statusEl.className = 'email-report-status status-success';
+                        statusEl.innerHTML = '<i class="fa-solid fa-check"></i> Auswertung wurde gesendet!';
+                        emailForm.querySelector('.email-report-row').style.display = 'none';
+                        emailForm.querySelector('.email-consent-label').style.display = 'none';
+                    } else {
+                        throw new Error(result.message || 'Senden fehlgeschlagen');
+                    }
+                } catch (err) {
+                    statusEl.className = 'email-report-status status-error';
+                    statusEl.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> ' + esc(err.message);
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Senden';
+                }
+            });
+        }
     }
 });
