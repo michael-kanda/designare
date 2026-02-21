@@ -99,20 +99,8 @@ body.page-loaded {
    SCROLL-MANAGEMENT (KORRIGIERT & VEREINFACHT)
    =================== */
 
-/* 1. Generelle Sperre für Overlays (Menü, Modals, Ladescreens)
-   Diese Klasse wird NUR noch temporär via JS gesetzt, wenn etwas offen ist. 
-*/
 body.no-scroll { 
     overflow-y: hidden !important; 
-}
-
-/* 2. Die Startseiten-Sperre (Die "App-View")
-   Wir sperren den Body auf der Index-Seite STANDARDMÄSSIG, 
-   aber NUR, wenn die Flip-Karte NICHT gekippt ist und wir uns nicht 
-   auf der Evita-Ansicht befinden.
-*/
-body.is-home-page:not(:has(#hero-flip-wrapper.flipped)):not(:has(#view-third[style*="display: flex"])) {
-    overflow-y: hidden !important;
 }
 
 
