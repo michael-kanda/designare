@@ -1,12 +1,14 @@
 // api/ai-visibility-check.js - KI-Sichtbarkeits-Check mit Grounding + Formatierung + Dashboard-Tracking
-// Version 13: Cheerio, Redis Rate-Limiting, Dashboard-Integration
+// Version 14: Cheerio, Redis Rate-Limiting, Dashboard-Integration, Redis Caching
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as brevo from '@getbrevo/brevo';
 import * as cheerio from 'cheerio';
 import { checkRateLimit, incrementRateLimit, getClientIP } from './rate-limiter.js';
 import { trackVisibilityCheckStats } from './evita-track.js';
+import { Redis } from '@upstash/redis'; // NEU: Für das Caching
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const redis = Redis.fromEnv(); // NEU: Initialisiert Upstash Redis automatisch über ENV-Variablen
 
 // =================================================================
 // OPENAI / CHATGPT CLIENT
@@ -83,8 +85,6 @@ function isDomainMentioned(text, cleanDomain) {
   // =================================================================
   // EINZELTEILE-PRÜFUNG (mit Schutz gegen False Positives)
   // =================================================================
-  // Problem: "hotel-wien.at" → ["hotel", "wien"] matcht jeden Text über Hotels in Wien.
-  // Lösung: (1) generische Wörter ignorieren, (2) Proximity-Check
   const parts = domainBase.split(/[-.]/).filter(p => p.length >= 4);
   
   if (parts.length >= 2) {
@@ -115,13 +115,11 @@ function isDomainMentioned(text, cleanDomain) {
     const uniqueParts = parts.filter(p => !genericWords.has(p));
     
     // Fall 1: Alle Teile generisch → kein Match über Einzelteile
-    // "hotel-wien" → beide generisch → zu unsicher
     if (uniqueParts.length === 0) {
       return false;
     }
     
     // Fall 2: Mindestens ein Teil ist unique → Proximity-Check
-    // Die Teile müssen im Text nahe beieinander stehen (max 60 Zeichen Abstand)
     if (parts.every(part => lower.includes(part))) {
       const positions = parts.map(part => {
         const idx = lower.indexOf(part);
@@ -149,11 +147,6 @@ function isDomainMentioned(text, cleanDomain) {
 
 /**
  * Prüft ob der Text eine Negation enthält die bedeutet, dass die Domain NICHT bekannt ist.
- * Wird von isDomainMentioned aufgerufen.
- * 
- * Wichtig: Nur reine "nicht gefunden"-Texte matchen. 
- * Wenn substanzielle Infos vorhanden sind ("bietet an", "Unternehmen ist tätig"),
- * wird die Negation ignoriert – denn dann wurde die Domain inhaltlich beschrieben.
  */
 function isNegationContext(textLower) {
   const negationPatterns = [
@@ -175,7 +168,7 @@ function isNegationContext(textLower) {
   const hasNegation = negationPatterns.some(p => textLower.includes(p));
   if (!hasNegation) return false;
   
-  // Substanz-Check: Wenn echte Infos da sind, ist die Negation nur ein Nebensatz
+  // Substanz-Check
   const hasSubstance = 
     textLower.includes('bietet') ||
     textLower.includes('dienstleistung') ||
@@ -184,18 +177,17 @@ function isNegationContext(textLower) {
     textLower.includes('tätig') ||
     textLower.includes('anbieter') ||
     textLower.includes('standort') ||
-    textLower.includes('bewertung') ||     // Reviews: Domain wurde gesucht
-    textLower.includes('rezension') ||     // Reviews: Domain wurde gesucht
-    textLower.includes('erwähnung') ||     // Mentions: Domain wurde gefunden
-    textLower.includes('gelistet') ||      // Mentions: Domain in Verzeichnis
-    textLower.includes('profil');           // Mentions: Social Media Profil
+    textLower.includes('bewertung') ||     
+    textLower.includes('rezension') ||     
+    textLower.includes('erwähnung') ||     
+    textLower.includes('gelistet') ||      
+    textLower.includes('profil');           
   
-  // Negation + keine Substanz = Domain ist wirklich nicht bekannt
   return !hasSubstance;
 }
 
 // =================================================================
-// RATE LIMITING (via Redis – siehe rate-limiter.js)
+// RATE LIMITING
 // =================================================================
 const DAILY_LIMIT = 3;
 
@@ -300,7 +292,6 @@ function removeBoringIntros(text) {
 // HELPER: Text formatieren (Absätze statt Listen) — MIT XSS-SCHUTZ
 // =================================================================
 
-// HTML-Entities escapen (MUSS vor jeder HTML-Erzeugung laufen)
 function escapeHTML(str) {
   return str
     .replace(/&/g, '&amp;')
@@ -311,22 +302,14 @@ function escapeHTML(str) {
 }
 
 function formatResponseText(text) {
-  // SCHRITT 1: Boring Intros entfernen (noch auf Rohtext)
   let formatted = removeBoringIntros(text);
   
-  // SCHRITT 1b: Gemini Grounding Citations entfernen
-  // Spezifische Patterns zuerst (bevor [cite diese teilweise matcht)
   formatted = formatted.replace(/\[citation[^\]]*\]/gi, '');
   formatted = formatted.replace(/\[source[^\]]*\]/gi, '');
-  // Vollständig: [cite: 2, 22, 23, 40] — Abgeschnitten: [cite: 2, 22  oder  [cite
   formatted = formatted.replace(/\[cite(?::[\d,\s]*)?(?:\]|(?=\s)|$)/gi, '');
-  // Angeklebt: [citeExterne → entferne nur "[cite", behalte den Rest
   formatted = formatted.replace(/\[cite(?=[A-Za-zÄÖÜäöü])/gi, '');
-  // Aufräumen: doppelte Leerzeichen die durch Entfernung entstehen
   formatted = formatted.replace(/\s{2,}/g, ' ');
   
-  // SCHRITT 2: Markdown-Fett extrahieren BEVOR wir escapen
-  // Wir merken uns die fetten Stellen mit einem Platzhalter
   const boldParts = [];
   formatted = formatted.replace(/\*\*([^*]+)\*\*/g, (_, content) => {
     const index = boldParts.length;
@@ -334,42 +317,34 @@ function formatResponseText(text) {
     return `%%BOLD_${index}%%`;
   });
   
-  // SCHRITT 3: ALLES escapen (XSS-Schutz!)
   formatted = escapeHTML(formatted);
   
-  // SCHRITT 4: Bold-Platzhalter durch <strong> ersetzen (escaped content!)
   formatted = formatted.replace(/%%BOLD_(\d+)%%/g, (_, index) => {
     return `<strong>${escapeHTML(boldParts[parseInt(index)])}</strong>`;
   });
   
-  // SCHRITT 5: Zeilenumbrüche normalisieren
   formatted = formatted.replace(/\r\n/g, '\n');
   formatted = formatted.replace(/\r/g, '\n');
   
-  // SCHRITT 6: Absätze erkennen (Doppel-Zeilenumbrüche)
   const blocks = formatted.split(/\n{2,}/);
   
   const htmlBlocks = blocks.map(block => {
     block = block.trim();
     if (!block) return '';
     
-    // Prüfe ob Block eine Liste ist (Bullets oder Nummern)
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
     const isList = lines.length > 1 && lines.every(l => /^[\d]+[.)]\s|^[•\-\*]\s/.test(l));
     
     if (isList) {
       const items = lines.map(l => l.replace(/^[\d]+[.)]\s*|^[•\-\*]\s*/, '').trim());
-      // Content ist bereits escaped!
       return '<ul class="ai-list">' + items.map(i => `<li>${i}</li>`).join('') + '</ul>';
     }
     
-    // Einzelne Bullet/Nummer-Zeilen in Fließtext → kompakt
     block = block.replace(/\n\s*\d+[.)]\s+/g, '<br>');
     block = block.replace(/\n\s*[•\-\*]\s+/g, '<br>');
     block = block.replace(/^\s*\d+[.)]\s+/, '');
     block = block.replace(/^\s*[•\-\*]\s+/, '');
     
-    // Restliche einzelne Zeilenumbrüche → <br>
     block = block.replace(/\n/g, '<br>');
     
     return `<p>${block}</p>`;
@@ -377,7 +352,6 @@ function formatResponseText(text) {
   
   let result = htmlBlocks.join('');
   
-  // Cleanup
   result = result.replace(/<p>\s*<\/p>/g, '');
   result = result.replace(/(<br>\s*){3,}/gi, '<br><br>');
   result = result.replace(/\s{2,}/g, ' ');
@@ -386,6 +360,7 @@ function formatResponseText(text) {
   
   return result.trim();
 }
+
 // =================================================================
 // HELPER: Industry sanitizen
 // =================================================================
@@ -397,7 +372,7 @@ function sanitizeIndustry(input) {
 }
 
 // =================================================================
-// NEU: E-MAIL-BENACHRICHTIGUNG via Brevo
+// E-MAIL-BENACHRICHTIGUNG via Brevo
 // =================================================================
 async function sendCheckNotification({ domain, industry, score, scoreLabel, scoreColor, mentionCount, totalTests, testResults, domainAnalysis, competitors, recommendations }) {
   try {
@@ -407,13 +382,11 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       process.env.BREVO_API_KEY
     );
 
-    // Score-Badge Farbe
     const badgeColor = scoreColor || '#f59e0b';
 
-    // Test-Ergebnisse als HTML-Tabelle
     const testRows = (testResults || []).map(t => {
       const statusIcon = t.mentioned ? '✅' : '❌';
-      const sentimentIcon = t.sentiment === 'positiv' ? '🟢' : t.sentiment === 'negativ' ? '🔴' : '🟡';
+      const sentimentIcon = t.sentiment === 'positiv' ? '🟢' : t.sentiment === 'negativ' ? '🔴' : t.sentiment === 'fehlend' ? '⚪' : '🟡';
       const engineBadge = t.engine === 'chatgpt' 
         ? '<span style="background:#10a37f;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:4px;">GPT</span>' 
         : '<span style="background:#4285f4;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:4px;">Gemini</span>';
@@ -429,19 +402,16 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
         </tr>`;
     }).join('');
 
-    // Schema-Info
     const schemaInfo = domainAnalysis?.hasSchema
       ? `✅ Vorhanden (${(domainAnalysis.schemaTypes || []).join(', ') || 'unbekannte Typen'})`
       : '❌ Nicht vorhanden';
 
-    // E-E-A-T Info
     const eeatItems = [];
     if (domainAnalysis?.hasAboutPage) eeatItems.push('Über-uns');
     if (domainAnalysis?.hasContactPage) eeatItems.push('Kontakt');
     if (domainAnalysis?.hasAuthorInfo) eeatItems.push('Autor-Info');
     const eeatInfo = eeatItems.length > 0 ? `✅ ${eeatItems.join(', ')}` : '❌ Keine gefunden';
 
-    // Empfehlungen
     const recoHtml = (recommendations || []).map(r => {
       const prioColor = r.priority === 'hoch' ? '#ef4444' : '#f59e0b';
       return `<div style="margin-bottom:8px;padding:8px 12px;background:#1a1a2e;border-left:3px solid ${prioColor};border-radius:4px;">
@@ -450,7 +420,6 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       </div>`;
     }).join('');
 
-    // Konkurrenten
     const competitorList = (competitors || []).length > 0
       ? competitors.slice(0, 10).join(', ')
       : 'Keine gefunden';
@@ -465,13 +434,11 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
 <body style="margin:0;padding:0;background:#0a0a1a;color:#fff;font-family:Arial,Helvetica,sans-serif;">
   <div style="max-width:600px;margin:0 auto;padding:20px;">
     
-    <!-- Header -->
     <div style="text-align:center;padding:20px 0;border-bottom:1px solid #333;">
       <h1 style="margin:0;font-size:20px;color:#fff;">🤖 KI-Sichtbarkeits-Check</h1>
       <p style="margin:5px 0 0;color:#888;">Neuer Check durchgeführt</p>
     </div>
 
-    <!-- Score Badge -->
     <div style="text-align:center;padding:30px 0;">
       <div style="display:inline-block;width:100px;height:100px;border-radius:50%;background:${badgeColor};line-height:100px;font-size:32px;font-weight:bold;color:#fff;">
         ${score}
@@ -479,7 +446,6 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       <p style="margin:10px 0 0;font-size:18px;color:${badgeColor};font-weight:bold;">${scoreLabel}</p>
     </div>
 
-    <!-- Domain & Branche -->
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
       <tr>
         <td style="padding:8px 12px;color:#888;width:120px;">Domain:</td>
@@ -499,7 +465,6 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       </tr>
     </table>
 
-    <!-- Technische Analyse -->
     <div style="background:#111;border-radius:8px;padding:16px;margin-bottom:20px;">
       <h3 style="margin:0 0 10px;color:#fff;font-size:14px;">📊 Technische Analyse</h3>
       <p style="margin:4px 0;color:#ccc;font-size:13px;">Schema.org: ${schemaInfo}</p>
@@ -507,7 +472,6 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       <p style="margin:4px 0;color:#ccc;font-size:13px;">Title: ${domainAnalysis?.title || '–'}</p>
     </div>
 
-    <!-- Test-Ergebnisse -->
     <div style="background:#111;border-radius:8px;padding:16px;margin-bottom:20px;">
       <h3 style="margin:0 0 10px;color:#fff;font-size:14px;">🧪 KI-Test-Ergebnisse</h3>
       <table style="width:100%;border-collapse:collapse;">
@@ -524,20 +488,17 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
       </table>
     </div>
 
-    <!-- Konkurrenten -->
     <div style="background:#111;border-radius:8px;padding:16px;margin-bottom:20px;">
       <h3 style="margin:0 0 10px;color:#fff;font-size:14px;">🏢 Genannte Konkurrenten</h3>
       <p style="color:#ccc;font-size:13px;margin:0;">${competitorList}</p>
     </div>
 
-    <!-- Empfehlungen -->
     ${recoHtml ? `
     <div style="background:#111;border-radius:8px;padding:16px;margin-bottom:20px;">
       <h3 style="margin:0 0 10px;color:#fff;font-size:14px;">💡 Empfehlungen</h3>
       ${recoHtml}
     </div>` : ''}
 
-    <!-- Footer -->
     <div style="text-align:center;padding:20px 0;border-top:1px solid #333;color:#666;font-size:11px;">
       KI-Sichtbarkeits-Check · designare.at
     </div>
@@ -550,7 +511,6 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
     console.log(`📧 Benachrichtigung gesendet für ${domain}`);
 
   } catch (error) {
-    // E-Mail-Fehler soll den Check NICHT blockieren
     console.error('⚠️ E-Mail-Benachrichtigung fehlgeschlagen:');
     console.error('  Message:', error?.message);
     console.error('  Body:', JSON.stringify(error?.body || error?.response?.body || 'keine Details'));
@@ -562,29 +522,19 @@ async function sendCheckNotification({ domain, industry, score, scoreLabel, scor
 // SENTIMENT-ANALYSE (LLM-basiert mit Keyword-Fallback)
 // =================================================================
 
-/**
- * LLM-basierte Sentiment-Analyse via gpt-4o-mini.
- * Erkennt Negationen, Ironie und Kontext korrekt.
- * Fällt bei Fehler automatisch auf Keyword-Analyse zurück.
- */
 async function analyzeSentiment(text, testType, domainMentioned) {
-  // Shortcut: Bei Bekanntheit ist fehlende Erwähnung eindeutig negativ.
-  // Bei Mentions/Reviews NICHT shortcutten — Gemini listet oft externe Quellen
-  // auf, ohne die Domain nochmal wörtlich zu wiederholen.
   if (!domainMentioned && testType === 'knowledge') {
-    return 'negativ';
+    return 'fehlend';
   }
 
   try {
-    // Kein API-Key → direkt Fallback
     if (!process.env.OPENAI_API_KEY) {
       return analyzeSentimentFallback(text, testType, domainMentioned);
     }
 
-    // Nur relevanten Text senden (spart Tokens)
     const cleanText = text
-      .replace(/<[^>]*>/g, '')      // HTML-Tags entfernen
-      .substring(0, 800)             // Max 800 Zeichen
+      .replace(/<[^>]*>/g, '')
+      .substring(0, 800)
       .trim();
 
     if (!cleanText || cleanText.length < 10) {
@@ -608,16 +558,12 @@ ${cleanText}
 """
 
 Regeln:
-- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen, oder es werden mehrere externe Quellen/Verzeichnisse aufgelistet
-- "neutral" = Unternehmen wird erwähnt aber ohne klare Wertung, gemischte Signale, wenig Substanz
-- "negativ" = Unternehmen nicht gefunden, KEINE Informationen vorhanden, schlechte Bewertungen, negative Kritik, oder Text sagt explizit dass nichts gefunden wurde
+- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen, oder es werden externe Quellen aufgelistet
+- "neutral" = Unternehmen wird erwähnt aber ohne klare Wertung, gemischte Signale
+- "negativ" = Explizit schlechte Bewertungen oder starke Kritik
+- "fehlend" = Unternehmen nicht gefunden, KEINE Informationen vorhanden, oder Text sagt explizit dass nichts gefunden wurde
 
-WICHTIG: 
-- Achte auf Negationen! "nicht zufrieden", "keine guten Bewertungen" = negativ.
-- Wenn der Text externe Quellen auflistet (z.B. herold.at, YouTube, WKO), ist das POSITIV — auch wenn der Domainname nicht wörtlich wiederholt wird.
-- "negativ" NUR wenn wirklich nichts gefunden wurde oder explizit schlechte Bewertungen vorliegen.
-
-Antworte mit EXAKT einem Wort: positiv, neutral oder negativ`;
+Antworte mit EXAKT einem Wort: positiv, neutral, negativ oder fehlend`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -641,11 +587,10 @@ Antworte mit EXAKT einem Wort: positiv, neutral oder negativ`;
     const data = await response.json();
     const result = (data.choices?.[0]?.message?.content || '').trim().toLowerCase();
 
-    if (['positiv', 'neutral', 'negativ'].includes(result)) {
+    if (['positiv', 'neutral', 'negativ', 'fehlend'].includes(result)) {
       return result;
     }
 
-    // LLM hat etwas anderes geantwortet → Fallback
     console.warn(`⚠️ Sentiment-LLM unerwartete Antwort: "${result}", Fallback auf Keywords`);
     return analyzeSentimentFallback(text, testType, domainMentioned);
 
@@ -655,10 +600,6 @@ Antworte mit EXAKT einem Wort: positiv, neutral oder negativ`;
   }
 }
 
-/**
- * Keyword-basierter Fallback (wird nur bei LLM-Fehler verwendet).
- * Behält die bisherige Logik als Sicherheitsnetz.
- */
 function analyzeSentimentFallback(text, testType, domainMentioned) {
   const textLower = text.toLowerCase();
   
@@ -671,7 +612,7 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
   const hasNotFound = notFoundIndicators.some(indicator => textLower.includes(indicator));
   
   if (testType === 'knowledge') {
-    if (!domainMentioned) return 'negativ';
+    if (!domainMentioned) return 'fehlend';
     
     const hasSubstantialInfo = 
       textLower.includes('bietet') || textLower.includes('anbieter') ||
@@ -683,7 +624,7 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
       textLower.includes('service');
     
     if (hasSubstantialInfo) return 'positiv';
-    if (hasNotFound && !hasSubstantialInfo) return 'negativ';
+    if (hasNotFound && !hasSubstantialInfo) return 'fehlend';
     return 'neutral';
   }
   
@@ -692,7 +633,7 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
       'keine bewertungen', 'keine rezensionen', 'keine online-bewertungen',
       'wurden keine bewertungen', 'keine bewertungen gefunden', 'keine rezensionen gefunden'
     ];
-    if (noBewertungen.some(phrase => textLower.includes(phrase))) return 'negativ';
+    if (noBewertungen.some(phrase => textLower.includes(phrase))) return 'fehlend';
     
     const hasLowRating = [
       /\b[1-2][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[12]\s*von\s*5/i,
@@ -714,7 +655,7 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
   }
   
   if (testType === 'mentions') {
-    if (hasNotFound) return 'negativ';
+    if (hasNotFound) return 'fehlend';
     
     const sourceCount = [
       'herold','wko','gelbe seiten','facebook','instagram','linkedin',
@@ -725,7 +666,7 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
     
     if (sourceCount >= 4) return 'positiv';
     if (sourceCount >= 1) return 'neutral';
-    if (!domainMentioned) return 'negativ';
+    if (!domainMentioned) return 'fehlend';
     return 'neutral';
   }
   
@@ -762,6 +703,27 @@ export default async function handler(req, res) {
     const cleanDomain = domainValidation.domain;
     const cleanIndustry = sanitizeIndustry(industry);
     
+    // =================================================================
+    // NEU: REDIS CACHING (Spart API-Kosten & Zeit)
+    // =================================================================
+    const cacheKey = `visibility_cache:${cleanDomain}`;
+    try {
+      const cachedResult = await redis.get(cacheKey);
+      if (cachedResult) {
+        console.log(`⚡ CACHE HIT: Lade Ergebnisse für ${cleanDomain} aus Redis.`);
+        // Rate-Limit trotzdem hochzählen, da der Nutzer den Service genutzt hat
+        await incrementRateLimit(clientIP, 'visibility'); 
+        
+        // Füge aktuelle Rate-Limit Infos hinzu und gib Cache zurück
+        cachedResult.meta.remainingChecks = (await checkRateLimit(clientIP, 'visibility', DAILY_LIMIT)).remaining;
+        cachedResult.cached = true; // Markierung fürs Frontend
+        
+        return res.status(200).json(cachedResult);
+      }
+    } catch (e) {
+      console.warn(`⚠️ Cache Error: Konnte Redis nicht lesen (${e.message})`);
+    }
+
     console.log(`🔍 AI Visibility Check: ${cleanDomain} (Branche: ${cleanIndustry || 'auto'})`);
     await incrementRateLimit(clientIP, 'visibility');
 
@@ -794,18 +756,13 @@ export default async function handler(req, res) {
       });
       clearTimeout(timeout);
       
-      // ============================================================
-      // NEU: Größenlimit (5 MB) — Schutz vor Speicher-Overflow
-      // ============================================================
       const MAX_HTML_SIZE = 5 * 1024 * 1024; // 5 MB
       
-      // Variante A: Content-Length Header prüfen (schnell, aber nicht immer vorhanden)
       const contentLength = parseInt(response.headers.get('content-length') || '0');
       if (contentLength > MAX_HTML_SIZE) {
         throw new Error(`Seite zu groß (${Math.round(contentLength / 1024 / 1024)} MB). Max: 5 MB.`);
       }
       
-      // Variante B: Stream lesen mit Byte-Limit (funktioniert immer)
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let html = '';
@@ -818,8 +775,6 @@ export default async function handler(req, res) {
         totalBytes += value.length;
         if (totalBytes > MAX_HTML_SIZE) {
           reader.cancel();
-          // Wir brechen ab, verwenden aber was wir haben — 
-          // die ersten 5 MB reichen für Schema.org + E-E-A-T
           console.log(`⚠️ HTML abgeschnitten bei ${Math.round(totalBytes / 1024)} KB`);
           break;
         }
@@ -827,14 +782,10 @@ export default async function handler(req, res) {
         html += decoder.decode(value, { stream: true });
       }
       
-      // Finales Flush des Decoders
       html += decoder.decode();
       
       const $ = cheerio.load(html);
       
-      // =============================================================
-      // SCHEMA.ORG (JSON-LD)
-      // =============================================================
       $('script[type="application/ld+json"]').each((_, el) => {
         try {
           const parsed = JSON.parse($(el).html());
@@ -850,20 +801,14 @@ export default async function handler(req, res) {
         } catch (e) {}
       });
       
-      // =============================================================
-      // E-E-A-T SIGNALE (Multi-Signal mit Cheerio)
-      // =============================================================
       const schemaTypesLower = domainAnalysis.schemaTypes.map(t => t.toLowerCase());
       
-      // Alle href-Werte sammeln
       const allHrefs = [];
       $('a[href]').each((_, el) => allHrefs.push($(el).attr('href').toLowerCase()));
       
-      // Sichtbarer Text (ohne Script/Style)
       $('script, style, noscript').remove();
       const visibleText = $('body').text().replace(/\s+/g, ' ').toLowerCase();
       
-      // --- ABOUT / ÜBER-UNS ---
       const aboutKeywords = ['about', 'über-uns', 'ueber-uns', 'about-us', 'who-we-are', 'unser-team', 'das-sind-wir', '/team', '#about', '#über-uns', '#ueber-uns', '#team', '#michael', '#founder', '#gruender'];
       const hasAboutLink = allHrefs.some(href => aboutKeywords.some(kw => href.includes(kw)));
       const hasAboutSchema = schemaTypesLower.includes('aboutpage');
@@ -873,7 +818,6 @@ export default async function handler(req, res) {
       );
       domainAnalysis.hasAboutPage = hasAboutLink || hasAboutSection || (hasAboutSchema && hasAboutText);
       
-      // --- KONTAKT / IMPRESSUM ---
       const contactKeywords = ['kontakt', 'contact', 'impressum', 'imprint', 'legal-notice', 'contact-us'];
       const hasContactLink = allHrefs.some(href => contactKeywords.some(kw => href.includes(kw)));
       const hasContactSchema = schemaTypesLower.includes('contactpage');
@@ -881,10 +825,8 @@ export default async function handler(req, res) {
       const hasImpressumText = /impressum|kontakt|contact/.test(visibleText);
       domainAnalysis.hasContactPage = hasContactLink || hasContactSchema || (hasContactInfo && hasImpressumText);
       
-      // --- AUTOREN-INFORMATIONEN ---
       const hasAuthorSchema = ['person', 'author', 'profilepage'].some(t => schemaTypesLower.includes(t));
       
-      // Schema.org Person mit echten Daten (jobTitle, name etc.)
       let hasAuthorInSchema = false;
       $('script[type="application/ld+json"]').each((_, el) => {
         try {
@@ -909,13 +851,11 @@ export default async function handler(req, res) {
       
       domainAnalysis.hasAuthorInfo = hasAuthorInSchema || hasMetaAuthor || hasAuthorText || (hasAuthorSchema && hasByline);
       
-      // Debug-Logging
       console.log(`   E-E-A-T Signals (Cheerio):`);
       console.log(`     About: link=${hasAboutLink}, section=${hasAboutSection}, schema=${hasAboutSchema}, text=${hasAboutText} → ${domainAnalysis.hasAboutPage}`);
       console.log(`     Contact: link=${hasContactLink}, schema=${hasContactSchema}, tel/mailto=${hasContactInfo}, text=${hasImpressumText} → ${domainAnalysis.hasContactPage}`);
       console.log(`     Author: schema=${hasAuthorSchema}, schemaData=${hasAuthorInSchema}, meta=${hasMetaAuthor}, text=${hasAuthorText}, byline=${hasByline} → ${domainAnalysis.hasAuthorInfo}`);
 
-      // Reload $ for title/description (we removed scripts above)
       const $full = cheerio.load(html);
       domainAnalysis.title = $full('title').first().text().trim();
       domainAnalysis.description = $full('meta[name="description"]').attr('content')?.trim() || '';
@@ -931,7 +871,6 @@ export default async function handler(req, res) {
     const testResults = [];
     let detectedIndustry = cleanIndustry;
     
-    // Generische Branchen-Eingaben, bei denen Auto-Detection trotzdem laufen soll
     const genericIndustries = [
       'online shop', 'onlineshop', 'webshop', 'shop', 'e-commerce', 'ecommerce',
       'webseite', 'website', 'homepage', 'firma', 'unternehmen', 'dienstleistung',
@@ -1150,7 +1089,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
         }
       ];
       
-      // Parallel ausführen für Speed
       const chatGptPromises = chatGptTests.map(async (test) => {
         try {
           console.log(`🤖 ChatGPT Test: ${test.description}...`);
@@ -1162,7 +1100,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
           
           const sentiment = await analyzeSentiment(text, 'knowledge', mentioned);
           
-          // Konkurrenten extrahieren
           const domainBase = cleanDomain.replace(/\.[^.]+$/, '');
           const domainRegex = /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)/gi;
           const matches = text.match(domainRegex) || [];
@@ -1200,7 +1137,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       const results = await Promise.all(chatGptPromises);
       chatGptResults.push(...results);
       
-      // ChatGPT-Ergebnisse auch in testResults aufnehmen
       testResults.push(...chatGptResults);
       
       console.log(`✅ ChatGPT Cross-Check abgeschlossen (${chatGptResults.length} Tests)`);
@@ -1214,12 +1150,10 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
     let score = 0;
     const scoreBreakdown = [];
     
-    // Ergebnisse nach Engine trennen
     const geminiTests = testResults.filter(t => !t.engine || t.engine === 'gemini');
     const chatgptTests = testResults.filter(t => t.engine === 'chatgpt');
     const allTests = testResults.filter(t => t.sentiment !== 'fehler');
     
-    // 1. Gemini Web-Präsenz (max 35 Punkte) 
     const geminiMentions = geminiTests.filter(t => t.mentioned).length;
     const geminiMentionScore = geminiTests.length > 0 
       ? Math.round((geminiMentions / geminiTests.length) * 35) 
@@ -1232,7 +1166,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       detail: `${geminiMentions} von ${geminiTests.length} Gemini-Suchen finden die Domain`
     });
     
-    // 2. ChatGPT Cross-Check (max 15 Punkte)
     if (chatgptTests.length > 0) {
       const chatgptMentions = chatgptTests.filter(t => t.mentioned).length;
       const chatgptScore = Math.round((chatgptMentions / chatgptTests.length) * 15);
@@ -1245,14 +1178,12 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       });
     }
     
-    // 3. Technische Authority (max 30 Punkte)
     let techScore = 0;
     if (domainAnalysis.hasSchema) techScore += 10;
     if (domainAnalysis.schemaTypes.length >= 3) techScore += 6;
     if (domainAnalysis.hasAboutPage) techScore += 5;
     if (domainAnalysis.hasContactPage) techScore += 5;
     if (domainAnalysis.hasAuthorInfo) techScore += 5;
-    // Cap bei 30 (falls alle Signale da sind: 10+6+5+5+5 = 31)
     techScore = Math.min(techScore, 30);
     score += techScore;
     scoreBreakdown.push({
@@ -1262,9 +1193,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       detail: `Schema: ${domainAnalysis.hasSchema ? '✓' : '✗'}, E-E-A-T: ${[domainAnalysis.hasAboutPage, domainAnalysis.hasContactPage, domainAnalysis.hasAuthorInfo].filter(Boolean).length}/3`
     });
     
-    // 4. Sentiment & Reputation (max 20 Punkte)
-    // Nicht-erwähnte Tests zählen im Nenner mit, bekommen aber 0 Punkte.
-    // So koppelt Reputation an Sichtbarkeit: keine Erwähnung = keine Reputation.
     const mentionedTests = allTests.filter(t => t.mentioned);
     const positiveCount = mentionedTests.filter(t => t.sentiment === 'positiv').length;
     const neutralCount = mentionedTests.filter(t => t.sentiment === 'neutral').length;
@@ -1282,7 +1210,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       detail: `${positiveCount} positiv, ${neutralCount} neutral, ${negativeCount} negativ`
     });
 
-    // Score-Kategorie bestimmen
     let scoreCategory = 'niedrig', scoreCategoryLabel = 'Kaum sichtbar', scoreCategoryColor = '#ef4444';
     if (score >= 65) { 
       scoreCategory = 'hoch'; 
@@ -1336,7 +1263,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       });
     }
     
-    // E-E-A-T Empfehlungen – spezifisch für fehlende Signale
     const missingEEAT = [];
     if (!domainAnalysis.hasAboutPage) missingEEAT.push('"Über uns" Seite');
     if (!domainAnalysis.hasContactPage) missingEEAT.push('Kontakt/Impressum Seite');
@@ -1351,7 +1277,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       });
     }
     
-    // ChatGPT-spezifische Empfehlungen
     const chatgptMentionCount = chatGptResults.filter(t => t.mentioned).length;
     const geminiMentionCount = geminiTests.filter(t => t.mentioned).length;
     
@@ -1386,9 +1311,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       country: req.headers['cf-ipcountry'] || null
     });
 
-    // =================================================================
-    // 📊 DASHBOARD: Visibility-Check in Redis tracken
-    // =================================================================
     await trackVisibilityCheckStats({
       domain: cleanDomain,
       score,
@@ -1399,9 +1321,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       industry: detectedIndustry || cleanIndustry
     });
 
-    // =================================================================
-    // E-MAIL-BENACHRICHTIGUNG SENDEN (muss vor Response abgeschlossen sein auf Vercel)
-    // =================================================================
     await sendCheckNotification({
       domain: cleanDomain,
       industry: detectedIndustry || cleanIndustry,
@@ -1418,7 +1337,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
 
     console.log(`\n📊 Ergebnis für ${cleanDomain}: Score ${score}/100 (${scoreCategoryLabel})`);
 
-    return res.status(200).json({
+    const finalResponse = {
       success: true,
       domain: cleanDomain,
       industry: detectedIndustry || cleanIndustry || null,
@@ -1450,7 +1369,19 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
         totalTests: testResults.length, 
         remainingChecks: (await checkRateLimit(clientIP, 'visibility', DAILY_LIMIT)).remaining 
       }
-    });
+    };
+
+    // =================================================================
+    // NEU: IN REDIS SPEICHERN (Cache für 24 Stunden = 86400 Sekunden)
+    // =================================================================
+    try {
+      await redis.set(cacheKey, finalResponse, { ex: 86400 });
+      console.log(`💾 CACHE SET: Ergebnisse für ${cleanDomain} in Redis gespeichert.`);
+    } catch (e) {
+      console.warn(`⚠️ Cache Error: Konnte Ergebnis nicht speichern (${e.message})`);
+    }
+
+    return res.status(200).json(finalResponse);
 
   } catch (error) {
     console.error("❌ Error:", error);
@@ -1463,7 +1394,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
 // =================================================================
 async function detectIndustryFromResponse(model, knowledgeText, domain) {
   try {
-    // KI-Antwort bereinigen: Nur Klartext, keine Steuerzeichen/Quotes
     const cleanText = knowledgeText
       .substring(0, 500)
       .replace(/["`\\]/g, '')
