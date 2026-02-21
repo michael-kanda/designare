@@ -10,6 +10,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsContainer = document.getElementById('results-container');
     const loadingOverlay = document.getElementById('loading-overlay');
 
+    // Loading-Status-Element dynamisch ergänzen (falls nicht im HTML)
+    if (loadingOverlay && !loadingOverlay.querySelector('.loading-status')) {
+        const container = loadingOverlay.querySelector('.loading-content') || loadingOverlay;
+        const statusEl = document.createElement('div');
+        statusEl.className = 'loading-status';
+        container.appendChild(statusEl);
+    }
+
     // Accessibility: Screenreader informieren wenn Ergebnisse geladen
     resultsContainer.setAttribute('aria-live', 'polite');
 
@@ -176,6 +184,32 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingOverlay.classList.add('visible');
         resultsContainer.innerHTML = '';
 
+        // Live-Status-Updates: Phasen passend zum Backend-Ablauf
+        const progressSteps = [
+            { text: 'Untersuche Website-Struktur …', delay: 0 },
+            { text: 'Prüfe Schema.org & E-E-A-T Signale …', delay: 2500 },
+            { text: 'Befrage Gemini zur Domain …', delay: 5000 },
+            { text: 'Analysiere KI-Sichtbarkeit …', delay: 9000 },
+            { text: 'ChatGPT Cross-Check läuft …', delay: 13000 },
+            { text: 'Berechne Sichtbarkeits-Score …', delay: 17000 },
+            { text: 'Fast fertig – Empfehlungen werden erstellt …', delay: 21000 }
+        ];
+        const statusEl = loadingOverlay.querySelector('.loading-status');
+        const progressTimers = [];
+        if (statusEl) {
+            statusEl.textContent = progressSteps[0].text;
+            statusEl.style.opacity = '1';
+            for (let i = 1; i < progressSteps.length; i++) {
+                progressTimers.push(setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                    setTimeout(() => {
+                        statusEl.textContent = progressSteps[i].text;
+                        statusEl.style.opacity = '1';
+                    }, 200);
+                }, progressSteps[i].delay));
+            }
+        }
+
         try {
             const response = await fetch('/api/ai-visibility-check', {
                 method: 'POST',
@@ -217,6 +251,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } finally {
             clearTimeout(timeoutId);
+            progressTimers.forEach(t => clearTimeout(t));
+            if (statusEl) { statusEl.textContent = ''; statusEl.style.opacity = '0'; }
             currentController = null;
             submitBtn.disabled = getRemainingChecks() === 0;
             submitBtn.innerHTML = getRemainingChecks() === 0 
