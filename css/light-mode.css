@@ -24,14 +24,55 @@ body.light-mode .header-right-controls button:hover { color: var(--accent-color)
 body.light-mode footer { background-color: rgba(255, 255, 255, 0.95); border-color: var(--border-color); }
 body.light-mode #back-to-top { background-color: var(--accent-color); color: #ffffff; }
 
+
 /* ===================
-   3. AI-STYLES.CSS 
+   3. AI-STYLES.CSS (EVITA CHATBOX LIGHT MODE)
    =================== */
-body.light-mode #ai-chat-history { background-color: var(--surface-light); }
-body.light-mode .chat-message.user { background-color: var(--accent-color); color: #ffffff; }
-body.light-mode .chat-message.ai { background-color: var(--surface-heavy); color: var(--text-color); border: 1px solid var(--border-color); }
-body.light-mode #ai-chat-form { background-color: var(--bg-color); border-color: var(--border-color); }
-body.light-mode .modal-footer { border-top-color: var(--border-color); }
+
+body.light-mode #ai-chat-history { 
+    background-color: #f9fafb !important; 
+}
+
+body.light-mode .chat-message.ai { 
+    background-color: #ffffff !important; 
+    color: #1f2937 !important; /* Klares, dunkles Grau für perfekte Lesbarkeit */
+    border: 1px solid #e5e7eb !important; /* Hauchzarter Rahmen */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03) !important; /* Ganz leichte Tiefe */
+}
+
+body.light-mode .chat-message.user { 
+    background-color: var(--accent-color) !important; 
+    color: #ffffff !important; 
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(184, 134, 11, 0.15) !important;
+}
+
+body.light-mode #ai-chat-form { 
+    background-color: #ffffff !important; 
+    border-color: #e5e7eb !important; 
+}
+
+body.light-mode #ai-chat-form input[type="text"] {
+    background-color: #f3f4f6 !important; /* Modernes, helles Eingabefeld */
+    color: #111827 !important;
+    border: 1px solid transparent !important;
+    transition: all 0.3s ease;
+}
+
+body.light-mode #ai-chat-form input[type="text"]:focus {
+    background-color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.1) !important;
+}
+
+body.light-mode .modal-footer { 
+    border-top-color: #e5e7eb !important; 
+}
+
+body.light-mode .typing-dots span {
+    background-color: var(--accent-color) !important;
+    opacity: 0.6;
+}
 
 /* ===================
    4. BOOKING.CSS 
