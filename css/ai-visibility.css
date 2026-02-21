@@ -536,6 +536,21 @@
     color: var(--text-color-muted);
 }
 
+/* NEUES SENTIMENT "fehlend" */
+.sentiment-fehlend {
+    color: var(--text-color-muted);
+}
+.sentiment-fehlend .sentiment-dot {
+    background: #949494;
+    box-shadow: 0 0 5px rgba(148, 148, 148, 0.3);
+}
+
+.test-sentiment.sentiment-fehlend {
+    background-color: rgba(148, 148, 148, 0.1);
+    border: 1px solid rgba(148, 148, 148, 0.3);
+    color: #949494;
+}
+
 .test-content {
     padding: 0 1.25rem 1.25rem;
     border-top: 1px solid rgba(255,255,255,0.05);
