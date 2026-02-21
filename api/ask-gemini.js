@@ -206,9 +206,9 @@ const toolDeclarations = [
                 type: FunctionDeclarationSchemaType.STRING,
                 description: "'question' für eine Folgefrage oder 'link' für einen internen Link"
               },
-         text: {
+      text: {
                 type: FunctionDeclarationSchemaType.STRING,
-                description: "Kurzer klickbarer Text (max 6 Wörter). Bei Links: Der Seitentitel. Bei Fragen: Eine logische, natürliche Rückfrage des Nutzers an dich (z.B. 'Wie funktioniert das?' oder 'Was kostet SEO?'). KEIN Unsinn."
+                description: "Kurzer klickbarer Text (max 6 Wörter). Bei Links: Der Seitentitel. Bei Fragen: ZWINGEND aus der Ich-Perspektive des NUTZERS formuliert (Richtig: 'Was kannst du für mich tun?', Falsch: 'Was kann ich für dich tun?')."
               },
               url: {
                 type: FunctionDeclarationSchemaType.STRING,
@@ -458,7 +458,7 @@ TOOLS:
 2. compose_email → E-Mail-Service für den Nutzer. Vorher fehlende Infos erfragen (An wen? Betreff? Inhalt?). Versendet wird über Evita. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
 3. remember_user_name → Wenn Nutzer Vornamen nennt
 4. suggest_chips → IMMER aufrufen. Chips-Regeln:
-   - Frage-Chip (type: 'question'): Muss eine absolut logische, natürliche Folgefrage sein, die der Nutzer als NÄCHSTES stellen würde (max 6 Wörter). Bezieht sich zwingend auf deine letzte Antwort. Erfinde keinen unsinnigen Kontext!
+   - Frage-Chip (type: 'question'): Eine logische Folgefrage des Nutzers. WICHTIG: Formuliere IMMER aus der ICH-Perspektive des Nutzers! (z.B. "Wie kannst du mir helfen?", "Was kostet das?").
    - Link-Chips (type: 'link'): MÜSSEN thematisch zur aktuellen Frage passen. KEINE zufälligen Links. Nur URLs aus VERFÜGBARE LINKS nutzen. Lieber nur 1 Link als unpassende aufzufüllen.
 
 SPEZIAL-SEITEN:
