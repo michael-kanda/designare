@@ -156,24 +156,24 @@
                     <i class="fa-solid fa-user-astronaut"></i>
                     <div>
                         <strong>User Experience:</strong>
-                        <p>Für den Nutzer fühlt sich Evita an wie ein echter Mensch am anderen Ende der Leitung. Sie fragt beiläufig nach dem Namen, passt ihre Begrüßung an die Tageszeit an und merkt sich, was man beim letzten Besuch besprochen hat.</p>
+                        <p>Für den Nutzer fühlt sich Evita an wie ein echter Mensch am anderen Ende der Leitung. Sie fragt beiläufig nach dem Namen, passt ihre Begrüßung an die Tageszeit an und greift Themen auf, über die man beim letzten Mal gesprochen hat.</p>
                     </div>
                 </div>
 
                 <p>Evitas Fähigkeiten gehen weit über einfaches Frage-Antwort-Ping-Pong hinaus:</p>
 
                 <dl class="feature-list">
-                    <dt>🧠 Sitzungs- & Namensgedächtnis</dt>
-                    <dd>Wenn du Evita deinen Namen verrätst ("Ich bin Alfred"), merkt sie sich diesen. Kommst du Wochen später wieder auf die Webseite, begrüßt sie dich mit "Servus Alfred! Schön, dass du wieder vorbeischaust."</dd>
+                    <dt><i class="fa-solid fa-brain" style="color: var(--accent-color); margin-right: 8px;"></i> Sitzungs- & Themen-Gedächtnis</dt>
+                    <dd>Wenn du Evita deinen Namen verrätst ("Ich bin Alfred"), merkt sie sich diesen. Sie speichert aber auch den inhaltlichen Kontext. Kommst du Wochen später wieder auf die Webseite, begrüßt sie dich mit "Servus Alfred! Schön, dass du wieder vorbeischaust." und weiß sogar noch, ob du dich das letzte Mal für SEO oder Webdesign interessiert hast.</dd>
                     
-                    <dt>📅 Aktive Terminbuchung</dt>
-                    <dd>Fragst du nach einem Termin, schickt sie dir keinen Link, sondern öffnet direkt mein Buchungs-Widget in der Oberfläche.</dd>
+                    <dt><i class="fa-regular fa-calendar-check" style="color: var(--accent-color); margin-right: 8px;"></i> Direkte Rückruf-Buchung</dt>
+                    <dd>Fragst du nach einem Termin oder einem Call, schickt sie dir keinen schnöden Text-Link. Sie öffnet direkt im Chat eine Rückruf-Funktion, die an meinen Google-Kalender angebunden ist. Sobald du eine Zeit wählst, generiert das System sofort einen QR-Code, mit dem du den Termin direkt in dein Smartphone scannen kannst.</dd>
                     
-                    <dt>📧 E-Mail-Service</dt>
-                    <dd>Du bist zu faul, das Kontaktformular auszufüllen? Sag Evita einfach: "Schreib Michael, dass ich Hilfe bei SEO brauche". Sie verfasst einen perfekten Entwurf und sendet ihn nach deiner Freigabe direkt über die API ab.</dd>
+                    <dt><i class="fa-regular fa-envelope" style="color: var(--accent-color); margin-right: 8px;"></i> E-Mail-Service für jeden Empfänger</dt>
+                    <dd>Evita ist nicht nur ein Kontaktformular zu mir. Sie ist ein allgemeiner E-Mail-Assistent für dich. Du kannst ihr sagen: "Schreib eine Mail an kunde@beispiel.at und sag ihm freundlich ab." Sie verfasst einen perfekten Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt aus dem Chat-Fenster heraus ab.</dd>
                     
-                    <dt>🎯 Dynamische "Chips"</dt>
-                    <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema passen.</dd>
+                    <dt><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-color); margin-right: 8px;"></i> Dynamische Folge-Chips</dt>
+                    <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische, aus deiner Ich-Perspektive formulierte Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema der Konversation passen.</dd>
                 </dl>
             </section>
 
@@ -206,7 +206,7 @@
                     <ul>
                         <li><code>remember_user_name</code>: Ein Tool, das im Hintergrund anspringt, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
                         <li><code>suggest_chips</code>: Ein Tool, das die KI zwingt, ein JSON-Objekt mit exakt drei sinnvollen Folge-Aktionen zurückzugeben.</li>
-                        <li>Der System-Prompt steuert hart, <em>wann</em> sie welches Tool verwenden darf.</li>
+                        <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt des Nutzers entgegen und baut einen versandfertigen Payload auf.</li>
                     </ul>
                 </article>
 
@@ -256,7 +256,7 @@
                         </tr>
                         <tr>
                             <td>Gibt oft tote Links oder Textwüsten aus</td>
-                            <td>Bietet smarte Aktionen via Function Calling (E-Mail, Kalender)</td>
+                            <td>Bietet smarte Aktionen via Function Calling (Kalender, E-Mail-Versand an Dritte)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -267,23 +267,37 @@
                 
                 <div class="faq-accordion">
                     <details name="faq-group">
-                        <summary>Kann Evita wirklich E-Mails verschicken?</summary>
+                        <summary>Kann ich wirklich E-Mails an beliebige Personen senden?</summary>
                         <div class="faq-content">
-                            <p>Ja! Über das Tool <code>compose_email</code> formuliert sie einen Text, zeigt ihn dir an, und wenn du bestätigst, sendet das Backend die Nachricht via Brevo-API direkt an mich. Du musst deine E-Mail-Adresse nicht einmal extra in ein Formularfeld tippen.</p>
+                            <p>Ja! Du brauchst kein Mail-Programm öffnen. Sag Evita einfach, wem du schreiben möchtest und was drinstehen soll. Sie formuliert den Text perfekt aus und sendet die E-Mail über meine angebundene API an den gewünschten Empfänger. (Zur Sicherheit gibt es ein Limit von max. 3 Mails pro Sitzung).</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie lange merkt sich Evita, wer ich bin?</summary>
+                        <div class="faq-content">
+                            <p>Dein Name und die Themen, über die ihr gesprochen habt, werden in einer sicheren Redis-Datenbank für <strong>30 Tage nach deinem letzten Besuch</strong> gespeichert. Kommst du innerhalb dieses Zeitraums wieder, knüpft sie nahtlos an euer letztes Gespräch an.</p>
                         </div>
                     </details>
 
                     <details name="faq-group">
                         <summary>Was passiert, wenn die KI etwas Falsches sagt?</summary>
                         <div class="faq-content">
-                            <p>Das RAG-System verhindert das fast komplett. Bevor sie antwortet, liest sie die Fakten in der Vektordatenbank nach. Außerdem gibt es im System-Prompt die eiserne Regel: "Erfinde keine Fakten über Michael". Weiß sie etwas nicht, blockt sie charmant ab.</p>
+                            <p>Das RAG-System verhindert Halluzinationen fast komplett. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit meiner Website-Datenbank ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern charmant abzublocken.</p>
                         </div>
                     </details>
 
                     <details name="faq-group">
-                        <summary>Wo liegen die Daten?</summary>
+                        <summary>Wird mein Chatverlauf mitgelesen?</summary>
                         <div class="faq-content">
-                            <p>Das Kurzzeitgedächtnis (für Namen etc.) liegt in einer extrem schnellen Redis-Datenbank (Upstash). Es ist komplett anonymisiert an eine Session-ID geknüpft und verfällt automatisch nach 30 Tagen Inaktivität.</p>
+                            <p>Das System arbeitet Serverless und speichert deinen Chat-Verlauf kurzzeitig und komplett anonymisiert unter einer kryptischen Session-ID, damit Evita dem roten Faden folgen kann. Persönliche Daten bleiben dort, wo sie hingehören – bei dir.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie kommen neue Texte von der Website in ihr Gedächtnis?</summary>
+                        <div class="faq-content">
+                            <p>Vollautomatisch. Ein Server-Cronjob durchsucht jede Nacht meine komplette Website nach Änderungen. Neue Texte werden sofort in Vektoren übersetzt und in Evitas Datenbank hochgeladen. Am nächsten Morgen ist sie auf dem aktuellsten Stand.</p>
                         </div>
                     </details>
                 </div>
@@ -297,8 +311,8 @@
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
                     <ul>
-                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Bot hält Besucher länger auf der Seite.</li>
-                        <li><strong>Automatisierung:</strong> Termine und erste Qualifizierungs-E-Mails werden direkt im Chat abgewickelt.</li>
+                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent hält Besucher länger auf der Seite.</li>
+                        <li><strong>Automatisierung:</strong> Termine und E-Mails werden direkt im Chat abgewickelt, ohne die Ansicht zu wechseln.</li>
                         <li><strong>Zero Maintenance:</strong> Durch den Cronjob und die Vektordatenbank füttert sich die KI komplett selbstständig mit Updates.</li>
                     </ul>
                 </div>
@@ -308,7 +322,7 @@
 
             <section class="blog-cta-wrapper">
                 <h2>Willst du deine eigene KI-Assistenz?</h2>
-                <p>Egal ob für deinen Online-Shop, deine Kanzlei oder dein Portfolio. Wenn du einen Bot brauchst, der deine Website auswendig kennt und aktiv für dich arbeitet, lass uns sprechen.</p>
+                <p>Egal ob für deinen Online-Shop, deine Kanzlei oder dein Portfolio. Wenn du einen Bot brauchst, der deine Website auswendig kennt und aktiv für dich und deine Kunden arbeitet, lass uns sprechen.</p>
                 
                 <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
                     <i class="fa-solid fa-code"></i> Projekt anfragen
