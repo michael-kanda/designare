@@ -206,9 +206,9 @@ const toolDeclarations = [
                 type: FunctionDeclarationSchemaType.STRING,
                 description: "'question' für eine Folgefrage oder 'link' für einen internen Link"
               },
-              text: {
+         text: {
                 type: FunctionDeclarationSchemaType.STRING,
-                description: "Kurzer klickbarer Text (max 6 Wörter)"
+                description: "Kurzer klickbarer Text (max 6 Wörter). Bei Links: Der Seitentitel. Bei Fragen: Eine logische, natürliche Rückfrage des Nutzers an dich (z.B. 'Wie funktioniert das?' oder 'Was kostet SEO?'). KEIN Unsinn."
               },
               url: {
                 type: FunctionDeclarationSchemaType.STRING,
