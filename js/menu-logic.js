@@ -27,14 +27,16 @@ export function initMenuInteractions() {
         });
     }
 
-    // 2. Starte die Inhaltsverzeichnis-Logik
-    generateDynamicTOC();
+    // 2. TOC AUSKOMMENTIERT
+    // generateDynamicTOC();
 }
 
+/* === TOC AUSKOMMENTIERT ===
 /**
  * Erstellt dynamisch Buttons für alle H2-Überschriften der aktuellen Seite
  * und fügt sie in das Seitenmenü ein.
  */
+/*
 function generateDynamicTOC() {
     const tocContainer = document.getElementById('dynamic-toc-container');
     const tocList = document.getElementById('toc-list');
@@ -135,10 +137,13 @@ function generateDynamicTOC() {
         });
     }
 }
+*/
 
+/* === scrollToHeading AUSKOMMENTIERT ===
 /**
  * Hilfsfunktion für das sanfte Scrollen mit Header-Offset
  */
+/*
 function scrollToHeading(headingId) {
     const target = document.getElementById(headingId);
     if (target) {
@@ -148,3 +153,5 @@ function scrollToHeading(headingId) {
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
 }
+*/
+// === ENDE TOC AUSKOMMENTIERT ===
