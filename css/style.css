@@ -664,6 +664,8 @@ h2[id] { scroll-margin-top: calc(var(--header-height-desktop) + 40px); }
 body.light-mode .theme-toggle-wrapper .toggle-icon-left { color: var(--text-color-muted) !important; opacity: 0.6 !important; }
 body.light-mode .theme-toggle-wrapper .toggle-icon-right { color: var(--accent-color) !important; opacity: 1 !important; }
 
+/* WICHTIG: Hier fehlte die ID #theme-toggle, deshalb waren die Ecken eckig! */
+#theme-toggle,
 .theme-toggle {
     all: unset !important;
     position: relative !important;
@@ -671,11 +673,13 @@ body.light-mode .theme-toggle-wrapper .toggle-icon-right { color: var(--accent-c
     width: 40px !important;
     height: 22px !important;
     background-color: var(--surface-heavy) !important;
-    border-radius: 50px !important;
+    border-radius: 50px !important; /* Hier ist die Rundung */
     cursor: pointer !important;
+    box-sizing: border-box !important;
     transition: background-color 0.3s ease !important;
 }
 
+#theme-toggle .toggle-knob,
 .toggle-knob {
     position: absolute !important;
     top: 2.5px !important;
@@ -683,14 +687,21 @@ body.light-mode .theme-toggle-wrapper .toggle-icon-right { color: var(--accent-c
     width: 17px !important;
     height: 17px !important;
     background-color: #ffffff !important;
-    border-radius: 50% !important;
+    border-radius: 50% !important; /* Runder Kreis */
     transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    pointer-events: none !important;
 }
 
-body.light-mode .theme-toggle { background-color: var(--border-color) !important; }
-body.light-mode .toggle-knob { left: 20.5px !important; }
+body.light-mode #theme-toggle,
+body.light-mode .theme-toggle { 
+    background-color: var(--border-color) !important; 
+}
 
+body.light-mode #theme-toggle .toggle-knob,
+body.light-mode .toggle-knob { 
+    left: 20.5px !important; 
+}
 /* ===================
    14. BLOCKQUOTE & ZITATE
    =================== */
@@ -736,9 +747,26 @@ blockquote cite::before { content: '— '; color: var(--accent-color); }
     background-color: #1e1e1e !important; /* Bleibt immer dunkel! */
     border-color: #333 !important;
 }
-.tech-terminal-wrapper .cmd-text,
-.tech-terminal-wrapper .output-text { color: #e0e0e0 !important; }
 
+/* Zwingt ALLE Texte im Terminal hell zu bleiben, auch im Light Mode */
+body.light-mode .tech-terminal-wrapper,
+body.light-mode .tech-terminal-wrapper p,
+body.light-mode .tech-terminal-wrapper span,
+body.light-mode .tech-terminal-wrapper .cmd-text,
+body.light-mode .tech-terminal-wrapper .output-text,
+body.light-mode .terminal-body-content,
+body.light-mode .tech-fact-item { 
+    color: #e0e0e0 !important; 
+}
+
+/* Wichtige Wörter im Terminal hervorheben (Weiß statt Schwarz) */
+body.light-mode .tech-terminal-wrapper strong,
+body.light-mode .tech-terminal-wrapper b { 
+    color: #ffffff !important; 
+}
+
+
+/* Erfolgsnachricht */
 .success-checkmark { display: flex; justify-content: center; margin-bottom: 1.2rem; }
 .checkmark-circle {
     stroke-dasharray: 166; stroke-dashoffset: 166;
