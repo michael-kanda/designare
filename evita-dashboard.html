@@ -808,6 +808,11 @@
           <div class="kpi-sub">${t.visibility_checks} heute</div>
         </div>
         <div class="kpi-card">
+          <div class="kpi-label">📩 Report-Mails</div>
+          <div class="kpi-value green">${p.visibility_emails || 0}</div>
+          <div class="kpi-sub">${t.visibility_emails || 0} heute</div>
+        </div>
+        <div class="kpi-card">
           <div class="kpi-label">📧 E-Mails gesendet</div>
           <div class="kpi-value green">${p.emails_sent}</div>
           <div class="kpi-sub">${t.emails_sent || 0} heute${p.emails_failed > 0 ? ` · ${p.emails_failed} fehlgeschlagen` : ''}</div>
@@ -901,6 +906,22 @@
               }
             </div>
           </div>
+        </div>`;
+      }
+
+      // ===== VISIBILITY REPORT EMAILS =====
+      if (data.visibilityEmails && data.visibilityEmails.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">📩 Letzte Report-Mails (KI-Sichtbarkeit)</div>
+          ${data.visibilityEmails.map(e => `
+            <div class="vis-check-item">
+              <div>
+                <div class="vis-domain">${escHTML(e.domain)}</div>
+                <div class="vis-industry">${escHTML(e.email)} · ${escHTML(e.industry || '–')}${e.timestamp ? ` · ${new Date(e.timestamp).toLocaleString('de-AT')}` : ''}</div>
+              </div>
+              <span class="vis-score ${e.score >= 65 ? 'hoch' : e.score >= 35 ? 'mittel' : 'niedrig'}">${e.score}/100</span>
+            </div>
+          `).join('')}
         </div>`;
       }
 
