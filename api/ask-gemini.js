@@ -563,12 +563,9 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
             subject: args.subject,
             body: args.body
           };
+          // Immer unseren eigenen Draft-Display verwenden (Gemini-Text enthält oft Duplikate)
           const draftDisplay = `\n\n**E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
-          if (!responsePayload.answer) {
-            responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
-          } else if (!responsePayload.answer.includes(args.subject)) {
-            responsePayload.answer += draftDisplay;
-          }
+          responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
           break;
         }
 
@@ -602,6 +599,11 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
         default:
           console.warn(`Unbekannter Tool: ${fc.name}`);
       }
+    }
+
+    // Chips unterdrücken wenn E-Mail-Entwurf aktiv (kontraproduktiv)
+    if (responsePayload.emailDraft) {
+      delete responsePayload.chips;
     }
 
     // ===================================================================
