@@ -197,6 +197,15 @@
     font-size: 0.9rem;
 }
 
+.loading-status {
+    margin-top: 1.2rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.02em;
+    min-height: 1.4em;
+    transition: opacity 0.2s ease;
+}
+
 /* --- RESULTS CONTAINER --- */
 .results-container {
     margin-top: 3rem;
@@ -737,6 +746,92 @@
     color: #ef4444;
 }
 
+/* --- EMAIL REPORT FORM --- */
+.email-report-section {
+    background: linear-gradient(135deg, rgba(196, 163, 90, 0.08) 0%, rgba(0,0,0,0) 100%);
+    border-color: rgba(196, 163, 90, 0.2);
+}
+
+.email-report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.email-report-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.email-report-input {
+    flex: 1;
+}
+
+.send-report-btn {
+    background: var(--accent-color);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.send-report-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(196, 163, 90, 0.3);
+}
+
+.send-report-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.email-consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-color-muted);
+    cursor: pointer;
+}
+
+.email-consent-label input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.email-consent-label a {
+    color: var(--accent-color);
+}
+
+.email-report-status {
+    font-size: 0.9rem;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.email-report-status.status-success {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.email-report-status.status-error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 600px) {
     .ai-visibility-tool {
@@ -754,5 +849,9 @@
 
     .industry-buttons {
         justify-content: center;
+    }
+
+    .email-report-row {
+        flex-direction: column;
     }
 }
