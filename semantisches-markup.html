@@ -27,7 +27,7 @@
   "@graph": [
     {
       "@type": "BlogPosting",
-      "@id": "https://designare.at/semantisches-markup.html#article",
+      "@id": "https://designare.at/semantisches-markup#article",
       "headline": "Semantisches Markup: Warum sauberer Code das Fundament für SEO und KI-Suche ist",
       "description": "Eine technische Analyse, warum semantisches HTML die Grundlage für moderne Suchmaschinenoptimierung und KI-Verständnis bildet.",
       "image": "https://designare.at/images/semantisches-html.webp",
@@ -60,12 +60,12 @@
         "Webentwicklung"
       ],
       "hasPart": {
-        "@id": "https://designare.at/semantisches-markup.html#faq-heading"
+        "@id": "https://designare.at/semantisches-markup#faq-heading"
       }
     },
     {
       "@type": "FAQPage",
-      "@id": "https://designare.at/semantisches-markup.html#faq-heading",
+      "@id": "https://designare.at/semantisches-markup#faq-heading",
       "mainEntity": [
         {
           "@type": "Question",
@@ -134,7 +134,7 @@
       
                 <div class="article-meta">
                     <time datetime="2025-12-15">15. Dezember 2025</time>
-                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -180,7 +180,7 @@
                 <h2 id="definition-heading">Was ist semantisches Markup?</h2>
                 
                 <div class="info-box">
-                    <i class="fa-solid fa-circle-info"></i>
+                    <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
                     <div>
                         <strong>Übersicht:</strong>
                         <p>Semantisches Markup ist das Fundament für echte Web-Handwerkskunst. Es bedeutet, HTML-Tags so zu verwenden, dass sie die <strong>Bedeutung</strong> des Inhalts beschreiben, nicht dessen Aussehen. Während ein <code>&lt;div&gt;</code> ein inhaltsleerer Container ist, kommunizieren Tags wie <code>&lt;article&gt;</code>, <code>&lt;nav&gt;</code> oder <code>&lt;aside&gt;</code> dem Browser und Crawlern, worum es sich bei den Daten handelt.</p>
@@ -193,10 +193,10 @@
             </section>
 
             <section aria-labelledby="importance-heading">
-                <h2 id="importance-heading">Warum ist das wichtig? <span class="article-white">SEO, GEO und Performance<span></h2>
+                <h2 id="importance-heading">Warum ist das wichtig? <span class="article-white">SEO, GEO und Performance</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-gear"></i>
+                    <i aria-hidden="true" class="fa-solid fa-gear"></i>
                     <div>
                         <strong>Technologie & Impact:</strong>
                         <p>Der Einsatz von semantischem "Hand-Code" statt generischer Container sorgt nicht nur für sauberen Quellcode, sondern ist der Schlüssel für <strong>GEO (Generative Engine Optimization).</strong> Einen umfassenden Überblick über die Strategie dahinter bietet der <a href="https://designare.at/geo-seo" title="GEO vs. SEO: Der komplette Guide">GEO-Leitfaden</a>.</p>
@@ -221,11 +221,11 @@
             </section>
 
             <section aria-labelledby="guide-heading">
-                <h2 id="guide-heading">Schritt-für-Schritt Anleitung: <span class="article-white">So strukturierst du richtig<span></h2>
+                <h2 id="guide-heading">Schritt-für-Schritt Anleitung: <span class="article-white">So strukturierst du richtig</span></h2>
                 
                 <p>Hier gehen wir vom generischen Code zum semantischen Meisterwerk.</p>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 1: <span class="article-white">Die Grobstruktur (Landmarks) definieren</span></h3>
                     <p>Vergiss "Header-Divs". Dein Dokument braucht klare Landmarks, damit Crawler sofort wissen, wo sie sich befinden.</p>
                     <ul>
@@ -234,39 +234,39 @@
                         <li>Packe den eigentlichen Inhalt zwingend in <code>&lt;main&gt;</code> darf nur einmal pro Seite vorkommen!.</li>
                         <li>Schließe mit <code>&lt;footer&gt;</code> ab.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
-                    <h3>Schritt 2: <span class="article-white">Content-Container wählen<span></h3>
+                <div class="step-guide">
+                    <h3>Schritt 2: <span class="article-white">Content-Container wählen</span></h3>
                     <p>Jetzt geht es ans Eingemachte. Statt alles in <code>div class="content"</code> zu werfen, nutze HTML5-Tags:</p>
                     <ul>
                         <li><strong><code>&lt;article&gt;</code>:</strong> Für in sich geschlossene Inhalte z.B. ein Blogpost oder eine News-Card, die auch alleine stehen könnten.</li>
                         <li><strong><code>&lt;section&gt;</code>:</strong> Um thematische Abschnitte innerhalb eines Artikels zu gruppieren (braucht meist eine eigene Überschrift).</li>
                         <li><strong><code>&lt;aside&gt;</code>:</strong> Für Inhalte, die nur indirekt mit dem Haupttext zu tun haben (Sidebar, Call-to-Action Boxen).</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
-                    <h3>Schritt 3: <span class="article-white">Hierarchie und Text-Semantik<span></h3>
+                <div class="step-guide">
+                    <h3>Schritt 3: <span class="article-white">Hierarchie und Text-Semantik</span></h3>
                     <p>Struktur ist King.</p>
                     <ul>
                         <li><strong>Headings:</strong> Nutze <code>&lt;h1&gt;</code> bis <code>&lt;h6&gt;</code> strikt hierarchisch. Springe nicht von h2 auf h4, nur weil es "besser aussieht". Das Design machst du mit CSS, die Struktur mit HTML.</li>
                         <li><strong>Text-Auszeichnung:</strong> Nutze <code>&lt;strong&gt;</code> für wichtige Keywords (semantische Betonung) statt <code>&lt;b&gt;</code> (nur fett). Nutze <code>&lt;em&gt;</code> für Betonung statt <code>&lt;i&gt;</code>.</li>
                         <li><strong>Listen:</strong> Nutze <code>&lt;ul&gt;</code> oder <code>&lt;ol&gt;</code> für Aufzählungen. Breche niemals Textwüsten nur mit <code>&lt;br&gt;</code> Tags um, wenn es eigentlich eine Liste ist.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 4: Metadaten und Mikro-Formate</h3>
                     <p>Für die "Evita" unter den Crawlern (die KI-Assistenten):</p>
                     <ul>
                         <li>Nutze <code>&lt;time datetime="2023-10-27"&gt;</code> für Datumsangaben. So verstehen Maschinen den zeitlichen Kontext exakt.</li>
                         <li>Verwende <code>&lt;figure&gt;</code> und <code>&lt;figcaption&gt;</code> für Bilder und deren Beschriftung, um eine semantische Verbindung herzustellen.</li>
                     </ul>
-                </article>
+                </div>
 
                 <aside class="expert-tip">
-                    <i class="fa-solid fa-lightbulb"></i>
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
                     <div>
                         <strong>Experten-Tipp:</strong>
                         <p><strong>Schema.org Integration:</strong> Semantisches HTML ist die Pflicht, strukturierte Daten (JSON-LD) sind die Kür. Wenn du deine semantischen Tags zusätzlich mit Schema.org Markup anreicherst z.B. <code>Article</code>, <code>Breadcrumb</code>, <code>FAQPage</code>, lieferst du den Suchmaschinen das Datenfutter auf dem Silbertablett. Das erhöht die Chance auf Rich Snippets massiv. Wie du Schema.org strategisch für GEO nutzt, erklärt der <a href="schema-org-meta-description.html" title="Schema.org für KI-Suche optimieren">Guide zu strukturierten Daten</a>. Für sauberes JSON-LD Markup direkt in WordPress nutze ich das Schema-Modul der <a href="seo-wunderkiste.html" title="SEO Wunderkiste: JSON-LD Modul">SEO Wunderkiste</a>.</p>
@@ -282,8 +282,8 @@
                 <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th scope="col" class="th-wrong">Falsch <i class="fa-solid fa-xmark"></i></th>
-                            <th scope="col" class="th-correct">Richtig <i class="fa-solid fa-check"></i></th>
+                            <th scope="col" class="th-wrong">Falsch <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Richtig <i aria-hidden="true" class="fa-solid fa-check"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -304,10 +304,10 @@
             </section>
 
             <section aria-labelledby="advanced-heading">
-                <h2 id="advanced-heading">Fortgeschrittene Tipps: <span class="article-white">GEO und KI-Readiness<span></h2>
+                <h2 id="advanced-heading">Fortgeschrittene Tipps: <span class="article-white">GEO und KI-Readiness</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-stars"></i>
+                    <i aria-hidden="true" class="fa-solid fa-stars"></i>
                     <div>
                         <strong>Next Level SEO:</strong>
                      <p>In einer Welt, in der KI-basierte Suche (Search Generative Experience) zunimmt, ist dein Code deine Visitenkarte für den Algorithmus. Du willst wissen, wie man Entitäten via JSON-LD verknüpft? Hier geht es zum <a href="geo-maschinenlesbarkeit-guide.html" title="Deep Dive: Webseiten für KIs optimieren">Deep Dive: Webseite maschinenlesbar machen</a>.</p>
@@ -371,7 +371,7 @@
             </section>
 
             <section aria-labelledby="conclusion-heading">
-                <h2 id="conclusion-heading">Fazit: <span class="article-white">Semantisches Markup als Fundament für die KI-Ära<span></h2>
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Semantisches Markup als Fundament für die KI-Ära</span></h2>
                 
                 <p>Semantisches Markup ist längst kein reines "Nice-to-have" für Barrierefreiheit mehr – es ist die harte Währung, mit der du bei modernen Suchmaschinen und KI-Modellen bezahlst. Wer heute noch "Div-Soup" kocht, liefert zwar Pixel, aber keinen Kontext. Damit LLMs und Crawler den wahren Wert deiner Inhalte erfassen können, musst du die Sprache sprechen, die sie verstehen: sauberes, strukturiertes HTML. Es geht nicht mehr nur darum, wie eine Seite aussieht, sondern darum, was sie <em>bedeutet</em>.</p>
 
@@ -392,7 +392,7 @@
     <p>Hand aufs Herz: Wie viele `div`-Verschachtelungen hat deine Startseite? Wenn du Bock hast, mal tief in die HTML-Struktur einzutauchen und echten "Clean Code" zu sehen:</p>
     
     <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
-        <i class="fa-solid fa-laptop-code"></i> Code-Review gefällig?
+        <i aria-hidden="true" class="fa-solid fa-laptop-code"></i> Code-Review gefällig?
     </button>
 </section>
             <div id="feedback-placeholder"></div>
