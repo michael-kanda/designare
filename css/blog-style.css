@@ -55,14 +55,7 @@ color: var(--accent-color);
       text-transform: uppercase;
 }
 
-.breadcrumb ol {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+/* breadcrumb ol: siehe Breadcrumb-Section unten */
 
 .article-meta {
     display: flex;
@@ -238,13 +231,17 @@ color: var(--text-color);
    6. CONTENT BOXES
    =================== */
 
-/* Summary Box */
+/* Summary Box (Mobile First → Desktop via Media Query unten) */
 .summary-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
     background-color: rgba(196, 163, 90, 0.05);
-    /* border-left: 2px solid var(--accent-color) !important; */
-    padding: 1.5rem;
+    padding: 2rem;
     margin: 2rem 0;
     border-radius: 0;
+    border: 1px solid var(--border-color);
 }
 
 .summary-box h3 {
@@ -625,7 +622,7 @@ color: var(--text-color);
 
 @media print {
     #blog-main { padding: 0; max-width: 100%; }
-    .breadcrumb, .cta-section, .article-footer { display: none; }
+    .breadcrumb, .cta-section, .article-footer, .related-articles, .faq-cards-section { display: none; }
     .article-header { border-bottom: 2px solid #000; }
     .blog-article h1, .blog-article h2, .blog-article h3 { color: #000; page-break-after: avoid; }
     .blog-article section { page-break-inside: avoid; }
@@ -633,19 +630,7 @@ color: var(--text-color);
     .blog-article code { border: 1px solid #000; }
 }
 
-/* --- Mobile First (Standard) --- */
-.summary-box {
-    display: flex;
-    flex-direction: column; /* Erst Text, dann Bild untereinander */
-    gap: 2rem;
-    align-items: center;
-    
-    /* Dein bestehendes Styling (Farben, Padding) wird hier übernommen */
-    background-color: var(--box-bg, #1a1a1a); /* Fallback, falls Variable fehlt */
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* --- Summary Box: Bild-Styling --- */
 
 .summary-image img {
     max-width: 100%;
@@ -945,14 +930,7 @@ color: var(--text-color);
    PRINT
    =================== */
 
-@media print {
-    .breadcrumb,
-    .related-articles {
-        display: none;
-    }
-}
-
-* ===================
+/* Print: see consolidated block above (line ~630) *//* ===================
    BLOG OVERVIEW - FAQ CARDS
    =================== */
 
@@ -994,13 +972,13 @@ color: var(--text-color);
 }
 
 .faq-card:hover {
-    border-color: var(--accent-color, #00d4ff);
+    border-color: var(--accent-color, #c4a35a);
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(196, 163, 90, 0.08);
 }
 
 .faq-card:hover .faq-card-link {
-    color: var(--accent-color, #00d4ff);
+    color: var(--accent-color, #c4a35a);
 }
 
 .faq-card:hover .faq-card-link i {
@@ -1017,7 +995,7 @@ color: var(--text-color);
     background: var(--card-bg-hover, rgba(255,255,255,0.05));
     border-radius: 10px;
     font-size: 1.3rem;
-    color: var(--accent-color, #00d4ff);
+    color: var(--accent-color, #c4a35a);
 }
 
 .faq-card-content {
@@ -1028,7 +1006,7 @@ color: var(--text-color);
 .faq-card-category {
     display: inline-block;
     font-size: 0.7rem;
-    color: var(--accent-color, #00d4ff);
+    color: var(--accent-color, #c4a35a);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.4rem;
@@ -1069,9 +1047,4 @@ color: var(--text-color);
    PRINT STYLES
    =================== */
 
-@media print {
-    .related-articles,
-    .faq-cards-section {
-        display: none;
-    }
-}
+/* Print: see consolidated block above (line ~630) */
