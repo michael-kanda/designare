@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
@@ -90,9 +92,9 @@
   ]
 }
 </script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
-    <script src="js/analytics-proxy.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
 </head>
 
 <body class="dark-mode no-scroll">
@@ -112,7 +114,7 @@
       
                 <div class="article-meta">
                     <time datetime="2025-12-25">25. Dezember 2025</time>
-                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 10 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 10 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -158,7 +160,7 @@
                 <h2 id="mechanics-heading">Die Mechanik: <span class="article-white">Von Keywords zu Entitäten</span></h2>
                 
                 <div class="info-box">
-                    <i class="fa-solid fa-robot"></i>
+                    <i aria-hidden="true" class="fa-solid fa-robot"></i>
                     <div>
                         <strong>Verständnis:</strong>
                         <p>Ein Large Language Model (LLM) „liest" eine Webseite nicht einfach nur – es versucht, die zugrunde liegende <strong>Entität</strong> (z.B. ein Unternehmen, ein Konzept, eine Person) und deren Kontext zu extrahieren. Keywords sind zweitrangig; semantische Beziehungen sind die neue Währung.</p>
@@ -174,7 +176,7 @@
                 <h2 id="importance-heading">Warum Maschinenlesbarkeit entscheidet</h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-chart-line"></i>
+                    <i aria-hidden="true" class="fa-solid fa-chart-line"></i>
                     <div>
                         <strong>Impact:</strong>
                         <p>In einer Ära des "Zero-Click-Search", in der Nutzer Antworten direkt im Chat erhalten, wird die Webseite zum reinen Datenlieferanten. Wer hier nicht maschinenlesbar ist, findet in den generierten Antworten nicht statt.</p>
@@ -203,7 +205,7 @@
                 
                 <p>Hier ist der Implementierungs-Guide, um deine Web-Präsenz als hochgradig optimiertes Daten-Asset aufzubauen.</p>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 1: <span class="article-white">High-Level Schema.org Markup (JSON-LD)</span></h3>
                     <p>Der wichtigste Hebel ist JSON-LD. Es reicht nicht mehr aus, nur generische Typen zu verwenden. Für die KI-Suche müssen spezifische Properties genutzt werden:</p>
                     <ul>
@@ -212,9 +214,9 @@
                         <li>Das Ziel: Die Identität deiner Entität zweifelsfrei klären.</li>
                     </ul>
                     <p>Eine detaillierte Anleitung zur Schema.org-Implementierung findest du im <a href="schema-org-meta-description.html" title="Schema.org als neue Meta-Description">Schema.org Deep-Dive</a>.</p>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 2: <span class="article-white">Semantisches HTML & Content-Clustering</span></h3>
                     <p>LLMs zerlegen Informationen in "Chunks". Deine HTML-Struktur muss das widerspiegeln:</p>
                     <ul>
@@ -222,9 +224,9 @@
                         <li>Jede Section sollte ein Teilproblem lösen. Statt Textwüsten zu produzieren, unterteile Content in präzise Unterpunkte (z.B. "Voraussetzungen", "Implementierung", "Fehlerbehebung").</li>
                         <li>Dies erleichtert der KI das semantische Parsing enorm.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 3: <span class="article-white">Entitäten-Verknüpfung im Text</span></h3>
                     <p>Vermeide vage Pronomen ("Wir", "Es", "Die Lösung").</p>
                     <ul>
@@ -232,19 +234,19 @@
                         <li>Verknüpfe Fachbegriffe intern mit Glossar-Seiten oder Definitionen.</li>
                         <li>Je enger das Netz aus Begriffen geknüpft ist, desto höher bewertet die KI die "Domain Authority".</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
-                    <h3>Schritt 4: <span class="article-white">Fakten-Dichte und Tabellen<span></h3>
+                <div class="step-guide">
+                    <h3>Schritt 4: <span class="article-white">Fakten-Dichte und Tabellen</span></h3>
                     <p>LLMs lieben strukturierte Daten. Integriere statistische Daten, Experten-Zitate und Tabellen.</p>
                     <ul>
                         <li>Nutze HTML-Tabellen für Vergleiche – diese werden von KIs fast immer als "Feature Snippet" oder direkte Antwortquelle bevorzugt.</li>
                         <li>Extrem niedrige TTFB (Time To First Byte) ist essenziell, da KI-Crawler oft striktere Timeouts haben als der Google-Bot. Vermeide daher <a href="https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026" title="Die 512MB-Falle: Warum PageBuilder Performance killen">ressourcenhungrige PageBuilder-Architekturen</a>.</li>
                     </ul>
-                </article>
+                </div>
 
                 <aside class="expert-tip">
-                    <i class="fa-solid fa-lightbulb"></i>
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
                     <div>
                         <strong>Experten-Tipp:</strong>
                         <p><strong>Voice & Speakable:</strong> Ergänze dein Markup um das <code>speakable</code> Attribut in Schema.org. Damit signalisierst du Voice-Assistenten und KI-Modellen explizit, welche Teile deines Inhalts für die auditive Wiedergabe (Text-to-Speech) geeignet sind. Das erhöht die Chance, von Alexa, Siri oder ChatGPT Voice zitiert zu werden.</p>
@@ -260,8 +262,8 @@
                 <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th scope="col" class="th-wrong">Falsch <i class="fa-solid fa-xmark"></i></th>
-                            <th scope="col" class="th-correct">Richtig <i class="fa-solid fa-check"></i></th>
+                            <th scope="col" class="th-wrong">Falsch <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Richtig <i aria-hidden="true" class="fa-solid fa-check"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -286,10 +288,10 @@
             </section>
 
             <section aria-labelledby="advanced-heading">
-                <h2 id="advanced-heading">Deep Dive: <span class="article-white">Fortgeschrittene Strategien<span></h2>
+                <h2 id="advanced-heading">Deep Dive: <span class="article-white">Fortgeschrittene Strategien</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-microchip"></i>
+                    <i aria-hidden="true" class="fa-solid fa-microchip"></i>
                     <div>
                         <strong>Recheneffizienz:</strong>
                         <p>KI-Modelle müssen effizient arbeiten. Komplexe Probleme sollten auf der Webseite bereits in logische Teilaufgaben zerlegt sein (Chain-of-Thought Vorbereitung).</p>
@@ -336,7 +338,7 @@
             </section>
 
             <section aria-labelledby="conclusion-heading">
-                <h2 id="conclusion-heading">Fazit: <span class="article-white">Die Architektur der Sichtbarkeit<span></h2>
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Die Architektur der Sichtbarkeit</span></h2>
                 
                 <p>Die Transformation zur maschinenlesbaren Webseite ist kein optionales Feature mehr, sondern das Fundament für organischen Traffic in Zeiten von LLMs. Der Übergang von der klassischen Suche zur KI-Suche markiert einen Paradigmenwechsel: Es geht nicht mehr nur darum, gefunden zu werden, sondern darum, von Algorithmen <em>verstanden</em> zu werden.</p>
 
@@ -358,7 +360,7 @@
                 <p>Versteht ChatGPT wirklich, was dein Unternehmen tut? Wenn du unsicher bist, wie gut deine Entitäten und dein Markup aufgestellt sind, lass uns einen Tech-Check machen.</p>
                 
                 <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
-                    <i class="fa-solid fa-microchip"></i> KI-Readiness Checken
+                    <i aria-hidden="true" class="fa-solid fa-microchip"></i> KI-Readiness Checken
                 </button>
             </section>
             <div id="feedback-placeholder"></div>
