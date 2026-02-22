@@ -1143,11 +1143,10 @@ export const initAiForm = () => {
             return div.innerHTML;
         }
     };
-
-    // ===================================================================
+// ===================================================================
     // FOLLOWUP CHIPS (Quick Suggestions)
     // ===================================================================
-const FollowupChips = {
+    const FollowupChips = {
         remove() {
             document.querySelectorAll('.evita-followup-chips').forEach(el => el.remove());
         },
@@ -1161,6 +1160,7 @@ const FollowupChips = {
 
             chips.forEach(chip => {
                 if (chip.type === 'link' && chip.url) {
+                    // Normaler Link-Chip
                     const a = document.createElement('a');
                     a.className = 'evita-followup-chip evita-chip-link';
                     a.href = chip.url;
@@ -1168,7 +1168,22 @@ const FollowupChips = {
                     a.rel = 'noopener';
                     a.innerHTML = '<img src="/images/link.svg" alt="" class="evita-chip-icon">' + this.esc(chip.text);
                     container.appendChild(a);
-                } else {
+               } else if (chip.type === 'booking') {
+                    const btn = document.createElement('button');
+                    // Nutzt exakt die gleiche Standard-Klasse wie die anderen Chips
+                    btn.className = 'evita-followup-chip'; 
+                    btn.type = 'button';
+                    btn.innerHTML = '<i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ' + this.esc(chip.text);
+                    btn.addEventListener('click', () => {
+                        this.remove();
+                        BookingModal.launch();
+                    });
+                    container.appendChild(btn);
+                }
+                
+                /*
+                // WIE GEWÜNSCHT AUSKOMMENTIERT: Weiterführende Fragen (Frage-Chips)
+                else {
                     const btn = document.createElement('button');
                     btn.className = 'evita-followup-chip';
                     btn.type = 'button';
@@ -1179,9 +1194,9 @@ const FollowupChips = {
                     });
                     container.appendChild(btn);
                 }
+                */
             });
 
-            // INNERHALB der AI-Message (erbt Alignment)
             if (aiMsgElement) {
                 aiMsgElement.appendChild(container);
             } else {
