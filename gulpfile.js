@@ -11,7 +11,8 @@ const coreFiles = [
     'css/header-footer.css',      // Globales Layout
     'css/side-menu.css',          // Navigation
     'css/menu-interactive.css',   // Interaktive Menus
-    'css/ai-styles.css',          // Evita/Chat Styles
+    'css/ai-styles.css',
+    'css/evita-styles.css',       
     'css/booking.css',      
     'css/legal-style.css',    
     'css/light-mode.css'         // MUSS ZULETZT sein fuer Overrides
