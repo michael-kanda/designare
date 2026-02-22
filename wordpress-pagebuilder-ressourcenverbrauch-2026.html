@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
@@ -48,7 +50,7 @@
     </script>
      <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
-    <script src="/js/analytics-proxy.js" async></script>
+    <script src="js/analytics-proxy.js" async></script>
 </head>
 
 <body class="dark-mode no-scroll">
@@ -68,7 +70,7 @@
       
                 <div class="article-meta">
                     <time datetime="2025-12-20">20. Dezember 2025</time>
-                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 6 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 6 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -110,10 +112,10 @@
             </section>
 
             <section aria-labelledby="status-quo">
-                <h2 id="status-quo">Der Status Quo: <span class="article-white">Wenn der DOM-Baum zum Urwald wird. <span></h2>
+                <h2 id="status-quo">Der Status Quo: <span class="article-white">Wenn der DOM-Baum zum Urwald wird. </span></h2>
                 
                 <div class="info-box">
-                    <i class="fa-solid fa-circle-info"></i>
+                    <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
                     <div>
                         <strong>Die Div-Suppe:</strong>
                         <p>Ein PageBuilder verspricht Freiheit, liefert technisch aber oft einen orchestralen Albtraum. Was in sauberem HTML5 aus drei Zeilen Code besteht, verwandeln gängige Builder in ein Konstrukt aus zehn verschachtelten div-Container. Jeder dieser Container muss vom Browser gerendert werden. Wie saubere Code-Strukturen aussehen, zeigt der Artikel ueber <a href="https://designare.at/semantisches-markup" title="Von Div-Soup zu semantischem HTML">semantisches Markup</a>.</p>
@@ -127,7 +129,7 @@
                 <h2 id="memory-limit">Die 512MB-Grenze: <span class="article-white">PHP-Hunger und KI-Realität</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-gear"></i>
+                    <i aria-hidden="true" class="fa-solid fa-gear"></i>
                     <div>
                         <strong>Technologie-Check:</strong>
                         <p>Mit WordPress 6.9 und der neuen <strong>Abilities API</strong> steigt der Rechenbedarf exponentiell. Wer hier auf Standard-Hosting setzt, scheitert 2026 am Ressourcen-Limit.</p>
@@ -143,7 +145,7 @@
                 <p>Ein massives Problem vieler WordPress Webseiten ist die clientseitige Einbindung von APIs ueber JavaScript-Snippets. Dies wirkt sich katastrophal auf Performance und Sicherheit aus.</p>
 
                 <aside class="expert-tip">
-                    <i class="fa-solid fa-lightbulb"></i>
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
                     <div>
                         <strong>Mein technischer Standard:</strong>
                         <p>Kritische Logik gehört auf den Server. Durch die Entwicklung serverseitiger Erweiterungen wird vermieden, dass API-Keys offen im Quellcode liegen. Das schützt nicht nur sensible Daten und entlastet den Browser, sondern nutzt auch das serverseitige PHP-Memory effizient im geschuetzten Backend. Ein Beispiel fuer performante serverseitige Logik ist die <a href="https://designare.at/KI-Integration-auf-Webseiten" title="Serverless vs. Plugin: Der Performance-Vergleich">Serverless-Integration von KI-Assistenten</a>.</p>
@@ -159,8 +161,8 @@
                 <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th scope="col" class="th-wrong">Falsch <i class="fa-solid fa-xmark"></i></th>
-                            <th scope="col" class="th-correct">Richtig <i class="fa-solid fa-check"></i></th>
+                            <th scope="col" class="th-wrong">Falsch <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Richtig <i aria-hidden="true" class="fa-solid fa-check"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -202,7 +204,7 @@
     <p>Vielleicht ist es Zeit fuer eine Diät. Wenn du wissen willst, wie man ohne PageBuilder Webseiten erstellt (ja, das geht und es macht Spass!), dann meld dich.</p>
     
     <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
-        <i class="fa-solid fa-code-branch"></i> Lets talk about Clean Code
+        <i aria-hidden="true" class="fa-solid fa-code-branch"></i> Lets talk about Clean Code
     </button>
 </section>
             <div id="feedback-placeholder"></div>
