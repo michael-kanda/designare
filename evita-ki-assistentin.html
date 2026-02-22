@@ -84,9 +84,9 @@
   ]
 }
 </script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
-    <script src="js/analytics-proxy.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
 </head>
 
 <body class="dark-mode no-scroll">
@@ -106,7 +106,7 @@
       
                 <div class="article-meta">
                     <time datetime="2026-02-21">21. Februar 2026</time>
-                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -153,7 +153,7 @@
                 <h2 id="mechanics-heading">Was Evita kann: <span class="article-white">Die Features im Überblick</span></h2>
                 
                 <div class="info-box">
-                    <i class="fa-solid fa-user-astronaut"></i>
+                    <i aria-hidden="true" class="fa-solid fa-user-astronaut"></i>
                     <div>
                         <strong>User Experience:</strong>
                         <p>Für den Nutzer fühlt sich Evita an wie ein echter Mensch am anderen Ende der Leitung. Sie fragt beiläufig nach dem Namen, passt ihre Begrüßung an die Tageszeit an und greift Themen auf, über die man beim letzten Mal gesprochen hat.</p>
@@ -163,16 +163,16 @@
                 <p>Evitas Fähigkeiten gehen weit über einfaches Frage-Antwort-Ping-Pong hinaus:</p>
 
                 <dl class="feature-list">
-                    <dt><i class="fa-solid fa-brain" style="color: var(--accent-color); margin-right: 8px;"></i> Sitzungs- & Themen-Gedächtnis</dt>
+                    <dt><i aria-hidden="true" class="fa-solid fa-brain"></i> Sitzungs- & Themen-Gedächtnis</dt>
                     <dd>Wenn du Evita deinen Namen verrätst ("Ich bin Alfred"), merkt sie sich diesen. Sie speichert aber auch den inhaltlichen Kontext. Kommst du Wochen später wieder auf die Webseite, begrüßt sie dich mit "Servus Alfred! Schön, dass du wieder vorbeischaust." und weiß sogar noch, ob du dich das letzte Mal für SEO oder Webdesign interessiert hast.</dd>
                     
-                    <dt><i class="fa-regular fa-calendar-check" style="color: var(--accent-color); margin-right: 8px;"></i> Direkte Rückruf-Buchung</dt>
+                    <dt><i aria-hidden="true" class="fa-regular fa-calendar-check"></i> Direkte Rückruf-Buchung</dt>
                     <dd>Fragst du nach einem Termin oder einem Call, schickt sie dir keinen schnöden Text-Link. Sie öffnet direkt im Chat eine Rückruf-Funktion, die an meinen Google-Kalender angebunden ist. Sobald du eine Zeit wählst, generiert das System sofort einen QR-Code, mit dem du den Termin direkt in dein Smartphone scannen kannst.</dd>
                     
-                    <dt><i class="fa-regular fa-envelope" style="color: var(--accent-color); margin-right: 8px;"></i> E-Mail-Service für jeden Empfänger</dt>
-                    <dd>Evita ist nicht nur ein Kontaktformular zu mir. Sie ist ein allgemeiner E-Mail-Assistent für dich. Du kannst ihr sagen: "Schreib eine Mail an kunde@beispiel.at und sag ihm freundlich ab." Sie verfasst einen perfekten Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt aus dem Chat-Fenster heraus ab.</dd>
+                    <dt><i aria-hidden="true" class="fa-regular fa-envelope"></i> E-Mail-Service für jeden Empfänger</dt>
+                    <dd>Evita ist nicht nur ein Kontaktformular zu mir. Sie ist ein allgemeiner E-Mail-Assistent für dich. Du kannst ihr sagen: "Schreib eine Mail an <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147f617a70715476717d67647d71783a7560">[email&#160;protected]</a> und sag ihm freundlich ab." Sie verfasst einen perfekten Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt aus dem Chat-Fenster heraus ab.</dd>
                     
-                    <dt><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-color); margin-right: 8px;"></i> Dynamische Folge-Chips</dt>
+                    <dt><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> Dynamische Folge-Chips</dt>
                     <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische, aus deiner Ich-Perspektive formulierte Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema der Konversation passen.</dd>
                 </dl>
             </section>
@@ -181,7 +181,7 @@
                 <h2 id="importance-heading">Unter der Haube: <span class="article-white">Der Tech-Stack</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-server"></i>
+                    <i aria-hidden="true" class="fa-solid fa-server"></i>
                     <div>
                         <strong>Architektur:</strong>
                         <p>Das System läuft komplett Serverless. Es basiert auf <strong>Google Gemini (2.5-flash)</strong> als "Gehirn", gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis) und <strong>Upstash Vector</strong> (für RAG).</p>
@@ -190,7 +190,7 @@
 
                 <p>Wie macht man ein Large Language Model (LLM) zu einer zuverlässigen Agentur-Mitarbeiterin? Hier sind die drei technischen Säulen:</p>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>1. RAG (Retrieval-Augmented Generation)</h3>
                     <p>Damit Evita keine Fakten über meine Dienstleistungen erfindet ("Halluzinationen"), nutzt sie eine Vektordatenbank.</p>
                     <ul>
@@ -198,9 +198,9 @@
                         <li><strong>Die Abfrage:</strong> Stellt der Nutzer eine Frage, wandelt Evita diese ebenfalls in einen Vektor um, sucht in Millisekunden die ähnlichsten Textbausteine aus der Datenbank und nutzt diese als "Kontext" für ihre Antwort.</li>
                         <li><strong>Der Vorteil:</strong> Ändere ich heute einen Preis auf meiner Website, weiß Evita morgen früh automatisch davon, ohne dass ich den Bot neu programmieren muss!</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>2. Native Function Calling (Tools)</h3>
                     <p>Evita ist nicht auf Textausgabe beschränkt. Ich habe ihr über die Gemini API Werkzeuge (Tools) in die Hand gegeben:</p>
                     <ul>
@@ -208,9 +208,9 @@
                         <li><code>suggest_chips</code>: Ein Tool, das die KI zwingt, ein JSON-Objekt mit exakt drei sinnvollen Folge-Aktionen zurückzugeben.</li>
                         <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt des Nutzers entgegen und baut einen versandfertigen Payload auf.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>3. Context-Aware System Prompting</h3>
                     <p>Damit Evita menschlich wirkt, wird ihr initialer "System Prompt" bei jedem Seitenaufruf dynamisch zusammengebaut:</p>
                     <ul>
@@ -218,10 +218,10 @@
                         <li>Sie kennt die aktuelle URL. Bist du gerade auf der SEO-Seite, wird sie dir diesen Link nicht mehr als "Chip" vorschlagen.</li>
                         <li>Sie kennt deine Historie. Warst du schon 5x im Chat, fragt sie dich nicht mehr nach deinem Anliegen, sondern steigt direkt locker ein.</li>
                     </ul>
-                </article>
+                </div>
 
                 <aside class="expert-tip">
-                    <i class="fa-solid fa-code"></i>
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
                     <div>
                         <strong>Entwickler-Tipp:</strong>
                         <p>Das größte Problem bei Folgefragen (Chips) in KIs ist, dass sie oft unsinnig halluzinieren. Der Trick liegt in der Schema-Definition des Tools: Man muss der KI im Description-Feld des Parameters extrem strenge Leitplanken geben (z.B. "Zwingend aus der Ich-Perspektive des Nutzers formulieren").</p>
@@ -237,8 +237,8 @@
                 <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th scope="col" class="th-wrong">Klassischer Chatbot <i class="fa-solid fa-xmark"></i></th>
-                            <th scope="col" class="th-correct">Evita (KI Agent) <i class="fa-solid fa-check"></i></th>
+                            <th scope="col" class="th-wrong">Klassischer Chatbot <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Evita (KI Agent) <i aria-hidden="true" class="fa-solid fa-check"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -304,7 +304,7 @@
             </section>
 
             <section aria-labelledby="conclusion-heading">
-                <h2 id="conclusion-heading">Fazit: <span class="article-white">Das Web wird interaktiv<span></h2>
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Das Web wird interaktiv</span></h2>
                 
                 <p>Eine Webseite muss heute keine statische Broschüre mehr sein. Mit modernen KI-APIs können wir Interfaces bauen, die sich an den Nutzer anpassen, mit ihm mitdenken und echte Aufgaben abnehmen.</p>
 
@@ -325,7 +325,7 @@
                 <p>Egal ob für deinen Online-Shop, deine Kanzlei oder dein Portfolio. Wenn du einen Bot brauchst, der deine Website auswendig kennt und aktiv für dich und deine Kunden arbeitet, lass uns sprechen.</p>
                 
                 <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
-                    <i class="fa-solid fa-code"></i> Projekt anfragen
+                    <i aria-hidden="true" class="fa-solid fa-code"></i> Projekt anfragen
                 </button>
             </section>
             
@@ -337,6 +337,6 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
-    
+
 </body>
 </html>
