@@ -44,6 +44,9 @@ const EMAIL_SENDER = {
 
 const MAX_EMAILS_PER_SESSION = 3;
 
+// Embedding-Modell (einmalig initialisiert, nicht pro Request)
+const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+
 // ===================================================================
 // MEMORY HELPERS
 // ===================================================================
@@ -230,18 +233,83 @@ const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|sp
 // ===================================================================
 // MAIN HANDLER
 // ===================================================================
+// ===================================================================
+// SECURITY: IP-basiertes Rate-Limiting (In-Memory, resets bei Redeploy)
+// ===================================================================
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;    // 1 Minute
+const RATE_LIMIT_MAX_REQUESTS = 20;         // Max 20 Requests pro Minute
+const EMAIL_RATE_LIMIT_MAX = 3;             // Max 3 E-Mails pro Minute pro IP
+const MAX_MESSAGE_LENGTH = 2000;            // Max Zeichenlänge für User-Input
+
+const ALLOWED_ORIGINS = [
+  'https://designare.at',
+  'https://www.designare.at',
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null
+].filter(Boolean);
+
+function getClientIp(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+    || req.headers['x-real-ip']
+    || req.socket?.remoteAddress
+    || 'unknown';
+}
+
+function checkRateLimit(ip, type = 'general') {
+  const key = `${ip}:${type}`;
+  const now = Date.now();
+  let entry = rateLimitMap.get(key);
+
+  // Cleanup: Alte Einträge entfernen (alle 100 Requests)
+  if (rateLimitMap.size > 10000) {
+    for (const [k, v] of rateLimitMap) {
+      if (now - v.windowStart > RATE_LIMIT_WINDOW_MS * 2) rateLimitMap.delete(k);
+    }
+  }
+
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    entry = { count: 0, windowStart: now };
+    rateLimitMap.set(key, entry);
+  }
+
+  entry.count++;
+  const limit = type === 'email' ? EMAIL_RATE_LIMIT_MAX : RATE_LIMIT_MAX_REQUESTS;
+  return entry.count <= limit;
+}
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  // CORS: Nur erlaubte Origins
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Vary', 'Origin');
 
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
+  // Rate-Limit prüfen
+  const clientIp = getClientIp(req);
+  if (!checkRateLimit(clientIp, 'general')) {
+    console.warn(`⚠️ Rate Limit erreicht für IP: ${clientIp}`);
+    return res.status(429).json({ answer: 'Zu viele Anfragen. Bitte warte einen Moment.', rateLimited: true });
+  }
+
   try {
     const { prompt, source, history, message, sessionId, userName, pendingEmail, confirmEmailSend, currentPage } = req.body;
     const userMessage = message || prompt;
+
+    // Input-Validierung
+    if (!userMessage || typeof userMessage !== 'string') {
+      return res.status(400).json({ answer: 'Keine Nachricht erhalten.' });
+    }
+    if (userMessage.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ answer: `Nachricht zu lang (max. ${MAX_MESSAGE_LENGTH} Zeichen). Bitte kürzer fassen!` });
+    }
 
     // ===================================================================
     // MEMORY
@@ -265,6 +333,12 @@ export default async function handler(req, res) {
     // ===================================================================
     if (confirmEmailSend && pendingEmail) {
       console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
+
+      // IP-basiertes E-Mail-Rate-Limit
+      if (!checkRateLimit(clientIp, 'email')) {
+        console.warn(`⚠️ E-Mail Rate Limit erreicht für IP: ${clientIp}`);
+        return res.status(429).json({ answer: 'Zu viele E-Mails in kurzer Zeit. Bitte warte einen Moment.' });
+      }
 
       if (emailsSent >= MAX_EMAILS_PER_SESSION) {
         return res.status(200).json({
@@ -306,15 +380,27 @@ export default async function handler(req, res) {
     // ===================================================================
     let usedModel = 'gemini-2.5-flash';
 
+    // Embedding-Modell (einmalig pro Cold-Start, nicht pro Request)
+    // → nach oben verschoben, siehe Modul-Scope
+
     const toolsConfig = { functionDeclarations: toolDeclarations };
     const commonConfig = { temperature: 0.7 };
 
-    const models = [
-      { name: 'gemini-2.5-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig, tools: [toolsConfig] }) },
-      { name: 'gemini-2.0-flash', instance: genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig, tools: [toolsConfig] }) }
-    ];
+    // Modelle werden pro Request erstellt, weil systemInstruction dynamisch ist
+    function createModelsWithSystemPrompt(sysPrompt) {
+      const modelConfig = {
+        generationConfig: commonConfig,
+        tools: [toolsConfig],
+        systemInstruction: { parts: [{ text: sysPrompt }] }
+      };
+      return [
+        { name: 'gemini-2.5-flash', instance: genAI.getGenerativeModel({ model: 'gemini-2.5-flash', ...modelConfig }) },
+        { name: 'gemini-2.0-flash', instance: genAI.getGenerativeModel({ model: 'gemini-2.0-flash', ...modelConfig }) }
+      ];
+    }
 
-    async function generateWithFallback(contents) {
+    async function generateWithFallback(contents, sysPrompt) {
+      const models = createModelsWithSystemPrompt(sysPrompt);
       for (let i = 0; i < models.length; i++) {
         try {
           usedModel = models[i].name;
@@ -334,7 +420,6 @@ export default async function handler(req, res) {
 
     try {
       console.log("🔍 Suche in Vector-DB nach:", userMessage);
-      const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
       const embedResult = await embeddingModel.embedContent(userMessage);
       const queryVector = embedResult.embedding.values.slice(0, 768);
 
@@ -422,11 +507,9 @@ ${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
 ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
     // ===================================================================
-    // CHAT-CONTENTS AUFBAUEN
+    // CHAT-CONTENTS AUFBAUEN (System-Prompt läuft über systemInstruction)
     // ===================================================================
     const contents = [];
-    contents.push({ role: 'user', parts: [{ text: `[SYSTEM-ANWEISUNG]\n${systemPrompt}` }] });
-    contents.push({ role: 'model', parts: [{ text: 'Verstanden! Ich bin Evita und nutze meine Tools wenn passend.' }] });
 
     if (history && Array.isArray(history) && history.length > 0) {
       for (const msg of history) {
@@ -446,7 +529,7 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
     // ===================================================================
     // GENERIEREN + FUNCTION CALLS VERARBEITEN
     // ===================================================================
-    const result = await generateWithFallback(contents);
+    const result = await generateWithFallback(contents, systemPrompt);
     const response = result.response;
 
     let answerText = '';
@@ -562,7 +645,7 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
         sessionId, userMessage, isReturningUser, usedFallback: false,
         modelUsed: usedModel,
         bookingIntent: !!responsePayload.openBooking,
-        bookingCompleted: !!responsePayload.openBooking
+        bookingCompleted: false  // Nur true wenn tatsächlich gebucht (kommt von book-appointment-phone)
       });
       trackQuestion(userMessage);
       if (topicKeywords.length > 0) trackTopics(topicKeywords);
