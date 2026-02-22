@@ -3,7 +3,7 @@
 // Tools: open_booking, compose_email, remember_user_name, suggest_chips
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from "@google/generative-ai";
 import { Redis } from "@upstash/redis";
-import { Index } from "@upstash/vector"; // <-- NEU: Vector Client
+import { Index } from "@upstash/vector"; 
 import Brevo from '@getbrevo/brevo';
 import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
 import { emailShell, unsubscribeFooter } from './email-template.js';
@@ -21,7 +21,7 @@ const redis = new Redis({
 });
 
 // ===================================================================
-// UPSTASH VECTOR (Langzeitgedächtnis / RAG) <-- NEU
+// UPSTASH VECTOR (Langzeitgedächtnis / RAG)
 // ===================================================================
 const vectorIndex = new Index({
   url: process.env.UPSTASH_VECTOR_REST_URL,
@@ -96,11 +96,9 @@ function buildEmailHtml(bodyText, subject, recipientEmail) {
     .map(p => `<p style="margin:0 0 16px;font-size:14px;color:#333;line-height:1.7;">${p.replace(/\n/g, '<br>')}</p>`).join('');
 
   const innerHtml = `
-    <!-- HEADER -->
     <tr><td style="padding:24px 32px 20px;border-bottom:1px solid #eee;">
       <span style="font-size:17px;font-weight:700;color:#1a1a1a;">${sanitizeHtml(subject)}</span>
     </td></tr>
-    <!-- BODY -->
     <tr><td style="padding:28px 32px;">
       ${bodyHtml}
     </td></tr>`;
@@ -112,13 +110,12 @@ function buildEmailHtml(bodyText, subject, recipientEmail) {
   return emailShell(innerHtml, { footerExtra: footer, showSlogan: false });
 }
 
-// Blocklist-Check: Prüft ob eine E-Mail-Adresse gesperrt ist
 async function isEmailBlocked(email) {
   try {
     return await redis.sismember('evita:email:blocklist', email.toLowerCase().trim());
   } catch (e) {
     console.error('Blocklist-Check Fehler:', e.message);
-    return false; // Bei Fehler nicht blockieren
+    return false; 
   }
 }
 
@@ -153,7 +150,7 @@ const toolDeclarations = [
   },
   {
     name: "compose_email",
-    description: "Verfasst und versendet eine E-Mail für den Nutzer. Das ist ein allgemeiner E-Mail-Service. Aufrufen wenn der Nutzer eine E-Mail senden, schreiben oder verfassen möchte. IMMER alle Pflichtfelder ausfüllen. Wenn Infos fehlen (Empfänger, Betreff, Inhalt), NICHT dieses Tool aufrufen sondern zuerst nachfragen.",
+    description: "Verfasst und versendet eine E-Mail für den Nutzer. Das ist ein allgemeiner E-Mail-Service. Aufrufen wenn der Nutzer eine E-Mail senden, schreiben oder verfassen möchte. IMMER alle Pflichtfelder ausfüllen.",
     parameters: {
       type: FunctionDeclarationSchemaType.OBJECT,
       properties: {
@@ -171,7 +168,7 @@ const toolDeclarations = [
         },
         body: {
           type: FunctionDeclarationSchemaType.STRING,
-          description: "Vollständiger E-Mail-Text inklusive Anrede und Grußformel. Verfasse die E-Mail im Stil und Ton den der Nutzer wünscht."
+          description: "Vollständiger E-Mail-Text inklusive Anrede und Grußformel."
         }
       },
       required: ["to", "subject", "body"]
@@ -179,7 +176,7 @@ const toolDeclarations = [
   },
   {
     name: "remember_user_name",
-    description: "Speichert den Vornamen des Nutzers wenn er sich vorstellt oder seinen Namen nennt. NUR bei echten Vornamen des Nutzers, NICHT bei erwähnten dritten Personen.",
+    description: "Speichert den Vornamen des Nutzers wenn er sich vorstellt oder seinen Namen nennt.",
     parameters: {
       type: FunctionDeclarationSchemaType.OBJECT,
       properties: {
@@ -193,7 +190,7 @@ const toolDeclarations = [
   },
   {
     name: "suggest_chips",
-    description: "Zeigt dem Nutzer exakt 3 klickbare Vorschläge unter der Antwort. IMMER aufrufen, bei JEDER Antwort. Genau 1 Folgefrage + 2 interne Links. KEINE doppelten Links. Folgefragen max 6 Wörter.",
+    description: "Zeigt dem Nutzer klickbare Link-Vorschläge unter der Antwort. IMMER aufrufen. Max 2 interne Links. KEINE doppelten Links. KEINE Fragen mehr generieren.",
     parameters: {
       type: FunctionDeclarationSchemaType.OBJECT,
       properties: {
@@ -204,20 +201,20 @@ const toolDeclarations = [
             properties: {
               type: {
                 type: FunctionDeclarationSchemaType.STRING,
-                description: "'question' für eine Folgefrage oder 'link' für einen internen Link"
+                description: "Immer 'link' für einen internen Link"
               },
-      text: {
+              text: {
                 type: FunctionDeclarationSchemaType.STRING,
-                description: "Kurzer klickbarer Text (max 6 Wörter). Bei Links: Der Seitentitel. Bei Fragen: ZWINGEND aus der Ich-Perspektive des NUTZERS formuliert (Richtig: 'Was kannst du für mich tun?', Falsch: 'Was kann ich für dich tun?')."
+                description: "Der Seitentitel (max 6 Wörter)"
               },
               url: {
                 type: FunctionDeclarationSchemaType.STRING,
-                description: "URL-Pfad, NUR bei type 'link', z.B. '/ki-sichtbarkeit'"
+                description: "URL-Pfad, z.B. '/ki-sichtbarkeit'"
               }
             },
-            required: ["type", "text"]
+            required: ["type", "text", "url"]
           },
-          description: "Exakt 3 Chips: 1x type 'question' + 2x type 'link'. Keine doppelten URLs."
+          description: "Liste von internen Links."
         }
       },
       required: ["chips"]
@@ -276,16 +273,11 @@ export default async function handler(req, res) {
       }
 
       if (!isValidEmail(pendingEmail.to)) {
-        return res.status(200).json({
-          answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus. Kannst du die nochmal prüfen?`
-        });
+        return res.status(200).json({ answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus.` });
       }
 
-      // Blocklist prüfen
       if (await isEmailBlocked(pendingEmail.to)) {
-        return res.status(200).json({
-          answer: `Die Adresse **${pendingEmail.to}** hat den Empfang von E-Mails über designare.at blockiert. Ich kann leider nicht dorthin senden.`
-        });
+        return res.status(200).json({ answer: `Die Adresse **${pendingEmail.to}** hat den Empfang von E-Mails über designare.at blockiert.` });
       }
 
       try {
@@ -305,10 +297,7 @@ export default async function handler(req, res) {
       } catch (emailError) {
         console.error('📧 Brevo-Fehler:', emailError.message);
         trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: false });
-        return res.status(200).json({
-          answer: `Da ist leider was schiefgelaufen beim Versand: ${emailError.message || 'Unbekannter Fehler'}. Soll ich es nochmal versuchen?`,
-          emailSent: false
-        });
+        return res.status(200).json({ answer: `Da ist leider was schiefgelaufen beim Versand.`, emailSent: false });
       }
     }
 
@@ -345,36 +334,23 @@ export default async function handler(req, res) {
 
     try {
       console.log("🔍 Suche in Vector-DB nach:", userMessage);
-      
-      // 1. Frage in Vektor umwandeln (auf 768 gekürzt für Free-Plan Kompatibilität)
       const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
       const embedResult = await embeddingModel.embedContent(userMessage);
       const queryVector = embedResult.embedding.values.slice(0, 768);
 
-      // 2. Ähnliche Dokumente aus Upstash Vector abrufen
-      const queryResult = await vectorIndex.query({
-          vector: queryVector,
-          topK: 3,
-          includeMetadata: true
-      });
+      const queryResult = await vectorIndex.query({ vector: queryVector, topK: 3, includeMetadata: true });
 
-      // 3. Nur gute Treffer filtern (>70% Ähnlichkeit)
-      const matchedPages = queryResult
-          .filter(match => match.score > 0.70)
-          .map(match => match.metadata);
+      const matchedPages = queryResult.filter(match => match.score > 0.70).map(match => match.metadata);
 
       if (matchedPages.length > 0) {
-        // Kontext für den System Prompt bauen
         additionalContext = matchedPages.map(page => {
           let ctx = `${page.title}`;
           if (page.url) ctx += ` (${page.url})`;
-          // Content auf 800 Zeichen kürzen, um das Kontextfenster zu schonen
           const contentToUse = page.content ? page.content.substring(0, 800) : '';
           ctx += `\n${contentToUse}`;
           return ctx;
         }).join('\n\n');
 
-        // Links für die Chips-Vorschläge sammeln
         const blacklist = ['CSV-Creator', 'CSV-Importer-PRO'];
         availableLinks = matchedPages
           .filter(p => p.url && !blacklist.some(s => p.url.includes(s)))
@@ -385,34 +361,11 @@ export default async function handler(req, res) {
       console.error('❌ RAG / Vector Fehler:', error.message); 
     }
 
-    // Feste Links immer verfügbar (wenn nicht aktuelle Seite)
-    const permanentLinks = [
-      { url: '/ki-sichtbarkeit', title: 'KI-Sichtbarkeits-Check' }
-    ];
+    const permanentLinks = [{ url: '/ki-sichtbarkeit', title: 'KI-Sichtbarkeits-Check' }];
     for (const pl of permanentLinks) {
       const isCurrentPage = currentPage && currentPage.replace(/\/$/, '') === pl.url;
       const alreadyIncluded = availableLinks.some(l => l.url === pl.url);
-      if (!isCurrentPage && !alreadyIncluded) {
-        availableLinks.push(pl);
-      }
-    }
-
-    // ===================================================================
-    // SILAS: Kein Function Calling
-    // ===================================================================
-    if (source === 'silas') {
-      const silaModels = [
-        genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: commonConfig }),
-        genAI.getGenerativeModel({ model: "gemini-2.0-flash", generationConfig: commonConfig })
-      ];
-      for (let i = 0; i < silaModels.length; i++) {
-        try {
-          const r = await silaModels[i].generateContent(userMessage);
-          return res.status(200).send(r.response.text());
-        } catch (e) {
-          if (i === silaModels.length - 1) throw e;
-        }
-      }
+      if (!isCurrentPage && !alreadyIncluded) availableLinks.push(pl);
     }
 
     // ===================================================================
@@ -422,23 +375,17 @@ export default async function handler(req, res) {
     const formattedDate = today.toLocaleDateString('de-AT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Europe/Vienna' });
     const formattedTime = today.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Vienna' });
     const hour = parseInt(new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Europe/Vienna' }));
-    const dayOfWeek = new Date().toLocaleString('de-AT', { weekday: 'long', timeZone: 'Europe/Vienna' });
-
+    
     let timeContext = '';
-    if (hour >= 0 && hour < 5) timeContext = `Mitten in der Nacht (${formattedTime}). Lockerer Ton – NUR bei ERSTER Nachricht.`;
+    if (hour >= 0 && hour < 5) timeContext = `Mitten in der Nacht (${formattedTime}). Lockerer Ton.`;
     else if (hour >= 5 && hour < 9) timeContext = `Früher Morgen (${formattedTime}).`;
-    else if (hour >= 9 && hour < 12) timeContext = `Vormittag (${formattedTime}).${dayOfWeek === 'Montag' ? ' Montagmorgen!' : ''}`;
-    else if (hour >= 12 && hour < 14) timeContext = `Mittagszeit (${formattedTime}). Kurz halten.`;
-    else if (hour >= 17 && hour < 21) timeContext = `Abend (${formattedTime}). Entspannt.`;
-    else if (hour >= 21) timeContext = `Spätabends (${formattedTime}). Locker.`;
-    if (dayOfWeek === 'Samstag' || dayOfWeek === 'Sonntag') timeContext += ` ${dayOfWeek}.`;
-
+    
     let memoryContext = '';
     if (isReturningUser && knownName) {
       const timeSince = lastVisit ? getTimeSinceText(new Date(lastVisit)) : 'einiger Zeit';
       memoryContext = `WIEDERKEHRENDER BESUCHER: ${knownName} (Besuch ${visitCount}, zuletzt vor ${timeSince}). Begrüße beim Namen, NICHT nach dem Namen fragen.${previousTopics.length > 0 ? ` Frühere Themen: ${previousTopics.slice(-5).join(', ')}` : ''}`;
     } else if (isReturningUser) {
-      memoryContext = `WIEDERKEHRENDER BESUCHER (Name unbekannt, Besuch ${visitCount}). Ab der 3. Nachricht beiläufig nach Namen fragen.`;
+      memoryContext = `WIEDERKEHRENDER BESUCHER (Name unbekannt, Besuch ${visitCount}).`;
     } else {
       memoryContext = `NEUER BESUCHER. Wenn der Nutzer seinen Namen nennt, rufe remember_user_name auf.`;
     }
@@ -455,20 +402,17 @@ MICHAEL-REGEL:
 
 TOOLS:    
 1. open_booking → Bei Terminwünschen
-2. compose_email → E-Mail-Service für den Nutzer. Vorher fehlende Infos erfragen (An wen? Betreff? Inhalt?). Versendet wird über Evita. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
+2. compose_email → E-Mail-Service für den Nutzer. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
 3. remember_user_name → Wenn Nutzer Vornamen nennt
 4. suggest_chips → IMMER aufrufen. Chips-Regeln:
-   - Frage-Chip (type: 'question'): Eine logische Folgefrage des Nutzers. WICHTIG: Formuliere IMMER aus der ICH-Perspektive des Nutzers! (z.B. "Wie kannst du mir helfen?", "Was kostet das?").
-   - Link-Chips (type: 'link'): MÜSSEN thematisch zur aktuellen Frage passen. KEINE zufälligen Links. Nur URLs aus VERFÜGBARE LINKS nutzen. Lieber nur 1 Link als unpassende aufzufüllen.
+   - Link-Chips (type: 'link'): MÜSSEN thematisch zur aktuellen Frage passen. KEINE zufälligen Links. Nur URLs aus VERFÜGBARE LINKS nutzen. Max 2 Links.
+   - HINWEIS: Generiere KEINE Frage-Chips (questions) mehr! Mache nur noch Link-Vorschläge.
 
 SPEZIAL-SEITEN:
-- /ki-sichtbarkeit → KI-Sichtbarkeits-Check. Wenn jemand nach KI-Sichtbarkeit, KI-Check oder ähnlichem fragt: Verweise auf die Seite (als Chip). Du KANNST dort KEINEN Check durchführen. Der Check ist ein Tool AUF der Seite, nicht in diesem Chat. Frage NICHT nach einer Domain.
+- /ki-sichtbarkeit → KI-Sichtbarkeits-Check. Wenn jemand nach KI-Sichtbarkeit, KI-Check fragt: Verweise auf die Seite (als Chip). 
 
 WICHTIG – KEINE LINKS IM FLIESSTEXT:
 Schreibe NIEMALS URLs in deinen Antworttext. Links laufen AUSSCHLIESSLICH über suggest_chips.
-
-STIMMUNG: Frustriert → direkt Lösung. Begeistert → mitfeiern. Unsicher → ermutigend.
-REGELN: Bulletpoints bei >2 Punkten. Tabus: Politik, Religion, Rechtsberatung.
 
 Datum: ${formattedDate} | ${formattedTime}
 ${timeContext ? `${timeContext} (NUR erste Nachricht)` : ''}
@@ -478,32 +422,25 @@ ${additionalContext ? `WEBSEITEN-KONTEXT:\n${additionalContext}` : ''}
 ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `- ${l.url} → "${l.title}"`).join('\n')}` : ''}`;
 
     // ===================================================================
-    // CHAT-CONTENTS AUFBAUEN (Gemini-Format)
+    // CHAT-CONTENTS AUFBAUEN
     // ===================================================================
     const contents = [];
-
-    // System-Prompt als initialer Dialog-Turn
     contents.push({ role: 'user', parts: [{ text: `[SYSTEM-ANWEISUNG]\n${systemPrompt}` }] });
     contents.push({ role: 'model', parts: [{ text: 'Verstanden! Ich bin Evita und nutze meine Tools wenn passend.' }] });
 
-    // Chat-History (alte Tags bereinigen für Übergangsphase)
     if (history && Array.isArray(history) && history.length > 0) {
       for (const msg of history) {
         const role = msg.role === 'user' ? 'user' : 'model';
         const clean = (msg.content || '')
           .replace(/\[BOOKING_CONFIRM_REQUEST\]/g, '')
           .replace(/\[buchung_starten\]/g, '')
-          .replace(/\[booking_starten\]/g, '')
           .replace(/\[USER_NAME:[^\]]+\]/g, '')
           .replace(/\[EMAIL_DRAFT\][\s\S]*?\[\/EMAIL_DRAFT\]/g, '')
-          .replace(/\[EMAIL_CONFIRMED\]/g, '')
-          .replace(/\[LINK:[^\]]+\]/g, '')
           .trim();
         if (clean) contents.push({ role, parts: [{ text: clean }] });
       }
     }
 
-    // Aktuelle Nachricht
     contents.push({ role: 'user', parts: [{ text: userMessage }] });
 
     // ===================================================================
@@ -512,7 +449,6 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
     const result = await generateWithFallback(contents);
     const response = result.response;
 
-    // Parts auslesen: Text + Function Calls
     let answerText = '';
     const functionCalls = [];
 
@@ -523,45 +459,28 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
       }
     }
 
-    // Fallback
     if (!answerText && functionCalls.length === 0) {
       try { answerText = response.text(); } catch (e) {}
     }
 
     console.log(`🤖 ${usedModel} | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
 
-    // ===================================================================
-    // FUNCTION CALLS AUSFÜHREN
-    // ===================================================================
     const responsePayload = { answer: answerText.trim() };
 
     for (const fc of functionCalls) {
       const args = fc.args || {};
-      console.log(`Tool: ${fc.name}(${JSON.stringify(args)})`);
 
       switch (fc.name) {
-
         case 'open_booking': {
           responsePayload.openBooking = true;
           responsePayload.bookingReason = args.reason || null;
-          if (!answerText.trim()) {
-            responsePayload.answer = 'Klar, ich öffne Michaels Kalender für dich!';
-          }
+          if (!answerText.trim()) responsePayload.answer = 'Klar, ich öffne Michaels Kalender für dich!';
           break;
         }
 
         case 'compose_email': {
-          if (!args.to || !args.subject || !args.body) {
-            console.warn('compose_email: Pflichtfelder fehlen');
-            break;
-          }
-          responsePayload.emailDraft = {
-            to: args.to,
-            toName: args.to_name || '',
-            subject: args.subject,
-            body: args.body
-          };
-          // Immer unseren eigenen Draft-Display verwenden (Gemini-Text enthält oft Duplikate)
+          if (!args.to || !args.subject || !args.body) break;
+          responsePayload.emailDraft = { to: args.to, toName: args.to_name || '', subject: args.subject, body: args.body };
           const draftDisplay = `\n\n**E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
           responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
           break;
@@ -569,37 +488,53 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
 
         case 'remember_user_name': {
           const n = args.name;
-          if (n && n.length >= 2 && n.length <= 20 && /^[A-Za-zÄÖÜäöüß\- ]+$/.test(n)) {
-            responsePayload.detectedName = n.trim();
-          }
+          if (n && n.length >= 2 && n.length <= 20) responsePayload.detectedName = n.trim();
           break;
         }
 
         case 'suggest_chips': {
+          let linkChips = [];
           if (args.chips && Array.isArray(args.chips)) {
             const seen = new Set();
             const currentPath = currentPage ? currentPage.replace(/\/$/, '') : '';
-            responsePayload.chips = args.chips
+            linkChips = args.chips
+              .filter(c => c.type === 'link' && c.url) // Nur noch Links erlauben
               .filter(c => {
-                if (c.type === 'link' && c.url) {
-                  // Keine Links zur aktuellen Seite
-                  if (currentPath && c.url.replace(/\/$/, '').includes(currentPath)) return false;
-                  if (seen.has(c.url)) return false;
-                  seen.add(c.url);
-                }
+                if (currentPath && c.url.replace(/\/$/, '').includes(currentPath)) return false;
+                if (seen.has(c.url)) return false;
+                seen.add(c.url);
                 return c.text && c.text.length > 0;
               })
-              .slice(0, 3);
+              .slice(0, 2);
+          }
+
+          // --- NEU: Dynamischer Booking-Chip ---
+          // Zeige den Kalender-Chip, wenn eine gewisse Chathistorie erreicht ist (ab der 3. Frage)
+          const isLongConversation = history && history.length >= 4; 
+          
+          // ODER wenn im aktuellen Dialog typische Intent-Keywords fallen
+          const bookingKeywords = ['termin', 'rückruf', 'kontakt', 'angebot', 'preis', 'zusammenarbeit', 'telefonieren', 'call', 'sprechen', 'erreichen', 'kosten', 'projekt'];
+          const isBookingTopic = bookingKeywords.some(kw => userMessage.toLowerCase().includes(kw) || answerText.toLowerCase().includes(kw));
+
+          const finalChips = [];
+          
+          // Wenn die Bedingung erfüllt ist, hängen wir als ALLERERSTES den Booking-Chip ein
+          if (isLongConversation || isBookingTopic) {
+              finalChips.push({ type: 'booking', text: 'Rückruf anfordern' });
+          }
+          
+          // Danach die normalen Links anfügen
+          finalChips.push(...linkChips);
+
+          if (finalChips.length > 0) {
+              responsePayload.chips = finalChips;
           }
           break;
         }
-
-        default:
-          console.warn(`Unbekannter Tool: ${fc.name}`);
       }
     }
 
-// Chips unterdrücken, wenn E-Mail-Entwurf ODER Booking aktiv ist (verhindert Ablenkung)
+    // Chips komplett unterdrücken wenn Kalender ODER E-Mail eh schon offen sind
     if (responsePayload.emailDraft || responsePayload.openBooking) {
       delete responsePayload.chips;
     }
@@ -632,7 +567,6 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
       trackQuestion(userMessage);
       if (topicKeywords.length > 0) trackTopics(topicKeywords);
 
-      // Name aus Memory fallback
       if (!responsePayload.detectedName && knownName) {
         responsePayload.detectedName = knownName;
       }
@@ -649,9 +583,6 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
   }
 }
 
-// ===================================================================
-// HILFSFUNKTION
-// ===================================================================
 function getTimeSinceText(lastDate) {
   const diffMs = new Date() - lastDate;
   const diffMins = Math.floor(diffMs / 60000);
