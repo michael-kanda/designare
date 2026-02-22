@@ -116,11 +116,10 @@ body.no-scroll {
     line-gap-override: 0%;
     size-adjust: 107%;
 }
-
-@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 300; src: url('/font/poppins-light.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 400; src: url('/font/poppins-regular.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 600; src: url('/font/poppins-semibold.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 700; src: url('/font/poppins-bold.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 300; src: url('/font/poppins-light.woff2') format('woff2'), url('/font/poppins-light.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 400; src: url('/font/poppins-regular.woff2') format('woff2'), url('/font/poppins-regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 600; src: url('/font/poppins-semibold.woff2') format('woff2'), url('/font/poppins-semibold.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 700; src: url('/font/poppins-bold.woff2') format('woff2'), url('/font/poppins-bold.ttf') format('truetype'); font-display: swap; }
 
 /* ===================
    3. UTILITY CLASSES
