@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
@@ -52,7 +54,7 @@
       "author": {
         "@type": "Person",
         "name": "Michael Kanda",
-        "url": "https://designare.at",
+        "url": "https://designare.at/#michael",
         "jobTitle": "Web & KI Entwickler"
       },
       "publisher": {
@@ -154,7 +156,7 @@
                 
                 <div class="article-meta">
                     <time datetime="2026-01-03">03. Januar 2026</time>
-                    <span class="reading-time"><i class="fa-regular fa-clock"></i> 9 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 9 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -194,7 +196,7 @@
                 <p>Vergiss alles, was du über klassische Snippets und das manuelle Polieren von Meta-Descriptions gelernt hast. Während du noch versuchst, Keywords in 155 Zeichen zu quetschen, haben Google, Perplexity und ChatGPT längst entschieden, welche Fragmente deiner Seite sie für ihre KI-generierten Antworten nutzen – oder ob sie dich komplett ignorieren. In der neuen Ära der <strong>Generative Engine Optimization (GEO)</strong> reicht purer Text nicht mehr aus. Schema.org ist nicht länger ein technisches "Nice-to-have" für ein paar hübsche Sterne in den Suchergebnissen, sondern die einzige verlässliche Schnittstelle zwischen deinem High-End-Content und den Algorithmen der LLMs.</p>
 
                 <div class="info-box">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i>
                     <div>
                         <strong>Das Kernproblem:</strong>
                         <p>KI-Bots sind eine "Black Box". Sie lesen deine Webseite nicht wie ein Mensch, sondern scannen sie nach <strong>Entitäten</strong>, Relationen und Kontext. Ohne maschinenlesbare Klarheit riskierst du, in der Bedeutungslosigkeit der SERPs zu verschwinden.</p>
@@ -210,7 +212,7 @@
                 <p>Schema.org ist weit mehr als nur ein technisches Markup – es ist die <strong>Lingua Franca des modernen Webs</strong>. Während klassisches HTML dem Browser sagt, wie eine Webseite <em>aussehen</em> soll (H1 ist groß, Fettgedrucktes ist wichtig), liefert Schema.org die Bedeutungsebene (Semantik). Es ist ein gemeinsames Vokabular von Google, Bing, Yahoo und Yandex, das Informationen in eine maschinenlesbare Struktur übersetzt.</p>
 
                 <div class="tech-box">
-                    <i class="fa-solid fa-code"></i>
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
                     <div>
                         <strong>Technische Implementierung:</strong>
                         <p>Der Goldstandard ist <strong>JSON-LD</strong> (JavaScript Object Notation for Linked Data). Ein Skript im Head-Bereich deiner Seite, das für den menschlichen Besucher unsichtbar bleibt, für Algorithmen aber wie ein hochauflösender Röntgenblick wirkt.</p>
@@ -245,7 +247,7 @@
                 
                 <p>Hier ist der Implementierungs-Guide, um deine Web-Präsenz als hochgradig optimiertes Daten-Asset aufzubauen.</p>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 1: <span class="article-white">Identifikation der relevanten Entities</span></h3>
                     <p>Bevor du eine einzige Zeile Code schreibst, musst du bestimmen, welche "Entities" (Einheiten) deine Seite repräsentiert.</p>
                     <ul>
@@ -253,9 +255,9 @@
                         <li>Nutze spezifische Untertypen: Ein <code>OpinionNewsArticle</code> signalisiert der KI eine andere Intention als ein rein informativer <code>Report</code>.</li>
                         <li>Analysiere deinen Content: Welche Fakten (Preise, Autoren, Daten) sind die Kernstücke?</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 2: <span class="article-white">Erstellung des JSON-LD Markups</span></h3>
                     <p>Der Goldstandard ist JSON-LD. Hier betten wir die Informationen in ein strukturiertes Skript ein.</p>
                     <ul>
@@ -263,9 +265,9 @@
                         <li>Stärke E-E-A-T: Verknüpfe das Autoren-Profil (<code>Person</code>) mit <code>sameAs</code>-Links zu sozialen Profilen.</li>
                         <li>Nutze <code>@id</code>-Referenzen für eine eindeutige Entity-Identität über alle Seiten hinweg.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 3: <span class="article-white">Deep-Dive in spezifische Schemata</span></h3>
                     <p>Um die KI-Suche aktiv zu "füttern", implementiere spezialisierte Schemata:</p>
                     <ul>
@@ -273,9 +275,9 @@
                         <li><strong><code>Dataset</code>:</strong> Mache komplexe Daten und Tabellen für KIs interpretierbar.</li>
                         <li><strong><code>HowTo</code>:</strong> Strukturiere Anleitungen schrittweise für Voice-Assistenten und Snippets.</li>
                     </ul>
-                </article>
+                </div>
 
-                <article class="step-guide">
+                <div class="step-guide">
                     <h3>Schritt 4: <span class="article-white">Validierung und Monitoring</span></h3>
                     <p>Code ohne Validierung ist ein Risiko.</p>
                     <ul>
@@ -283,10 +285,10 @@
                         <li>Teste mit dem <strong>Google Rich Results Test</strong> Tool.</li>
                         <li>Überwache den "Verbesserungen"-Bericht in der Google Search Console auf Warnungen.</li>
                     </ul>
-                </article>
+                </div>
 
                 <aside class="expert-tip">
-                    <i class="fa-solid fa-lightbulb"></i>
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
                     <div>
                         <strong>Experten-Tipp:</strong>
                         <p>Nutze die Eigenschaft <code>publishingPrinciples</code> innerhalb eines <code>NewsMediaOrganization</code>-Typs. In Zeiten von KI-generiertem Spam ist das ein massives Vertrauenssignal. Es zeigt den Suchmaschinen, dass du dich an journalistische Standards und Korrekturrichtlinien hältst – ein entscheidender Faktor für dein E-E-A-T Ranking.</p>
@@ -302,8 +304,8 @@
                 <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th scope="col" class="th-wrong">Falsch <i class="fa-solid fa-xmark"></i></th>
-                            <th scope="col" class="th-correct">Richtig <i class="fa-solid fa-check"></i></th>
+                            <th scope="col" class="th-wrong">Falsch <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Richtig <i aria-hidden="true" class="fa-solid fa-check"></i></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -331,7 +333,7 @@
                 <h2 id="advanced-heading">Fortgeschrittene Strategien: <span class="article-white">Maximale GEO-Readiness</span></h2>
                 
                 <div class="tech-box">
-                    <i class="fa-solid fa-microchip"></i>
+                    <i aria-hidden="true" class="fa-solid fa-microchip"></i>
                     <div>
                         <strong>Knowledge Graph Aufbau:</strong>
                         <p>Um im Bereich GEO wirklich zu dominieren, musst du über die Standard-Tags hinausgehen. Nutze <code>@id</code>-Referenzen, um eine eindeutige Identität für deine Marke aufzubauen.</p>
@@ -446,7 +448,7 @@
                 <p>Strukturierte Daten sind komplex und Fehler sind schnell passiert. Wenn du unsicher bist, ob dein JSON-LD wirklich GEO-ready ist oder die Rich Results auslöst, die du dir wünschst:</p>
                 
                 <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
-                    <i class="fa-solid fa-code"></i> Schema-Audit anfragen
+                    <i aria-hidden="true" class="fa-solid fa-code"></i> Schema-Audit anfragen
                 </button>
             </section>
 
