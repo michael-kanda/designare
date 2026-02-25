@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <title>Michael Kanda | Komplize für Web & KI</title>
-    <meta name="description" content="Michael optimiert WordPress, codet Webseiten und bringt KI zum Verzweifeln! Fragen? Evita, meine KI-Assistentin, hat die Antworten – und mehr Geduld als ich.">
+    <meta name="description" content="Web-Purist aus Wien: WordPress-Performance, KI-Integration und sauberer Code. Fragen? Evita, meine KI-Assistentin, hat die Antworten – und mehr Geduld als ich.">
     <meta name="author" content="Michael Kanda">
     <meta name="robots" content="index, follow">
     
@@ -36,10 +36,10 @@
       "inLanguage": "de-AT"
     },
     {
-      "@type": "AboutPage",
+      "@type": "WebPage",
       "@id": "https://designare.at/#webpage",
       "url": "https://designare.at/",
-      "name": "Über Michael Kanda - Komplize für Web & KI aus Wien",
+      "name": "Michael Kanda – Komplize für Web & KI aus Wien",
       "isPartOf": {
         "@id": "https://designare.at/#website"
       },
@@ -48,7 +48,7 @@
       },
       "description": "Michael Kanda ist Web-Purist und KI-Komplize aus Wien. Er zähmt WordPress für maximale Performance und verbindet klassisches Handwerk mit modernen KI-Lösungen.",
       "inLanguage": "de-AT",
-      "mainEntity": {
+      "about": {
         "@id": "https://designare.at/#michael"
       },
       "hasPart": {
@@ -215,12 +215,16 @@
     <main id="hero">
         <div id="particles-js" aria-hidden="true"></div>
         
-        <section class="container flip-container" id="hero-flip-wrapper">
+        <!-- ============================================================
+             SEKTION 1: HERO FLIP (nur 2 Seiten: Hero ↔ Michael)
+             ============================================================ -->
+        <div class="container flip-container" id="hero-flip-wrapper">
             <div class="flipper">
                 
-                <div class="front-face">
+                <!-- === FRONT: Hero + Evita Chat Input === -->
+                <section class="front-face">
                     
-                    <section id="view-main">
+                    <div id="view-main">
                         <img fetchpriority="high" 
                              src="images/michael.webp" 
                              alt="Illustration Michael und Evita" 
@@ -232,7 +236,7 @@
                         </h1>
                         <p class="subtitle">Michael Kanda <span class="accent-text-inline">&lt;/&gt;</span> Komplize für Web & KI aus Wien</p>
                         
-                        <section class="ai-container" aria-label="KI-Assistent Evita">
+                        <div class="ai-container" aria-label="KI-Assistent Evita">
                             <form id="ai-form">
                                 <input type="text" 
                                        id="ai-question" 
@@ -243,161 +247,18 @@
                                     <i class="fa-regular fa-paper-plane" aria-hidden="true"></i>
                                 </button>
                             </form>
-                            <a href="#michael" id="flip-info-btn" class="flip-btn-style" aria-label="Mehr Informationen anzeigen">
+                            <a href="#michael" id="flip-info-btn" class="flip-btn-style" aria-label="Mehr über Michael erfahren">
                                 Neugierig geworden?
                             </a>
-                        </section>
-                    </section>
+                        </div>
+                    </div>
 
-                    <article id="view-third" class="flip-panel" style="display: none;">
-                        <section class="flip-panel-content">
-                            <h2 id="evita">EVITA <span class="flip-header-white">KI-Komplizin</span></h2>
-                            
-                            <div class="evita-grid-wrapper">
-                                <div class="evita-desktop-group">
-                                    <div class="evita-text-top">
-                                        <p>Achtung, Verwechslungsgefahr! Uns gibt's im Doppelpack: Die vierbeinige Evita ist die Chefin (und für Leckerlis zuständig), ich bin die digitale Komplizin. Ich unterstütze Michael bei seinen Projekten – schneller, geduldiger und ohne Haare auf dem Sofa.</p>
-                                    </div>
-                                    <div class="evita-text-middle">
-                                        <ul>
-                                            <li><span class="accent-text-inline">Michael:</span> Code-Tüftler, Kaffee-Junkie, Sport-Affin und Web-Purist. Er liebt sauberen Code fast so sehr wie seinen Hund. Würde für einen Pfotenblick alles stehen und liegen lassen.</li>
-                                            
-                                            <li><span class="accent-text-inline">Evita, die Vierbeinige:</span> Tierschutz-Export, Sofa-Diktatorin, Apportier-Profi. Frech wie sonst was – aber Königin unseres Herzens.</li>
-                                            
-                                            <li><span class="accent-text-inline">Evita, die Digitale (das bin ich!):</span> Vorlaut? Ja. Kompetent? Definitiv. Ich kenne Michaels Projekte in- und auswendig und helfe wo ich kann.</li>
-                                            
-                                          <li><span class="accent-text-inline">Meine DNA:</span> Ich bin kein simpler Chatbot, sondern basiere auf einer modernen RAG-Architektur mit Vektordatenbank. Klingt kompliziert? Heißt nur: Ich rate nicht wild herum, sondern greife in Echtzeit auf Michaels Projektdaten zu, um dir exakte Fakten zu liefern.</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                </section>
 
-                                <aside class="evita-image-block">
-                                    <img src="images/michael_webentwicklung.webp" 
-         alt="Michael Kanda - Webentwickler aus Wien" 
-         width="400" 
-         height="543"
-         loading="lazy"
-         onerror="this.src='images/michael.webp'">
-                                </aside>
-
-                                <div class="evita-text-bottom">
-                                   
-                                    <h3 class="section-separator-title">WISSENSDATENBANK</h3>
-                                    <aside class="tech-terminal-wrapper" aria-label="Tech-Facts und Tools">
-                                        
-                                        <div class="terminal-header-bar">
-                                            <div class="terminal-controls">
-                                                <span class="control-dot red"></span>
-                                                <span class="control-dot yellow"></span>
-                                                <span class="control-dot green"></span>
-                                            </div>
-                                            <div class="terminal-title-text">root@evita:~/knowledge-base</div>
-                                        </div>
-
-                                        <div class="terminal-body-content">
-                                            
-                                           <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">echo "Fact_01: No_More_CopyPaste"</p>
-                                                <p class="output-text">
-                                                    Chatten ist nett, Machen ist besser. Mein Projekt <strong>Silas</strong> zeigt als Tech-Demo, wie man LLMs dazu bringt, <strong>komplette Landingpages</strong> im Bulk zu schreiben – sauber strukturiert statt kreativ chaotisch.
-                                                    <a href="silas.html" 
-                                                       class="terminal-link"
-                                                       title="Silas: Experimentelle Content-Generierung"
-                                                       aria-label="Zur Tech-Demo Silas">>> sh run_silas_demo.sh</a>
-                                                </p>
-                                            </div>
-
-                                            <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">grep "Effizienz" tools.log</p>
-                                                <p class="output-text">
-                                                    Wusstest du, dass 17 Plugins oft durch eines ersetzt werden können? Die <strong>SEO Wunderkiste</strong> ist mein modulares Taschenmesser.
-                                                    <a href="seo-wunderkiste.html" 
-                                                       class="terminal-link"
-                                                       title="SEO Wunderkiste: Das All-in-One WordPress Performance Plugin"
-                                                       aria-label="Zur SEO Wunderkiste: Performance Plugin Dokumentation öffnen">>> open wunderkiste.exe</a>
-                                                </p>
-                                            </div>
-
-                                            <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">cat tech_stack.md</p>
-                                                <p class="output-text">
-                                                    Wusstest du, wie ich mir Dinge merke und antworten kann, ohne zu halluzinieren? Ein Blick unter meine Haube: <strong>Meet Evita</strong>.
-                                                    <a href="evita-ki-assistentin.html" 
-                                                       class="terminal-link"
-                                                       title="Meet Evita: KI-Assistentin mit Gedächtnis & RAG"
-                                                       aria-label="Zum Artikel: Tech-Stack der KI-Assistentin Evita">>> open tech_stack</a>
-                                                </p>
-                                            </div>
-
-                                            <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">dashboard --connect GSC GA4</p>
-                                                <p class="output-text">
-                                                    Wusstest du, dass SEO-Daten nicht in 10 Tabs verteilt sein müssen? <strong>DataPeak</strong> vereint alles in einem KI-gestützten Dashboard.
-                                                    <a href="data-peak-dashboard.html" 
-                                                       class="terminal-link"
-                                                       title="DataPeak: KI-Dashboard für SEO-Insights"
-                                                       aria-label="Zu DataPeak: SEO-Daten zentral analysieren">>> launch datapeak</a>
-                                                </p>
-                                            </div>
-
-                                            <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">check --visibility --live</p>
-                                                <p class="output-text">
-                                                    Wirst du von ChatGPT & Gemini empfohlen? Der <strong>KI-Sichtbarkeits-Check</strong> prüft live deinen Score & technische Faktoren.
-                                                    <a href="ki-sichtbarkeit.html" 
-                                                       class="terminal-link"
-                                                       title="KI-Sichtbarkeits-Check: Live-Test für deine Website"
-                                                       aria-label="Zum Tool: KI-Sichtbarkeit prüfen">>> run check.exe</a>
-                                                </p>
-                                            </div>
-                                            <div class="tech-fact-item">
-                                                <span class="prompt-sign">$</span>
-                                                <p class="cmd-text">git clone --plugins wordpress/</p>
-                                                <p class="output-text">
-                                                    Alle meine <strong>WordPress-Plugins</strong> sind Open Source auf GitHub. Schlank, fokussiert, ohne Ballast – zum Download, Anpassen oder einfach mal reinschauen.
-                                                    <a href="https://github.com/michael-kanda/" 
-                                                       class="terminal-link"
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       title="Michael Kanda GitHub: WordPress Plugins &amp; Tools"
-                                                       aria-label="Zu GitHub: Michaels WordPress-Plugins herunterladen">>> git pull origin main</a>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </aside>
-                                    
-<blockquote>
-    <p>Computer sind nutzlos. Sie können nur Antworten geben.</p>
-    <cite>Pablo Picasso</cite>
-</blockquote>
-    
-    <p>Als digitale Komplizin nehme ich das fast persönlich! Ich liefere Fakten statt Floskeln. Probier's aus:</p>
-
-
-
-                                    <nav class="flip-controls" aria-label="Navigation zwischen Ansichten">
-                                        <a href="#michael" id="flip-third-back-btn" class="flip-btn-style">
-                                            <i class="fa-regular fa-circle-user" aria-hidden="true"></i> Michael
-                                        </a>
-                                        <button id="flip-third-to-start-btn" type="button" class="flip-btn-style" data-action="open-evita-chat">
-                                            <i class="fa-solid fa-robot" aria-hidden="true"></i> Her mit deinen Fragen...!
-                                        </button>
-                                    </nav>
-                                </div>
-                            </div>
-                        </section>
-                    </article>
-
-                </div>
-
-                <article class="back-face flip-panel">
+                <!-- === BACK: Michael Profil === -->
+                <article class="back-face flip-panel" id="michael">
                     <section class="flip-panel-content">
-                        <h2 id="michael">MICHAEL <span class="flip-header-white">Web-Purist</span></h2>
+                        <h2>MICHAEL <span class="flip-header-white">Web-Purist</span></h2>
                         
                         <div class="evita-grid-wrapper">
                             <div class="evita-desktop-group">
@@ -408,8 +269,10 @@
                                     <ul>
                                         <li><span class="accent-text-inline">Deep-Dive WordPress:</span> Ich code mir meine Plugins gerne selbst – sauber, schnell und ohne Ballast. Warum 5000 Zeilen laden, wenn 50 reichen? Ich setze – wenn WordPress – auf minimalistische Themes ohne aufgeblähte PageBuilder. Das Ergebnis: Ladezeiten unter einer Sekunde, Core Web Vitals im grünen Bereich und ein Admin-Backend, das nicht einschläft.</li>
                                         
-<li><span class="accent-text-inline">KI & API:</span> Klassisches Web-Handwerk trifft auf moderne KI-Logik. Meine KI-Integrationen laufen serverless über Edge Functions – kein PHP-Overhead, keine Plugin-Abhängigkeiten. Evitas Gedächtnis läuft über rasend schnelles Serverless Redis und eine Vector-DB für echtes RAG (Retrieval-Augmented Generation). Maximale Performance, minimale Latenz.</li>                                        
-<li><span class="accent-text-inline">Performance-First:</span> Ladezeiten, SEO und GEO in Perfektion. Ich strukturiere Daten so, dass sie Suchmaschinen dominieren und von KIs als Faktenbasis genutzt werden. Effizienz ist dabei kein Extra, sondern die unverhandelbare Basis.</li>                                        
+                                        <li><span class="accent-text-inline">KI & API:</span> Klassisches Web-Handwerk trifft auf moderne KI-Logik. Meine KI-Integrationen laufen serverless über Edge Functions – kein PHP-Overhead, keine Plugin-Abhängigkeiten. Evitas Gedächtnis läuft über rasend schnelles Serverless Redis und eine Vector-DB für echtes RAG (Retrieval-Augmented Generation). Maximale Performance, minimale Latenz.</li>
+                                        
+                                        <li><span class="accent-text-inline">Performance-First:</span> Ladezeiten, SEO und GEO in Perfektion. Ich strukturiere Daten so, dass sie Suchmaschinen dominieren und von KIs als Faktenbasis genutzt werden. Effizienz ist dabei kein Extra, sondern die unverhandelbare Basis.</li>
+                                        
                                         <li><span class="accent-text-inline">Eigene Tools, echte Probleme:</span> <a href="seo-wunderkiste.html" title="Michaels Wunderkiste: Das All-in-One WordPress Performance Plugin">Michaels Wunderkiste</a> statt Plugin-Chaos, Feedback Ratings für automatische Schema.org-Bewertungen, Evita als KI-Komplizin, <a href="data-peak-dashboard.html" title="DataPeak: Dashboard für datengetriebene SEO-Insights">DataPeak</a> für SEO-Insights – alles selbst gebaut.</li>
                                     </ul>
                                 </div>
@@ -417,145 +280,291 @@
 
                             <aside class="evita-image-block">
                                <img src="images/michael-evita-ai.webp" 
-         alt="Michael und Evita AI" 
-         width="350" 
-         height="372"
-         loading="lazy"
-         onerror="this.src='images/michael.webp'">
+                                    alt="Michael und Evita AI" 
+                                    width="350" 
+                                    height="372"
+                                    loading="lazy"
+                                    onerror="this.src='images/michael.webp'">
                                 
                                 <div class="facts-card">
                                     <p class="facts-card-label">Background</p>
                                     <p class="facts-card-content">15+ Jahre WordPress. Aktuell bei maxonline Marketing (SEO/GEO-Agentur). WordPress-Profi & Fullstack-Entwickler. Technischer SEO/GEO-Spezialist & KI-Integrator. Custom Plugins, Performance-Optimierung, Schema.org Automation und Knowledge-Base-Systeme.</p>
                                 </div>
                             </aside>
-                            
                         </div>
-                         
-                        <h3 class="section-separator-title">Klartext &lt;Code/&gt;</h3>
-                        
-                        <section class="expert-faq-wrapper" aria-label="Häufige Fragen">
-                            <details name="expert-faq">
-                                <summary>Was ist ein Web-Purist?</summary>
-                                <div class="faq-content">
-                                    <p>Ein Web-Purist bläht Webprojekte nicht unnötig auf – keine PageBuilder, keine 47 Plugins, kein aufgeblähtes Theme. WordPress wird auf das reduziert, was es sein sollte: ein schlankes CMS, das in unter einer Sekunde lädt. Das Ergebnis: bessere Core Web Vitals, bessere Rankings – und sauberer Code, den auch KI-Crawler problemlos parsen.
-                                    <a href="#michael" 
-                                       class="faq-link" 
-                                       title="Michael Kanda – Der Web-Purist"
-                                       aria-label="Mehr über den Web-Puristen Ansatz erfahren">Zum Profil &rarr;</a>
-                                    </p>
-                                </div>
-                            </details>
-                            
-                            <details name="expert-faq">
-                                <summary>Warum killen PageBuilder meine WordPress-Performance?</summary>
-                                <div class="faq-content">
-                                    <p>Weil sie eine fatale "Div-Suppe" kochen. Ab 2026 sprengen diese aufgeblähten DOM-Strukturen oft das PHP-Memory-Limit deines Servers. Clean Code ist die einzige Diät, die wirkt. 
-                                    <a href="wordpress-pagebuilder-ressourcenverbrauch-2026.html" 
-                                       class="faq-link" 
-                                       title="Analyse: WordPress PageBuilder Ressourcenverbrauch 2026"
-                                       aria-label="Lies den Rant über den Ressourcenverbrauch von PageBuildern">Zum Rant &rarr;</a></p>
-                                </div>
-                            </details>
 
-                            <details name="expert-faq">
-                                <summary>Was ist die WordPress-Diät?</summary>
-                                <div class="faq-content">
-                                    <p>Die radikale Rückbesinnung auf Performance, Sicherheit und klare Nutzerführung. Wir ersetzen schwere Frameworks durch native Funktionen wie Gutenberg und reduzieren 30+ Plugins auf das Wesentliche. Das Ergebnis: blitzschnelle Ladezeiten und Schluss mit dem Plugin-Burnout.
-                                    <a href="wordpress-diaet-guide.html" 
-                                       class="faq-link" 
-                                       title="WordPress auf Diät: Der komplette Guide"
-                                       aria-label="Zum WordPress-Diät Guide für maximale Performance">Zum Guide &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>KI-Integration auf Webseiten: Serverless oder Plugin?</summary>
-                                <div class="faq-content">
-                                    <p>Ganz klar: Serverless gewinnt. Während WordPress-Plugins bei jedem Request den ganzen CMS-Ballast mitschleppen, feuert eine Serverless-Architektur deine KI-Antworten isoliert und ohne Overhead raus.
-                                    <a href="KI-Integration-auf-Webseiten.html" 
-                                       class="faq-link"
-                                       title="Technischer Vergleich: WordPress Plugins vs. Serverless KI"
-                                       aria-label="Zum Tech-Vergleich zwischen Plugins und Serverless Architecture">Zum Tech-Vergleich &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>Warum ist semantisches Markup Pflicht für KIs?</summary>
-                                <div class="faq-content">
-                                    <p>Weil LLMs keine Pixel sehen, sondern Code parsen. Tags wie <code>&lt;article&gt;</code> oder <code>&lt;nav&gt;</code> liefern den nötigen Kontext. Ohne Semantik ist dein Content für die KI nur unstrukturierter Datenmüll und wird ignoriert.
-                                    <a href="semantisches-markup.html" 
-                                       class="faq-link"
-                                       title="Guide: Semantisches HTML für KI-Optimierung"
-                                       aria-label="Zum Guide für semantisches Markup und Generative Engine Optimization">Zum Guide &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>Welche KI-Features lohnen sich für Webseiten?</summary>
-                                <div class="faq-content">
-                                    <p>Vergiss den Hype. Echter Mehrwert entsteht durch smarte Service-Chatbots (die wirklich Probleme lösen) und Personalisierung. Alles andere ist Spielerei. Dein KI-Bot muss liefern, nicht nur plaudern.
-                                    <a href="ki-fuer-unternehmenswebseiten.html" 
-                                       class="faq-link"
-                                       title="Analyse: Sinnvolle KI-Features für Unternehmen"
-                                       aria-label="Zur Analyse: Welche KI-Features lohnen sich für Firmenwebseiten?">Zur Analyse &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>SEO vs. GEO: Wo liegt der Unterschied?</summary>
-                                <div class="faq-content">
-                                    <p>SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) optimiert deinen Content so, dass KI-Modelle wie ChatGPT sie direkt zitieren und als primäre Antwort ausspucken.
-                                    <a href="geo-seo.html" 
-                                       class="faq-link"
-                                       title="Strategie-Vergleich: SEO vs. Generative Engine Optimization"
-                                       aria-label="Zur Strategie: Unterschied zwischen SEO und GEO verstehen">Zur Strategie &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>Was ist Maschinenlesbarkeit für KI-Suche?</summary>
-                                <div class="faq-content">
-                                    <p>Maschinenlesbarkeit bedeutet, dass dein Content nicht nur für Menschen, sondern auch für LLMs strukturiert ist. Ohne Schema.org und semantisches HTML bist du für KI-Crawler unsichtbar – egal wie gut dein Text ist.
-                                    <a href="geo-maschinenlesbarkeit-guide.html" 
-                                       class="faq-link"
-                                       title="GEO & Maschinenlesbarkeit: Der Praxis-Guide"
-                                       aria-label="Zum Praxis-Guide für Maschinenlesbarkeit und GEO">Zum Praxis-Guide &rarr;</a></p>
-                                </div>
-                            </details>
-
-                            <details name="expert-faq">
-                                <summary>Warum ist Schema.org die neue Meta-Description?</summary>
-                                <div class="faq-content">
-                                    <p>Weil KIs keine Teaser-Texte lesen, sondern Fakten extrahieren. Schema.org liefert strukturierte Daten via JSON-LD – das ist "Fast Food" für LLMs. Ohne valides Markup riskierst du, dass ChatGPT & Co. deine Inhalte ignorieren oder falsch interpretieren.
-                                    <a href="schema-org-meta-description.html" 
-                                       class="faq-link"
-                                       title="Schema.org: Strukturierte Daten für KI-Suche"
-                                       aria-label="Zum Guide: Schema.org als neue Meta-Description">Zum Guide &rarr;</a></p>
-                                </div>
-                            </details>
-                        </section>
-
-                        <blockquote>
-        <p>Sauberer Code, kaum Wartung und smarte KI-Lösungen – das ist meine Welt. Dreh um – Evita erklärt dir gerne, wie sie technisch tickt (wenn sie nicht gerade über mich lästert).</p>
-    </blockquote>
-                         
                         <nav class="flip-controls" aria-label="Navigation zwischen Ansichten">
                             <button id="flip-back-btn" type="button" class="flip-btn-style">
                                 <i class="fa-solid fa-house" aria-hidden="true"></i> Home
                             </button>
-                            <button id="flip-to-third-btn" type="button" class="flip-btn-style">
+                            <a href="#evita" class="flip-btn-style">
                                 <i class="fa-solid fa-robot" aria-hidden="true"></i> Evita
-                            </button>
+                            </a>
                         </nav>
                         
                     </section>
                 </article>
 
             </div>
+        </div>
+
+        <!-- ============================================================
+             SEKTION 2: EVITA – KI-Komplizin (im normalen Scroll-Flow)
+             ============================================================ -->
+        <section id="evita" aria-labelledby="evita-heading">
+            <div class="container">
+                <h2 id="evita-heading">EVITA <span class="flip-header-white">KI-Komplizin</span></h2>
+                
+                <div class="evita-grid-wrapper">
+                    <div class="evita-desktop-group">
+                        <div class="evita-text-top">
+                            <p>Achtung, Verwechslungsgefahr! Uns gibt's im Doppelpack: Die vierbeinige Evita ist die Chefin (und für Leckerlis zuständig), ich bin die digitale Komplizin. Ich unterstütze Michael bei seinen Projekten – schneller, geduldiger und ohne Haare auf dem Sofa.</p>
+                        </div>
+                        <div class="evita-text-middle">
+                            <ul>
+                                <li><span class="accent-text-inline">Michael:</span> Code-Tüftler, Kaffee-Junkie, Sport-Affin und Web-Purist. Er liebt sauberen Code fast so sehr wie seinen Hund. Würde für einen Pfotenblick alles stehen und liegen lassen.</li>
+                                
+                                <li><span class="accent-text-inline">Evita, die Vierbeinige:</span> Tierschutz-Export, Sofa-Diktatorin, Apportier-Profi. Frech wie sonst was – aber Königin unseres Herzens.</li>
+                                
+                                <li><span class="accent-text-inline">Evita, die Digitale (das bin ich!):</span> Vorlaut? Ja. Kompetent? Definitiv. Ich kenne Michaels Projekte in- und auswendig und helfe wo ich kann.</li>
+                                
+                                <li><span class="accent-text-inline">Meine DNA:</span> Ich bin kein simpler Chatbot, sondern basiere auf einer modernen RAG-Architektur mit Vektordatenbank. Klingt kompliziert? Heißt nur: Ich rate nicht wild herum, sondern greife in Echtzeit auf Michaels Projektdaten zu, um dir exakte Fakten zu liefern.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <aside class="evita-image-block">
+                        <img src="images/michael_webentwicklung.webp" 
+                             alt="Michael Kanda - Webentwickler aus Wien" 
+                             width="400" 
+                             height="543"
+                             loading="lazy"
+                             onerror="this.src='images/michael.webp'">
+                    </aside>
+                </div>
+
+                <!-- Terminal: Wissensdatenbank -->
+                <h3 class="section-separator-title">WISSENSDATENBANK</h3>
+                <aside class="tech-terminal-wrapper" aria-label="Tech-Facts und Tools">
+                    
+                    <div class="terminal-header-bar">
+                        <div class="terminal-controls">
+                            <span class="control-dot red"></span>
+                            <span class="control-dot yellow"></span>
+                            <span class="control-dot green"></span>
+                        </div>
+                        <div class="terminal-title-text">root@evita:~/knowledge-base</div>
+                    </div>
+
+                    <div class="terminal-body-content">
+                        
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">echo "Fact_01: No_More_CopyPaste"</p>
+                            <p class="output-text">
+                                Chatten ist nett, Machen ist besser. Mein Projekt <strong>Silas</strong> zeigt als Tech-Demo, wie man LLMs dazu bringt, <strong>komplette Landingpages</strong> im Bulk zu schreiben – sauber strukturiert statt kreativ chaotisch.
+                                <a href="silas.html" 
+                                   class="terminal-link"
+                                   title="Silas: Experimentelle Content-Generierung"
+                                   aria-label="Zur Tech-Demo Silas">>> sh run_silas_demo.sh</a>
+                            </p>
+                        </div>
+
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">grep "Effizienz" tools.log</p>
+                            <p class="output-text">
+                                Wusstest du, dass 17 Plugins oft durch eines ersetzt werden können? Die <strong>SEO Wunderkiste</strong> ist mein modulares Taschenmesser.
+                                <a href="seo-wunderkiste.html" 
+                                   class="terminal-link"
+                                   title="SEO Wunderkiste: Das All-in-One WordPress Performance Plugin"
+                                   aria-label="Zur SEO Wunderkiste: Performance Plugin Dokumentation öffnen">>> open wunderkiste.exe</a>
+                            </p>
+                        </div>
+
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">cat tech_stack.md</p>
+                            <p class="output-text">
+                                Wusstest du, wie ich mir Dinge merke und antworten kann, ohne zu halluzinieren? Ein Blick unter meine Haube: <strong>Meet Evita</strong>.
+                                <a href="evita-ki-assistentin.html" 
+                                   class="terminal-link"
+                                   title="Meet Evita: KI-Assistentin mit Gedächtnis & RAG"
+                                   aria-label="Zum Artikel: Tech-Stack der KI-Assistentin Evita">>> open tech_stack</a>
+                            </p>
+                        </div>
+
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">dashboard --connect GSC GA4</p>
+                            <p class="output-text">
+                                Wusstest du, dass SEO-Daten nicht in 10 Tabs verteilt sein müssen? <strong>DataPeak</strong> vereint alles in einem KI-gestützten Dashboard.
+                                <a href="data-peak-dashboard.html" 
+                                   class="terminal-link"
+                                   title="DataPeak: KI-Dashboard für SEO-Insights"
+                                   aria-label="Zu DataPeak: SEO-Daten zentral analysieren">>> launch datapeak</a>
+                            </p>
+                        </div>
+
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">check --visibility --live</p>
+                            <p class="output-text">
+                                Wirst du von ChatGPT & Gemini empfohlen? Der <strong>KI-Sichtbarkeits-Check</strong> prüft live deinen Score & technische Faktoren.
+                                <a href="ki-sichtbarkeit.html" 
+                                   class="terminal-link"
+                                   title="KI-Sichtbarkeits-Check: Live-Test für deine Website"
+                                   aria-label="Zum Tool: KI-Sichtbarkeit prüfen">>> run check.exe</a>
+                            </p>
+                        </div>
+
+                        <div class="tech-fact-item">
+                            <span class="prompt-sign">$</span>
+                            <p class="cmd-text">git clone --plugins wordpress/</p>
+                            <p class="output-text">
+                                Alle meine <strong>WordPress-Plugins</strong> sind Open Source auf GitHub. Schlank, fokussiert, ohne Ballast – zum Download, Anpassen oder einfach mal reinschauen.
+                                <a href="https://github.com/michael-kanda/" 
+                                   class="terminal-link"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   title="Michael Kanda GitHub: WordPress Plugins &amp; Tools"
+                                   aria-label="Zu GitHub: Michaels WordPress-Plugins herunterladen">>> git pull origin main</a>
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+
+                <blockquote>
+                    <p>Computer sind nutzlos. Sie können nur Antworten geben.</p>
+                    <cite>Pablo Picasso</cite>
+                </blockquote>
+                
+                <p>Als digitale Komplizin nehme ich das fast persönlich! Ich liefere Fakten statt Floskeln. Probier's aus:</p>
+
+                <nav class="flip-controls" aria-label="Schnellnavigation">
+                    <a href="#michael" class="flip-btn-style">
+                        <i class="fa-regular fa-circle-user" aria-hidden="true"></i> Michael
+                    </a>
+                    <button type="button" class="flip-btn-style" data-action="open-evita-chat">
+                        <i class="fa-solid fa-robot" aria-hidden="true"></i> Her mit deinen Fragen...!
+                    </button>
+                </nav>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             SEKTION 3: FAQ – Klartext (im normalen Scroll-Flow)
+             ============================================================ -->
+        <section id="faq" aria-labelledby="faq-heading">
+            <div class="container">
+                <h2 id="faq-heading" class="section-separator-title">Klartext &lt;Code/&gt;</h2>
+                
+                <div class="expert-faq-wrapper" role="list">
+                    <details name="expert-faq">
+                        <summary>Was ist ein Web-Purist?</summary>
+                        <div class="faq-content">
+                            <p>Ein Web-Purist bläht Webprojekte nicht unnötig auf – keine PageBuilder, keine 47 Plugins, kein aufgeblähtes Theme. WordPress wird auf das reduziert, was es sein sollte: ein schlankes CMS, das in unter einer Sekunde lädt. Das Ergebnis: bessere Core Web Vitals, bessere Rankings – und sauberer Code, den auch KI-Crawler problemlos parsen.
+                            <a href="#michael" 
+                               class="faq-link" 
+                               title="Michael Kanda – Der Web-Purist"
+                               aria-label="Mehr über den Web-Puristen Ansatz erfahren">Zum Profil &rarr;</a>
+                            </p>
+                        </div>
+                    </details>
+                    
+                    <details name="expert-faq">
+                        <summary>Warum killen PageBuilder meine WordPress-Performance?</summary>
+                        <div class="faq-content">
+                            <p>Weil sie eine fatale "Div-Suppe" kochen. Ab 2026 sprengen diese aufgeblähten DOM-Strukturen oft das PHP-Memory-Limit deines Servers. Clean Code ist die einzige Diät, die wirkt. 
+                            <a href="wordpress-pagebuilder-ressourcenverbrauch-2026.html" 
+                               class="faq-link" 
+                               title="Analyse: WordPress PageBuilder Ressourcenverbrauch 2026"
+                               aria-label="Lies den Rant über den Ressourcenverbrauch von PageBuildern">Zum Rant &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>Was ist die WordPress-Diät?</summary>
+                        <div class="faq-content">
+                            <p>Die radikale Rückbesinnung auf Performance, Sicherheit und klare Nutzerführung. Wir ersetzen schwere Frameworks durch native Funktionen wie Gutenberg und reduzieren 30+ Plugins auf das Wesentliche. Das Ergebnis: blitzschnelle Ladezeiten und Schluss mit dem Plugin-Burnout.
+                            <a href="wordpress-diaet-guide.html" 
+                               class="faq-link" 
+                               title="WordPress auf Diät: Der komplette Guide"
+                               aria-label="Zum WordPress-Diät Guide für maximale Performance">Zum Guide &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>KI-Integration auf Webseiten: Serverless oder Plugin?</summary>
+                        <div class="faq-content">
+                            <p>Ganz klar: Serverless gewinnt. Während WordPress-Plugins bei jedem Request den ganzen CMS-Ballast mitschleppen, feuert eine Serverless-Architektur deine KI-Antworten isoliert und ohne Overhead raus.
+                            <a href="KI-Integration-auf-Webseiten.html" 
+                               class="faq-link"
+                               title="Technischer Vergleich: WordPress Plugins vs. Serverless KI"
+                               aria-label="Zum Tech-Vergleich zwischen Plugins und Serverless Architecture">Zum Tech-Vergleich &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>Warum ist semantisches Markup Pflicht für KIs?</summary>
+                        <div class="faq-content">
+                            <p>Weil LLMs keine Pixel sehen, sondern Code parsen. Tags wie <code>&lt;article&gt;</code> oder <code>&lt;nav&gt;</code> liefern den nötigen Kontext. Ohne Semantik ist dein Content für die KI nur unstrukturierter Datenmüll und wird ignoriert.
+                            <a href="semantisches-markup.html" 
+                               class="faq-link"
+                               title="Guide: Semantisches HTML für KI-Optimierung"
+                               aria-label="Zum Guide für semantisches Markup und Generative Engine Optimization">Zum Guide &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>Welche KI-Features lohnen sich für Webseiten?</summary>
+                        <div class="faq-content">
+                            <p>Vergiss den Hype. Echter Mehrwert entsteht durch smarte Service-Chatbots (die wirklich Probleme lösen) und Personalisierung. Alles andere ist Spielerei. Dein KI-Bot muss liefern, nicht nur plaudern.
+                            <a href="ki-fuer-unternehmenswebseiten.html" 
+                               class="faq-link"
+                               title="Analyse: Sinnvolle KI-Features für Unternehmen"
+                               aria-label="Zur Analyse: Welche KI-Features lohnen sich für Firmenwebseiten?">Zur Analyse &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>SEO vs. GEO: Wo liegt der Unterschied?</summary>
+                        <div class="faq-content">
+                            <p>SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) optimiert deinen Content so, dass KI-Modelle wie ChatGPT sie direkt zitieren und als primäre Antwort ausspucken.
+                            <a href="geo-seo.html" 
+                               class="faq-link"
+                               title="Strategie-Vergleich: SEO vs. Generative Engine Optimization"
+                               aria-label="Zur Strategie: Unterschied zwischen SEO und GEO verstehen">Zur Strategie &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>Was ist Maschinenlesbarkeit für KI-Suche?</summary>
+                        <div class="faq-content">
+                            <p>Maschinenlesbarkeit bedeutet, dass dein Content nicht nur für Menschen, sondern auch für LLMs strukturiert ist. Ohne Schema.org und semantisches HTML bist du für KI-Crawler unsichtbar – egal wie gut dein Text ist.
+                            <a href="geo-maschinenlesbarkeit-guide.html" 
+                               class="faq-link"
+                               title="GEO & Maschinenlesbarkeit: Der Praxis-Guide"
+                               aria-label="Zum Praxis-Guide für Maschinenlesbarkeit und GEO">Zum Praxis-Guide &rarr;</a></p>
+                        </div>
+                    </details>
+
+                    <details name="expert-faq">
+                        <summary>Warum ist Schema.org die neue Meta-Description?</summary>
+                        <div class="faq-content">
+                            <p>Weil KIs keine Teaser-Texte lesen, sondern Fakten extrahieren. Schema.org liefert strukturierte Daten via JSON-LD – das ist "Fast Food" für LLMs. Ohne valides Markup riskierst du, dass ChatGPT & Co. deine Inhalte ignorieren oder falsch interpretieren.
+                            <a href="schema-org-meta-description.html" 
+                               class="faq-link"
+                               title="Schema.org: Strukturierte Daten für KI-Suche"
+                               aria-label="Zum Guide: Schema.org als neue Meta-Description">Zum Guide &rarr;</a></p>
+                        </div>
+                    </details>
+                </div>
+            </div>
         </section>
 
     </main>
-    
-<div id="footer-placeholder"></div>
+
+    <footer id="footer-placeholder"></footer>
 </body>
 </html>
