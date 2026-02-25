@@ -917,3 +917,167 @@ blockquote.pull-quote::after {
     }
 }
 
+
+/* ============================================================
+   HYBRID LAYOUT PATCH
+   Ergänzung zur bestehenden flip-card.css
+   Macht Evita + FAQ zu normalen Scroll-Sektionen unterhalb des Flips
+   ============================================================ */
+
+/* ===================
+   1. HERO FIX: Kinder vertikal stapeln
+   Das ist der eigentliche Bug-Fix.
+   =================== */
+
+#hero:has(.flip-container) {
+    flex-direction: column;        /* ← DAS hat gefehlt */
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+/* ===================
+   2. FLIP-CONTAINER: bleibt wie er ist, nur saubere Abgrenzung
+   =================== */
+
+#hero .flip-container {
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ===================
+   3. SCROLL-SEKTIONEN (Evita + FAQ)
+   Eigenständige Bereiche im normalen Flow
+   =================== */
+
+#evita,
+#faq {
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#evita {
+    padding-top: clamp(40px, 6vh, 80px);
+    padding-bottom: clamp(40px, 4vh, 60px);
+    border-top: 1px solid var(--border-color-subtle);
+}
+
+#faq {
+    padding-top: clamp(30px, 4vh, 60px);
+    padding-bottom: clamp(60px, 8vh, 120px);
+    border-top: 1px solid var(--border-color-subtle);
+}
+
+/* Evita H2 übernimmt den Flip-Panel Style */
+#evita h2 {
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    font-size: 2rem;
+    text-align: left;
+}
+
+/* Typography für Sektionen außerhalb des Flips */
+#evita p,
+#evita ul li {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+#evita ul {
+    list-style-type: square;
+    list-style-position: inside;
+    padding: 0;
+    margin: 10px 0 15px 0;
+}
+
+/* Grid-Layout für Evita-Sektion auf Desktop */
+@media (min-width: 769px) {
+    #evita .evita-grid-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        grid-template-rows: auto auto;
+        gap: 30px;
+        align-items: start;
+    }
+
+    #evita .evita-desktop-group {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+    }
+
+    #evita .evita-image-block {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-end;
+        align-self: start;
+    }
+}
+
+/* Mobile: Evita-Sektion */
+@media (max-width: 768px) {
+    #evita .evita-grid-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #evita .evita-desktop-group { display: contents; }
+    #evita .evita-text-top { order: 1; }
+    
+    #evita .evita-image-block {
+        order: 2;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+
+    #evita .evita-image-block img {
+        width: 60%;
+        max-width: 200px;
+        margin: 0;
+    }
+
+    #evita .evita-text-middle { order: 3; }
+
+    #evita h2 { font-size: 1.6rem; margin-bottom: 15px; }
+}
+
+/* ===================
+   4. FAQ: Erbt Expert-FAQ Styles, braucht nur Container-Korrektur
+   =================== */
+
+#faq .expert-faq-wrapper {
+    margin-top: 0;     /* Braucht keinen extra margin-top, da Section schon padding hat */
+    border-top: none;  /* Border kommt von der Section selbst */
+}
+
+/* ===================
+   5. LIGHT MODE Patches für Scroll-Sektionen
+   =================== */
+
+body.light-mode #evita p,
+body.light-mode #evita li,
+body.light-mode #evita h2,
+body.light-mode #evita h3,
+body.light-mode #evita .flip-header-white {
+    color: #333333 !important;
+}
+
+body.light-mode #evita h2 {
+    color: var(--accent-color) !important;
+}
+
