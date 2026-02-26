@@ -1,8 +1,9 @@
 name: Daily Rating Update
+
 on:
   schedule:
     # Läuft jeden 2ten Tag um 04:00 Uhr morgens (UTC)
-    - cron: '0 4 */2 * *''
+    - cron: '0 4 */2 * *'
   workflow_dispatch: # Erlaubt dir, es auch manuell zu testen
 
 jobs:
