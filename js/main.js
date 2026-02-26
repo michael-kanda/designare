@@ -301,3 +301,51 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.performance-tip').forEach(el => observer.observe(el));
+
+// Wir warten, bis das HTML-Dokument vollständig geladen ist
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Finde alle <pre> Blöcke auf der aktuellen Seite
+    const preBlocks = document.querySelectorAll('pre');
+
+    // 2. Gehe jeden einzelnen Block durch
+    preBlocks.forEach((preBlock) => {
+        
+        // 3. Erstelle das Button-Element
+        const button = document.createElement('button');
+        button.innerText = 'Kopieren';
+        button.className = 'copy-button'; // Die Klasse aus unserem CSS
+
+        // 4. Füge den Button in den <pre> Block ein
+        preBlock.appendChild(button);
+
+        // 5. Füge dem Button ein Klick-Ereignis hinzu
+        button.addEventListener('click', async () => {
+            
+            // Text extrahieren: Wir suchen nach einem <code> Tag im <pre> Block.
+            // Gibt es eines, nehmen wir dessen Text. Wenn nicht, nehmen wir den Text des <pre> Blocks.
+            const codeElement = preBlock.querySelector('code');
+            const textToCopy = codeElement ? codeElement.innerText : preBlock.innerText;
+
+            try {
+                // Moderne Clipboard API: Kopiert den Text in die Zwischenablage
+                await navigator.clipboard.writeText(textToCopy);
+                
+                // Visuelles Feedback für den Nutzer (Text und Farbe ändern)
+                button.innerText = 'Kopiert!';
+                button.classList.add('copied');
+
+                // Nach 2 Sekunden (2000 Millisekunden) setzen wir den Button zurück
+                setTimeout(() => {
+                    button.innerText = 'Kopieren';
+                    button.classList.remove('copied');
+                }, 2000);
+                
+            } catch (err) {
+                // Falls etwas schiefgeht (z.B. fehlende Berechtigungen im Browser)
+                console.error('Fehler beim Kopieren des Codes: ', err);
+                button.innerText = 'Fehler';
+            }
+        });
+    });
+});
