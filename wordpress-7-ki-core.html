@@ -129,7 +129,7 @@
                     <div class="summary-content">
                         <h3>Das Wichtigste in Kürze:</h3>
                         <ul>
-                            <li><strong>Zwei Releases, ein Ziel:</strong> Die <strong>Abilities API</strong> ist seit WordPress <strong>6.9</strong> (November 2025) im Core. Der <strong>WP AI Client SDK</strong> ist für WordPress <strong>7.0</strong> (April 2026) vorgeschlagen.</li>
+                            <li><strong>Zwei Releases, ein Ziel:</strong> Die <strong>Abilities API</strong> ist seit WordPress <strong>6.9</strong> (Dezember 2025) im Core. Der <strong>WP AI Client SDK</strong> ist für WordPress <strong>7.0</strong> (April 2026) vorgeschlagen.</li>
                             <li><strong>Kein LLM auf deinem Server:</strong> WordPress baut keine KI ein – es baut die standardisierten Schnittstellen dazu. Die Rechenarbeit bleibt bei OpenAI, Google und Co.</li>
                             <li><strong>Der AI Client SDK:</strong> Entwickler greifen über die Klasse <code>AI_Client</code> einheitlich auf Modelle wie Gemini, GPT oder Claude zu – ohne anbieterspezifischen Code.</li>
                             <li><strong>Abilities API:</strong> Macht WordPress maschinenlesbar für externe Tools (n8n, Make) und KI-Agenten via MCP. Bereits heute in WordPress 6.9 verfügbar.</li>
@@ -154,7 +154,7 @@
                 
                 <p>WordPress, das System hinter über 40 % aller Websites weltweit, integriert KI erstmals als fundamentalen Bestandteil des Cores – und macht damit einen Großteil des florierenden KI-Plugin-Markts strukturell obsolet. Bis jetzt glich KI in WordPress einem Flickenteppich: Für SEO-Texte nutzte man Plugin A, für Bilder Plugin B, für Chat-Assistenz Plugin C. Das Ergebnis war ein aufgeblähtes Backend, Sicherheitsprobleme und explodierende Abo-Kosten.</p>
 
-                <p>Das ändert sich in zwei Stufen. <strong>WordPress 6.9 (November 2025)</strong> hat mit der Abilities API bereits das Agenten-Interface in den Core gebracht – das GitHub-Repository des Feature-Plugins wurde im Februar 2026 archiviert, weil der Code erfolgreich in den WordPress Core übernommen wurde. Mit dem geplanten Release von <strong>WordPress 7.0 (April 2026)</strong> soll der WP AI Client SDK folgen – die standardisierte PHP-Abstraktionsschicht zu Sprachmodellen. Zusammen bilden sie das Fundament für native KI-Automatisierung direkt in WordPress.</p>
+                <p>Das ändert sich in zwei Stufen. <strong>WordPress 6.9 (Dezember 2025)</strong> hat mit der Abilities API bereits das Agenten-Interface in den Core gebracht – das Vorgänger-Repository (<a href="https://github.com/Automattic/wp-feature-api" rel="noopener" target="_blank">Automattic/wp-feature-api</a>) wurde archiviert, weil die Abilities API als offizielle Nachfolge-Implementierung in den WordPress Core übernommen wurde. Mit dem geplanten Release von <strong>WordPress 7.0 (April 2026)</strong> soll der WP AI Client SDK folgen – die standardisierte PHP-Abstraktionsschicht zu Sprachmodellen. Zusammen bilden sie das Fundament für native KI-Automatisierung direkt in WordPress.</p>
 
                 <div class="info-box">
                     <i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i>
@@ -205,7 +205,7 @@
 
                 <div class="step-guide">
                     <h3>1. Der WP AI Client SDK (<code>AI_Client</code>) – vorgeschlagen für WP 7.0</h3>
-                    <p>Bisher musstest du für OpenAI, Google Gemini oder Anthropic eigene HTTP-Requests schreiben oder dich auf anbieterspezifische Plugin-Abstraktionen verlassen. Der WP AI Client SDK bringt eine standardisierte Klasse mit, die heute bereits via Composer verfügbar ist und für den WordPress 7.0 Core vorgeschlagen wird.</p>
+                    <p>Bisher musstest du für OpenAI, Google Gemini oder Anthropic eigene HTTP-Requests schreiben oder dich auf anbieterspezifische Plugin-Abstraktionen verlassen. Der WP AI Client SDK bringt eine standardisierte Klasse mit, die heute bereits via Composer verfügbar ist und für den WordPress 7.0 Core vorgeschlagen wird. <strong>Hinweis:</strong> Laut den AI-Contributor-Meetings vom Februar 2026 gibt es die Möglichkeit, dass der SDK bei Bedarf auf WordPress 7.1 verschoben wird, falls weitere Iterationszeit nötig ist. Der aktuelle Stand zeigt aber eine klare Absicht, den SDK in 7.0 auszuliefern.</p>
                     <ul>
                         <li><strong>Installation (bereits heute):</strong> <code>composer require wordpress/wp-ai-client</code></li>
                         <li><strong>Vendor-Lock-in beendet:</strong> Du schreibst deinen Code einmal. Der Seitenbetreiber entscheidet in den Backend-Einstellungen unter „KI-Zugangsdaten", welcher Anbieter und welches Modell genutzt werden soll. Dein Plugin-Code muss sich darum nicht kümmern.</li>
@@ -244,7 +244,7 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
 
                 <div class="step-guide">
                     <h3>2. Die Abilities API – bereits in WordPress 6.9</h3>
-                    <p>Das ist der wahre Gamechanger für Automatisierung – und er ist bereits verfügbar. Die Abilities API (seit WordPress 6.9 im Core) definiert, was dein WordPress tun <em>kann</em>, und teilt dies der Außenwelt maschinenlesbar mit. Sie bringt ein neues funktionales Primitiv in WordPress: eine standardisierte und entdeckbare Art, wie Plugins ihre Funktionen anbieten.</p>
+                    <p>Das ist der wahre Gamechanger für Automatisierung – und er ist bereits verfügbar. Die Abilities API (seit WordPress 6.9 im Core) definiert, was dein WordPress tun <em>kann</em>, und teilt dies der Außenwelt maschinenlesbar mit. Sie bringt ein neues funktionales Primitiv in WordPress: eine standardisierte und entdeckbare Art, wie Plugins ihre Funktionen anbieten. <strong>Wichtig:</strong> In WordPress 6.9 wurde nur die serverseitige (PHP) Implementierung ausgeliefert. Mit WordPress 7.0 kommt zusätzlich die <strong>Client-Side Abilities API</strong>, die Abilities auch im Browser standardisiert registrieren und ausführen kann – für noch reichere Workflows direkt im Editor.</p>
                     <ul>
                         <li>
                             <strong>Ability registrieren:</strong>
@@ -254,7 +254,7 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
     'permission_callback' =&gt; function() {
         return current_user_can( 'edit_posts' );
     },
-    'callback'            =&gt; 'mein_plugin_erstelle_entwurf_callback',
+    'execute_callback'        =&gt; 'mein_plugin_erstelle_entwurf_callback',
     'input_schema'        =&gt; array(
         'type'       =&gt; 'object',
         'properties' =&gt; array(
@@ -270,8 +270,7 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
     // ...
     'meta' =&gt; array(
         'mcp' =&gt; array(
-            'public' =&gt; true,
-            'type'   =&gt; 'tool', // alternativ: 'resource' oder 'prompt'
+            'public' =&gt; true, // Pflicht für MCP-Zugriff
         ),
     ),
 ) );</code></pre>
@@ -440,8 +439,8 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
                     <ul>
-                        <li><strong>Abilities API (WP 6.9):</strong> Bereits im Core. Macht WordPress-Funktionen maschinenlesbar und entdeckbar für KI-Agenten, MCP-Clients und Automatisierungstools.</li>
-                        <li><strong>WP AI Client SDK (WP 7.0, vorgeschlagen):</strong> Standardisierter PHP-Zugang zu allen großen KI-Anbietern über eine einheitliche Klasse – ohne Vendor-Lock-in.</li>
+                        <li><strong>Abilities API (WP 6.9):</strong> Serverseitig bereits im Core. Macht WordPress-Funktionen maschinenlesbar und entdeckbar für KI-Agenten, MCP-Clients und Automatisierungstools. WordPress 7.0 ergänzt die Client-Side Abilities API für Browser-basierte Workflows.</li>
+                        <li><strong>WP AI Client SDK (WP 7.0, vorgeschlagen):</strong> Standardisierter PHP-Zugang zu allen großen KI-Anbietern über eine einheitliche Klasse – ohne Vendor-Lock-in. Laut AI-Contributor-Meetings ist ein Aufschub auf 7.1 möglich, falls mehr Iterationszeit nötig ist.</li>
                         <li><strong>Kein LLM auf dem Server:</strong> WordPress ist der Router, die KI-Rechenarbeit bleibt bei den Anbietern.</li>
                         <li><strong>Sicherheit &amp; DSGVO nicht vergessen:</strong> <code>permission_callback</code> ist Pflicht. Drittlandübermittlungen müssen rechtlich abgesichert sein.</li>
                     </ul>
