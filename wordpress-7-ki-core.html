@@ -66,18 +66,10 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Brauche ich mit WordPress 7.0 noch externe KI-Plugins?",
+          "name": "Brauche ich mit WordPress 6.9 / 7.0 noch externe KI-Plugins?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Für grundlegende KI-Funktionen nicht mehr. Die Abilities API ist bereits in WordPress 6.9 im Core. Der WP AI Client SDK kommt mit WordPress 7.0. Du benötigst weiterhin einen eigenen API-Key von einem KI-Anbieter (z.B. OpenAI, Anthropic oder Google), zahlst aber keine Plugin-Abonnements mehr."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Werden die KI-Bilder in der Mediathek gespeichert?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Ja. Bildgenerierung ist als Ability geplant. Generierte Bilder sollen direkt in der WordPress-Mediathek gespeichert werden, inklusive automatisch generierter Alt-Texte."
+            "text": "Die Infrastruktur zieht in den Core ein, aber du benötigst weiterhin einen Zugang zu den KI-Modellen selbst – also einen API-Key von OpenAI, Anthropic, Google oder einem anderen Anbieter. Du zahlst direkt für das, was du verbrauchst (Pay-per-Use), sparst dir aber Plugin-Abonnements und profitierst von einer einheitlichen Konfiguration für alle KI-Features auf deiner Website."
           }
         },
         {
@@ -85,7 +77,47 @@
           "name": "Läuft mit WordPress 7.0 ein KI-Modell auf meinem Server?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Nein. WordPress baut keine KI in den Core ein. Es standardisiert lediglich die Schnittstellen (APIs). Die eigentliche Rechenarbeit passiert auf den Servern externer Anbieter wie OpenAI, Google oder Anthropic."
+            "text": "Nein. WordPress baut keine KI in den Core ein – es baut die standardisierten Schnittstellen dazu. Dein Server sendet lediglich HTTP-Requests an externe KI-Anbieter (OpenAI, Google, Anthropic). Die eigentliche KI-Rechenarbeit findet auf deren Servern statt. Für deinen Server ist ein KI-Aufruf technisch kaum belastender als das Abrufen eines RSS-Feeds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann WordPress jetzt von ganz alleine bloggen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, in Kombination mit Automatisierungstools. Die Abilities API (seit WP 6.9 im Core) macht WordPress maschinenlesbar. Du kannst Workflows einrichten, bei denen ein externes Skript (z.B. n8n) aktuelle Daten abruft und WordPress über registrierte Abilities den Befehl gibt, einen Beitragsentwurf zu erstellen. Über den MCP Adapter können KI-Assistenten wie Claude oder ChatGPT direkt mit WordPress interagieren."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was passiert mit meinen alten KI-Plugins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gute Plugin-Entwickler werden ihre Architektur anpassen: Statt eigener HTTP-Clients nutzen sie den nativen AI_Client SDK, statt proprietärer APIs registrieren sie Abilities. Reine Wrapper-Plugins, die nur eine ChatGPT-Schnittstelle in den Editor brachten, werden durch die nativen Funktionen strukturell überflüssig."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Werden die KI-Bilder in der Mediathek gespeichert?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Bildgenerierung ist als Ability geplant. Generierte Bilder sollen direkt in der WordPress-Mediathek gespeichert werden, inklusive automatisch generierter Alt-Texte. Das Bild wird physisch auf deinem Server gehostet – kein externer Hosting-Dienst nötig."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wem gehören die generierten Bilder und Texte?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Generierte Bilder sollen physisch in deiner Mediathek gespeichert werden – du hostest sie selbst. Die Nutzungsrechte hängen vom jeweiligen Anbieter ab, dessen API-Key du konfiguriert hast. Prüfe die Nutzungsbedingungen des gewählten Anbieters (z.B. OpenAI, Google, Anthropic), da diese sich unterscheiden und für kommerzielle Nutzung relevant sind."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist das DSGVO-konform für europäische Websites?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Da alle Prompts und Inhalte an externe US-amerikanische Anbieter gesendet werden, müssen die üblichen Anforderungen für Drittlandübermittlungen erfüllt sein: Verarbeitungsverträge (DPA) mit den Anbietern, Prüfung der Standardvertragsklauseln sowie transparente Information der Nutzer, falls deren Inhalte in Prompts einfließen. WordPress stellt die Infrastruktur bereit – die datenschutzrechtliche Verantwortung liegt beim Seitenbetreiber."
           }
         }
       ]
@@ -412,6 +444,13 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
                         <summary>Was passiert mit meinen alten KI-Plugins?</summary>
                         <div class="faq-content">
                             <p>Gute Plugin-Entwickler werden ihre Architektur anpassen: Statt eigener HTTP-Clients nutzen sie den nativen <code>AI_Client</code> SDK, statt proprietärer APIs registrieren sie Abilities. Das macht ihre Plugins schlanker und interoperabler. Reine „Wrapper"-Plugins, die nur eine ChatGPT-Schnittstelle in den Editor brachten, werden durch die nativen Funktionen strukturell überflüssig.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Werden die KI-Bilder in der Mediathek gespeichert?</summary>
+                        <div class="faq-content">
+                            <p>Ja. Bildgenerierung ist als Ability geplant. Generierte Bilder sollen direkt in der WordPress-Mediathek gespeichert werden, inklusive automatisch generierter Alt-Texte. Das Bild wird physisch auf deinem Server gehostet – kein externer Hosting-Dienst nötig.</p>
                         </div>
                     </details>
 
