@@ -1048,3 +1048,36 @@ color: var(--text-color);
    =================== */
 
 /* Print: see consolidated block above (line ~630) */
+
+/* Positioniert den <pre>-Container relativ, damit der Button absolut darin platziert werden kann */
+pre {
+    position: relative;
+}
+
+/* Das Design des Kopieren-Buttons */
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 6px 12px;
+    background-color: #333333; /* Dunkles Grau passend zum Dark-Mode */
+    color: #ffffff;
+    border: 1px solid #555555;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit; /* Übernimmt die Schriftart (Poppins) */
+    transition: all 0.3s ease;
+    z-index: 10; /* Stellt sicher, dass der Button über dem Text liegt */
+}
+
+/* Hover-Effekt, wenn man mit der Maus darüber fährt */
+.copy-button:hover {
+    background-color: #444444;
+}
+
+/* Klasse, die per JavaScript hinzugefügt wird, wenn erfolgreich kopiert wurde */
+.copy-button.copied {
+    background-color: #28a745; /* Ein positives Grün */
+    border-color: #28a745;
+}
