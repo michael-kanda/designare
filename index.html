@@ -65,8 +65,8 @@
       "image": {
         "@type": "ImageObject",
         "@id": "https://designare.at/#primaryimage",
-        "url": "https://designare.at/images/Michael-Kanda.jpg",
-        "contentUrl": "https://designare.at/images/Michael-Kanda.jpg",
+        "url": "https://designare.at/images/michael.webp",
+        "contentUrl": "https://designare.at/images/michael.webp",
         "caption": "Michael Kanda"
       },
       "jobTitle": "Web-Purist und KI-Enthusiast",
@@ -160,7 +160,7 @@
           "name": "SEO vs. GEO: Wo liegt der Unterschied?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) optimiert deine Fakten so, dass KI-Modelle wie ChatGPT sie direkt zitieren und als primäre Antwort ausspucken. <a href=\"https://designare.at/geo-seo\">Zur Strategie</a>"
+            "text": "SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) optimiert deinen Content so, dass KI-Modelle wie ChatGPT sie direkt zitieren und als primäre Antwort ausspucken. <a href=\"https://designare.at/geo-seo\">Zur Strategie</a>"
           }
         },
         {
@@ -169,6 +169,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Weil KIs keine Teaser-Texte lesen, sondern Fakten extrahieren. Schema.org liefert strukturierte Daten via JSON-LD – das ist Fast Food für LLMs. Ohne valides Markup riskierst du, dass ChatGPT & Co. deine Inhalte ignorieren oder falsch interpretieren. <a href=\"https://designare.at/schema-org-meta-description\">Zum Guide</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was ist Maschinenlesbarkeit für KI-Suche?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Maschinenlesbarkeit bedeutet, dass dein Content nicht nur für Menschen, sondern auch für LLMs strukturiert ist. Ohne Schema.org und semantisches HTML bist du für KI-Crawler unsichtbar – egal wie gut dein Text ist. <a href=\"https://designare.at/geo-maschinenlesbarkeit-guide\">Zum Praxis-Guide</a>"
           }
         },
         {
@@ -205,7 +213,7 @@
         },
         {
           "@type": "Question",
-          "name": "Was ist die WordPress Abilities API?",
+          "name": "Was ist die WordPress Abilities API – und warum ist sie ein Gamechanger?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Die Abilities API ist seit WordPress 6.9 im Core. Sie macht WordPress-Funktionen maschinenlesbar und entdeckbar – für KI-Agenten, Automatisierungstools wie n8n und externe Clients via MCP. Statt proprietärer Plugin-APIs gibt es einen einheitlichen Standard: registrierte Abilities mit definiertem Input/Output-Schema und Berechtigungslogik. <a href=\"https://designare.at/wordpress-7-ki-core\">Zum Artikel: Abilities API & AI Client erklärt</a>"
@@ -588,6 +596,39 @@
                                        class="faq-link"
                                        title="WordPress KI im Core: Was das für Plugins und Workflows bedeutet"
                                        aria-label="Zum Artikel: WordPress 7.0 AI Client SDK und Abilities API im Vergleich">Was sich ändert &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Kann man viele SEO-Texte auf einmal generieren?</summary>
+                                <div class="faq-content">
+                                    <p>Ja, das ist technisch möglich. Mein Tech-Showcase „Silas" demonstriert, wie man KIs dazu bringt, strukturierte Massen-Daten (CSV) für den Import zu liefern, statt nur einfachen Text.
+                                    <a href="silas.html" 
+                                       class="faq-link"
+                                       title="Silas: Experimentelle Content-Generierung mit KI"
+                                       aria-label="Zur Tech-Demo Silas: SEO-Texte im Bulk generieren">Zur Tech-Demo &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Können WordPress Plugins reduziert werden?</summary>
+                                <div class="faq-content">
+                                    <p>Ja, oft können 17 Einzel-Plugins durch eine modulare Lösung ersetzt werden. Die SEO Wunderkiste vereint Funktionen wie Caching, Bildoptimierung und Security in einem Tool.
+                                    <a href="seo-wunderkiste.html" 
+                                       class="faq-link"
+                                       title="SEO Wunderkiste: Das All-in-One WordPress Performance Plugin"
+                                       aria-label="Zur SEO Wunderkiste: WordPress Plugins reduzieren">Zur SEO Wunderkiste &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Wie funktioniert die KI-Assistentin Evita?</summary>
+                                <div class="faq-content">
+                                    <p>Evita basiert auf einem RAG-System (Retrieval-Augmented Generation) mit Upstash Vector und Redis. Sie greift in Echtzeit auf die Website-Daten zu und merkt sich Themen und Namen für wiederkehrende Besucher.
+                                    <a href="evita-ki-assistentin.html" 
+                                       class="faq-link"
+                                       title="Evita: KI-Assistentin mit RAG-Architektur"
+                                       aria-label="Zum Tech-Stack von Evita: RAG, Vector DB und Redis erklärt">Zum Tech-Stack &rarr;</a></p>
                                 </div>
                             </details>
                         </section>
