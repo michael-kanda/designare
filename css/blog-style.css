@@ -1065,7 +1065,7 @@ pre {
     border: 1px solid #555555;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-family: inherit; /* Übernimmt die Schriftart (Poppins) */
     transition: all 0.3s ease;
     z-index: 10; /* Stellt sicher, dass der Button über dem Text liegt */
