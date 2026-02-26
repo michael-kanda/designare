@@ -194,6 +194,30 @@
             "@type": "Answer",
             "text": "Evita basiert auf einem RAG-System (Retrieval-Augmented Generation) mit Upstash Vector und Redis. Sie greift in Echtzeit auf die Website-Daten zu und merkt sich Themen und Namen für wiederkehrende Besucher. <a href=\"https://designare.at/evita-ki-assistentin\">Zum Tech-Stack von Evita</a>"
           }
+        },
+        {
+          "@type": "Question",
+          "name": "Läuft mit WordPress 7.0 ein KI-Modell auf meinem Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nein. WordPress baut keine KI in den Core ein – es baut die standardisierten Schnittstellen dazu. Die eigentliche Rechenarbeit passiert auf den Servern externer Anbieter wie OpenAI, Google oder Anthropic. Für deinen Server ist ein KI-Aufruf technisch kaum belastender als das Abrufen eines RSS-Feeds. <a href=\"https://designare.at/wordpress-7-ki-core\">Zum Artikel: WordPress KI im Core erklärt</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was ist die WordPress Abilities API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Abilities API ist seit WordPress 6.9 im Core. Sie macht WordPress-Funktionen maschinenlesbar und entdeckbar – für KI-Agenten, Automatisierungstools wie n8n und externe Clients via MCP. Statt proprietärer Plugin-APIs gibt es einen einheitlichen Standard: registrierte Abilities mit definiertem Input/Output-Schema und Berechtigungslogik. <a href=\"https://designare.at/wordpress-7-ki-core\">Zum Artikel: Abilities API & AI Client erklärt</a>"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Brauche ich mit WordPress 7.0 noch externe KI-Plugins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Für grundlegende KI-Funktionen nicht mehr. Die Abilities API ist seit WordPress 6.9 im Core, der WP AI Client SDK kommt mit 7.0. Du brauchst weiterhin einen API-Key bei einem Anbieter (OpenAI, Anthropic, Google), zahlst aber direkt für Verbrauch – keine Plugin-Abos mehr. <a href=\"https://designare.at/wordpress-7-ki-core\">Zum Deep-Dive</a>"
+          }
         }
       ]
     }
@@ -531,6 +555,39 @@
                                        class="faq-link"
                                        title="Schema.org: Strukturierte Daten für KI-Suche"
                                        aria-label="Zum Guide: Schema.org als neue Meta-Description">Zum Guide &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Läuft mit WordPress 7.0 ein KI-Modell auf meinem Server?</summary>
+                                <div class="faq-content">
+                                    <p>Nein – und das ist der entscheidende Punkt. WordPress baut keine KI ein, es baut die standardisierten <em>Schnittstellen</em> dazu. Dein Server schickt einen HTTP-Request an OpenAI oder Google, die rechnen, du bekommst das Ergebnis. Für PHP ist das kaum anstrengender als ein RSS-Feed-Abruf. Die echte Herausforderung ist nicht die CPU – sondern PHP-Timeouts bei langen Antwortzeiten.
+                                    <a href="wordpress-7-ki-core.html" 
+                                       class="faq-link"
+                                       title="WordPress KI im Core: Abilities API & AI Client erklärt"
+                                       aria-label="Zum Deep-Dive: WordPress KI-Architektur, PHP-Performance und Timeouts">Zur Architektur &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Was ist die WordPress Abilities API – und warum ist sie ein Gamechanger?</summary>
+                                <div class="faq-content">
+                                    <p>Die Abilities API ist seit WordPress 6.9 im Core und bringt ein neues Primitiv ins System: Plugins können ihre Funktionen als maschinenlesbare, selbst-dokumentierende Einheiten registrieren – mit definiertem Input/Output-Schema und Berechtigungslogik. KI-Agenten, n8n-Workflows und externe Tools via MCP sehen dadurch, was WordPress <em>kann</em> – ohne proprietäre Hacks. Das ist das Ende des Plugin-Chaos auf API-Ebene.
+                                    <a href="wordpress-7-ki-core.html" 
+                                       class="faq-link"
+                                       title="WordPress Abilities API: Funktionsweise und Code-Beispiele"
+                                       aria-label="Zum Artikel: Abilities API seit WordPress 6.9 im Core erklärt">Zum Deep-Dive &rarr;</a></p>
+                                </div>
+                            </details>
+
+                            <details name="expert-faq">
+                                <summary>Brauche ich mit WordPress 7.0 noch externe KI-Plugins?</summary>
+                                <div class="faq-content">
+                                    <p>Strukturell nicht mehr. Die Abilities API (WP 6.9) und der WP AI Client SDK (WP 7.0, vorgeschlagen) ersetzen das Plugin-Chaos durch einen Core-Standard. Du zahlst deinen API-Key direkt an OpenAI, Anthropic oder Google – Pay-per-Use statt Abo-Wahnsinn. Gute Plugin-Entwickler werden ihre Architektur auf den nativen SDK umstellen. Reine ChatGPT-Wrapper werden obsolet.
+                                    <a href="wordpress-7-ki-core.html" 
+                                       class="faq-link"
+                                       title="WordPress KI im Core: Was das für Plugins und Workflows bedeutet"
+                                       aria-label="Zum Artikel: WordPress 7.0 AI Client SDK und Abilities API im Vergleich">Was sich ändert &rarr;</a></p>
                                 </div>
                             </details>
                         </section>
