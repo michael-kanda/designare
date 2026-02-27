@@ -365,12 +365,12 @@ export default async function handler(req, res) {
       // Whitelist-Check: Nur an freigegebene Adressen senden
       if (!(await isEmailWhitelisted(pendingEmail.to))) {
         return res.status(200).json({ 
-          answer: `Die Adresse **${pendingEmail.to}** ist nicht in der Empfänger-Whitelist hinterlegt. E-Mails dürfen nur an freigegebene Adressen versendet werden. Bitte wende dich an Michael, damit er die Adresse im Dashboard freischaltet.` 
+          answer: `Die Adresse ${pendingEmail.to} ist nicht in der Empfänger-Whitelist hinterlegt. E-Mails dürfen nur an freigegebene Adressen versendet werden. Bitte wende dich an Michael, damit er die Adresse im Dashboard freischaltet.` 
         });
       }
 
       if (await isEmailBlocked(pendingEmail.to)) {
-        return res.status(200).json({ answer: `Die Adresse **${pendingEmail.to}** hat den Empfang von E-Mails über designare.at blockiert.` });
+        return res.status(200).json({ answer: `Die Adresse ${pendingEmail.to} hat den Empfang von E-Mails über designare.at blockiert.` });
       }
 
       try {
@@ -384,7 +384,7 @@ export default async function handler(req, res) {
         trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: true });
 
         return res.status(200).json({
-          answer: `Erledigt! Die E-Mail an **${pendingEmail.to}** mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
+          answer: `Erledigt! Die E-Mail an ${pendingEmail.to} mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
           emailSent: true, messageId: result.messageId
         });
       } catch (emailError) {
@@ -583,7 +583,7 @@ ${availableLinks.length > 0 ? `\nVERFÜGBARE LINKS:\n${availableLinks.map(l => `
         case 'compose_email': {
           if (!args.to || !args.subject || !args.body) break;
           responsePayload.emailDraft = { to: args.to, toName: args.to_name || '', subject: args.subject, body: args.body };
-          const draftDisplay = `\n\n**E-Mail-Entwurf:**\n**An:** ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\n**Betreff:** ${args.subject}\n\n---\n${args.body}\n---`;
+          const draftDisplay = `\n\nE-Mail-Entwurf:\nAn: ${args.to}${args.to_name ? ` (${args.to_name})` : ''}\nBetreff: ${args.subject}\n\n---\n${args.body}\n---`;
           responsePayload.answer = `Hier ist mein Entwurf:${draftDisplay}\n\nSoll ich die E-Mail so abschicken, oder möchtest du etwas ändern?`;
           break;
         }
