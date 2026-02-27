@@ -90,6 +90,32 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: e.message });
       }
     }
+
+    // ── Manuellen Rebuild triggern ──
+    if (action === 'trigger_rebuild') {
+      const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK;
+      if (!deployHookUrl) {
+        return res.status(500).json({ error: 'VERCEL_DEPLOY_HOOK nicht konfiguriert' });
+      }
+      try {
+        const response = await fetch(deployHookUrl, { method: 'POST' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+
+        const logEntry = {
+          timestamp: new Date().toISOString(),
+          trigger: 'dashboard',
+          status: 'triggered',
+          deployment_id: result?.job?.id || result?.id || null
+        };
+        await redis.lpush('build:log:triggers', JSON.stringify(logEntry));
+        await redis.ltrim('build:log:triggers', 0, 99);
+
+        return res.status(200).json({ success: true, message: 'Rebuild getriggert', deployment: logEntry });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
     
     return res.status(400).json({ error: 'Unknown action' });
   }
@@ -416,6 +442,35 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 12. BUILD LOG – KI-Datenbank Aktualisierungen
+    // ===============================================================
+    let buildTriggers = [];
+    try {
+      const raw = await redis.lrange('build:log:triggers', 0, 29);
+      buildTriggers = raw.map(entry => {
+        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+        catch { return { timestamp: null, status: 'unknown', trigger: '?' }; }
+      });
+    } catch (e) {}
+
+    let buildResults = [];
+    try {
+      const raw = await redis.lrange('build:log:results', 0, 29);
+      buildResults = raw.map(entry => {
+        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+        catch { return { timestamp: null, status: 'unknown' }; }
+      });
+    } catch (e) {}
+
+    let latestBuild = null;
+    try {
+      const raw = await redis.get('build:log:latest');
+      if (raw) {
+        latestBuild = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      }
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -505,6 +560,13 @@ export default async function handler(req, res) {
         templates: silasTemplates,
         recentErrors: silasRecentErrors,
         heatmap: silasHeatmap
+      },
+
+      // ── BUILD LOG ──────────────────────────────────────────────
+      buildLog: {
+        latest: latestBuild,
+        triggers: buildTriggers,
+        results: buildResults
       }
     });
 
