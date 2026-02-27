@@ -470,6 +470,14 @@ export default async function handler(req, res) {
       }
     } catch (e) {}
 
+    let buildInventory = null;
+    try {
+      const raw = await redis.get('build:log:inventory');
+      if (raw) {
+        buildInventory = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      }
+    } catch (e) {}
+
     // ===============================================================
     // RESPONSE
     // ===============================================================
@@ -566,7 +574,8 @@ export default async function handler(req, res) {
       buildLog: {
         latest: latestBuild,
         triggers: buildTriggers,
-        results: buildResults
+        results: buildResults,
+        inventory: buildInventory
       }
     });
 
