@@ -22,6 +22,8 @@
 
 .blog-article {
     line-height: 1.8;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .visually-hidden {
@@ -596,6 +598,11 @@ color: var(--text-color);
     .comparison-table td:first-child::before { content: "Falsch: "; font-weight: 400; color: #ff6b6b; }
     .comparison-table td:last-child::before { content: "Richtig: "; font-weight: 400; color: #51cf66; }
 
+    .comparison-table code {
+        white-space: normal;
+        word-break: break-word;
+    }
+
     /* AI-Visibility Tool: Falsch/Richtig Override entfernen */
     .ai-visibility-tool .comparison-table td:first-child {
         background-color: transparent;
@@ -1052,6 +1059,8 @@ color: var(--text-color);
 /* Positioniert den <pre>-Container relativ, damit der Button absolut darin platziert werden kann */
 pre {
     position: relative;
+    overflow-x: auto;
+    max-width: 100%;
 }
 
 /* Das Design des Kopieren-Buttons */
