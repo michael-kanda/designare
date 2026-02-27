@@ -155,8 +155,215 @@
       border-bottom-color: var(--silas);
     }
 
+    .tab-btn.active.builds-tab {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    /* ============================================ */
+    /* BUILDS TAB                                   */
+    /* ============================================ */
+    .build-status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .build-status-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .build-status-icon.success { background: var(--green-bg); }
+    .build-status-icon.partial { background: var(--orange-bg); }
+    .build-status-icon.failed { background: var(--red-bg); }
+    .build-status-icon.none { background: rgba(255,255,255,0.05); }
+
+    .build-status-info { flex: 1; }
+
+    .build-status-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .build-status-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .build-trigger-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .build-trigger-btn:hover { opacity: 0.85; }
+    .build-trigger-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .build-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .build-detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .build-detail-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .build-detail-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .build-detail-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .build-log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: var(--bg-card-hover);
+      transition: background 0.15s;
+    }
+
+    .build-log-item:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .build-log-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .build-log-dot.success { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .build-log-dot.partial { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+    .build-log-dot.failed { background: var(--red); box-shadow: 0 0 6px var(--red); }
+    .build-log-dot.triggered { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+    .build-log-dot.error { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+    .build-log-content { flex: 1; min-width: 0; }
+
+    .build-log-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .build-log-details {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .build-log-time {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .build-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .build-tag.cron { background: var(--blue-bg); color: var(--blue); }
+    .build-tag.manual { background: var(--accent-glow); color: var(--accent); }
+    .build-tag.dashboard { background: var(--orange-bg); color: var(--orange); }
+
+    .build-files-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .build-file-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      background: rgba(79, 172, 254, 0.08);
+      color: var(--blue);
+      border-radius: 4px;
+    }
+
+    .build-category-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .build-category-tag {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .build-category-tag span {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 900px) {
+      .build-detail-grid { grid-template-columns: 1fr 1fr; }
+      .build-status-banner { flex-wrap: wrap; }
+    }
 
     /* ============================================ */
     /* MAIN GRID                                    */
@@ -743,6 +950,7 @@
   <nav class="tab-bar" id="tabBar" style="display:none;">
     <button class="tab-btn active" data-tab="evita" onclick="switchTab('evita')">💬 Evita Chatbot</button>
     <button class="tab-btn silas-tab" data-tab="silas" onclick="switchTab('silas')">✍️ Silas Content</button>
+    <button class="tab-btn builds-tab" data-tab="builds" onclick="switchTab('builds')">🔄 KI-Datenbank</button>
   </nav>
 
   <!-- CONTENT -->
@@ -786,6 +994,7 @@
           } else if (tab === 'silas') {
             renderSilasCharts(cachedData);
           }
+          // builds tab hat keine Charts
         }, 50);
       }
     }
@@ -867,18 +1076,20 @@
 
       const evitaHTML = renderEvitaTab(data);
       const silasHTML = renderSilasTab(data);
+      const buildsHTML = renderBuildsTab(data);
 
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'evita';
 
       document.getElementById('dashboardContent').innerHTML = `
         <div id="tab-evita" class="tab-content ${activeTab === 'evita' ? 'active' : ''}">${evitaHTML}</div>
         <div id="tab-silas" class="tab-content ${activeTab === 'silas' ? 'active' : ''}">${silasHTML}</div>
+        <div id="tab-builds" class="tab-content ${activeTab === 'builds' ? 'active' : ''}">${buildsHTML}</div>
       `;
 
       // Render charts for active tab
       if (activeTab === 'evita') {
         renderEvitaCharts(data);
-      } else {
+      } else if (activeTab === 'silas') {
         renderSilasCharts(data);
       }
     }
@@ -1477,6 +1688,255 @@
           plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } } }
         }
       });
+    }
+
+    // ============================================================
+    // BUILDS TAB
+    // ============================================================
+    function renderBuildsTab(data) {
+      const bl = data.buildLog;
+      if (!bl) return '<div class="no-data" style="padding:60px 0;">Noch keine Build-Daten vorhanden.<br>Nach dem ersten Deploy mit dem neuen Build-Script werden hier Daten erscheinen.</div>';
+
+      const latest = bl.latest;
+      let html = '';
+
+      // ===== STATUS BANNER =====
+      if (latest) {
+        const statusIcon = latest.status === 'success' ? '✅' : latest.status === 'partial' ? '⚠️' : '❌';
+        const statusClass = latest.status || 'none';
+        const dt = latest.timestamp ? new Date(latest.timestamp) : null;
+        const timeAgo = dt ? getTimeAgo(dt) : '–';
+        const dateStr = dt ? dt.toLocaleString('de-AT') : '–';
+
+        html += `<div class="build-status-banner">
+          <div class="build-status-icon ${statusClass}">${statusIcon}</div>
+          <div class="build-status-info">
+            <div class="build-status-title">Letzter Build: ${latest.status === 'success' ? 'Erfolgreich' : latest.status === 'partial' ? 'Teilweise erfolgreich' : 'Fehlgeschlagen'}</div>
+            <div class="build-status-meta">${dateStr} · ${timeAgo}</div>
+          </div>
+          <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+        </div>`;
+      } else {
+        html += `<div class="build-status-banner">
+          <div class="build-status-icon none">📦</div>
+          <div class="build-status-info">
+            <div class="build-status-title">Noch kein Build geloggt</div>
+            <div class="build-status-meta">Der erste Build mit dem neuen Script wird hier erscheinen</div>
+          </div>
+          <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+        </div>`;
+      }
+
+      // ===== DETAIL CARDS =====
+      if (latest) {
+        html += `<div class="build-detail-grid">
+          <div class="build-detail-card">
+            <div class="build-detail-label">Blog-Artikel</div>
+            <div class="build-detail-value blue">${latest.articles?.count || 0}</div>
+            <div class="build-detail-sub">in articles-db.json</div>
+          </div>
+          <div class="build-detail-card">
+            <div class="build-detail-label">Knowledge-Seiten</div>
+            <div class="build-detail-value green">${latest.knowledge?.pages || 0}</div>
+            <div class="build-detail-sub">${latest.knowledge?.keywords || 0} Keywords · ${latest.knowledge?.sections || 0} Sektionen</div>
+          </div>
+          <div class="build-detail-card">
+            <div class="build-detail-label">HTML-Seiten</div>
+            <div class="build-detail-value">${latest.html_pages || '–'}</div>
+            <div class="build-detail-sub">in public/</div>
+          </div>
+        </div>`;
+
+        // Kategorien-Übersicht
+        if (latest.articles?.categories && Object.keys(latest.articles.categories).length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">📂 Artikel nach Kategorie</div>
+            <div class="build-category-bar">
+              ${Object.entries(latest.articles.categories).map(([cat, count]) => 
+                `<div class="build-category-tag">${escHTML(cat)}: <span>${count}</span></div>`
+              ).join(' · ')}
+            </div>
+          </div>`;
+        }
+
+        // Generierte Dateien
+        if (latest.files_generated && latest.files_generated.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">📄 Generierte Dateien</div>
+            <div class="build-files-list">
+              ${latest.files_generated.map(f => `<span class="build-file-tag">${escHTML(f)}</span>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        // Fehler im letzten Build
+        if (latest.errors && latest.errors.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">⚠️ Fehler im letzten Build</div>
+            ${latest.errors.map(err => `
+              <div class="fallback-item">
+                <div class="fallback-msg">${escHTML(err)}</div>
+              </div>
+            `).join('')}
+          </div>`;
+        }
+      }
+
+      // ===== BUILD HISTORY (Triggers + Results merged and sorted) =====
+      const allEvents = [];
+
+      // Trigger-Events
+      (bl.triggers || []).forEach(t => {
+        allEvents.push({
+          type: 'trigger',
+          timestamp: t.timestamp,
+          status: t.status || 'triggered',
+          trigger: t.trigger || '?',
+          deployment_id: t.deployment_id,
+          error: t.error
+        });
+      });
+
+      // Build-Result-Events
+      (bl.results || []).forEach(r => {
+        allEvents.push({
+          type: 'result',
+          timestamp: r.timestamp,
+          status: r.status || 'unknown',
+          articles: r.articles?.count || 0,
+          pages: r.knowledge?.pages || 0,
+          keywords: r.knowledge?.keywords || 0,
+          duration_ms: r.duration_ms,
+          errors: r.errors || [],
+          files: r.files_generated || []
+        });
+      });
+
+      // Sortieren nach Timestamp (neueste zuerst)
+      allEvents.sort((a, b) => {
+        const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return tb - ta;
+      });
+
+      if (allEvents.length > 0) {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Build-Historie <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${allEvents.length} Events)</span></div>
+          <div class="list-card" style="background:transparent;border:none;padding:0;max-height:500px;">
+            ${allEvents.slice(0, 30).map(event => {
+              const dt = event.timestamp ? new Date(event.timestamp) : null;
+              const timeStr = dt ? dt.toLocaleString('de-AT') : '–';
+              const timeAgoStr = dt ? getTimeAgo(dt) : '';
+
+              if (event.type === 'trigger') {
+                const triggerLabel = event.trigger === 'cron' ? 'Automatisch (Cron)' 
+                  : event.trigger === 'dashboard' ? 'Manuell (Dashboard)' 
+                  : event.trigger === 'manual' ? 'Manuell (API)'
+                  : 'Unbekannt';
+                const tagClass = event.trigger === 'cron' ? 'cron' : event.trigger === 'dashboard' ? 'dashboard' : 'manual';
+                const dotClass = event.status === 'error' ? 'error' : 'triggered';
+
+                return `<div class="build-log-item">
+                  <div class="build-log-dot ${dotClass}"></div>
+                  <div class="build-log-content">
+                    <div class="build-log-title">
+                      ${event.status === 'error' ? '❌ Trigger fehlgeschlagen' : '🚀 Deploy getriggert'}
+                      <span class="build-tag ${tagClass}">${event.trigger}</span>
+                    </div>
+                    <div class="build-log-details">
+                      ${triggerLabel}${event.error ? ` · ${escHTML(event.error)}` : ''}${event.deployment_id ? ` · ID: ${escHTML(event.deployment_id)}` : ''}
+                    </div>
+                  </div>
+                  <div class="build-log-time">${timeStr}<br>${timeAgoStr}</div>
+                </div>`;
+              }
+
+              // type === 'result'
+              const dotClass = event.status === 'success' ? 'success' : event.status === 'partial' ? 'partial' : 'failed';
+              const statusLabel = event.status === 'success' ? '✅ Build erfolgreich' : event.status === 'partial' ? '⚠️ Teilweise erfolgreich' : '❌ Build fehlgeschlagen';
+
+              return `<div class="build-log-item">
+                <div class="build-log-dot ${dotClass}"></div>
+                <div class="build-log-content">
+                  <div class="build-log-title">${statusLabel}</div>
+                  <div class="build-log-details">
+                    ${event.articles} Artikel · ${event.pages} Seiten · ${event.keywords} Keywords${event.duration_ms ? ` · ${event.duration_ms}ms` : ''}${event.errors.length > 0 ? ` · ${event.errors.length} Fehler` : ''}
+                  </div>
+                  ${event.files.length > 0 ? `<div class="build-files-list" style="margin-top:6px;">${event.files.map(f => `<span class="build-file-tag">${escHTML(f)}</span>`).join('')}</div>` : ''}
+                </div>
+                <div class="build-log-time">${timeStr}<br>${timeAgoStr}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Build-Historie</div>
+          <div class="no-data">Noch keine Build-Events vorhanden. Nach dem ersten Build mit dem neuen System werden hier Einträge erscheinen.</div>
+        </div>`;
+      }
+
+      return html;
+    }
+
+    // Zeitdifferenz als lesbarer Text
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diff = now - date;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'gerade eben';
+      if (minutes < 60) return `vor ${minutes} Min.`;
+      if (hours < 24) return `vor ${hours} Std.`;
+      if (days === 1) return 'gestern';
+      return `vor ${days} Tagen`;
+    }
+
+    // Manuellen Rebuild auslösen
+    async function triggerRebuild() {
+      const btn = document.getElementById('rebuildBtn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Wird ausgelöst...';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_rebuild' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          btn.textContent = '✅ Deploy gestartet!';
+          btn.style.background = 'var(--green)';
+          setTimeout(() => {
+            btn.textContent = '🔄 Jetzt neu bauen';
+            btn.style.background = '';
+            btn.disabled = false;
+            loadDashboard(); // Refresh um neuen Trigger-Eintrag zu sehen
+          }, 3000);
+        } else {
+          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🔄 Jetzt neu bauen';
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 4000);
+        }
+      } catch (e) {
+        btn.textContent = '❌ ' + e.message;
+        btn.style.background = 'var(--red)';
+        setTimeout(() => {
+          btn.textContent = '🔄 Jetzt neu bauen';
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 4000);
+      }
     }
 
     // ============================================================
