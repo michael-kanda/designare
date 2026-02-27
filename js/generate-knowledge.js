@@ -25,6 +25,12 @@ const EXCLUDE_PARTIALS = [
     'blog-feedback.html'
 ];
 
+// Dateien die IMMER indexiert werden, auch bei wenig Text
+// (z.B. Tool-Seiten die hauptsächlich aus JS bestehen aber trotzdem wichtig sind)
+const FORCE_INCLUDE = [
+    'evita-ki-assistentin.html'
+];
+
 // Maximale Textlänge pro Sektion (in Zeichen)
 const MAX_SECTION_LENGTH = 2000;
 const MAX_TOTAL_LENGTH = 8000;
@@ -250,6 +256,16 @@ async function generateKnowledge() {
                 console.log(`   → Titel: "${content.title.substring(0, 50)}..."`);
                 console.log(`   → ${content.keywords.length} Keywords, ${content.sections.length} Sektionen`);
                 console.log(`   → ${content.text.length} Zeichen Content\n`);
+            } else if (FORCE_INCLUDE.includes(file)) {
+                // Force-Include: auch bei wenig Text indexieren
+                knowledgeBase.push(content);
+                totalKeywords += content.keywords.length;
+                totalSections += content.sections.length;
+                
+                console.log(`✅ ${file} (force-include)`);
+                console.log(`   → Titel: "${content.title.substring(0, 50)}..."`);
+                console.log(`   → ${content.keywords.length} Keywords, ${content.sections.length} Sektionen`);
+                console.log(`   → ${content.text?.length || 0} Zeichen Content\n`);
             } else {
                 console.log(`⏭️  ${file} - Zu wenig Content, übersprungen\n`);
             }
