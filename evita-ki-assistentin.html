@@ -32,7 +32,7 @@
       "description": "Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.",
       "image": "https://designare.at/images/evita-chat.webp",
       "datePublished": "2026-02-21",
-      "dateModified": "2026-02-21",
+      "dateModified": "2026-02-27",
       "author": {
         "@type": "Person",
         "name": "Michael Kanda",
@@ -53,7 +53,8 @@
         "Upstash Vector",
         "Redis",
         "Gemini API",
-        "Function Calling"
+        "Function Calling",
+        "E-Mail Whitelist"
       ],
       "hasPart": {
         "@id": "https://designare.at/evita-ki-assistentin#faq-heading"
@@ -77,6 +78,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Durch eine Kombination aus Function Calling und einer schnellen Redis-Datenbank. Die KI extrahiert den Namen aus dem Chat und speichert ihn für zukünftige Besuche."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "An wen kann Evita E-Mails senden?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aus Datenschutzgründen versendet Evita E-Mails ausschließlich an Adressen, die vorab in einer Empfänger-Whitelist freigegeben wurden. Pro Sitzung gilt außerdem ein Limit von maximal 3 E-Mails."
           }
         }
       ]
@@ -120,7 +129,7 @@
                     <div class="summary-content">
                         <h3>Das Wichtigste in Kürze:</h3>
                         <ul>
-                           <li><strong>Mehr als ein Chatbot:</strong> Evita ist meine digitale Assistentin, benannt nach meiner Tierschutzhündin. Sie führt Smalltalk, macht Termine aus und schreibt Mails.</li>
+                           <li><strong>Mehr als ein Chatbot:</strong> Evita ist meine digitale Assistentin, benannt nach meiner Tierschutzhündin. Sie führt Smalltalk, macht Termine aus und versendet E-Mails an freigegebene Empfänger.</li>
                             <li><strong>RAG (Retrieval-Augmented Generation):</strong> Durch eine Vektordatenbank kennt Evita die gesamte Website auswendig und halluziniert nicht.</li>
                             <li><strong>Function Calling:</strong> Evita ist nicht nur passiv. Sie nutzt aktiv Tools (Kalender öffnen, dynamische Chips vorschlagen).</li>
                             <li><strong>Langzeitgedächtnis:</strong> Über Redis merkt sie sich Namen ("Servus Alfred!") und Lieblingsthemen von wiederkehrenden Besuchern.</li>
@@ -169,8 +178,8 @@
                     <dt><i aria-hidden="true" class="fa-regular fa-calendar-check"></i> Direkte Rückruf-Buchung</dt>
                     <dd>Fragst du nach einem Termin oder einem Call, schickt sie dir keinen schnöden Text-Link. Sie öffnet direkt im Chat eine Rückruf-Funktion, die an meinen Google-Kalender angebunden ist. Sobald du eine Zeit wählst, generiert das System sofort einen QR-Code, mit dem du den Termin direkt in dein Smartphone scannen kannst.</dd>
                     
-                    <dt><i aria-hidden="true" class="fa-regular fa-envelope"></i> E-Mail-Service für jeden Empfänger</dt>
-                    <dd>Evita ist nicht nur ein Kontaktformular zu mir. Sie ist ein allgemeiner E-Mail-Assistent für dich. Du kannst ihr sagen: "Schreib eine Mail an <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147f617a70715476717d67647d71783a7560">[email&#160;protected]</a> und sag ihm freundlich ab." Sie verfasst einen perfekten Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt aus dem Chat-Fenster heraus ab.</dd>
+                    <dt><i aria-hidden="true" class="fa-regular fa-envelope"></i> E-Mail-Service mit Empfänger-Whitelist</dt>
+                    <dd>Evita kann direkt aus dem Chat E-Mails verfassen und versenden – allerdings nur an Adressen, die ich vorab im Dashboard freigegeben habe. Dadurch wird Missbrauch ausgeschlossen. Du beschreibst ihr, was drinstehen soll, sie formuliert einen Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt ab.</dd>
                     
                     <dt><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> Dynamische Folge-Chips</dt>
                     <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische, aus deiner Ich-Perspektive formulierte Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema der Konversation passen.</dd>
@@ -206,7 +215,7 @@
                     <ul>
                         <li><code>remember_user_name</code>: Ein Tool, das im Hintergrund anspringt, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
                         <li><code>suggest_chips</code>: Ein Tool, das die KI zwingt, ein JSON-Objekt mit exakt drei sinnvollen Folge-Aktionen zurückzugeben.</li>
-                        <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt des Nutzers entgegen und baut einen versandfertigen Payload auf.</li>
+                        <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt entgegen, prüft die Adresse gegen eine Empfänger-Whitelist und baut einen versandfertigen Payload auf.</li>
                     </ul>
                 </div>
 
@@ -256,7 +265,7 @@
                         </tr>
                         <tr>
                             <td>Gibt oft tote Links oder Textwüsten aus</td>
-                            <td>Bietet smarte Aktionen via Function Calling (Kalender, E-Mail-Versand an Dritte)</td>
+                            <td>Bietet smarte Aktionen via Function Calling (Kalender, E-Mail-Versand an freigegebene Empfänger)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -267,9 +276,9 @@
                 
                 <div class="faq-accordion">
                     <details name="faq-group">
-                        <summary>Kann ich wirklich E-Mails an beliebige Personen senden?</summary>
+                        <summary>An wen kann Evita E-Mails senden?</summary>
                         <div class="faq-content">
-                            <p>Ja! Du brauchst kein Mail-Programm öffnen. Sag Evita einfach, wem du schreiben möchtest und was drinstehen soll. Sie formuliert den Text perfekt aus und sendet die E-Mail über meine angebundene API an den gewünschten Empfänger. (Zur Sicherheit gibt es ein Limit von max. 3 Mails pro Sitzung).</p>
+                            <p>Aus Datenschutzgründen versendet Evita E-Mails ausschließlich an Adressen, die ich vorab in einer Empfänger-Whitelist im Dashboard freigegeben habe. So ist sichergestellt, dass kein Missbrauch stattfinden kann. Pro Sitzung gilt außerdem ein Limit von maximal 3 E-Mails.</p>
                         </div>
                     </details>
 
@@ -312,7 +321,7 @@
                     <h3>Zusammenfassung:</h3>
                     <ul>
                         <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent hält Besucher länger auf der Seite.</li>
-                        <li><strong>Automatisierung:</strong> Termine und E-Mails werden direkt im Chat abgewickelt, ohne die Ansicht zu wechseln.</li>
+                        <li><strong>Automatisierung:</strong> Termine und E-Mails werden direkt im Chat abgewickelt – datenschutzkonform durch eine Empfänger-Whitelist abgesichert.</li>
                         <li><strong>Zero Maintenance:</strong> Durch den Cronjob und die Vektordatenbank füttert sich die KI komplett selbstständig mit Updates.</li>
                     </ul>
                 </div>
