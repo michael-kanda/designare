@@ -507,6 +507,89 @@
       border-color: var(--red);
     }
 
+    /* WHITELIST */
+    .whitelist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(0, 214, 143, 0.06);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 4px;
+    }
+
+    .whitelist-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .whitelist-remove {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--red);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .whitelist-remove:hover {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .whitelist-add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .whitelist-add-form input {
+      flex: 1;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .whitelist-add-form input:focus {
+      border-color: var(--green);
+    }
+
+    .whitelist-add-form input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .whitelist-add-btn {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .whitelist-add-btn:hover { opacity: 0.85; }
+
     /* HEATMAP */
     .heatmap-grid {
       display: grid;
@@ -982,6 +1065,25 @@
         </div>`;
       }
 
+      // ===== EMAIL WHITELIST (Erlaubte Empfänger) =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">✅ E-Mail Whitelist <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${(data.emailWhitelist || []).length} erlaubt)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">Evita darf nur an diese Adressen E-Mails versenden. Ist die Liste leer, ist der Versand komplett gesperrt.</div>
+        <div class="whitelist-add-form">
+          <input type="email" id="whitelistInput" placeholder="neue@email.at eingeben …" onkeydown="if(event.key==='Enter'){event.preventDefault();addToWhitelist();}">
+          <button class="whitelist-add-btn" onclick="addToWhitelist()">+ Hinzufügen</button>
+        </div>
+        ${(data.emailWhitelist || []).length > 0
+          ? data.emailWhitelist.map(email => `
+            <div class="whitelist-item">
+              <span class="whitelist-email">${escHTML(email)}</span>
+              <button class="whitelist-remove" onclick="removeFromWhitelist('${escHTML(email)}')" title="Entfernen">✕</button>
+            </div>
+          `).join('')
+          : '<div class="no-data">Noch keine Empfänger freigeschaltet – Evita kann keine E-Mails senden.</div>'
+        }
+      </div>`;
+
       // ===== EMAIL BLOCKLIST =====
       if (data.emailBlocklist && data.emailBlocklist.length > 0) {
         html += `<div class="chart-card full-width" style="margin-bottom:24px;">
@@ -1432,6 +1534,51 @@
         const data = await res.json();
         if (data.success) {
           loadDashboard(); // Refresh
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function addToWhitelist() {
+      const input = document.getElementById('whitelistInput');
+      const email = (input?.value || '').trim().toLowerCase();
+      if (!email) return;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Bitte gib eine gültige E-Mail-Adresse ein.');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_whitelist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          input.value = '';
+          loadDashboard();
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function removeFromWhitelist(email) {
+      if (!confirm(`"${email}" wirklich von der Whitelist entfernen? Evita kann dann nicht mehr an diese Adresse senden.`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_whitelist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDashboard();
         } else {
           alert('Fehler: ' + (data.error || 'Unbekannt'));
         }
