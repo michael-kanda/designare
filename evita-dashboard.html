@@ -826,7 +826,7 @@
       const range = document.getElementById('rangeSelect')?.value || 30;
       
       try {
-        const res = await fetch(`/api/evita-dashboard?range=${range}&token=${TOKEN}`);
+        const res = await fetch(`/api/evita-dashboard?range=${range}&token=${TOKEN}&_=${Date.now()}`);
         
         if (res.status === 401) {
           localStorage.removeItem('evita_dashboard_token');
