@@ -54,13 +54,37 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized. Token required.' });
   }
 
-  // ── POST: Blocklist-Eintrag entfernen ──
+  // ── POST: Admin-Aktionen (Blocklist, Whitelist) ──
   if (req.method === 'POST') {
     const { action, email } = req.body || {};
     
     if (action === 'remove_blocklist' && email) {
       try {
         await redis.srem('evita:email:blocklist', email.toLowerCase().trim());
+        return res.status(200).json({ success: true, removed: email });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // ── Whitelist: E-Mail-Adresse hinzufügen ──
+    if (action === 'add_whitelist' && email) {
+      try {
+        const normalized = email.toLowerCase().trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+          return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
+        }
+        await redis.sadd('evita:email:whitelist', normalized);
+        return res.status(200).json({ success: true, added: normalized });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // ── Whitelist: E-Mail-Adresse entfernen ──
+    if (action === 'remove_whitelist' && email) {
+      try {
+        await redis.srem('evita:email:whitelist', email.toLowerCase().trim());
         return res.status(200).json({ success: true, removed: email });
       } catch (e) {
         return res.status(500).json({ error: e.message });
@@ -383,6 +407,15 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 11. E-MAIL WHITELIST (Erlaubte Empfänger)
+    // ===============================================================
+    let emailWhitelist = [];
+    try {
+      emailWhitelist = await redis.smembers('evita:email:whitelist') || [];
+      emailWhitelist.sort((a, b) => a.localeCompare(b)); // Alphabetisch sortieren
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -427,6 +460,7 @@ export default async function handler(req, res) {
       recentEmails,
       visibilityEmails,
       emailBlocklist,
+      emailWhitelist,
       heatmap,
 
       visibility: {
