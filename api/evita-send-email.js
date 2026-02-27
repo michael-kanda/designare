@@ -107,6 +107,47 @@ export default async function handler(req, res) {
       }
     }
 
+    // ---------------------------------------------------------------
+    // 2b. WHITELIST-CHECK (Nur an freigegebene Adressen senden)
+    // ---------------------------------------------------------------
+    try {
+      const normalizedTo = to.toLowerCase().trim();
+      const whitelistSize = await redis.scard('evita:email:whitelist');
+      if (whitelistSize > 0) {
+        const isWhitelisted = await redis.sismember('evita:email:whitelist', normalizedTo);
+        if (!isWhitelisted) {
+          return res.status(403).json({
+            error: 'Empfänger nicht in Whitelist',
+            message: `Die Adresse ${normalizedTo} ist nicht als erlaubter Empfänger hinterlegt.`
+          });
+        }
+      } else {
+        // Leere Whitelist = Versand komplett gesperrt
+        return res.status(403).json({
+          error: 'Keine Empfänger freigeschaltet',
+          message: 'Die Empfänger-Whitelist ist leer. Bitte im Dashboard mindestens eine Adresse freischalten.'
+        });
+      }
+    } catch (e) {
+      console.error('Whitelist-Check Fehler:', e.message);
+      return res.status(500).json({ error: 'Whitelist-Prüfung fehlgeschlagen' });
+    }
+
+    // ---------------------------------------------------------------
+    // 2c. BLOCKLIST-CHECK
+    // ---------------------------------------------------------------
+    try {
+      const isBlocked = await redis.sismember('evita:email:blocklist', to.toLowerCase().trim());
+      if (isBlocked) {
+        return res.status(403).json({
+          error: 'Empfänger blockiert',
+          message: `${to} hat den Empfang von E-Mails blockiert.`
+        });
+      }
+    } catch (e) {
+      console.error('Blocklist-Check Fehler:', e.message);
+    }
+
     
     // ---------------------------------------------------------------
 // 3. RATE-LIMITING (pro Session via Redis)
