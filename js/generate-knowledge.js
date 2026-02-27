@@ -1,9 +1,37 @@
-// js/generate-knowledge.js - VERBESSERTE VERSION
-// Mehr Content, bessere Struktur, semantische Keywords
+// js/generate-knowledge.js - VERBESSERTE VERSION + VECTOR-DB UPLOAD
+// Crawlt HTML → generiert knowledge.json → uploaded nach Upstash Vector
+// Läuft bei jedem Build (npm run build), dadurch ist die Vector-DB immer synchron
 
 import fs from 'fs';
 import path from 'path';
 import * as cheerio from 'cheerio';
+
+// ── Upstash Vector & Gemini (optional – wenn Env-Vars fehlen, wird nur JSON generiert) ──
+let vectorIndex = null;
+let embeddingModel = null;
+
+try {
+    if (process.env.UPSTASH_VECTOR_REST_URL && process.env.GEMINI_API_KEY) {
+        const { Index } = await import("@upstash/vector");
+        const { GoogleGenerativeAI } = await import("@google/generative-ai");
+
+        vectorIndex = new Index({
+            url: process.env.UPSTASH_VECTOR_REST_URL,
+            token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+        });
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
+        embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+
+        console.log('🔗 Vector-DB Verbindung initialisiert (gemini-embedding-001)\n');
+    } else {
+        console.log('⚠️  UPSTASH/GEMINI Env-Vars fehlen → nur lokale JSON-Generierung (kein Vector-Upload)\n');
+    }
+} catch (initError) {
+    console.error('⚠️  Vector-DB Init fehlgeschlagen:', initError.message);
+    console.log('   → Fahre ohne Vector-Upload fort\n');
+}
 
 const HTML_DIR = './'; 
 const OUTPUT_FILE = './knowledge.json';
@@ -162,15 +190,9 @@ function extractContent($, filename) {
     });
 
     // Haupt-Textinhalt extrahieren
-    // Priorität: article > main > .content > body
-    let mainContent = $('article').text() || 
-                      $('main').text() || 
-                      $('.content').text() || 
-                      $('body').text();
-
     // Entferne Script/Style Inhalte die eventuell mitgekommen sind
     $('script, style, nav, header, footer, .modal, #side-menu-panel').remove();
-    mainContent = $('article').text() || $('main').text() || $('body').text();
+    const mainContent = $('article').text() || $('main').text() || $('body').text();
 
     content.text = cleanText(mainContent).substring(0, MAX_TOTAL_LENGTH);
 
@@ -218,10 +240,61 @@ function generateSearchIndex(knowledgeBase) {
 }
 
 /**
+ * Uploaded alle Seiten in die Upstash Vector-DB
+ * Verwendet dasselbe Embedding-Modell wie rag-service.js (gemini-embedding-001, 768 dims)
+ */
+async function uploadToVectorDB(knowledgeBase) {
+    if (!vectorIndex || !embeddingModel) {
+        console.log('\n⏭️  Vector-Upload übersprungen (keine Verbindung)\n');
+        return { uploaded: 0, errors: 0 };
+    }
+
+    console.log(`\n🚀 Starte Vector-DB Upload (${knowledgeBase.length} Seiten)...\n`);
+    
+    let uploaded = 0;
+    let errors = 0;
+
+    for (const page of knowledgeBase) {
+        const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
+
+        try {
+            const result = await embeddingModel.embedContent(textToEmbed);
+            // WICHTIG: Auf 768 Dimensionen kürzen – muss mit rag-service.js matchen
+            const vector = result.embedding.values.slice(0, 768);
+
+            await vectorIndex.upsert({
+                id: `page_${page.slug}`,
+                vector: vector,
+                data: textToEmbed,
+                metadata: {
+                    title: page.title,
+                    url: page.url,
+                    content: page.text
+                }
+            });
+
+            uploaded++;
+            console.log(`   📤 ${page.slug}`);
+
+            // Rate-Limit Schutz (Gemini Free: 1500 RPM, aber lieber safe)
+            await new Promise(r => setTimeout(r, 300));
+
+        } catch (error) {
+            errors++;
+            console.error(`   ❌ ${page.slug}: ${error.message}`);
+        }
+    }
+
+    console.log(`\n✅ Vector-Upload abgeschlossen: ${uploaded} OK, ${errors} Fehler`);
+    return { uploaded, errors };
+}
+
+/**
  * Hauptfunktion
  */
 async function generateKnowledge() {
     console.log('🚀 Starte Knowledge-Base Generierung...\n');
+    const startTime = Date.now();
     
     // Finde alle HTML-Dateien
     const allFiles = fs.readdirSync(HTML_DIR).filter(file => file.endsWith('.html'));
@@ -313,6 +386,17 @@ async function generateKnowledge() {
     console.log(`   💾 Gespeichert in: ${OUTPUT_FILE}`);
     console.log(`   💾 Kompakt-Version: knowledge.min.json`);
     console.log('═'.repeat(50));
+
+    // ══════════════════════════════════════════════════════════════
+    // VECTOR-DB UPLOAD (nur wenn Env-Vars vorhanden)
+    // ══════════════════════════════════════════════════════════════
+    const vectorResult = await uploadToVectorDB(knowledgeBase);
+
+    const totalTime = Date.now() - startTime;
+    console.log(`\n⏱️  Gesamtzeit: ${totalTime}ms`);
+    if (vectorResult.uploaded > 0) {
+        console.log(`🧠 Vector-DB: ${vectorResult.uploaded}/${knowledgeBase.length} Seiten synchronisiert`);
+    }
 }
 
 generateKnowledge().catch(console.error);
