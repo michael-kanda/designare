@@ -46,8 +46,8 @@ async function logBuild() {
     timestamp: new Date().toISOString(),
     status: 'success',
     node_version: process.version,
-    articles: { count: 0, categories: {} },
-    knowledge: { pages: 0, keywords: 0, sections: 0 },
+    articles: { count: 0, categories: {}, list: [] },
+    knowledge: { pages: 0, keywords: 0, sections: 0, list: [] },
     files_generated: [],
     errors: []
   };
@@ -59,10 +59,17 @@ async function logBuild() {
       const articlesDb = JSON.parse(fs.readFileSync(articlesPath, 'utf-8'));
       buildLog.articles.count = articlesDb.articles?.length || 0;
 
-      // Kategorien zählen
+      // Kategorien zählen + Artikelliste erstellen
       const cats = {};
       (articlesDb.articles || []).forEach(a => {
         cats[a.category] = (cats[a.category] || 0) + 1;
+        buildLog.articles.list.push({
+          slug: a.slug,
+          title: a.title,
+          category: a.category,
+          tags: a.tags || [],
+          question: a.question || ''
+        });
       });
       buildLog.articles.categories = cats;
       buildLog.files_generated.push('articles-db.json');
@@ -86,6 +93,19 @@ async function logBuild() {
       buildLog.knowledge.keywords = knowledge.stats?.total_keywords || 0;
       buildLog.knowledge.sections = knowledge.stats?.total_sections || 0;
       buildLog.files_generated.push('knowledge.json');
+
+      // Detaillierte Seitenliste erstellen
+      (knowledge.pages || []).forEach(p => {
+        buildLog.knowledge.list.push({
+          slug: p.slug,
+          title: p.title,
+          url: p.url || `/${p.slug}`,
+          type: p.type || 'page',
+          keywords: (p.keywords || []).slice(0, 8),
+          sections_count: p.sections?.length || 0,
+          text_length: p.text?.length || 0
+        });
+      });
 
       console.log(`   ✅ knowledge.json: ${buildLog.knowledge.pages} Seiten, ${buildLog.knowledge.keywords} Keywords`);
     } else {
@@ -134,14 +154,33 @@ async function logBuild() {
   buildLog.duration_ms = Date.now() - startTime;
 
   // ─── An Redis senden ───────────────────────────────────────────
-  const logJson = JSON.stringify(buildLog);
+
+  // Detaillierte Seitenliste separat speichern (wird bei jedem Build überschrieben)
+  // So bleibt die Build-History kompakt, aber die aktuelle Inventarliste ist immer verfügbar
+  const inventory = {
+    timestamp: buildLog.timestamp,
+    articles: buildLog.articles.list,
+    knowledge: buildLog.knowledge.list
+  };
+  await redisCommand('SET', ['build:log:inventory', JSON.stringify(inventory)]);
+
+  // Für die Build-History: kompakte Version ohne die langen Listen
+  const compactLog = {
+    ...buildLog,
+    articles: { ...buildLog.articles, list: undefined },
+    knowledge: { ...buildLog.knowledge, list: undefined }
+  };
+  delete compactLog.articles.list;
+  delete compactLog.knowledge.list;
+
+  const logJson = JSON.stringify(compactLog);
 
   // In Build-Log-Liste speichern (neueste zuerst)
   await redisCommand('LPUSH', ['build:log:results', logJson]);
   await redisCommand('LTRIM', ['build:log:results', '0', '99']); // Max 100
 
-  // Letztes Build-Datum speichern (für schnellen Zugriff)
-  await redisCommand('SET', ['build:log:latest', logJson]);
+  // Letztes Build-Datum speichern (für schnellen Zugriff) – mit Listen
+  await redisCommand('SET', ['build:log:latest', JSON.stringify(buildLog)]);
 
   // Tages-Counter erhöhen
   const today = new Date().toISOString().split('T')[0];
