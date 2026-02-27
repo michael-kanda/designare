@@ -3,5 +3,11 @@
   "outputDirectory": "public",
   "framework": null,
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "crons": [
+    {
+      "path": "/api/cron-rebuild",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }
