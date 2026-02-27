@@ -365,6 +365,199 @@
       .build-status-banner { flex-wrap: wrap; }
     }
 
+    /* INVENTORY LISTS */
+    .inventory-section {
+      margin-bottom: 24px;
+    }
+
+    .inventory-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .inventory-toggle:hover {
+      border-color: var(--blue);
+      background: var(--bg-card-hover);
+    }
+
+    .inventory-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .inventory-toggle-icon {
+      font-size: 1.2rem;
+    }
+
+    .inventory-toggle-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .inventory-toggle-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--blue);
+      background: var(--blue-bg);
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .inventory-toggle-arrow {
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      font-size: 0.8rem;
+    }
+
+    .inventory-toggle.open .inventory-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .inventory-list {
+      display: none;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .inventory-list.open {
+      display: block;
+    }
+
+    .inventory-list::-webkit-scrollbar { width: 4px; }
+    .inventory-list::-webkit-scrollbar-track { background: transparent; }
+    .inventory-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .inventory-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: background 0.15s;
+    }
+
+    .inventory-item:last-child { border-bottom: none; }
+    .inventory-item:hover { background: var(--bg-card-hover); }
+
+    .inventory-item-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      min-width: 24px;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .inventory-item-content { flex: 1; min-width: 0; }
+
+    .inventory-item-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .inventory-item-meta {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inventory-item-slug {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .inventory-type-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      padding: 1px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .inventory-type-badge.article { background: var(--silas-bg); color: var(--silas); }
+    .inventory-type-badge.page { background: var(--blue-bg); color: var(--blue); }
+    .inventory-type-badge.homepage { background: var(--accent-glow); color: var(--accent); }
+    .inventory-type-badge.blog { background: var(--orange-bg); color: var(--orange); }
+
+    .inventory-cat-badge {
+      font-size: 0.65rem;
+      padding: 1px 7px;
+      border-radius: 4px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .inventory-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .inventory-keyword {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+    }
+
+    .inventory-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .inventory-filter {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .inventory-filter input {
+      flex: 1;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .inventory-filter input:focus { border-color: var(--blue); }
+    .inventory-filter input::placeholder { color: var(--text-muted); }
+
     /* ============================================ */
     /* MAIN GRID                                    */
     /* ============================================ */
@@ -1782,6 +1975,91 @@
         }
       }
 
+      // ===== INVENTORY: Detaillierte Seitenlisten =====
+      const inv = bl.inventory;
+      if (inv) {
+        // ── Blog-Artikel Liste ──
+        const articles = inv.articles || [];
+        if (articles.length > 0) {
+          html += `<div class="inventory-section">
+            <div class="inventory-toggle" onclick="toggleInventory('articles')">
+              <div class="inventory-toggle-left">
+                <span class="inventory-toggle-icon">📝</span>
+                <span class="inventory-toggle-title">Blog-Artikel in der KI-Datenbank</span>
+                <span class="inventory-toggle-count">${articles.length}</span>
+              </div>
+              <span class="inventory-toggle-arrow" id="articles-arrow">▼</span>
+            </div>
+            <div class="inventory-filter" id="articles-filter" style="display:none;">
+              <input type="text" placeholder="Artikel suchen…" oninput="filterInventory('articles', this.value)">
+            </div>
+            <div class="inventory-list" id="articles-list">
+              ${articles.map((a, i) => `
+                <div class="inventory-item" data-search="${escHTML((a.title + ' ' + a.slug + ' ' + a.category + ' ' + (a.tags || []).join(' ')).toLowerCase())}">
+                  <span class="inventory-item-num">${i + 1}</span>
+                  <div class="inventory-item-content">
+                    <div class="inventory-item-title">${escHTML(a.title)}</div>
+                    <div class="inventory-item-meta">
+                      <span class="inventory-item-slug">/${escHTML(a.slug)}</span>
+                      <span class="inventory-cat-badge">${escHTML(a.category)}</span>
+                    </div>
+                    ${a.tags && a.tags.length > 0 ? `
+                      <div class="inventory-keywords">
+                        ${a.tags.map(t => `<span class="inventory-keyword">${escHTML(t)}</span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        }
+
+        // ── Knowledge-Seiten Liste ──
+        const pages = inv.knowledge || [];
+        if (pages.length > 0) {
+          html += `<div class="inventory-section">
+            <div class="inventory-toggle" onclick="toggleInventory('knowledge')">
+              <div class="inventory-toggle-left">
+                <span class="inventory-toggle-icon">🧠</span>
+                <span class="inventory-toggle-title">Knowledge-Seiten für die KI</span>
+                <span class="inventory-toggle-count">${pages.length}</span>
+              </div>
+              <span class="inventory-toggle-arrow" id="knowledge-arrow">▼</span>
+            </div>
+            <div class="inventory-filter" id="knowledge-filter" style="display:none;">
+              <input type="text" placeholder="Seite suchen…" oninput="filterInventory('knowledge', this.value)">
+            </div>
+            <div class="inventory-list" id="knowledge-list">
+              ${pages.map((p, i) => `
+                <div class="inventory-item" data-search="${escHTML((p.title + ' ' + p.slug + ' ' + p.type + ' ' + (p.keywords || []).join(' ')).toLowerCase())}">
+                  <span class="inventory-item-num">${i + 1}</span>
+                  <div class="inventory-item-content">
+                    <div class="inventory-item-title">${escHTML(p.title)}</div>
+                    <div class="inventory-item-meta">
+                      <span class="inventory-item-slug">${escHTML(p.url || '/' + p.slug)}</span>
+                      <span class="inventory-type-badge ${p.type || 'page'}">${p.type || 'page'}</span>
+                      <span style="color:var(--text-muted);">${p.sections_count || 0} Sektionen · ${p.text_length ? Math.round(p.text_length / 1000) + 'k' : '–'} Zeichen</span>
+                    </div>
+                    ${p.keywords && p.keywords.length > 0 ? `
+                      <div class="inventory-keywords">
+                        ${p.keywords.map(k => `<span class="inventory-keyword">${escHTML(k)}</span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (articles.length === 0 && pages.length === 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="no-data">Die Seiteninventar-Daten sind noch leer. Nach dem nächsten Build mit dem aktualisierten Script erscheinen hier alle indexierten Seiten.</div>
+          </div>`;
+        }
+      }
+
       // ===== BUILD HISTORY (Triggers + Results merged and sorted) =====
       const allEvents = [];
 
@@ -1937,6 +2215,39 @@
           btn.disabled = false;
         }, 4000);
       }
+    }
+
+    // Inventar-Liste auf-/zuklappen
+    function toggleInventory(id) {
+      const list = document.getElementById(`${id}-list`);
+      const filter = document.getElementById(`${id}-filter`);
+      const toggle = list?.previousElementSibling?.previousElementSibling || 
+                     filter?.previousElementSibling;
+      
+      if (list?.classList.contains('open')) {
+        list.classList.remove('open');
+        if (filter) filter.style.display = 'none';
+        if (toggle) toggle.classList.remove('open');
+      } else {
+        list?.classList.add('open');
+        if (filter) {
+          filter.style.display = 'flex';
+          filter.querySelector('input')?.focus();
+        }
+        if (toggle) toggle.classList.add('open');
+      }
+    }
+
+    // Inventar-Liste filtern
+    function filterInventory(id, query) {
+      const list = document.getElementById(`${id}-list`);
+      if (!list) return;
+      const q = query.toLowerCase().trim();
+      const items = list.querySelectorAll('.inventory-item');
+      items.forEach(item => {
+        const searchText = item.getAttribute('data-search') || '';
+        item.style.display = (!q || searchText.includes(q)) ? '' : 'none';
+      });
     }
 
     // ============================================================
