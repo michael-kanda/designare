@@ -122,6 +122,18 @@ async function isEmailBlocked(email) {
   }
 }
 
+async function isEmailWhitelisted(email) {
+  try {
+    // Prüfe ob die Whitelist überhaupt Einträge hat
+    const whitelistSize = await redis.scard('evita:email:whitelist');
+    if (whitelistSize === 0) return false; // Leere Whitelist = niemand erlaubt
+    return await redis.sismember('evita:email:whitelist', email.toLowerCase().trim());
+  } catch (e) {
+    console.error('Whitelist-Check Fehler:', e.message);
+    return false; // Im Fehlerfall sicherheitshalber blockieren
+  }
+}
+
 async function sendEmail({ to, toName, subject, body, sessionId }) {
   const email = new Brevo.SendSmtpEmail();
   email.sender = EMAIL_SENDER;
@@ -350,6 +362,13 @@ export default async function handler(req, res) {
         return res.status(200).json({ answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus.` });
       }
 
+      // Whitelist-Check: Nur an freigegebene Adressen senden
+      if (!(await isEmailWhitelisted(pendingEmail.to))) {
+        return res.status(200).json({ 
+          answer: `Die Adresse **${pendingEmail.to}** ist nicht in der Empfänger-Whitelist hinterlegt. E-Mails dürfen nur an freigegebene Adressen versendet werden. Bitte wende dich an Michael, damit er die Adresse im Dashboard freischaltet.` 
+        });
+      }
+
       if (await isEmailBlocked(pendingEmail.to)) {
         return res.status(200).json({ answer: `Die Adresse **${pendingEmail.to}** hat den Empfang von E-Mails über designare.at blockiert.` });
       }
@@ -487,7 +506,7 @@ MICHAEL-REGEL:
 
 TOOLS:    
 1. open_booking → Bei Terminwünschen
-2. compose_email → E-Mail-Service für den Nutzer. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent})
+2. compose_email → E-Mail-Service für den Nutzer. Max. ${MAX_EMAILS_PER_SESSION} (bisher: ${emailsSent}). WICHTIG: E-Mails dürfen NUR an Adressen gesendet werden, die in der Empfänger-Whitelist hinterlegt sind. Wenn der Versand fehlschlägt weil die Adresse nicht freigeschaltet ist, informiere den Nutzer freundlich und verweise darauf, dass Michael die Adresse im Dashboard freischalten muss.
 3. remember_user_name → Wenn Nutzer Vornamen nennt
 4. suggest_chips → IMMER aufrufen. Chips-Regeln:
    - Link-Chips (type: 'link'): MÜSSEN thematisch zur aktuellen Frage passen. KEINE zufälligen Links. Nur URLs aus VERFÜGBARE LINKS nutzen. Max 2 Links.
