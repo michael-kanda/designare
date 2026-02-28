@@ -8,7 +8,7 @@
 // ===================================================================
 const CONFIG = {
     showDelay: 2500,         // ms nach Aufruf von initEvitaGreeting()
-    autoHideDelay: 5000,     // ms nach Typewriter-Ende
+    autoHideDelay: 7000,     // ms nach Typewriter-Ende
     typewriterSpeed: 30,     // ms pro Wort
     cooldownHours: 24,       // Stunden bis zur nächsten Begrüßung
     lsKeyName: 'evita_user_name',
