@@ -47,7 +47,11 @@ export default async function handler(req, res) {
     const memory = await getMemory(sessionId);
     const { isReturningUser, knownName, previousTopics, visitCount, lastVisit, emailsSent } = extractMemoryContext(memory, userName);
 
-    console.log(`🧠 Memory: Session=${sessionId?.substring(0, 8)}... | Name=${knownName} | Visits=${visitCount} | Emails=${emailsSent}`);
+    // visitCount nur beim ersten Turn der Session erhöhen (nicht bei jeder Nachricht)
+    const isFirstMessageInSession = !history || history.length === 0;
+    const effectiveVisitCount = isFirstMessageInSession ? visitCount : (memory?.visitCount || 1);
+
+    console.log(`🧠 Memory: Session=${sessionId?.substring(0, 8)}... | Name=${knownName} | Visits=${effectiveVisitCount} | Emails=${emailsSent}`);
 
     if (!history || history.length === 0) {
       trackChatSession(sessionId);
@@ -66,7 +70,7 @@ export default async function handler(req, res) {
 
     // ── System-Prompt bauen ──
     const systemPrompt = buildSystemPrompt({
-      isReturningUser, knownName, visitCount, lastVisit, previousTopics,
+      isReturningUser, knownName, visitCount: effectiveVisitCount, lastVisit, previousTopics,
       emailsSent, currentPage, additionalContext, availableLinks
     });
 
@@ -88,7 +92,7 @@ export default async function handler(req, res) {
 
       const updatedMemory = buildUpdatedMemory({
         memory, detectedName: responsePayload.detectedName, knownName,
-        visitCount, previousTopics, topicKeywords, userMessage, emailsSent
+        visitCount: effectiveVisitCount, previousTopics, topicKeywords, userMessage, emailsSent
       });
       await saveMemory(sessionId, updatedMemory);
 
