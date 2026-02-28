@@ -33,7 +33,7 @@ try {
     console.log('   → Fahre ohne Vector-Upload fort\n');
 }
 
-// ── Redis: KI-Ausschluss-Liste laden (optional) ──
+// ── Redis: KI-Ausschluss-Liste laden (optional, für Dashboard-Feature) ──
 let dynamicExcludes = [];
 try {
     if (process.env.UPSTASH_REDIS_REST_URL) {
@@ -48,7 +48,7 @@ try {
         }
     }
 } catch (redisError) {
-    console.error('⚠️  Redis-Abfrage für Exclude-URLs fehlgeschlagen:', redisError.message);
+    console.warn('⚠️  Redis-Abfrage für Exclude-URLs fehlgeschlagen:', redisError.message);
 }
 
 const HTML_DIR = './'; 
@@ -183,6 +183,34 @@ function extractContent($, filename) {
     });
 
     // Extrahiere Sektionen basierend auf H2-Überschriften
+
+    // ── Content VOR dem ersten H2 als "Einleitung" erfassen ──
+    // Fängt Hero-Texte, Intros und Teaser-Absätze auf, die sonst verloren gehen
+    const firstH2 = $('h2').first();
+    if (firstH2.length > 0) {
+        let preH2Content = '';
+        const container = $('article').length > 0 ? $('article')
+                        : $('main').length > 0 ? $('main') : $('body');
+
+        container.children().each((i, el) => {
+            const $el = $(el);
+            if ($el.is('h2')) return false;       // Stopp beim ersten H2
+            if ($el.is('h1')) return;             // H1 überspringen (ist im Titel)
+            if ($el.is('p, li, span, div, ul, ol, blockquote')) {
+                const text = $el.text().trim();
+                if (text) preH2Content += text + ' ';
+            }
+        });
+
+        preH2Content = cleanText(preH2Content);
+        if (preH2Content.length > 50) {
+            content.sections.push({
+                heading: content.title + ' – Einleitung',
+                content: preH2Content.substring(0, MAX_SECTION_LENGTH)
+            });
+        }
+    }
+
     $('h2').each((i, el) => {
         const sectionTitle = $(el).text().trim();
         let sectionContent = '';
@@ -259,9 +287,8 @@ function generateSearchIndex(knowledgeBase) {
 
 /**
  * Uploaded alle Sektionen in die Upstash Vector-DB (Section-basiertes Chunking)
- * Jede H2-Sektion wird als eigener Vektor gespeichert → präzisere Suchergebnisse.
+ * Jede H2-Sektion + Einleitung wird als eigener Vektor gespeichert.
  * Seiten ohne Sektionen bekommen einen Fallback-Vektor mit dem gesamten Text.
- * Verwendet dasselbe Embedding-Modell wie rag-service.js (gemini-embedding-001, 768 dims)
  */
 async function uploadToVectorDB(knowledgeBase) {
     if (!vectorIndex || !embeddingModel) {
@@ -269,7 +296,6 @@ async function uploadToVectorDB(knowledgeBase) {
         return { uploaded: 0, errors: 0, chunks: 0 };
     }
 
-    // Zähle erwartete Chunks vorab
     let expectedChunks = 0;
     for (const page of knowledgeBase) {
         expectedChunks += (page.sections && page.sections.length > 0) ? page.sections.length : 1;
@@ -277,14 +303,11 @@ async function uploadToVectorDB(knowledgeBase) {
 
     console.log(`\n🚀 Starte Vector-DB Upload (Section-Chunking: ${expectedChunks} Chunks aus ${knowledgeBase.length} Seiten)...\n`);
 
-    // Reset: Alte Vektoren entfernen für sauberen Neuaufbau
-    // Verhindert verwaiste Einträge von gelöschten/umbenannten Seiten
     try {
         await vectorIndex.reset();
         console.log('🗑️  Vector-DB zurückgesetzt (alte Einträge entfernt)\n');
     } catch (resetError) {
         console.error('⚠️  Vector-DB Reset fehlgeschlagen:', resetError.message);
-        console.log('   → Fahre mit Upsert fort (alte Einträge bleiben)\n');
     }
 
     let uploaded = 0;
@@ -294,7 +317,7 @@ async function uploadToVectorDB(knowledgeBase) {
         const sections = page.sections || [];
 
         if (sections.length === 0) {
-            // ── FALLBACK: Seite ohne H2-Sektionen → gesamten Text als einen Chunk ──
+            // ── FALLBACK: Seite ohne Sektionen → gesamten Text als einen Chunk ──
             const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
 
             try {
@@ -322,10 +345,9 @@ async function uploadToVectorDB(knowledgeBase) {
                 console.error(`   ❌ ${page.slug}: ${error.message}`);
             }
         } else {
-            // ── SECTION-CHUNKING: Ein Vektor pro H2-Sektion ──
+            // ── SECTION-CHUNKING: Ein Vektor pro Sektion (inkl. Einleitung) ──
             for (let i = 0; i < sections.length; i++) {
                 const section = sections[i];
-                // Embed-Text: Seitentitel + Sektions-Überschrift + Sektions-Inhalt
                 const textToEmbed = `${page.title} – ${section.heading}\n${section.content}`;
 
                 try {
