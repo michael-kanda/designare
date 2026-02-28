@@ -263,51 +263,100 @@ export default async function handler(req, res) {
 
         // ==========================================
         // TEIL 2: UPSTASH VECTOR DATENBANK UPLOAD
+        // (Section-basiertes Chunking)
         // ==========================================
-        console.log("🚀 Starte Upload in die Upstash Vector Datenbank...");
+        console.log("🚀 Starte Upload in die Upstash Vector Datenbank (Section-Chunking)...");
         // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
         const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
         let uploadErrorsCount = 0;
+        let uploadedChunks = 0;
+
+        // Reset: Alte Vektoren entfernen für sauberen Neuaufbau
+        try {
+            await vectorIndex.reset();
+            console.log('🗑️  Vector-DB zurückgesetzt (alte Einträge entfernt)');
+        } catch (resetError) {
+            console.error('⚠️  Vector-DB Reset fehlgeschlagen:', resetError.message);
+        }
 
         for (let i = 0; i < knowledgeBase.length; i++) {
             const page = knowledgeBase[i];
-            const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
-            
-            try {
-                const result = await embeddingModel.embedContent(textToEmbed);
-                // WICHTIG: Auf 768 Dimensionen kürzen – muss mit rag-service.js matchen
-                const denseVector = result.embedding.values.slice(0, 768);
+            const sections = page.sections || [];
 
-                await vectorIndex.upsert({
-                    id: `page_${page.slug}`,
-                    vector: denseVector,
-                    data: textToEmbed,
-                    metadata: {
-                        title: page.title,
-                        url: page.url,
-                        content: page.text
+            if (sections.length === 0) {
+                // ── FALLBACK: Seite ohne H2-Sektionen → gesamten Text als einen Chunk ──
+                const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
+
+                try {
+                    const result = await embeddingModel.embedContent(textToEmbed);
+                    const denseVector = result.embedding.values.slice(0, 768);
+
+                    await vectorIndex.upsert({
+                        id: `page_${page.slug}`,
+                        vector: denseVector,
+                        data: textToEmbed,
+                        metadata: {
+                            title: page.title,
+                            url: page.url,
+                            section_heading: null,
+                            content: page.text.substring(0, 2000)
+                        }
+                    });
+
+                    uploadedChunks++;
+                    console.log(`   📤 ${page.slug} (Seiten-Vektor, keine Sektionen)`);
+                    await new Promise(r => setTimeout(r, 300));
+
+                } catch (uploadError) {
+                    console.error(`❌ Vector-Upload Fehler bei ${page.title}:`, uploadError.message);
+                    uploadErrorsCount++;
+                    errors.push({ file: page.slug, type: 'vector_upload_error', error: uploadError.message });
+                }
+            } else {
+                // ── SECTION-CHUNKING: Ein Vektor pro H2-Sektion ──
+                for (let s = 0; s < sections.length; s++) {
+                    const section = sections[s];
+                    const textToEmbed = `${page.title} – ${section.heading}\n${section.content}`;
+
+                    try {
+                        const result = await embeddingModel.embedContent(textToEmbed);
+                        const denseVector = result.embedding.values.slice(0, 768);
+
+                        await vectorIndex.upsert({
+                            id: `section_${page.slug}__${s}`,
+                            vector: denseVector,
+                            data: textToEmbed,
+                            metadata: {
+                                title: page.title,
+                                url: page.url,
+                                section_heading: section.heading,
+                                content: section.content
+                            }
+                        });
+
+                        uploadedChunks++;
+                        console.log(`   📤 ${page.slug} → §${s}: "${section.heading.substring(0, 50)}"`);
+                        await new Promise(r => setTimeout(r, 300));
+
+                    } catch (uploadError) {
+                        console.error(`❌ Vector-Upload Fehler bei ${page.slug} §${s}:`, uploadError.message);
+                        uploadErrorsCount++;
+                        errors.push({ file: `${page.slug}__${s}`, type: 'vector_upload_error', error: uploadError.message });
                     }
-                });
-
-                // Vermeide Rate-Limits der Gemini API (300ms warten)
-                await new Promise(res => setTimeout(res, 300)); 
-
-            } catch (uploadError) {
-                console.error(`❌ Vector-Upload Fehler bei ${page.title}:`, uploadError.message);
-                uploadErrorsCount++;
-                errors.push({ file: page.slug, type: 'vector_upload_error', error: uploadError.message });
+                }
             }
         }
 
         // Gesamtzeit updaten
         output.stats.processing_time_ms = Date.now() - startTime;
         output.stats.vector_upload_errors = uploadErrorsCount;
+        output.stats.vector_chunks = uploadedChunks;
 
-        console.log(`✅ Cron Job abgeschlossen in ${output.stats.processing_time_ms}ms`);
+        console.log(`✅ Cron Job abgeschlossen in ${output.stats.processing_time_ms}ms (${uploadedChunks} Chunks)`);
 
         return res.status(200).json({
             success: true,
-            message: `Knowledge-Base erfolgreich regeneriert und in Vektor-DB geladen`,
+            message: `Knowledge-Base erfolgreich regeneriert: ${uploadedChunks} Chunks aus ${knowledgeBase.length} Seiten in Vektor-DB geladen`,
             stats: output.stats,
             errors: errors.length > 0 ? errors : undefined,
             timestamp: new Date().toISOString()
