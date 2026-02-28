@@ -91,6 +91,31 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── KI-Ausschluss: URL hinzufügen ──
+    if (action === 'add_exclude_url' && req.body.url) {
+      try {
+        // Normalisiere: kein führender Slash, kein .html
+        const normalized = req.body.url.trim().toLowerCase().replace(/^\//, '').replace(/\.html$/, '');
+        if (!normalized || normalized.length < 2) {
+          return res.status(400).json({ error: 'Ungültiger Seitenname' });
+        }
+        await redis.sadd('build:exclude:urls', normalized);
+        return res.status(200).json({ success: true, added: normalized });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // ── KI-Ausschluss: URL entfernen ──
+    if (action === 'remove_exclude_url' && req.body.url) {
+      try {
+        await redis.srem('build:exclude:urls', req.body.url.trim().toLowerCase());
+        return res.status(200).json({ success: true, removed: req.body.url });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
     // ── Manuellen Rebuild triggern ──
     if (action === 'trigger_rebuild') {
       const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK;
@@ -479,6 +504,15 @@ export default async function handler(req, res) {
     } catch (e) {}
 
     // ===============================================================
+    // 13. KI-AUSSCHLUSS-LISTE (Seiten die nicht indexiert werden)
+    // ===============================================================
+    let excludedUrls = [];
+    try {
+      excludedUrls = await redis.smembers('build:exclude:urls') || [];
+      excludedUrls.sort((a, b) => a.localeCompare(b));
+    } catch (e) {}
+
+    // ===============================================================
     // RESPONSE
     // ===============================================================
     return res.status(200).json({
@@ -575,7 +609,8 @@ export default async function handler(req, res) {
         latest: latestBuild,
         triggers: buildTriggers,
         results: buildResults,
-        inventory: buildInventory
+        inventory: buildInventory,
+        excludedUrls: excludedUrls
       }
     });
 
