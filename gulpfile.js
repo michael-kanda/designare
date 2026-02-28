@@ -9,6 +9,7 @@ const { src, dest, parallel } = gulp;
 const coreFiles = [
     'css/style.css',              // Reset & Vars
     'css/header-footer.css',      // Globales Layout
+    'css/evita-greeting.css',
     'css/side-menu.css',          // Navigation
     'css/menu-interactive.css',   // Interaktive Menus
     'css/ai-styles.css',
