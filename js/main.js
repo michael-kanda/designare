@@ -19,6 +19,7 @@ import { initAiForm } from './ai-form.js';
 import { initSilasForm } from './silas-form.js';
 import { initMenuInteractions } from './menu-logic.js';
 import { setupSearchModal } from './search.js';
+import { initEvitaGreeting } from './evita-greeting.js';
 
 let globalAiFormInstance = null;
 
@@ -273,6 +274,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
             initializeDynamicScripts();
             initializeForms();
+            
+            // Evita Greeting-Bubble (nach ai-form.js, damit window.openEvitaChat existiert)
+            initEvitaGreeting();
             
             // HIER ENTSPERRT DER ZENTRALE MANAGER (falls wir z.B. auf einer Unterseite sind!)
             window.updateScrollState();
