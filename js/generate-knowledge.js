@@ -33,6 +33,24 @@ try {
     console.log('   → Fahre ohne Vector-Upload fort\n');
 }
 
+// ── Redis: KI-Ausschluss-Liste laden (optional) ──
+let dynamicExcludes = [];
+try {
+    if (process.env.UPSTASH_REDIS_REST_URL) {
+        const { Redis } = await import("@upstash/redis");
+        const redis = new Redis({
+            url: process.env.UPSTASH_REDIS_REST_URL,
+            token: process.env.UPSTASH_REDIS_REST_TOKEN,
+        });
+        dynamicExcludes = await redis.smembers('build:exclude:urls') || [];
+        if (dynamicExcludes.length > 0) {
+            console.log(`🚫 ${dynamicExcludes.length} Seiten via Dashboard ausgeschlossen: ${dynamicExcludes.join(', ')}\n`);
+        }
+    }
+} catch (redisError) {
+    console.error('⚠️  Redis-Abfrage für Exclude-URLs fehlgeschlagen:', redisError.message);
+}
+
 const HTML_DIR = './'; 
 const OUTPUT_FILE = './knowledge.json';
 
@@ -355,11 +373,12 @@ async function generateKnowledge() {
     // Filtere Excludes
     const files = allFiles.filter(file => 
         !EXCLUDE_FILES.includes(file) && 
-        !EXCLUDE_PARTIALS.includes(file)
+        !EXCLUDE_PARTIALS.includes(file) &&
+        !dynamicExcludes.some(slug => file === `${slug}.html` || file.replace('.html', '') === slug)
     );
 
     console.log(`📄 Gefunden: ${allFiles.length} HTML-Dateien`);
-    console.log(`📄 Indexiere: ${files.length} Seiten (${allFiles.length - files.length} ausgeschlossen)\n`);
+    console.log(`📄 Indexiere: ${files.length} Seiten (${allFiles.length - files.length} ausgeschlossen, davon ${dynamicExcludes.length} via Dashboard)\n`);
 
     const knowledgeBase = [];
     let totalKeywords = 0;
