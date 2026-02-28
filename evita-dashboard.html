@@ -2060,6 +2060,31 @@
         }
       }
 
+      // ===== KI-AUSSCHLUSS MANAGEMENT =====
+      const excluded = bl.excludedUrls || [];
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">🚫 Seiten von KI-Suche ausschließen</div>
+        <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:12px;">
+          Diese Seiten werden beim nächsten Build nicht in Evitas Wissensdatenbank aufgenommen. Nach dem Ändern → „Jetzt neu bauen" klicken.
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input type="text" id="excludeUrlInput" placeholder="z.B. meine-seite oder /meine-seite.html"
+            style="flex:1; background:var(--bg-card-hover); border:1px solid var(--border); color:var(--text-primary); padding:8px 12px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;"
+            onkeydown="if(event.key==='Enter')addExcludeUrl()">
+          <button onclick="addExcludeUrl()" style="background:var(--red); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;">+ Ausschließen</button>
+        </div>
+        ${excluded.length > 0 ? `
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${excluded.map(url => `
+              <div style="display:inline-flex; align-items:center; gap:6px; background:var(--red-bg); padding:5px 12px; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.75rem;">
+                <span style="color:var(--red);">/${escHTML(url)}</span>
+                <span onclick="removeExcludeUrl('${escHTML(url)}')" style="color:var(--text-muted); cursor:pointer; font-size:0.85rem; margin-left:2px;" title="Ausschluss aufheben">✕</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<div style="font-size:0.78rem; color:var(--text-muted);">Keine Seiten ausgeschlossen – alle Seiten werden indexiert.</div>'}
+      </div>`;
+
       // ===== BUILD HISTORY (Triggers + Results merged and sorted) =====
       const allEvents = [];
 
@@ -2346,6 +2371,53 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'remove_whitelist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDashboard();
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function addExcludeUrl() {
+      const input = document.getElementById('excludeUrlInput');
+      let url = (input?.value || '').trim().toLowerCase();
+      if (!url) return;
+      // Normalisiere: kein führender Slash, kein .html
+      url = url.replace(/^\//, '').replace(/\.html$/, '');
+      if (!url || url.length < 2) {
+        alert('Bitte gib einen gültigen Seitennamen ein.');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_exclude_url', url })
+        });
+        const data = await res.json();
+        if (data.success) {
+          input.value = '';
+          loadDashboard();
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function removeExcludeUrl(url) {
+      if (!confirm(`"/${url}" wieder für die KI-Suche freigeben?`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_exclude_url', url })
         });
         const data = await res.json();
         if (data.success) {
