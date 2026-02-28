@@ -185,7 +185,9 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
           success: true,
-          message: `Vektor-DB aktualisiert: ${result.stats?.vector_chunks || '?'} Chunks aus ${result.stats?.total_pages || '?'} Seiten`,
+          message: result.stats
+            ? `Vektor-DB aktualisiert: ${result.stats.vector_chunks ?? '?'} Chunks aus ${result.stats.total_pages ?? '?'} Seiten (${result.stats.processing_time_ms}ms)`
+            : result.message || 'Cron lief, aber keine Stats zurückgegeben',
           stats: result.stats
         });
       } catch (e) {
