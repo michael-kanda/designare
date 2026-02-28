@@ -115,6 +115,33 @@ function extractContent($, filename) {
         }
     });
 
+    // ── Content VOR dem ersten H2 als "Einleitung" erfassen ──
+    // Fängt Hero-Texte, Intros und Teaser-Absätze auf, die sonst verloren gehen
+    const firstH2 = $('h2').first();
+    if (firstH2.length > 0) {
+        let preH2Content = '';
+        const container = $('article').length > 0 ? $('article')
+                        : $('main').length > 0 ? $('main') : $('body');
+
+        container.children().each((i, el) => {
+            const $el = $(el);
+            if ($el.is('h2')) return false;       // Stopp beim ersten H2
+            if ($el.is('h1')) return;             // H1 überspringen (ist im Titel)
+            if ($el.is('p, li, span, div, ul, ol, blockquote')) {
+                const text = $el.text().trim();
+                if (text) preH2Content += text + ' ';
+            }
+        });
+
+        preH2Content = cleanText(preH2Content);
+        if (preH2Content.length > 50) {
+            content.sections.push({
+                heading: content.title + ' – Einleitung',
+                content: preH2Content.substring(0, CONFIG.maxSectionLength)
+            });
+        }
+    }
+
     $('h2').each((i, el) => {
         const sectionTitle = $(el).text().trim();
         let sectionContent = '';
