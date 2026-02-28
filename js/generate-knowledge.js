@@ -240,53 +240,106 @@ function generateSearchIndex(knowledgeBase) {
 }
 
 /**
- * Uploaded alle Seiten in die Upstash Vector-DB
+ * Uploaded alle Sektionen in die Upstash Vector-DB (Section-basiertes Chunking)
+ * Jede H2-Sektion wird als eigener Vektor gespeichert → präzisere Suchergebnisse.
+ * Seiten ohne Sektionen bekommen einen Fallback-Vektor mit dem gesamten Text.
  * Verwendet dasselbe Embedding-Modell wie rag-service.js (gemini-embedding-001, 768 dims)
  */
 async function uploadToVectorDB(knowledgeBase) {
     if (!vectorIndex || !embeddingModel) {
         console.log('\n⏭️  Vector-Upload übersprungen (keine Verbindung)\n');
-        return { uploaded: 0, errors: 0 };
+        return { uploaded: 0, errors: 0, chunks: 0 };
     }
 
-    console.log(`\n🚀 Starte Vector-DB Upload (${knowledgeBase.length} Seiten)...\n`);
-    
+    // Zähle erwartete Chunks vorab
+    let expectedChunks = 0;
+    for (const page of knowledgeBase) {
+        expectedChunks += (page.sections && page.sections.length > 0) ? page.sections.length : 1;
+    }
+
+    console.log(`\n🚀 Starte Vector-DB Upload (Section-Chunking: ${expectedChunks} Chunks aus ${knowledgeBase.length} Seiten)...\n`);
+
+    // Reset: Alte Vektoren entfernen für sauberen Neuaufbau
+    // Verhindert verwaiste Einträge von gelöschten/umbenannten Seiten
+    try {
+        await vectorIndex.reset();
+        console.log('🗑️  Vector-DB zurückgesetzt (alte Einträge entfernt)\n');
+    } catch (resetError) {
+        console.error('⚠️  Vector-DB Reset fehlgeschlagen:', resetError.message);
+        console.log('   → Fahre mit Upsert fort (alte Einträge bleiben)\n');
+    }
+
     let uploaded = 0;
     let errors = 0;
 
     for (const page of knowledgeBase) {
-        const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
+        const sections = page.sections || [];
 
-        try {
-            const result = await embeddingModel.embedContent(textToEmbed);
-            // WICHTIG: Auf 768 Dimensionen kürzen – muss mit rag-service.js matchen
-            const vector = result.embedding.values.slice(0, 768);
+        if (sections.length === 0) {
+            // ── FALLBACK: Seite ohne H2-Sektionen → gesamten Text als einen Chunk ──
+            const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
 
-            await vectorIndex.upsert({
-                id: `page_${page.slug}`,
-                vector: vector,
-                data: textToEmbed,
-                metadata: {
-                    title: page.title,
-                    url: page.url,
-                    content: page.text
+            try {
+                const result = await embeddingModel.embedContent(textToEmbed);
+                const vector = result.embedding.values.slice(0, 768);
+
+                await vectorIndex.upsert({
+                    id: `page_${page.slug}`,
+                    vector: vector,
+                    data: textToEmbed,
+                    metadata: {
+                        title: page.title,
+                        url: page.url,
+                        section_heading: null,
+                        content: page.text.substring(0, 2000)
+                    }
+                });
+
+                uploaded++;
+                console.log(`   📤 ${page.slug} (Seiten-Vektor, keine Sektionen)`);
+                await new Promise(r => setTimeout(r, 300));
+
+            } catch (error) {
+                errors++;
+                console.error(`   ❌ ${page.slug}: ${error.message}`);
+            }
+        } else {
+            // ── SECTION-CHUNKING: Ein Vektor pro H2-Sektion ──
+            for (let i = 0; i < sections.length; i++) {
+                const section = sections[i];
+                // Embed-Text: Seitentitel + Sektions-Überschrift + Sektions-Inhalt
+                const textToEmbed = `${page.title} – ${section.heading}\n${section.content}`;
+
+                try {
+                    const result = await embeddingModel.embedContent(textToEmbed);
+                    const vector = result.embedding.values.slice(0, 768);
+
+                    await vectorIndex.upsert({
+                        id: `section_${page.slug}__${i}`,
+                        vector: vector,
+                        data: textToEmbed,
+                        metadata: {
+                            title: page.title,
+                            url: page.url,
+                            section_heading: section.heading,
+                            content: section.content
+                        }
+                    });
+
+                    uploaded++;
+                    console.log(`   📤 ${page.slug} → §${i}: "${section.heading.substring(0, 50)}"`);
+                    await new Promise(r => setTimeout(r, 300));
+
+                } catch (error) {
+                    errors++;
+                    console.error(`   ❌ ${page.slug} §${i}: ${error.message}`);
                 }
-            });
-
-            uploaded++;
-            console.log(`   📤 ${page.slug}`);
-
-            // Rate-Limit Schutz (Gemini Free: 1500 RPM, aber lieber safe)
-            await new Promise(r => setTimeout(r, 300));
-
-        } catch (error) {
-            errors++;
-            console.error(`   ❌ ${page.slug}: ${error.message}`);
+            }
         }
     }
 
-    console.log(`\n✅ Vector-Upload abgeschlossen: ${uploaded} OK, ${errors} Fehler`);
-    return { uploaded, errors };
+    console.log(`\n✅ Vector-Upload abgeschlossen: ${uploaded} Chunks OK, ${errors} Fehler`);
+    return { uploaded, errors, chunks: uploaded };
 }
 
 /**
@@ -395,7 +448,7 @@ async function generateKnowledge() {
     const totalTime = Date.now() - startTime;
     console.log(`\n⏱️  Gesamtzeit: ${totalTime}ms`);
     if (vectorResult.uploaded > 0) {
-        console.log(`🧠 Vector-DB: ${vectorResult.uploaded}/${knowledgeBase.length} Seiten synchronisiert`);
+        console.log(`🧠 Vector-DB: ${vectorResult.chunks} Chunks aus ${knowledgeBase.length} Seiten synchronisiert (Section-Chunking)`);
     }
 }
 
