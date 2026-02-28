@@ -265,19 +265,21 @@ export default async function handler(req, res) {
         // TEIL 2: UPSTASH VECTOR DATENBANK UPLOAD
         // ==========================================
         console.log("🚀 Starte Upload in die Upstash Vector Datenbank...");
-        const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+        // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
+        const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
         let uploadErrorsCount = 0;
 
         for (let i = 0; i < knowledgeBase.length; i++) {
             const page = knowledgeBase[i];
-            const textToEmbed = `${page.title}\n${page.text}`;
+            const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
             
             try {
                 const result = await embeddingModel.embedContent(textToEmbed);
-                const denseVector = result.embedding.values;
+                // WICHTIG: Auf 768 Dimensionen kürzen – muss mit rag-service.js matchen
+                const denseVector = result.embedding.values.slice(0, 768);
 
                 await vectorIndex.upsert({
-                    id: `page_${page.slug}`, // Eindeutige ID basierend auf dem Slug
+                    id: `page_${page.slug}`,
                     vector: denseVector,
                     data: textToEmbed,
                     metadata: {
