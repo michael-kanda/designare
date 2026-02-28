@@ -1908,6 +1908,7 @@
             <div class="build-status-meta">${dateStr} · ${timeAgo}</div>
           </div>
           <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+          <button class="build-trigger-btn" id="vectorBtn" onclick="triggerVectorRebuild()" style="background:var(--accent);margin-left:8px;">🧠 Vektor-DB aktualisieren</button>
         </div>`;
       } else {
         html += `<div class="build-status-banner">
@@ -1917,6 +1918,7 @@
             <div class="build-status-meta">Der erste Build mit dem neuen Script wird hier erscheinen</div>
           </div>
           <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+          <button class="build-trigger-btn" id="vectorBtn" onclick="triggerVectorRebuild()" style="background:var(--accent);margin-left:8px;">🧠 Vektor-DB aktualisieren</button>
         </div>`;
       }
 
@@ -2065,7 +2067,7 @@
       html += `<div class="chart-card full-width" style="margin-bottom:24px;">
         <div class="chart-title">🚫 Seiten von KI-Suche ausschließen</div>
         <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:12px;">
-          Diese Seiten werden beim nächsten Build nicht in Evitas Wissensdatenbank aufgenommen. Nach dem Ändern → „Jetzt neu bauen" klicken.
+          Diese Seiten werden beim nächsten Build nicht in Evitas Wissensdatenbank aufgenommen. Nach dem Ändern → „🧠 Vektor-DB aktualisieren" klicken.
         </div>
         <div style="display:flex; gap:8px; margin-bottom:16px;">
           <input type="text" id="excludeUrlInput" placeholder="z.B. meine-seite oder /meine-seite.html"
@@ -2239,6 +2241,50 @@
           btn.style.background = '';
           btn.disabled = false;
         }, 4000);
+      }
+    }
+
+    async function triggerVectorRebuild() {
+      const btn = document.getElementById('vectorBtn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Crawling & Embedding...';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_vector_rebuild' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          btn.textContent = '✅ ' + (data.message || 'Fertig!');
+          btn.style.background = 'var(--green)';
+          setTimeout(() => {
+            btn.textContent = '🧠 Vektor-DB aktualisieren';
+            btn.style.background = 'var(--accent)';
+            btn.disabled = false;
+            loadDashboard();
+          }, 5000);
+        } else {
+          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🧠 Vektor-DB aktualisieren';
+            btn.style.background = 'var(--accent)';
+            btn.disabled = false;
+          }, 5000);
+        }
+      } catch (e) {
+        btn.textContent = '❌ ' + e.message;
+        btn.style.background = 'var(--red)';
+        setTimeout(() => {
+          btn.textContent = '🧠 Vektor-DB aktualisieren';
+          btn.style.background = 'var(--accent)';
+          btn.disabled = false;
+        }, 5000);
       }
     }
 
