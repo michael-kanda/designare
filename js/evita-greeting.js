@@ -11,6 +11,8 @@ const CONFIG = {
     autoHideDelay: 7000,     // ms nach Typewriter-Ende
     typewriterSpeed: 30,     // ms pro Wort
     cooldownHours: 24,       // Stunden bis zur nächsten Begrüßung
+    modalCheckInterval: 500, // ms zwischen Modal-Checks
+    modalCheckTimeout: 15000,// ms max. Wartezeit auf Modal-Schließung
     lsKeyName: 'evita_user_name',
     lsKeySession: 'evita_session_id',
     lsKeyLastGreeting: 'evita_last_greeting',
@@ -87,6 +89,48 @@ function pickMessage() {
     }
 
     return text;
+}
+
+/**
+ * Prüft ob aktuell ein Modal (Cookie-Banner, Kontaktformular etc.) offen ist.
+ * Verhindert dass Greeting-Bubble gleichzeitig mit einem Modal erscheint.
+ */
+function isAnyModalOpen() {
+    return document.querySelector('.modal-overlay.visible') !== null;
+}
+
+/**
+ * Wartet bis alle Modals geschlossen sind.
+ * Gibt auf nach modalCheckTimeout ms (z.B. User schließt Cookie-Banner nicht).
+ * @returns {Promise<boolean>} true = Weg frei, false = Timeout
+ */
+function waitForModalsToClose() {
+    return new Promise((resolve) => {
+        // Sofort prüfen – kein Modal offen? Direkt weiter.
+        if (!isAnyModalOpen()) {
+            resolve(true);
+            return;
+        }
+
+        console.log('⏳ Evita-Greeting wartet auf Modal-Schließung...');
+        const startTime = Date.now();
+
+        const interval = setInterval(() => {
+            if (!isAnyModalOpen()) {
+                clearInterval(interval);
+                console.log('✅ Modal geschlossen – Greeting wird angezeigt');
+                // Kurze Pause nach Modal-Schließung, damit der User nicht überrumpelt wird
+                setTimeout(() => resolve(true), 800);
+                return;
+            }
+
+            if (Date.now() - startTime > CONFIG.modalCheckTimeout) {
+                clearInterval(interval);
+                console.log('⏰ Evita-Greeting: Timeout – Modal noch offen, Greeting wird übersprungen');
+                resolve(false);
+            }
+        }, CONFIG.modalCheckInterval);
+    });
 }
 
 // ===================================================================
@@ -174,6 +218,13 @@ export function initEvitaGreeting() {
         // Evita-Avatar im Header muss existieren
         const avatar = document.getElementById('evita-chat-button');
         if (!avatar) return;
+
+        // ── NEU: Warten bis Cookie-Banner / andere Modals geschlossen sind ──
+        const canShow = await waitForModalsToClose();
+        if (!canShow) return; // Timeout: Greeting überspringen
+
+        // Nochmal prüfen nach dem Warten (könnte inzwischen Session-Greeted sein)
+        if (sessionStorage.getItem(CONFIG.ssKeyGreeted)) return;
 
         markAsShown();
 
