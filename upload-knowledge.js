@@ -24,21 +24,23 @@ async function uploadKnowledge() {
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
     const pages = kbData.pages || kbData; 
 
-    const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
+    const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
 
     // 3. Verarbeite jeden Eintrag
     for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
-        const textToEmbed = `${page.title}\n${page.text || page.content}`;
+        const textToEmbed = `${page.title}\n${page.meta_description || ''}\n${page.text || page.content}`;
         
         try {
             console.log(`⏳ Verarbeite [${i + 1}/${pages.length}]: ${page.title}`);
             
             const result = await embeddingModel.embedContent(textToEmbed);
-            const denseVector = result.embedding.values;
+            // WICHTIG: Auf 768 Dimensionen kürzen – muss mit rag-service.js matchen
+            const denseVector = result.embedding.values.slice(0, 768);
 
             await vectorIndex.upsert({
-                id: `page_${i}`,
+                id: `page_${page.slug || i}`,
                 vector: denseVector,
                 data: textToEmbed,
                 metadata: {
