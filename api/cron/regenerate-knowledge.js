@@ -7,7 +7,10 @@ import path from 'path';
 import * as cheerio from 'cheerio';
 import { Index } from "@upstash/vector";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Redis } from "@upstash/redis";
+import { redis } from '../../lib/redis.js'; // <- Hier holst du dir deinen fertigen Client
+
+// Setzt das Timeout für diese Funktion auf 5 Minuten (Vercel Pro Feature)
+export const maxDuration = 300;
 
 // Konfiguration
 const CONFIG = {
@@ -27,11 +30,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const vectorIndex = new Index({
   url: process.env.UPSTASH_VECTOR_REST_URL,
   token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-});
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 /**
