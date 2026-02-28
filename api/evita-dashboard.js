@@ -97,8 +97,11 @@ export default async function handler(req, res) {
     // ── KI-Ausschluss: URL hinzufügen ──
     if (action === 'add_exclude_url' && req.body.url) {
       try {
-        // Normalisiere: kein führender Slash, kein .html
-        const normalized = req.body.url.trim().toLowerCase().replace(/^\//, '').replace(/\.html$/, '');
+        // Normalisiere: keine Domain, kein führender Slash, kein .html
+        const normalized = req.body.url.trim().toLowerCase()
+          .replace(/^https?:\/\/[^/]+\/?/, '')  // Domain entfernen
+          .replace(/^\//, '')                     // Führenden Slash entfernen
+          .replace(/\.html$/, '');                // .html entfernen
         if (!normalized || normalized.length < 2) {
           return res.status(400).json({ error: 'Ungültiger Seitenname' });
         }
