@@ -2433,8 +2433,8 @@
       const input = document.getElementById('excludeUrlInput');
       let url = (input?.value || '').trim().toLowerCase();
       if (!url) return;
-      // Normalisiere: kein führender Slash, kein .html
-      url = url.replace(/^\//, '').replace(/\.html$/, '');
+      // Normalisiere: kein führender Slash, kein .html, keine Domain
+      url = url.replace(/^https?:\/\/[^/]+\/?/, '').replace(/^\//, '').replace(/\.html$/, '');
       if (!url || url.length < 2) {
         alert('Bitte gib einen gültigen Seitennamen ein.');
         return;
@@ -2448,7 +2448,8 @@
         const data = await res.json();
         if (data.success) {
           input.value = '';
-          loadDashboard();
+          await loadDashboard();
+          switchTab('builds');
         } else {
           alert('Fehler: ' + (data.error || 'Unbekannt'));
         }
@@ -2467,7 +2468,8 @@
         });
         const data = await res.json();
         if (data.success) {
-          loadDashboard();
+          await loadDashboard();
+          switchTab('builds');
         } else {
           alert('Fehler: ' + (data.error || 'Unbekannt'));
         }
