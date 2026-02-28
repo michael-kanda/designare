@@ -148,11 +148,12 @@ export default async function handler(req, res) {
     // ── Vektor-DB manuell aktualisieren (ruft den Cron-Endpoint auf) ──
     if (action === 'trigger_vector_rebuild') {
       const cronSecret = process.env.CRON_SECRET;
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'https://designare.at';
+      const host = req.headers.host || 'designare.at';
+      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const baseUrl = `${protocol}://${host}`;
 
       try {
+        console.log(`🧠 Vektor-DB Rebuild: Rufe ${baseUrl}/api/cron/regenerate-knowledge auf...`);
         const response = await fetch(`${baseUrl}/api/cron/regenerate-knowledge`, {
           method: 'GET',
           headers: {
@@ -160,7 +161,14 @@ export default async function handler(req, res) {
           }
         });
 
-        const result = await response.json();
+        const responseText = await response.text();
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseErr) {
+          console.error(`🧠 Keine JSON-Antwort (Status ${response.status}):`, responseText.substring(0, 200));
+          throw new Error(`Cron-Endpoint antwortet nicht mit JSON (Status ${response.status}). Ist regenerate-knowledge.js deployed?`);
+        }
 
         if (!response.ok || !result.success) {
           throw new Error(result.error || result.message || `HTTP ${response.status}`);
