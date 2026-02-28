@@ -1,228 +1,71 @@
 // api/cron/regenerate-knowledge.js
-// Automatische Regenerierung der Knowledge-Base UND Vektor-DB Upload via Vercel Cron
-// Läuft täglich um 3:00 Uhr nachts (Europe/Vienna)
+// Vektor-DB Sync: Holt die bereits gebaute knowledge.json und lädt Sektionen in Upstash Vector
+// Läuft täglich um 3:00 Uhr nachts (Europe/Vienna) ODER manuell via Dashboard-Button
+//
+// ARCHITEKTUR:
+//   Build-Time:  generate-knowledge.js → crawlt HTML → erzeugt knowledge.json (mit Sektionen + Einleitungen)
+//   Runtime:     regenerate-knowledge.js (diese Datei) → holt knowledge.json → erzeugt Embeddings → Upstash Upload
+//
+// Warum nicht direkt crawlen? Serverless Functions haben keinen Zugriff auf statische HTML-Dateien.
 
-import fs from 'fs';
-import path from 'path';
-import * as cheerio from 'cheerio';
 import { Index } from "@upstash/vector";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { redis } from '../../lib/redis.js'; // <- Hier holst du dir deinen fertigen Client
+import { redis } from '../../lib/redis.js';
 
-// Setzt das Timeout für diese Funktion auf 5 Minuten (Vercel Pro Feature)
+// Vercel Pro: bis zu 5 Minuten
 export const maxDuration = 300;
 
-// Konfiguration
-const CONFIG = {
-    htmlDir: process.cwd(),
-    outputFile: path.join(process.cwd(), 'knowledge.json'),
-    excludeFiles: ['404.html', 'impressum.html', 'datenschutz.html', 'disclaimer.html'],
-    excludePartials: ['header.html', 'footer.html', 'modals.html', 'side-menu.html', 'blog-feedback.html'],
-    maxSectionLength: 2000,
-    maxTotalLength: 8000
-};
-
-// Cron-Secret für Sicherheit (verhindert unbefugte Aufrufe)
 const CRON_SECRET = process.env.CRON_SECRET;
 
-// API Clients initialisieren (Upstash & Gemini)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const vectorIndex = new Index({
-  url: process.env.UPSTASH_VECTOR_REST_URL,
-  token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+    url: process.env.UPSTASH_VECTOR_REST_URL,
+    token: process.env.UPSTASH_VECTOR_REST_TOKEN,
 });
 
-/**
- * Bereinigt Text von HTML und übermäßigen Whitespaces
- */
-function cleanText(text) {
-    return text
-        .replace(/\s+/g, ' ')
-        .replace(/\n+/g, ' ')
-        .replace(/\t+/g, ' ')
-        .trim();
-}
-
-/**
- * Extrahiert Keywords aus Text
- */
-function extractKeywords(text, title) {
-    const stopwords = new Set([
-        'der', 'die', 'das', 'und', 'oder', 'aber', 'wenn', 'weil', 'dass',
-        'ein', 'eine', 'einer', 'einem', 'einen', 'ist', 'sind', 'war', 'waren',
-        'wird', 'werden', 'wurde', 'wurden', 'hat', 'haben', 'hatte', 'hatten',
-        'kann', 'können', 'konnte', 'konnten', 'muss', 'müssen', 'musste',
-        'nicht', 'auch', 'noch', 'schon', 'nur', 'sehr', 'mehr', 'als', 'wie',
-        'bei', 'bis', 'für', 'mit', 'nach', 'über', 'unter', 'vor', 'von', 'zu',
-        'auf', 'aus', 'durch', 'gegen', 'ohne', 'um', 'an', 'in', 'im', 'am',
-        'den', 'dem', 'des', 'dir', 'dich', 'mir', 'mich', 'sich', 'uns', 'euch',
-        'ihr', 'ihre', 'ihrer', 'ihrem', 'ihren', 'sein', 'seine', 'seiner',
-        'dein', 'deine', 'deiner', 'deinem', 'deinen', 'unser', 'unsere',
-        'hier', 'dort', 'dann', 'wann', 'wo', 'was', 'wer', 'welche', 'welcher',
-        'dieser', 'diese', 'dieses', 'diesem', 'diesen', 'jeder', 'jede', 'jedes',
-        'alle', 'allem', 'allen', 'aller', 'alles', 'andere', 'anderen', 'anderer',
-        'viel', 'viele', 'vielen', 'vieler', 'wenig', 'wenige', 'wenigen',
-        'gut', 'neue', 'neuen', 'neuer', 'ersten', 'erste', 'erster'
-    ]);
-
-    const combined = `${title} ${text}`.toLowerCase();
-    const words = combined.match(/[a-zäöüß]{3,}/g) || [];
-    
-    const wordCount = {};
-    words.forEach(word => {
-        if (!stopwords.has(word) && word.length > 3) {
-            wordCount[word] = (wordCount[word] || 0) + 1;
-        }
-    });
-    
-    return Object.entries(wordCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 15)
-        .map(([word]) => word);
-}
-
-/**
- * Extrahiert Content aus HTML-Datei
- */
-function extractContent($, filename) {
-    const content = {
-        title: '',
-        slug: filename.replace('.html', ''),
-        url: `/${filename}`,
-        meta_description: '',
-        headings: [],
-        sections: [],
-        text: '',
-        keywords: [],
-        type: 'page',
-        last_indexed: new Date().toISOString()
-    };
-
-    content.title = $('h1').first().text().trim() || 
-                    $('title').text().trim() || 
-                    filename.replace('.html', '').replace(/-/g, ' ');
-
-    content.meta_description = $('meta[name="description"]').attr('content') || '';
-
-    if ($('article').length > 0) content.type = 'article';
-    else if (filename === 'index.html') content.type = 'homepage';
-    else if (filename.toLowerCase().includes('blog')) content.type = 'blog';
-
-    $('h1, h2, h3').each((i, el) => {
-        const heading = $(el).text().trim();
-        if (heading && heading.length > 2) {
-            content.headings.push({ level: el.tagName.toLowerCase(), text: heading });
-        }
-    });
-
-    // ── Content VOR dem ersten H2 als "Einleitung" erfassen ──
-    // Fängt Hero-Texte, Intros und Teaser-Absätze auf, die sonst verloren gehen
-    const firstH2 = $('h2').first();
-    if (firstH2.length > 0) {
-        let preH2Content = '';
-        const container = $('article').length > 0 ? $('article')
-                        : $('main').length > 0 ? $('main') : $('body');
-
-        container.children().each((i, el) => {
-            const $el = $(el);
-            if ($el.is('h2')) return false;       // Stopp beim ersten H2
-            if ($el.is('h1')) return;             // H1 überspringen (ist im Titel)
-            if ($el.is('p, li, span, div, ul, ol, blockquote')) {
-                const text = $el.text().trim();
-                if (text) preH2Content += text + ' ';
-            }
-        });
-
-        preH2Content = cleanText(preH2Content);
-        if (preH2Content.length > 50) {
-            content.sections.push({
-                heading: content.title + ' – Einleitung',
-                content: preH2Content.substring(0, CONFIG.maxSectionLength)
-            });
-        }
-    }
-
-    $('h2').each((i, el) => {
-        const sectionTitle = $(el).text().trim();
-        let sectionContent = '';
-        
-        let next = $(el).next();
-        while (next.length && !next.is('h2')) {
-            if (next.is('p, li, span, div')) {
-                const text = next.text().trim();
-                if (text) sectionContent += text + ' ';
-            }
-            next = next.next();
-        }
-        
-        if (sectionTitle && sectionContent) {
-            content.sections.push({
-                heading: sectionTitle,
-                content: cleanText(sectionContent).substring(0, CONFIG.maxSectionLength)
-            });
-        }
-    });
-
-    $('script, style, nav, header, footer, .modal, #side-menu-panel').remove();
-    const mainContent = $('article').text() || $('main').text() || $('body').text();
-    content.text = cleanText(mainContent).substring(0, CONFIG.maxTotalLength);
-
-    content.keywords = extractKeywords(content.text, content.title);
-    
-    const filenameKeywords = filename.replace('.html', '').split('-').filter(w => w.length > 2);
-    content.keywords = [...new Set([...content.keywords, ...filenameKeywords])];
-
-    return content;
-}
-
-/**
- * Generiert Such-Index
- */
-function generateSearchIndex(knowledgeBase) {
-    const searchIndex = {};
-    
-    knowledgeBase.forEach((page, pageIndex) => {
-        page.keywords.forEach(keyword => {
-            if (!searchIndex[keyword]) searchIndex[keyword] = [];
-            searchIndex[keyword].push(pageIndex);
-        });
-        
-        const titleWords = page.title.toLowerCase().match(/[a-zäöüß]{3,}/g) || [];
-        titleWords.forEach(word => {
-            if (!searchIndex[word]) searchIndex[word] = [];
-            if (!searchIndex[word].includes(pageIndex)) searchIndex[word].push(pageIndex);
-        });
-    });
-    
-    return searchIndex;
-}
-
-/**
- * Hauptfunktion - wird von Vercel Cron aufgerufen
- */
 export default async function handler(req, res) {
-    // Sicherheitscheck: Nur Vercel Cron oder mit Secret erlauben
+    // ── Auth: Nur Vercel Cron oder Bearer Secret ──
     const authHeader = req.headers.authorization;
     const isVercelCron = req.headers['x-vercel-cron'] === '1';
     const hasValidSecret = CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
-    
+
     if (!isVercelCron && !hasValidSecret) {
         console.log('Unauthorized cron attempt blocked');
-        return res.status(401).json({ 
-            error: 'Unauthorized',
-            message: 'This endpoint is only accessible via Vercel Cron or with valid authorization'
-        });
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    console.log('🚀 Cron: Starte Knowledge-Base Regenerierung & Vektor-Upload...');
+    console.log('🚀 Vektor-DB Sync: Starte...');
     const startTime = Date.now();
 
     try {
         // ==========================================
-        // TEIL 1: LOKALES CRAWLING & JSON ERSTELLUNG
+        // 1. KNOWLEDGE.JSON LADEN
         // ==========================================
+        const host = req.headers.host || 'designare.at';
+        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const knowledgeUrl = `${protocol}://${host}/knowledge.json`;
 
-        // Dynamische Ausschluss-Liste aus Redis laden (Dashboard-Feature)
+        console.log(`📥 Lade ${knowledgeUrl}...`);
+
+        const jsonResponse = await fetch(knowledgeUrl);
+        if (!jsonResponse.ok) {
+            throw new Error(`knowledge.json nicht erreichbar: HTTP ${jsonResponse.status}. Wurde "npm run build" ausgeführt?`);
+        }
+
+        const knowledgeData = await jsonResponse.json();
+        const pages = knowledgeData.pages || [];
+
+        if (pages.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'knowledge.json enthält keine Seiten',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        console.log(`✅ ${pages.length} Seiten aus knowledge.json geladen`);
+
+        // ── Dynamische Excludes aus Redis (Dashboard-Feature) ──
         let dynamicExcludes = [];
         try {
             dynamicExcludes = await redis.smembers('build:exclude:urls') || [];
@@ -230,146 +73,86 @@ export default async function handler(req, res) {
                 console.log(`🚫 ${dynamicExcludes.length} Seiten via Dashboard ausgeschlossen: ${dynamicExcludes.join(', ')}`);
             }
         } catch (redisError) {
-            console.error('⚠️  Redis-Abfrage für Exclude-URLs fehlgeschlagen:', redisError.message);
+            console.warn('⚠️  Redis Exclude-Abfrage fehlgeschlagen:', redisError.message);
         }
 
-        const isExcluded = (file) =>
-            !file.endsWith('.html') ||
-            CONFIG.excludeFiles.includes(file) ||
-            CONFIG.excludePartials.includes(file) ||
-            dynamicExcludes.some(slug => file === `${slug}.html` || file.replace('.html', '') === slug);
+        // Seiten filtern (Dashboard-Excludes)
+        const filteredPages = dynamicExcludes.length > 0
+            ? pages.filter(page => !dynamicExcludes.some(slug =>
+                page.slug === slug || page.url === `/${slug}.html` || page.url === `/${slug}`
+              ))
+            : pages;
 
-        let files = [];
-        try {
-            const allFiles = fs.readdirSync(CONFIG.htmlDir);
-            files = allFiles.filter(file => !isExcluded(file));
-        } catch (dirError) {
-            // Fallback: Versuche public Verzeichnis
-            const publicDir = path.join(CONFIG.htmlDir, 'public');
-            if (fs.existsSync(publicDir)) {
-                const allFiles = fs.readdirSync(publicDir);
-                files = allFiles.filter(file => !isExcluded(file));
-                CONFIG.htmlDir = publicDir;
-            }
-        }
+        console.log(`📄 ${filteredPages.length} Seiten nach Exclude-Filter`);
 
-        if (files.length === 0) {
-            return res.status(200).json({
-                success: true,
-                message: 'Keine HTML-Dateien gefunden',
-                timestamp: new Date().toISOString()
-            });
-        }
+        // ==========================================
+        // 2. UPSTASH VECTOR UPLOAD (Section-Chunking)
+        // ==========================================
+        console.log('🚀 Starte Embedding & Upload...');
+        const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
 
-        const knowledgeBase = [];
+        let uploadedChunks = 0;
+        let uploadErrors = 0;
         const errors = [];
 
-        for (const file of files) {
-            try {
-                const filePath = path.join(CONFIG.htmlDir, file);
-                const html = fs.readFileSync(filePath, 'utf8');
-                const $ = cheerio.load(html);
-                const content = extractContent($, file);
-
-                if (content.text && content.text.length > 100) {
-                    knowledgeBase.push(content);
-                    console.log(`✅ Indexiert: ${file} (${content.keywords.length} Keywords)`);
-                }
-            } catch (fileError) {
-                errors.push({ file, type: 'parsing_error', error: fileError.message });
-                console.error(`❌ Fehler bei ${file}:`, fileError.message);
-            }
-        }
-
-        // Generiere Such-Index (WICHTIG: War in meiner alten Antwort vergessen)
-        const searchIndex = generateSearchIndex(knowledgeBase);
-
-        // Erstelle Output
-        const output = {
-            generated_at: new Date().toISOString(),
-            generated_by: 'cron',
-            stats: {
-                total_pages: knowledgeBase.length,
-                total_keywords: knowledgeBase.reduce((sum, p) => sum + p.keywords.length, 0),
-                total_sections: knowledgeBase.reduce((sum, p) => sum + p.sections.length, 0),
-                processing_time_ms: 0 // Wird am Ende aktualisiert
-            },
-            pages: knowledgeBase,
-            search_index: searchIndex
-        };
-
-        // Speichere JSON lokal
-        fs.writeFileSync(CONFIG.outputFile, JSON.stringify(output, null, 2));
-        console.log(`✅ Lokale knowledge.json aktualisiert: ${knowledgeBase.length} Seiten`);
-
-        // ==========================================
-        // TEIL 2: UPSTASH VECTOR DATENBANK UPLOAD
-        // (Section-basiertes Chunking)
-        // ==========================================
-        console.log("🚀 Starte Upload in die Upstash Vector Datenbank (Section-Chunking)...");
-        // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
-        const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-        let uploadErrorsCount = 0;
-        let uploadedChunks = 0;
-
-        // Reset: Alte Vektoren entfernen für sauberen Neuaufbau
+        // Reset: Sauberer Neuaufbau
         try {
             await vectorIndex.reset();
-            console.log('🗑️  Vector-DB zurückgesetzt (alte Einträge entfernt)');
+            console.log('🗑️  Vector-DB zurückgesetzt');
         } catch (resetError) {
             console.error('⚠️  Vector-DB Reset fehlgeschlagen:', resetError.message);
         }
 
-        for (let i = 0; i < knowledgeBase.length; i++) {
-            const page = knowledgeBase[i];
+        for (const page of filteredPages) {
             const sections = page.sections || [];
 
             if (sections.length === 0) {
-                // ── FALLBACK: Seite ohne H2-Sektionen → gesamten Text als einen Chunk ──
-                const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
+                // ── FALLBACK: Seite ohne Sektionen → ganzer Text als ein Chunk ──
+                const textToEmbed = `${page.title}\n${page.text || ''}`.substring(0, 4000);
 
                 try {
                     const result = await embeddingModel.embedContent(textToEmbed);
-                    const denseVector = result.embedding.values.slice(0, 768);
+                    const vector = result.embedding.values.slice(0, 768);
 
                     await vectorIndex.upsert({
                         id: `page_${page.slug}`,
-                        vector: denseVector,
+                        vector,
                         data: textToEmbed,
                         metadata: {
                             title: page.title,
-                            url: page.url,
+                            url: page.url || `/${page.slug}.html`,
                             section_heading: null,
-                            content: page.text.substring(0, 2000)
+                            content: (page.text || '').substring(0, 2000)
                         }
                     });
 
                     uploadedChunks++;
-                    console.log(`   📤 ${page.slug} (Seiten-Vektor, keine Sektionen)`);
+                    console.log(`   📤 ${page.slug} (Seiten-Vektor)`);
                     await new Promise(r => setTimeout(r, 300));
 
-                } catch (uploadError) {
-                    console.error(`❌ Vector-Upload Fehler bei ${page.title}:`, uploadError.message);
-                    uploadErrorsCount++;
-                    errors.push({ file: page.slug, type: 'vector_upload_error', error: uploadError.message });
+                } catch (err) {
+                    uploadErrors++;
+                    errors.push({ file: page.slug, error: err.message });
+                    console.error(`   ❌ ${page.slug}: ${err.message}`);
                 }
+
             } else {
-                // ── SECTION-CHUNKING: Ein Vektor pro H2-Sektion ──
+                // ── SECTION-CHUNKING: Ein Vektor pro Sektion (inkl. Einleitung) ──
                 for (let s = 0; s < sections.length; s++) {
                     const section = sections[s];
                     const textToEmbed = `${page.title} – ${section.heading}\n${section.content}`;
 
                     try {
                         const result = await embeddingModel.embedContent(textToEmbed);
-                        const denseVector = result.embedding.values.slice(0, 768);
+                        const vector = result.embedding.values.slice(0, 768);
 
                         await vectorIndex.upsert({
                             id: `section_${page.slug}__${s}`,
-                            vector: denseVector,
+                            vector,
                             data: textToEmbed,
                             metadata: {
                                 title: page.title,
-                                url: page.url,
+                                url: page.url || `/${page.slug}.html`,
                                 section_heading: section.heading,
                                 content: section.content
                             }
@@ -379,32 +162,38 @@ export default async function handler(req, res) {
                         console.log(`   📤 ${page.slug} → §${s}: "${section.heading.substring(0, 50)}"`);
                         await new Promise(r => setTimeout(r, 300));
 
-                    } catch (uploadError) {
-                        console.error(`❌ Vector-Upload Fehler bei ${page.slug} §${s}:`, uploadError.message);
-                        uploadErrorsCount++;
-                        errors.push({ file: `${page.slug}__${s}`, type: 'vector_upload_error', error: uploadError.message });
+                    } catch (err) {
+                        uploadErrors++;
+                        errors.push({ file: `${page.slug}__${s}`, error: err.message });
+                        console.error(`   ❌ ${page.slug} §${s}: ${err.message}`);
                     }
                 }
             }
         }
 
-        // Gesamtzeit updaten
-        output.stats.processing_time_ms = Date.now() - startTime;
-        output.stats.vector_upload_errors = uploadErrorsCount;
-        output.stats.vector_chunks = uploadedChunks;
+        // ==========================================
+        // 3. ERGEBNIS
+        // ==========================================
+        const processingTime = Date.now() - startTime;
+        const stats = {
+            total_pages: filteredPages.length,
+            vector_chunks: uploadedChunks,
+            vector_upload_errors: uploadErrors,
+            processing_time_ms: processingTime
+        };
 
-        console.log(`✅ Cron Job abgeschlossen in ${output.stats.processing_time_ms}ms (${uploadedChunks} Chunks)`);
+        console.log(`✅ Vektor-DB Sync abgeschlossen: ${uploadedChunks} Chunks aus ${filteredPages.length} Seiten in ${processingTime}ms`);
 
         return res.status(200).json({
             success: true,
-            message: `Knowledge-Base erfolgreich regeneriert: ${uploadedChunks} Chunks aus ${knowledgeBase.length} Seiten in Vektor-DB geladen`,
-            stats: output.stats,
+            message: `${uploadedChunks} Chunks aus ${filteredPages.length} Seiten in Vektor-DB geladen`,
+            stats,
             errors: errors.length > 0 ? errors : undefined,
             timestamp: new Date().toISOString()
         });
 
     } catch (error) {
-        console.error('❌ Cron Komplettausfall:', error);
+        console.error('❌ Vektor-DB Sync Fehler:', error);
         return res.status(500).json({
             success: false,
             error: error.message,
