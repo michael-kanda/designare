@@ -4,3 +4,10 @@
     <a href="datenschutz.html" id="datenschutz-link" target="_blank" rel="noopener">Datenschutz</a>
     <a href="#" id="back-to-top" class="footer-btn" aria-label="Nach oben scrollen"><i class="fa-solid fa-circle-chevron-up"></i></a>
 </footer>
+
+<!-- Evita Avatar – schwebt über dem Footer, nutzt komplett die bestehende ai-form.js Logik -->
+<div id="evita-footer-avatar" onclick="window.openEvitaChat && window.openEvitaChat()" onkeydown="if(event.key==='Enter'){window.openEvitaChat && window.openEvitaChat()}" aria-label="Chat mit Evita öffnen" role="button" tabindex="0">
+    <img src="images/evita-ki-assistentin.webp" alt="Evita – KI-Assistentin" width="56" height="56" loading="lazy">
+    <span class="evita-avatar-pulse"></span>
+    <span class="evita-avatar-tooltip">Frag mich was!</span>
+</div>
