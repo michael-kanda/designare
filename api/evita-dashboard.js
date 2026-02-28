@@ -2,6 +2,9 @@
 // Authentifizierung via Bearer Token (EVITA_DASHBOARD_TOKEN in Vercel Env)
 import { Redis } from "@upstash/redis";
 
+// Vercel Pro: Erlaube bis zu 5 Min (nötig für Vektor-DB Rebuild via Dashboard)
+export const maxDuration = 300;
+
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -139,6 +142,46 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, message: 'Rebuild getriggert', deployment: logEntry });
       } catch (e) {
         return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // ── Vektor-DB manuell aktualisieren (ruft den Cron-Endpoint auf) ──
+    if (action === 'trigger_vector_rebuild') {
+      const cronSecret = process.env.CRON_SECRET;
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'https://designare.at';
+
+      try {
+        const response = await fetch(`${baseUrl}/api/cron/regenerate-knowledge`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${cronSecret}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || result.message || `HTTP ${response.status}`);
+        }
+
+        const logEntry = {
+          timestamp: new Date().toISOString(),
+          trigger: 'dashboard-vector',
+          status: 'completed',
+          stats: result.stats || null
+        };
+        await redis.lpush('build:log:triggers', JSON.stringify(logEntry));
+        await redis.ltrim('build:log:triggers', 0, 99);
+
+        return res.status(200).json({
+          success: true,
+          message: `Vektor-DB aktualisiert: ${result.stats?.vector_chunks || '?'} Chunks aus ${result.stats?.total_pages || '?'} Seiten`,
+          stats: result.stats
+        });
+      } catch (e) {
+        return res.status(500).json({ error: `Vektor-DB Fehler: ${e.message}` });
       }
     }
     
