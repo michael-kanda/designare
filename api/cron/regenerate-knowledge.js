@@ -7,6 +7,7 @@ import path from 'path';
 import * as cheerio from 'cheerio';
 import { Index } from "@upstash/vector";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Redis } from "@upstash/redis";
 
 // Konfiguration
 const CONFIG = {
@@ -26,6 +27,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const vectorIndex = new Index({
   url: process.env.UPSTASH_VECTOR_REST_URL,
   token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+});
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 /**
@@ -190,24 +196,34 @@ export default async function handler(req, res) {
         // ==========================================
         // TEIL 1: LOKALES CRAWLING & JSON ERSTELLUNG
         // ==========================================
+
+        // Dynamische Ausschluss-Liste aus Redis laden (Dashboard-Feature)
+        let dynamicExcludes = [];
+        try {
+            dynamicExcludes = await redis.smembers('build:exclude:urls') || [];
+            if (dynamicExcludes.length > 0) {
+                console.log(`🚫 ${dynamicExcludes.length} Seiten via Dashboard ausgeschlossen: ${dynamicExcludes.join(', ')}`);
+            }
+        } catch (redisError) {
+            console.error('⚠️  Redis-Abfrage für Exclude-URLs fehlgeschlagen:', redisError.message);
+        }
+
+        const isExcluded = (file) =>
+            !file.endsWith('.html') ||
+            CONFIG.excludeFiles.includes(file) ||
+            CONFIG.excludePartials.includes(file) ||
+            dynamicExcludes.some(slug => file === `${slug}.html` || file.replace('.html', '') === slug);
+
         let files = [];
         try {
             const allFiles = fs.readdirSync(CONFIG.htmlDir);
-            files = allFiles.filter(file => 
-                file.endsWith('.html') && 
-                !CONFIG.excludeFiles.includes(file) && 
-                !CONFIG.excludePartials.includes(file)
-            );
+            files = allFiles.filter(file => !isExcluded(file));
         } catch (dirError) {
             // Fallback: Versuche public Verzeichnis
             const publicDir = path.join(CONFIG.htmlDir, 'public');
             if (fs.existsSync(publicDir)) {
                 const allFiles = fs.readdirSync(publicDir);
-                files = allFiles.filter(file => 
-                    file.endsWith('.html') && 
-                    !CONFIG.excludeFiles.includes(file) && 
-                    !CONFIG.excludePartials.includes(file)
-                );
+                files = allFiles.filter(file => !isExcluded(file));
                 CONFIG.htmlDir = publicDir;
             }
         }
