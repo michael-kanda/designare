@@ -1,5 +1,6 @@
 // api/evita-dashboard.js - Dashboard-API für Evita- & Silas-Statistiken
 // Authentifizierung via Bearer Token (EVITA_DASHBOARD_TOKEN in Vercel Env)
+// REFACTORED: Alle Redis-Reads parallelisiert via Promise.all
 import { Redis } from "@upstash/redis";
 
 // Vercel Pro: Erlaube bis zu 5 Min (nötig für Vektor-DB Rebuild via Dashboard)
@@ -15,21 +16,19 @@ const redis = new Redis({
 // ===================================================================
 function isAuthorized(req) {
   const token = process.env.EVITA_DASHBOARD_TOKEN;
-  if (!token) return false; // Kein Token konfiguriert = Dashboard gesperrt
+  if (!token) return false;
 
-  // Bearer Token aus Header
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.split(' ')[1] === token;
   }
 
-  // Alternativ: Query-Parameter (für einfaches Bookmarking)
   const queryToken = req.query?.token;
   return queryToken === token;
 }
 
 // ===================================================================
-// HELPER: Letzte N Tage als Array
+// HELPER
 // ===================================================================
 function getLastNDays(n) {
   const days = [];
@@ -39,6 +38,43 @@ function getLastNDays(n) {
     days.push(d.toISOString().split('T')[0]);
   }
   return days;
+}
+
+/** Safe parseInt mit Default 0 */
+function safeInt(val) {
+  return parseInt(val || 0);
+}
+
+/** Parsed eine Redis-Liste (JSON-Strings oder bereits geparst) */
+function parseRedisList(raw, fallbackObj = null) {
+  if (!raw || !Array.isArray(raw)) return [];
+  return raw.map(entry => {
+    try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
+    catch { return fallbackObj; }
+  }).filter(Boolean);
+}
+
+/** Parsed ein Sorted-Set-Result (alternierend: member, score) */
+function parseSortedSet(raw, keyName = 'item') {
+  const result = [];
+  if (!raw) return result;
+  for (let i = 0; i < raw.length; i += 2) {
+    result.push({ [keyName]: raw[i], count: parseInt(raw[i + 1]) });
+  }
+  return result;
+}
+
+/** Aggregiert Hashes über mehrere Tage (Topics, Intents, Models) */
+function aggregateHashesByDay(hashResults) {
+  const agg = {};
+  for (const hash of hashResults) {
+    if (hash) {
+      Object.entries(hash).forEach(([key, count]) => {
+        agg[key] = (agg[key] || 0) + parseInt(count);
+      });
+    }
+  }
+  return agg;
 }
 
 // ===================================================================
@@ -52,12 +88,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Auth prüfen
   if (!isAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized. Token required.' });
   }
 
-  // ── POST: Admin-Aktionen (Blocklist, Whitelist) ──
+  // ── POST: Admin-Aktionen (unverändert) ──
   if (req.method === 'POST') {
     const { action, email } = req.body || {};
     
@@ -70,7 +105,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Whitelist: E-Mail-Adresse hinzufügen ──
     if (action === 'add_whitelist' && email) {
       try {
         const normalized = email.toLowerCase().trim();
@@ -84,7 +118,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Whitelist: E-Mail-Adresse entfernen ──
     if (action === 'remove_whitelist' && email) {
       try {
         await redis.srem('evita:email:whitelist', email.toLowerCase().trim());
@@ -94,14 +127,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── KI-Ausschluss: URL hinzufügen ──
     if (action === 'add_exclude_url' && req.body.url) {
       try {
-        // Normalisiere: keine Domain, kein führender Slash, kein .html
         const normalized = req.body.url.trim().toLowerCase()
-          .replace(/^https?:\/\/[^/]+\/?/, '')  // Domain entfernen
-          .replace(/^\//, '')                     // Führenden Slash entfernen
-          .replace(/\.html$/, '');                // .html entfernen
+          .replace(/^https?:\/\/[^/]+\/?/, '')
+          .replace(/^\//, '')
+          .replace(/\.html$/, '');
         if (!normalized || normalized.length < 2) {
           return res.status(400).json({ error: 'Ungültiger Seitenname' });
         }
@@ -112,7 +143,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── KI-Ausschluss: URL entfernen ──
     if (action === 'remove_exclude_url' && req.body.url) {
       try {
         await redis.srem('build:exclude:urls', req.body.url.trim().toLowerCase());
@@ -122,7 +152,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Manuellen Rebuild triggern ──
     if (action === 'trigger_rebuild') {
       const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK;
       if (!deployHookUrl) {
@@ -148,7 +177,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // ── Vektor-DB manuell aktualisieren (ruft den Cron-Endpoint auf) ──
     if (action === 'trigger_vector_rebuild') {
       const cronSecret = process.env.CRON_SECRET;
       const host = req.headers.host || 'designare.at';
@@ -159,9 +187,7 @@ export default async function handler(req, res) {
         console.log(`🧠 Vektor-DB Rebuild: Rufe ${baseUrl}/api/cron/regenerate-knowledge auf...`);
         const response = await fetch(`${baseUrl}/api/cron/regenerate-knowledge`, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${cronSecret}`
-          }
+          headers: { 'Authorization': `Bearer ${cronSecret}` }
         });
 
         const responseText = await response.text();
@@ -203,68 +229,127 @@ export default async function handler(req, res) {
 
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
+  // =====================================================================
+  // GET: Dashboard-Daten laden – ALLES PARALLEL
+  // =====================================================================
   try {
-    const range = parseInt(req.query?.range || '30'); // Default: 30 Tage
+    const range = parseInt(req.query?.range || '30');
     const days = getLastNDays(range);
+    const t0 = Date.now();
 
-    // ===============================================================
-    // 1. DAILY STATS – EVITA (Nachrichten, Chats, Bookings, Fallbacks)
-    // ===============================================================
-    const dailyStats = [];
-    
-    for (const day of days) {
-      const [stats, uniqueCount] = await Promise.all([
-        redis.hgetall(`evita:stats:daily:${day}`),
-        redis.pfcount(`evita:stats:unique:${day}`)
-      ]);
+    // ── PHASE 1: Alle tagesbasierten Reads parallel ──────────────────
+    // Pro Tag: 2 Evita (daily + unique) + 2 Silas (daily + unique) 
+    //        + 4 Aggregationen (topics, intents, evita-models, silas-models)
+    // = 8 Calls × 30 Tage = 240 Calls parallel statt sequenziell
 
-      dailyStats.push({
+    const [
+      evitaDailyResults,
+      evitaUniqueResults,
+      silasDailyResults,
+      silasUniqueResults,
+      evitaTopicResults,
+      silasIntentResults,
+      evitaModelResults,
+      silasModelResults
+    ] = await Promise.all([
+      Promise.all(days.map(d => redis.hgetall(`evita:stats:daily:${d}`).catch(() => null))),
+      Promise.all(days.map(d => redis.pfcount(`evita:stats:unique:${d}`).catch(() => 0))),
+      Promise.all(days.map(d => redis.hgetall(`silas:stats:daily:${d}`).catch(() => null))),
+      Promise.all(days.map(d => redis.pfcount(`silas:stats:unique:${d}`).catch(() => 0))),
+      Promise.all(days.map(d => redis.hgetall(`evita:stats:topics:${d}`).catch(() => null))),
+      Promise.all(days.map(d => redis.hgetall(`silas:stats:intents:${d}`).catch(() => null))),
+      Promise.all(days.map(d => redis.hgetall(`evita:stats:models:${d}`).catch(() => null))),
+      Promise.all(days.map(d => redis.hgetall(`silas:stats:models:${d}`).catch(() => null))),
+    ]);
+
+    // ── PHASE 2: Alle Einzel-Reads parallel ──────────────────────────
+
+    const [
+      topQuestionsRaw,
+      silasTopKeywordsRaw,
+      recentFallbacksRaw,
+      silasRecentErrorsRaw,
+      heatmapRaw,
+      silasHeatmapRaw,
+      visibilityScoresRaw,
+      recentVisibilityChecksRaw,
+      recentEmailsRaw,
+      visibilityEmailsRaw,
+      silasTemplatesRaw,
+      emailBlocklistRaw,
+      emailWhitelistRaw,
+      buildTriggersRaw,
+      buildResultsRaw,
+      latestBuildRaw,
+      buildInventoryRaw,
+      excludedUrlsRaw
+    ] = await Promise.all([
+      redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true }).catch(() => []),
+      redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true }).catch(() => []),
+      redis.lrange('evita:stats:fallbacks', 0, 19).catch(() => []),
+      redis.lrange('silas:stats:errors', 0, 19).catch(() => []),
+      redis.hgetall('evita:stats:heatmap').catch(() => ({})),
+      redis.hgetall('silas:stats:heatmap').catch(() => ({})),
+      redis.hgetall('evita:stats:visibility_scores').catch(() => ({})),
+      redis.lrange('evita:stats:visibility_checks', 0, 19).catch(() => []),
+      redis.lrange('evita:stats:emails', 0, 19).catch(() => []),
+      redis.lrange('evita:stats:visibility_emails', 0, 19).catch(() => []),
+      redis.zrange('silas:stats:templates', 0, 9, { rev: true, withScores: true }).catch(() => []),
+      redis.smembers('evita:email:blocklist').catch(() => []),
+      redis.smembers('evita:email:whitelist').catch(() => []),
+      redis.lrange('build:log:triggers', 0, 29).catch(() => []),
+      redis.lrange('build:log:results', 0, 29).catch(() => []),
+      redis.get('build:log:latest').catch(() => null),
+      redis.get('build:log:inventory').catch(() => null),
+      redis.smembers('build:exclude:urls').catch(() => []),
+    ]);
+
+    console.log(`📊 Dashboard: ${days.length} Tage, alle Redis-Reads in ${Date.now() - t0}ms`);
+
+    // =====================================================================
+    // VERARBEITUNG (pure Berechnung, keine I/O mehr)
+    // =====================================================================
+
+    // ── 1. Daily Stats – Evita ──
+    const dailyStats = days.map((day, i) => {
+      const s = evitaDailyResults[i] || {};
+      return {
         date: day,
-        total_chats: parseInt(stats?.total_chats || 0),
-        total_messages: parseInt(stats?.total_messages || 0),
-        booking_intents: parseInt(stats?.booking_intents || 0),
-        booking_completions: parseInt(stats?.booking_completions || 0),
-        fallback_count: parseInt(stats?.fallback_count || 0),
-        new_users: parseInt(stats?.new_users || 0),
-        returning_users: parseInt(stats?.returning_users || 0),
-        visibility_checks: parseInt(stats?.visibility_checks || 0),
-        visibility_emails: parseInt(stats?.visibility_emails || 0),
-        emails_sent: parseInt(stats?.emails_sent || 0),
-        emails_failed: parseInt(stats?.emails_failed || 0),
-        unique_visitors: uniqueCount || 0
-      });
-    }
+        total_chats: safeInt(s.total_chats),
+        total_messages: safeInt(s.total_messages),
+        booking_intents: safeInt(s.booking_intents),
+        booking_completions: safeInt(s.booking_completions),
+        fallback_count: safeInt(s.fallback_count),
+        new_users: safeInt(s.new_users),
+        returning_users: safeInt(s.returning_users),
+        visibility_checks: safeInt(s.visibility_checks),
+        visibility_emails: safeInt(s.visibility_emails),
+        emails_sent: safeInt(s.emails_sent),
+        emails_failed: safeInt(s.emails_failed),
+        unique_visitors: evitaUniqueResults[i] || 0
+      };
+    });
 
-    // ===============================================================
-    // 1b. DAILY STATS – SILAS
-    // ===============================================================
-    const silasDailyStats = [];
-
-    for (const day of days) {
-      const [stats, uniqueCount] = await Promise.all([
-        redis.hgetall(`silas:stats:daily:${day}`),
-        redis.pfcount(`silas:stats:unique:${day}`)
-      ]);
-
-      silasDailyStats.push({
+    // ── 1b. Daily Stats – Silas ──
+    const silasDailyStats = days.map((day, i) => {
+      const s = silasDailyResults[i] || {};
+      return {
         date: day,
-        total_generations: parseInt(stats?.total_generations || 0),
-        total_keywords: parseInt(stats?.total_keywords || 0),
-        successful: parseInt(stats?.successful || 0),
-        failed: parseInt(stats?.failed || 0),
-        rate_limit_hits: parseInt(stats?.rate_limit_hits || 0),
-        master_mode_uses: parseInt(stats?.master_mode_uses || 0),
-        downloads_csv: parseInt(stats?.downloads_csv || 0),
-        downloads_txt: parseInt(stats?.downloads_txt || 0),
-        downloads_html: parseInt(stats?.downloads_html || 0),
-        downloaded_items: parseInt(stats?.downloaded_items || 0),
-        unique_users: uniqueCount || 0
-      });
-    }
+        total_generations: safeInt(s.total_generations),
+        total_keywords: safeInt(s.total_keywords),
+        successful: safeInt(s.successful),
+        failed: safeInt(s.failed),
+        rate_limit_hits: safeInt(s.rate_limit_hits),
+        master_mode_uses: safeInt(s.master_mode_uses),
+        downloads_csv: safeInt(s.downloads_csv),
+        downloads_txt: safeInt(s.downloads_txt),
+        downloads_html: safeInt(s.downloads_html),
+        downloaded_items: safeInt(s.downloaded_items),
+        unique_users: silasUniqueResults[i] || 0
+      };
+    });
 
-    // ===============================================================
-    // 2. AGGREGIERTE ZUSAMMENFASSUNG – EVITA
-    // ===============================================================
+    // ── 2. Aggregierte Zusammenfassung – Evita ──
     const totals = dailyStats.reduce((acc, day) => ({
       total_chats: acc.total_chats + day.total_chats,
       total_messages: acc.total_messages + day.total_messages,
@@ -285,12 +370,9 @@ export default async function handler(req, res) {
       emails_sent: 0, emails_failed: 0, unique_visitors: 0
     });
 
-    // Heute separat – Evita
     const today = dailyStats[dailyStats.length - 1] || {};
 
-    // ===============================================================
-    // 2b. AGGREGIERTE ZUSAMMENFASSUNG – SILAS
-    // ===============================================================
+    // ── 2b. Aggregierte Zusammenfassung – Silas ──
     const silasTotals = silasDailyStats.reduce((acc, day) => ({
       total_generations: acc.total_generations + day.total_generations,
       total_keywords: acc.total_keywords + day.total_keywords,
@@ -310,273 +392,59 @@ export default async function handler(req, res) {
       downloaded_items: 0, unique_users: 0
     });
 
-    // Heute separat – Silas
     const silasToday = silasDailyStats[silasDailyStats.length - 1] || {};
 
-    // ===============================================================
-    // 3. TOP-FRAGEN – EVITA (Sorted Set, Top 20)
-    // ===============================================================
-    let topQuestions = [];
-    try {
-      const raw = await redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true });
-      for (let i = 0; i < raw.length; i += 2) {
-        topQuestions.push({
-          question: raw[i],
-          count: parseInt(raw[i + 1])
-        });
-      }
-    } catch (e) {
-      console.error('Top-Fragen Fehler:', e.message);
-    }
+    // ── 3. Sorted Sets parsen ──
+    const topQuestions = parseSortedSet(topQuestionsRaw, 'question');
+    const silasTopKeywords = parseSortedSet(silasTopKeywordsRaw, 'keyword');
+    const silasTemplates = parseSortedSet(silasTemplatesRaw, 'template');
 
-    // ===============================================================
-    // 3b. TOP-KEYWORDS – SILAS (Sorted Set, Top 30)
-    // ===============================================================
-    let silasTopKeywords = [];
-    try {
-      const raw = await redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true });
-      for (let i = 0; i < raw.length; i += 2) {
-        silasTopKeywords.push({
-          keyword: raw[i],
-          count: parseInt(raw[i + 1])
-        });
-      }
-    } catch (e) {
-      console.error('Silas Top-Keywords Fehler:', e.message);
-    }
-
-    // ===============================================================
-    // 4. THEMEN-AGGREGATION – EVITA (letzte N Tage)
-    // ===============================================================
-    const topicAgg = {};
-    for (const day of days) {
-      try {
-        const topics = await redis.hgetall(`evita:stats:topics:${day}`);
-        if (topics) {
-          Object.entries(topics).forEach(([topic, count]) => {
-            topicAgg[topic] = (topicAgg[topic] || 0) + parseInt(count);
-          });
-        }
-      } catch (e) {}
-    }
-
+    // ── 4. Tages-Aggregationen ──
+    const topicAgg = aggregateHashesByDay(evitaTopicResults);
     const topTopics = Object.entries(topicAgg)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 15)
       .map(([topic, count]) => ({ topic, count }));
 
-    // ===============================================================
-    // 4b. INTENT-VERTEILUNG – SILAS (letzte N Tage)
-    // ===============================================================
-    const silasIntentAgg = {};
-    for (const day of days) {
-      try {
-        const intents = await redis.hgetall(`silas:stats:intents:${day}`);
-        if (intents) {
-          Object.entries(intents).forEach(([intent, count]) => {
-            silasIntentAgg[intent] = (silasIntentAgg[intent] || 0) + parseInt(count);
-          });
-        }
-      } catch (e) {}
-    }
+    const silasIntentAgg = aggregateHashesByDay(silasIntentResults);
+    const modelAgg = aggregateHashesByDay(evitaModelResults);
+    const silasModelAgg = aggregateHashesByDay(silasModelResults);
 
-    // ===============================================================
-    // 5. MODELL-NUTZUNG – EVITA (letzte N Tage aggregiert)
-    // ===============================================================
-    const modelAgg = {};
-    for (const day of days) {
-      try {
-        const models = await redis.hgetall(`evita:stats:models:${day}`);
-        if (models) {
-          Object.entries(models).forEach(([model, count]) => {
-            modelAgg[model] = (modelAgg[model] || 0) + parseInt(count);
-          });
-        }
-      } catch (e) {}
-    }
+    // ── 5. Listen parsen ──
+    const recentFallbacks = parseRedisList(recentFallbacksRaw, { message: '?', timestamp: null });
+    const silasRecentErrors = parseRedisList(silasRecentErrorsRaw, { keyword: '?', error: '?', timestamp: null });
+    const recentEmails = parseRedisList(recentEmailsRaw, { to: '?', subject: '?', success: false, timestamp: null });
+    const visibilityEmails = parseRedisList(visibilityEmailsRaw);
+    const recentVisibilityChecks = parseRedisList(recentVisibilityChecksRaw);
+    const buildTriggers = parseRedisList(buildTriggersRaw, { timestamp: null, status: 'unknown', trigger: '?' });
+    const buildResults = parseRedisList(buildResultsRaw, { timestamp: null, status: 'unknown' });
 
-    // ===============================================================
-    // 5b. MODELL-NUTZUNG – SILAS
-    // ===============================================================
-    const silasModelAgg = {};
-    for (const day of days) {
-      try {
-        const models = await redis.hgetall(`silas:stats:models:${day}`);
-        if (models) {
-          Object.entries(models).forEach(([model, count]) => {
-            silasModelAgg[model] = (silasModelAgg[model] || 0) + parseInt(count);
-          });
-        }
-      } catch (e) {}
-    }
-
-    // ===============================================================
-    // 6. FALLBACK-NACHRICHTEN – EVITA (letzte 20)
-    // ===============================================================
-    let recentFallbacks = [];
-    try {
-      const raw = await redis.lrange('evita:stats:fallbacks', 0, 19);
-      recentFallbacks = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return { message: entry, timestamp: null }; }
-      });
-    } catch (e) {}
-
-    // ===============================================================
-    // 6b. FEHLER-LOG – SILAS (letzte 20)
-    // ===============================================================
-    let silasRecentErrors = [];
-    try {
-      const raw = await redis.lrange('silas:stats:errors', 0, 19);
-      silasRecentErrors = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return { keyword: '?', error: entry, timestamp: null }; }
-      });
-    } catch (e) {}
-
-    // ===============================================================
-    // 7. HEATMAP – EVITA (Wochentag × Stunde)
-    // ===============================================================
-    let heatmap = {};
-    try {
-      heatmap = await redis.hgetall('evita:stats:heatmap') || {};
-    } catch (e) {}
-
-    // ===============================================================
-    // 7b. HEATMAP – SILAS
-    // ===============================================================
-    let silasHeatmap = {};
-    try {
-      silasHeatmap = await redis.hgetall('silas:stats:heatmap') || {};
-    } catch (e) {}
-
-    // ===============================================================
-    // 8. VISIBILITY-CHECK STATISTIKEN
-    // ===============================================================
-    let visibilityScores = {};
-    try {
-      visibilityScores = await redis.hgetall('evita:stats:visibility_scores') || {};
-    } catch (e) {}
-
-    let recentVisibilityChecks = [];
-    try {
-      const raw = await redis.lrange('evita:stats:visibility_checks', 0, 19);
-      recentVisibilityChecks = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return null; }
-      }).filter(Boolean);
-    } catch (e) {}
-
-    // ===============================================================
-    // 9. E-MAIL-VERSAND LOG (letzte 20)
-    // ===============================================================
-    let recentEmails = [];
-    try {
-      const raw = await redis.lrange('evita:stats:emails', 0, 19);
-      recentEmails = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return { to: '?', subject: '?', success: false, timestamp: null }; }
-      });
-    } catch (e) {}
-
-    // ===============================================================
-    // 9a. VISIBILITY REPORT-MAILS (letzte 20)
-    // ===============================================================
-    let visibilityEmails = [];
-    try {
-      const raw = await redis.lrange('evita:stats:visibility_emails', 0, 19);
-      visibilityEmails = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return null; }
-      }).filter(Boolean);
-    } catch (e) {}
-
-    // ===============================================================
-    // 9b. TEMPLATE-NUTZUNG – SILAS
-    // ===============================================================
-    let silasTemplates = [];
-    try {
-      const raw = await redis.zrange('silas:stats:templates', 0, 9, { rev: true, withScores: true });
-      for (let i = 0; i < raw.length; i += 2) {
-        silasTemplates.push({
-          template: raw[i],
-          count: parseInt(raw[i + 1])
-        });
-      }
-    } catch (e) {}
-
-    // ===============================================================
-    // 10. E-MAIL BLOCKLIST
-    // ===============================================================
-    let emailBlocklist = [];
-    try {
-      emailBlocklist = await redis.smembers('evita:email:blocklist') || [];
-    } catch (e) {}
-
-    // ===============================================================
-    // 11. E-MAIL WHITELIST (Erlaubte Empfänger)
-    // ===============================================================
-    let emailWhitelist = [];
-    try {
-      emailWhitelist = await redis.smembers('evita:email:whitelist') || [];
-      emailWhitelist.sort((a, b) => a.localeCompare(b)); // Alphabetisch sortieren
-    } catch (e) {}
-
-    // ===============================================================
-    // 12. BUILD LOG – KI-Datenbank Aktualisierungen
-    // ===============================================================
-    let buildTriggers = [];
-    try {
-      const raw = await redis.lrange('build:log:triggers', 0, 29);
-      buildTriggers = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return { timestamp: null, status: 'unknown', trigger: '?' }; }
-      });
-    } catch (e) {}
-
-    let buildResults = [];
-    try {
-      const raw = await redis.lrange('build:log:results', 0, 29);
-      buildResults = raw.map(entry => {
-        try { return typeof entry === 'string' ? JSON.parse(entry) : entry; }
-        catch { return { timestamp: null, status: 'unknown' }; }
-      });
-    } catch (e) {}
+    // ── 6. Einzelwerte ──
+    const heatmap = heatmapRaw || {};
+    const silasHeatmap = silasHeatmapRaw || {};
+    const visibilityScores = visibilityScoresRaw || {};
+    const emailBlocklist = emailBlocklistRaw || [];
+    const emailWhitelist = (emailWhitelistRaw || []).sort((a, b) => a.localeCompare(b));
+    const excludedUrls = (excludedUrlsRaw || []).sort((a, b) => a.localeCompare(b));
 
     let latestBuild = null;
-    try {
-      const raw = await redis.get('build:log:latest');
-      if (raw) {
-        latestBuild = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      }
-    } catch (e) {}
+    if (latestBuildRaw) {
+      latestBuild = typeof latestBuildRaw === 'string' ? JSON.parse(latestBuildRaw) : latestBuildRaw;
+    }
 
     let buildInventory = null;
-    try {
-      const raw = await redis.get('build:log:inventory');
-      if (raw) {
-        buildInventory = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      }
-    } catch (e) {}
+    if (buildInventoryRaw) {
+      buildInventory = typeof buildInventoryRaw === 'string' ? JSON.parse(buildInventoryRaw) : buildInventoryRaw;
+    }
 
-    // ===============================================================
-    // 13. KI-AUSSCHLUSS-LISTE (Seiten die nicht indexiert werden)
-    // ===============================================================
-    let excludedUrls = [];
-    try {
-      excludedUrls = await redis.smembers('build:exclude:urls') || [];
-      excludedUrls.sort((a, b) => a.localeCompare(b));
-    } catch (e) {}
-
-    // ===============================================================
-    // RESPONSE
-    // ===============================================================
+    // =====================================================================
+    // RESPONSE (identisches Format, Frontend braucht keine Anpassung)
+    // =====================================================================
     return res.status(200).json({
       success: true,
       generated_at: new Date().toISOString(),
       range_days: range,
 
-      // ── EVITA ──────────────────────────────────────────────────
       summary: {
         today: {
           chats: today.total_chats || 0,
@@ -625,7 +493,6 @@ export default async function handler(req, res) {
         recentChecks: recentVisibilityChecks
       },
 
-      // ── SILAS ──────────────────────────────────────────────────
       silas: {
         summary: {
           today: {
@@ -660,7 +527,6 @@ export default async function handler(req, res) {
         heatmap: silasHeatmap
       },
 
-      // ── BUILD LOG ──────────────────────────────────────────────
       buildLog: {
         latest: latestBuild,
         triggers: buildTriggers,
