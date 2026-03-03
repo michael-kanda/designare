@@ -42,6 +42,6 @@
     "inject-consent": "node js/inject-consent.js",
     "log-build": "node js/log-build.js",
     "bundle-css": "gulp",
-    "build": "node js/generate-articles-db.js && node js/generate-knowledge.js && node generate-sitemap.js && node js/inject-ratings.js && mkdir -p public/css && cp -r *.html *.svg *.csv *.json js images font CSV-Importer-PRO downloads public/ 2>/dev/null || echo 'Assets copy done' && npm run bundle-css && node js/inject-theme-init.js && node js/inject-header.js && node js/inject-footer.js && node js/inject-modals.js && node js/inject-side-menu.js && node js/inject-breadcrumb.js && node js/inject-related.js && node js/inject-blog-articles.js && node js/inject-lazy-loading.js && node js/inject-consent.js && node js/log-build.js"
+    "build": "node js/build-runner.js"
   }
 }
