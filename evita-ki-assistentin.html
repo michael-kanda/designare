@@ -66,26 +66,42 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Was ist RAG (Retrieval-Augmented Generation)?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "RAG ist eine Technik, bei der eine KI vor dem Antworten in einer Datenbank nachliest. So erfindet sie keine Fakten, sondern nutzt exakt die Informationen der Website."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Wie merkt sich die KI meinen Namen?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Durch eine Kombination aus Function Calling und einer schnellen Redis-Datenbank. Die KI extrahiert den Namen aus dem Chat und speichert ihn für zukünftige Besuche."
-          }
-        },
-        {
-          "@type": "Question",
           "name": "An wen kann Evita E-Mails senden?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Aus Datenschutzgründen versendet Evita E-Mails ausschließlich an Adressen, die vorab in einer Empfänger-Whitelist freigegeben wurden. Pro Sitzung gilt außerdem ein Limit von maximal 3 E-Mails."
+            "text": "Aus Datenschutzgründen versendet Evita E-Mails ausschließlich an Adressen, die vorab in einer Empfänger-Whitelist im Dashboard freigegeben wurden. So ist sichergestellt, dass kein Missbrauch stattfinden kann. Pro Sitzung gilt außerdem ein Limit von maximal 3 E-Mails."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie lange merkt sich Evita, wer ich bin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dein Name und die Themen, über die ihr gesprochen habt, werden in einer sicheren Redis-Datenbank für 30 Tage nach deinem letzten Besuch gespeichert. Kommst du innerhalb dieses Zeitraums wieder, knüpft sie nahtlos an euer letztes Gespräch an."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was passiert, wenn die KI etwas Falsches sagt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Das RAG-System verhindert Halluzinationen fast komplett. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit der Website-Datenbank ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern charmant abzublocken."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wird mein Chatverlauf mitgelesen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Das System arbeitet Serverless und speichert deinen Chat-Verlauf kurzzeitig und komplett anonymisiert unter einer kryptischen Session-ID, damit Evita dem roten Faden folgen kann. Persönliche Daten bleiben dort, wo sie hingehören – bei dir."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie kommen neue Texte von der Website in ihr Gedächtnis?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vollautomatisch. Ein Server-Cronjob durchsucht jede Nacht die komplette Website nach Änderungen. Neue Texte werden sofort in Vektoren übersetzt und in Evitas Datenbank hochgeladen. Am nächsten Morgen ist sie auf dem aktuellsten Stand."
           }
         }
       ]
@@ -193,7 +209,7 @@
                     <i aria-hidden="true" class="fa-solid fa-server"></i>
                     <div>
                         <strong>Architektur:</strong>
-                        <p>Das System läuft komplett <a href="https://designare.at/KI-Integration-auf-Webseiten" title="Serverless vs. Plugin: Warum diese Architektur schneller ist">Serverless</a>. Es basiert auf <strong>Google Gemini (2.5-flash)</strong> als "Gehirn", gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis) und <strong>Upstash Vector</strong> (für RAG).</p>
+                        <p>Das System läuft komplett Serverless. Es basiert auf <strong>Google Gemini (2.5-flash)</strong> als "Gehirn", gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis) und <strong>Upstash Vector</strong> (für RAG).</p>
                     </div>
                 </div>
 
@@ -315,7 +331,7 @@
             <section aria-labelledby="conclusion-heading">
                 <h2 id="conclusion-heading">Fazit: <span class="article-white">Das Web wird interaktiv</span></h2>
                 
-                <p>Eine Webseite muss heute keine statische Broschüre mehr sein. Mit modernen <a href="https://designare.at/ki-fuer-unternehmenswebseiten" title="KI für Unternehmenswebseiten: Echter Nutzen statt Hype">KI-APIs</a> können wir Interfaces bauen, die sich an den Nutzer anpassen, mit ihm mitdenken und echte Aufgaben abnehmen.</p>
+                <p>Eine Webseite muss heute keine statische Broschüre mehr sein. Mit modernen KI-APIs können wir Interfaces bauen, die sich an den Nutzer anpassen, mit ihm mitdenken und echte Aufgaben abnehmen.</p>
 
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
