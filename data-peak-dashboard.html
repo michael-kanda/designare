@@ -110,7 +110,48 @@
       ]
     }
     </script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": "https://designare.at/data-peak-dashboard#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Ersetzt DataPeak klassische Tools wie Semrush?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "DataPeak ist kein Ersatz, sondern eine Intelligenz-Schicht. Während klassische Tools riesige Datenbanken bieten, nutzt DataPeak deine spezifischen GSC- und GA4-Daten, um sie mittels KI in konkrete Handlungen zu verwandeln. Es ist das Werkzeug für die tägliche Umsetzung."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie sicher sind meine Daten?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Anwendung nutzt offizielle Google-APIs via OAuth2. Daten werden nur dort verarbeitet, wo sie gebraucht werden, sicher gelagert in einer dedizierten Vercel-Umgebung."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Welche Datenquellen zapft DataPeak an?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aktuell integriert DataPeak die Google Search Console und Google Analytics 4 über offizielle APIs. Die KI-Analyse läuft über das Vercel AI SDK mit direkter Anbindung an Google Gemini. Weitere Datenquellen wie die Bing Webmaster Tools sind in der Roadmap."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Brauche ich technisches Wissen, um DataPeak zu nutzen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Für die Grundfunktionen nicht. Das Dashboard ist so gebaut, dass Ergebnisse und Handlungsempfehlungen sofort verständlich sind – auch ohne SEO-Hintergrund."
+          }
+        }
+      ]
+    }
+    </script>
     <script type="module" src="js/main.js"></script>
     <script src="js/analytics-proxy.js" async></script>
 </head>
@@ -483,6 +524,20 @@
                         <summary>Wie sicher sind meine Daten?</summary>
                         <div class="faq-content">
                             <p>Die Anwendung nutzt offizielle Google-APIs via OAuth2. Daten werden nur dort verarbeitet, wo sie gebraucht werden, sicher gelagert in einer dedizierten Vercel-Umgebung.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Welche Datenquellen zapft DataPeak an?</summary>
+                        <div class="faq-content">
+                            <p>Aktuell integriert DataPeak die <strong>Google Search Console</strong> und <strong>Google Analytics 4</strong> über offizielle APIs. Die KI-Analyse läuft über das Vercel AI SDK mit direkter Anbindung an Google Gemini. Weitere Datenquellen wie die Bing Webmaster Tools sind in der Roadmap.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Brauche ich technisches Wissen, um DataPeak zu nutzen?</summary>
+                        <div class="faq-content">
+                            <p>Für die Grundfunktionen nicht. Das Dashboard ist so gebaut, dass Ergebnisse und Handlungsempfehlungen sofort verständlich sind – auch ohne SEO-Hintergrund.</p>
                         </div>
                     </details>
                 </div>
