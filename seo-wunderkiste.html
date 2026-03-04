@@ -44,6 +44,40 @@
   "featureList": "SEO Meta Settings, Schema JSON-LD, Bulk NoIndex, Conversion Tracking, Image Resizer, SVG Support, Emoji Bloat Remover, XML-RPC Blocker"
 }
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://designare.at/seo-wunderkiste#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Ist die SEO Wunderkiste kostenlos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ja, komplett. Kein Freemium, kein verstecktes Abo. Das Plugin entstand aus eigener Arbeit an Kundenprojekten. Alle 17 Module sind uneingeschränkt nutzbar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Verlangsamt das Plugin meine Website?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein – das ist der Kerngedanke. Die Wunderkiste lädt standardmäßig kein einziges Frontend-Script oder Stylesheet. Alle Module arbeiten serverseitig oder im Admin-Bereich. Kein zusätzliches CSS, kein JavaScript-Overhead."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Welche WordPress-Version wird benötigt?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mindestens WordPress 6.0 und PHP 8.0. Das Plugin nutzt moderne PHP-Features und den Block-Editor (Gutenberg) für die Custom Blocks. Für die beste Kompatibilität empfehle ich WordPress 6.5+ mit PHP 8.2."
+      }
+    }
+  ]
+}
+</script>
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/analytics-proxy.js" async></script>
@@ -120,7 +154,7 @@
         <dd>Erweiterte Meta-Tag-Verwaltung pro Seite: SEO-Titel, Meta-Description, Robots-Tag, Open Graph und Twitter Cards. Inklusive automatischer Canonical-URLs und Fallback auf Beitragsbild.</dd>
         
         <dt>2. SEO Schema (JSON-LD)</dt>
-        <dd>Fügt Beiträgen und Seiten ein Eingabefeld hinzu, um individuellen <a href="https://designare.at/schema-org-meta-description" title="Schema.org & Meta Description: Strukturierte Daten richtig einsetzen">Schema.org Code (JSON-LD)</a> direkt in den Head einzufuegen. Unterstuetzt alle Schema-Typen.</dd>
+        <dd>Fügt Beiträgen und Seiten ein Eingabefeld hinzu, um individuellen Schema.org Code (JSON-LD) direkt in den Head einzufuegen. Unterstuetzt alle Schema-Typen.</dd>
         
         <dt>3. Bulk NoIndex Manager</dt>
         <dd>Ermöglicht das massenhafte Setzen und Entfernen von NoIndex fuer Seiten und Beitraege direkt aus der Uebersicht. Inklusive visueller Status-Spalte.</dd>
@@ -181,7 +215,7 @@
         <dd>Fügt das aktuelle Datum dynamisch ein. Shortcodes: [datum], [jahr], [monat]. 12+ Formate, Zeitzonen-Support, Prefix/Suffix, HTML-Wrapper. Deutsche Monatsnamen inklusive.</dd>
 
         <dt>17. Semantic Blocks</dt>
-        <dd><a href="https://designare.at/semantisches-markup" title="Semantisches Markup: Von Div-Soup zu sauberem HTML">HTML5-semantische Gutenberg-Bloecke</a>: article, section, aside, header, footer, main, figure, address, nav, details/accordion und mark. Eigene Block-Kategorie "Semantic Blocks". Details-Block mit 9 konfigurierbaren Icon-Stilen und Position (links/rechts).</dd>
+        <dd>HTML5-semantische Gutenberg-Bloecke: article, section, aside, header, footer, main, figure, address, nav, details/accordion und mark. Eigene Block-Kategorie "Semantic Blocks". Details-Block mit 9 konfigurierbaren Icon-Stilen und Position (links/rechts).</dd>
     </dl>
 </section>
 
@@ -202,7 +236,7 @@
         <i aria-hidden="true" class="fa-solid fa-box-open"></i>
         <div>
             <strong>Version 2.9 (Januar 2026) kostenlos sichern</strong>
-            <p>Die SEO Wunderkiste ist mein Werkzeug gegen den <a href="https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026" title="Die 512MB-Falle: Warum PageBuilder dein Projekt killen">Plugin-Bloat</a>. Jetzt mit Semantic Blocks, konfigurierbarer Währung und vollständiger Gutenberg-Integration.</p>
+            <p>Die SEO Wunderkiste ist mein Werkzeug gegen den Plugin-Bloat. Jetzt mit Semantic Blocks, konfigurierbarer Währung und vollständiger Gutenberg-Integration.</p>
            
             <a href="/downloads/seo-wunderkiste-v2.9.zip" 
                onclick="gtag('event', 'file_download', {
@@ -240,6 +274,33 @@
         <dd>Conversion Tracker fuer GA4 und Google Ads. ID Column Display mit Kopier-Funktion.</dd>
     </dl>
 </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Ist die SEO Wunderkiste kostenlos?</summary>
+                        <div class="faq-content">
+                            <p>Ja, komplett. Kein Freemium, kein verstecktes Abo. Das Plugin entstand aus meiner eigenen Arbeit an Kundenprojekten – ich brauchte eine schlanke Lösung ohne den Ballast kommerzieller SEO-Plugins. Du kannst alle 17 Module uneingeschränkt nutzen.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Verlangsamt das Plugin meine Website?</summary>
+                        <div class="faq-content">
+                            <p>Nein – das ist der Kerngedanke. Die Wunderkiste lädt standardmäßig <strong>kein einziges</strong> Frontend-Script oder Stylesheet. Alle Module arbeiten serverseitig oder im Admin-Bereich. Kein zusätzliches CSS, kein JavaScript-Overhead. Das unterscheidet sie fundamental von Plugin-Sammlungen wie Yoast oder RankMath, die eigene Frameworks mitbringen. Warum das wichtig ist, erklärt der Artikel über <a href="https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026" title="Warum WordPress-PageBuilder an ihre Grenzen stoßen">WordPress-Ressourcenverbrauch</a>.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Welche WordPress-Version wird benötigt?</summary>
+                        <div class="faq-content">
+                            <p>Mindestens WordPress 6.0 und PHP 8.0. Das Plugin nutzt moderne PHP-Features und den Block-Editor (Gutenberg) für die Custom Blocks. Für die beste Kompatibilität empfehle ich WordPress 6.5+ mit PHP 8.2.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
 
             <section class="blog-cta-wrapper">
     <h2>Fehlt dir noch ein Feature?</h2>

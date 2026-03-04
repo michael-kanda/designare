@@ -48,6 +48,40 @@
       "keywords": ["PageBuilder", "WordPress", "Performance", "PHP Memory Limit", "Webentwicklung", "API"]
     }
     </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": "https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Warum sind PageBuilder schlecht für die Performance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PageBuilder erzeugen massive DOM-Strukturen mit hunderten verschachtelten Div-Containern, laden eigene CSS- und JavaScript-Frameworks und erhöhen den PHP-Speicherbedarf oft auf 256–512 MB. Das Ergebnis: Längere Ladezeiten, schlechtere Core Web Vitals und ein aufgeblähter Quellcode, den weder Crawler noch KI-Systeme effizient lesen können."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich meinen PageBuilder nachträglich entfernen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Technisch ja, aber es ist aufwendig. PageBuilder speichern Inhalte in proprietären Shortcode- oder JSON-Formaten. Beim Deaktivieren bleibt oft nur unlesbarer Rohcode übrig. Eine saubere Migration bedeutet: Jeden Inhalt manuell in semantisches HTML überführen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Welche Alternative gibt es zu PageBuildern?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Der WordPress Block-Editor (Gutenberg) in Kombination mit einem schlanken Theme und gezielten Custom Blocks. Für anspruchsvollere Projekte: Custom Theme Development mit sauberem PHP, HTML und CSS – ohne die Overhead-Schicht eines Page Builders."
+          }
+        }
+      ]
+    }
+    </script>
      <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/analytics-proxy.js" async></script>
@@ -132,7 +166,7 @@
                     <i aria-hidden="true" class="fa-solid fa-gear"></i>
                     <div>
                         <strong>Technologie-Check:</strong>
-                        <p>Mit WordPress 6.9 und der neuen <strong><a href="https://designare.at/wordpress-7-ki-core" title="WordPress 7.0 & KI: Abilities API und AI Client SDK im Detail">Abilities API</a></strong> steigt der Rechenbedarf exponentiell. Wer hier auf Standard-Hosting setzt, scheitert 2026 am Ressourcen-Limit.</p>
+                        <p>Mit WordPress 6.9 und der neuen <strong>Abilities API</strong> steigt der Rechenbedarf exponentiell. Wer hier auf Standard-Hosting setzt, scheitert 2026 am Ressourcen-Limit.</p>
                     </div>
                 </div>
 
@@ -199,6 +233,34 @@
 
                 <p>Eine Webseite ist mehr als Drag-and-Drop: Sie ist eine hochpräzise Software-Architektur. Semantik, Lean Code und moderne Schnittstellen sind der Schluessel zum Vorsprung. Denn der wahre Luxus im Web ist Geschwindigkeit, entstanden aus Disziplin im Code. Das Ziel ist klar: Weg vom Code-Chaos, hin zur absoluten Struktur.</p>
             </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Warum sind PageBuilder schlecht für die Performance?</summary>
+                        <div class="faq-content">
+                            <p>PageBuilder erzeugen massive DOM-Strukturen mit hunderten verschachtelten Div-Containern, laden eigene CSS- und JavaScript-Frameworks und erhöhen den PHP-Speicherbedarf oft auf 256–512 MB. Für einen einfachen Button generiert ein PageBuilder leicht 15–20 HTML-Elemente, wo ein Entwickler mit einem einzigen <code>&lt;button&gt;</code>-Tag auskommt. Das Ergebnis: Längere Ladezeiten, schlechtere Core Web Vitals und ein aufgeblähter Quellcode, den weder Crawler noch <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Technischer Guide für KI-Sichtbarkeit">KI-Systeme</a> effizient lesen können.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Kann ich meinen PageBuilder nachträglich entfernen?</summary>
+                        <div class="faq-content">
+                            <p>Technisch ja, aber es ist aufwendig. PageBuilder speichern Inhalte in proprietären Shortcode- oder JSON-Formaten. Beim Deaktivieren bleibt oft nur unlesbarer Rohcode übrig. Eine saubere Migration bedeutet: Jeden Inhalt manuell in <a href="https://designare.at/semantisches-markup" title="Semantisches HTML für SEO & KI-Suche">semantisches HTML</a> überführen. Je länger du wartest, desto größer der Aufwand.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Welche Alternative gibt es zu PageBuildern?</summary>
+                        <div class="faq-content">
+                            <p>Der WordPress Block-Editor (Gutenberg) in Kombination mit einem schlanken Theme und gezielten Custom Blocks. Für anspruchsvollere Projekte: Custom Theme Development mit sauberem PHP, HTML und CSS – ohne die Overhead-Schicht eines Page Builders. Mit <a href="https://designare.at/wordpress-7-ki-core" title="WordPress 7 & KI: Was sich für Entwickler ändert">WordPress 7</a> wird dieser Ansatz durch native KI-Integration noch attraktiver.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
 <section class="blog-cta-wrapper">
     <h2>Deine Seite fühlt sich fett an?</h2>
     <p>Vielleicht ist es Zeit fuer eine Diät. Wenn du wissen willst, wie man ohne PageBuilder Webseiten erstellt (ja, das geht und es macht Spass!), dann meld dich.</p>
