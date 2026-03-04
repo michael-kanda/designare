@@ -92,14 +92,37 @@
           "name": "Warum variieren die Ergebnisse?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Das liegt an der Natur der KIs. Gemini nutzt oft Live-Daten, während ChatGPT stärker auf Trainingsdaten basiert. Unser Tool zeigt dir genau diese Diskrepanz auf: Wirst du schon "gelernt" oder nur "gefunden"? Hinweis: Um Server-Ressourcen zu schonen, speichern wir das Analyse-Ergebnis einer Domain für 24 Stunden zwischen."
+            "text": "Das liegt an der Natur der KIs. Gemini nutzt oft Live-Daten, während ChatGPT stärker auf Trainingsdaten basiert. Unser Tool zeigt dir genau diese Diskrepanz auf: Wirst du schon \"gelernt\" oder nur \"gefunden\"? Hinweis: Um Server-Ressourcen zu schonen, speichern wir das Analyse-Ergebnis einer Domain für 24 Stunden zwischen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wie wird der Score berechnet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Der Score setzt sich aus vier gewichteten Kategorien zusammen: Gemini-Sichtbarkeit (35 Punkte), ChatGPT-Sichtbarkeit (15 Punkte), technische Authority durch Schema.org und E-E-A-T-Signale (30 Punkte) und Online-Reputation basierend auf Sentiment-Analyse (20 Punkte). Die technische Analyse macht fast ein Drittel aus – sauberes Markup zahlt sich also direkt im Score aus."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Warum kennt Gemini mich, aber ChatGPT nicht (oder umgekehrt)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gemini durchsucht das Web live über Google Grounding – es findet dich, sobald du im Google-Index existierst. ChatGPT dagegen antwortet aus seinem Trainingswissen, das nur periodisch aktualisiert wird. Wenn Gemini dich kennt, aber ChatGPT nicht, bist du auffindbar, aber noch nicht gelernt. Umgekehrt deutet es darauf hin, dass dein Google-Profil Lücken hat, obwohl du in älteren Datenquellen präsent bist."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was bedeuten die E-E-A-T-Signale im Ergebnis?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "E-E-A-T steht für Experience, Expertise, Authoritativeness und Trustworthiness – die Kriterien, nach denen Google und KI-Systeme Vertrauenswürdigkeit bewerten. Unser Tool prüft drei konkrete Signale: Existiert eine Über-uns-Seite? Gibt es ein Impressum oder eine Kontaktseite? Sind Autoren-Informationen hinterlegt? Jedes fehlende Signal kostet dich Punkte – und Sichtbarkeit."
           }
         }
       ]
     }
   ]
-}
-</script>
+}</script>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
@@ -216,6 +239,42 @@
                 </aside>
             </section>
 
+            <section aria-labelledby="score-heading">
+                <h2 id="score-heading">So wird dein <span class="article-white">Score berechnet</span></h2>
+                
+                <p>Dein Visibility-Score setzt sich aus vier Kategorien zusammen, die unterschiedlich gewichtet sind:</p>
+
+                <dl class="feature-list">
+                    <dt>Gemini-Sichtbarkeit (max. 35 Punkte)</dt>
+                    <dd>Wir stellen Google Gemini drei gezielte Fragen: Kennt es dein Unternehmen? Findet es Bewertungen? Gibt es externe Erwähnungen auf anderen Websites? Gemini durchsucht dabei das Web live (Google Grounding) – das ist der härteste Test, weil er zeigt, ob du im aktuellen Google-Index als relevante Quelle existierst.</dd>
+                    
+                    <dt>ChatGPT-Sichtbarkeit (max. 15 Punkte)</dt>
+                    <dd>ChatGPT antwortet aus seinem Trainingswissen – ohne Live-Suche. Wer hier auftaucht, hat es in die „Wissensbasis" der KI geschafft. Das ist seltener, aber langfristig wertvoller als ein reines Suchergebnis.</dd>
+                    
+                    <dt>Technische Authority (max. 30 Punkte)</dt>
+                    <dd>Wir crawlen deine Startseite und prüfen: Ist <a href="https://designare.at/schema-org-meta-description" title="Schema.org: Strukturierte Daten für KI-Suche">Schema.org (JSON-LD)</a> vorhanden? Gibt es mindestens drei verschiedene Schema-Typen? Existieren E-E-A-T-Signale – also eine Über-uns-Seite, ein Impressum/Kontakt und Autoren-Informationen? Jedes Signal zählt, weil es KI-Systemen hilft, dein Unternehmen als vertrauenswürdig einzustufen.</dd>
+                    
+                    <dt>Online-Reputation (max. 20 Punkte)</dt>
+                    <dd>Wie sprechen die KIs über dich? Wir analysieren das Sentiment jeder KI-Antwort per LLM: Positiv (substantielle Beschreibung, gute Bewertungen), neutral (erwähnt, aber ohne Wertung), negativ (explizite Kritik) oder fehlend (nicht gefunden). Positive Erwähnungen bringen volle Punkte, fehlende null.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="methodik-heading">
+                <h2 id="methodik-heading">Die Methodik <span class="article-white">im Detail</span></h2>
+                
+                <p>Hinter dem Check steckt keine Simulation – es sind echte API-Calls an echte KI-Modelle. Konkret passiert Folgendes, wenn du eine Domain eingibst:</p>
+
+                <p><strong>Phase 1: Domain-Crawling.</strong> Wir rufen deine Startseite ab und parsen den HTML-Quellcode. Dabei extrahieren wir alle JSON-LD-Blöcke, prüfen auf Schema-Typen und durchsuchen den sichtbaren Text sowie die Link-Struktur nach E-E-A-T-Signalen. Das passiert serverseitig über Cheerio – kein headless Browser, kein Overhead.</p>
+
+                <p><strong>Phase 2: Gemini mit Google Grounding.</strong> Drei sequentielle Anfragen an Google Gemini: Bekanntheit, Online-Reputation und externe Erwähnungen. Gemini nutzt dabei die Google-Suche als Datenquelle (Grounding) – es antwortet also nicht aus dem Bauch, sondern basierend auf aktuellen Suchergebnissen.</p>
+
+                <p><strong>Phase 3: ChatGPT Cross-Check.</strong> Eine parallele Anfrage an OpenAI: Kennt ChatGPT dein Unternehmen aus seinem Trainingswissen? Das deckt die Lücke ab, die Gemini allein nicht zeigen kann.</p>
+
+                <p><strong>Phase 4: Sentiment-Analyse.</strong> Jede KI-Antwort wird per LLM auf ihr Sentiment geprüft – nicht per Keyword-Matching, sondern durch einen separaten API-Call, der den Kontext versteht. Bei API-Ausfällen greift ein Keyword-Fallback.</p>
+
+                <p>Die Ergebnisse werden für 24 Stunden gecacht, um API-Kosten im Rahmen zu halten. Ein erneuter Check derselben Domain innerhalb dieses Zeitraums liefert das gespeicherte Ergebnis.</p>
+            </section>
+
             <section aria-labelledby="faq-heading">
                 <h2 id="faq-heading">Häufig gestellte Fragen (FAQ)</h2>
                 
@@ -238,6 +297,27 @@
                         <summary>Warum variieren die Ergebnisse?</summary>
                         <div class="faq-content">
                            <p>Das liegt an der Natur der KIs. <strong>Gemini</strong> hat oft Zugriff auf aktuelle Live-Daten aus dem Google-Index. <strong>ChatGPT</strong> basiert stärker auf Trainingsdaten. Unser Tool zeigt dir genau diese Diskrepanz auf: Wirst du schon "gelernt" oder nur "gefunden"? <em>Hinweis: Um Server-Ressourcen zu schonen, speichern wir das Analyse-Ergebnis einer Domain für 24 Stunden zwischen.</em></p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie wird der Score berechnet?</summary>
+                        <div class="faq-content">
+                            <p>Der Score setzt sich aus vier gewichteten Kategorien zusammen: Gemini-Sichtbarkeit (35 Punkte), ChatGPT-Sichtbarkeit (15 Punkte), technische Authority durch <a href="https://designare.at/schema-org-meta-description" title="Schema.org: Strukturierte Daten für KI-Suche">Schema.org</a> und E-E-A-T-Signale (30 Punkte) und Online-Reputation basierend auf Sentiment-Analyse (20 Punkte). Die technische Analyse macht fast ein Drittel aus – <a href="https://designare.at/semantisches-markup" title="Semantisches Markup für SEO & KI-Suche">sauberes Markup</a> zahlt sich also direkt im Score aus.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Warum kennt Gemini mich, aber ChatGPT nicht (oder umgekehrt)?</summary>
+                        <div class="faq-content">
+                            <p>Gemini durchsucht das Web live über Google Grounding – es findet dich, sobald du im Google-Index existierst. ChatGPT dagegen antwortet aus seinem Trainingswissen, das nur periodisch aktualisiert wird. Wenn Gemini dich kennt, aber ChatGPT nicht, bist du „auffindbar, aber noch nicht gelernt". Umgekehrt deutet es darauf hin, dass dein Google-Profil Lücken hat, obwohl du in älteren Datenquellen präsent bist.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was bedeuten die E-E-A-T-Signale im Ergebnis?</summary>
+                        <div class="faq-content">
+                            <p>E-E-A-T steht für Experience, Expertise, Authoritativeness und Trustworthiness – die Kriterien, nach denen Google und KI-Systeme Vertrauenswürdigkeit bewerten. Unser Tool prüft drei konkrete Signale: Existiert eine Über-uns-Seite? Gibt es ein Impressum oder eine Kontaktseite? Sind Autoren-Informationen hinterlegt? Jedes fehlende Signal kostet dich Punkte – und Sichtbarkeit. Mehr dazu im <a href="https://designare.at/geo-seo" title="GEO: So landest du in KI-Antworten">GEO-Leitfaden</a>.</p>
                         </div>
                     </details>
                 </div>
