@@ -7,11 +7,11 @@ import { trackVisibilityCheckStats } from './evita-track.js';
 import { Redis } from '@upstash/redis';
 
 // Eigene Module
-import { chatGPTQuery, detectIndustryFromResponse } from './lib/ai-clients.js';
-import { isDomainMentioned, isSubstantialBusinessResponse, validateAndCleanDomain, sanitizeIndustry } from './lib/domain-detection.js';
-import { escapeHTML, stripHTML, formatResponseText } from './lib/text-formatting.js';
-import { analyzeSentiment } from './lib/sentiment.js';
-import { trackVisibilityCheck, sendCheckNotification } from './lib/notifications.js';
+import { chatGPTQuery, detectIndustryFromResponse } from './vis-ai-clients.js';
+import { isDomainMentioned, isSubstantialBusinessResponse, validateAndCleanDomain, sanitizeIndustry } from './vis-domain-detection.js';
+import { escapeHTML, stripHTML, formatResponseText } from './vis-text-formatting.js';
+import { analyzeSentiment } from './vis-sentiment.js';
+import { trackVisibilityCheck, sendCheckNotification } from './vis-notifications.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const redis = Redis.fromEnv();
