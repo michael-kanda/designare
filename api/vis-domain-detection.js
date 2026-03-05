@@ -94,6 +94,23 @@ export function isDomainMentioned(text, cleanDomain) {
 // Prüft ob der Text eine Negation enthält
 // =================================================================
 function isNegationContext(textLower) {
+  // Definitive Negationen — hier ist eindeutig nichts gefunden, kein Substanz-Check nötig
+  const definitiveNegations = [
+    'keine online-bewertungen',
+    'keine bewertungen gefunden',
+    'keine rezensionen gefunden',
+    'keine bewertungen auf',
+    'wurden keine bewertungen',
+    'wurden keine online-bewertungen',
+    'keine externen erwähnungen',
+    'keine erwähnungen gefunden',
+    'wurden keine erwähnungen',
+    'keine externen erwähnungen auf anderen',
+    'beziehen sich jedoch nicht auf',
+  ];
+  if (definitiveNegations.some(p => textLower.includes(p))) return true;
+
+  // Allgemeine Negationen — werden gegen Substanz-Check geprüft
   const negationPatterns = [
     'keine informationen',
     'nicht bekannt',
@@ -113,7 +130,7 @@ function isNegationContext(textLower) {
   const hasNegation = negationPatterns.some(p => textLower.includes(p));
   if (!hasNegation) return false;
   
-  // Substanz-Check
+  // Substanz-Check: Hat die Antwort trotz Negation echte Unternehmensinfos?
   const hasSubstance = 
     textLower.includes('bietet') ||
     textLower.includes('dienstleistung') ||
@@ -122,9 +139,6 @@ function isNegationContext(textLower) {
     textLower.includes('tätig') ||
     textLower.includes('anbieter') ||
     textLower.includes('standort') ||
-    textLower.includes('bewertung') ||     
-    textLower.includes('rezension') ||     
-    textLower.includes('erwähnung') ||     
     textLower.includes('gelistet') ||      
     textLower.includes('profil');           
   
