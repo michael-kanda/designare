@@ -4,6 +4,11 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/ai-visibility-check.js": {
+      "includeFiles": "api/lib/**"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron-rebuild",
