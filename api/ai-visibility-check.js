@@ -187,6 +187,66 @@ function isNegationContext(textLower) {
 }
 
 // =================================================================
+// HELPER: Content-Fallback – Erkennt substanzielle Unternehmensantworten
+// auch wenn isDomainMentioned den exakten Domain-Namen nicht matcht
+// (z.B. weil die KI "Extras Besetzungsagentur GmbH" statt "extras-besetzungsagentur.at" schreibt)
+// =================================================================
+function isSubstantialBusinessResponse(plainText, cleanDomain, testType = 'knowledge') {
+  const lower = plainText.toLowerCase();
+  
+  // Prüfe ob die Antwort explizit sagt, dass nichts gefunden wurde
+  const notFoundPatterns = [
+    'keine informationen gefunden',
+    'nicht gefunden',
+    'habe ich keine informationen',
+    'keine daten verfügbar',
+    'kann ich keine angaben',
+    'mir nicht bekannt',
+    'wurden keine informationen',
+    'no information found',
+    'i don\'t have information',
+    'keine bewertungen gefunden',
+    'keine online-bewertungen',
+    'keine rezensionen gefunden',
+    'keine externen erwähnungen',
+    'keine erwähnungen gefunden'
+  ];
+  if (notFoundPatterns.some(p => lower.includes(p))) return false;
+  
+  // Substanz-Indikatoren je nach Test-Typ
+  const keywordSets = {
+    knowledge: [
+      'bietet', 'anbieter', 'dienstleistung', 'produkt', 'unternehmen',
+      'firma', 'standort', 'spezialisiert', 'tätig', 'gegründet', 'gmbh',
+      'agentur', 'vermittlung', 'betreuung', 'service', 'branche',
+      'mitarbeiter', 'geschäftsführ', 'inhaber', 'sitz in', 'ansässig'
+    ],
+    reviews: [
+      'bewertung', 'rezension', 'sterne', 'stars', 'rating', 'review',
+      'google reviews', 'trustpilot', 'provenexpert', 'kununu',
+      'zufrieden', 'empfehlen', 'erfahrung', 'kundenmeinung',
+      'positiv', 'von 5', 'durchschnitt', 'feedback'
+    ],
+    mentions: [
+      'herold', 'wko', 'gelbe seiten', 'firmenabc', 'branchenverzeichnis',
+      'facebook', 'instagram', 'linkedin', 'xing', 'erwähnt', 'gelistet',
+      'verzeichnis', 'profil', 'eintrag', 'social media', 'verlinkt'
+    ]
+  };
+  
+  const keywords = keywordSets[testType] || keywordSets.knowledge;
+  const matchCount = keywords.filter(kw => lower.includes(kw)).length;
+  
+  // Mindestens 3 Indikatoren UND mindestens 80 Zeichen Text
+  if (matchCount >= 3 && plainText.length >= 80) {
+    console.log(`   → Substanz-Check (${testType}): ${matchCount} Keywords gefunden`);
+    return true;
+  }
+  
+  return false;
+}
+
+// =================================================================
 // RATE LIMITING
 // =================================================================
 const DAILY_LIMIT = 3;
@@ -299,6 +359,10 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
+}
+
+function stripHTML(str) {
+  return str.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/\s+/g, ' ').trim();
 }
 
 function formatResponseText(text) {
@@ -534,6 +598,7 @@ async function analyzeSentiment(text, testType, domainMentioned) {
 
     const cleanText = text
       .replace(/<[^>]*>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;/g, "'")
       .substring(0, 800)
       .trim();
 
@@ -601,7 +666,7 @@ Antworte mit EXAKT einem Wort: positiv, neutral, negativ oder fehlend`;
 }
 
 function analyzeSentimentFallback(text, testType, domainMentioned) {
-  const textLower = text.toLowerCase();
+  const textLower = text.replace(/<[^>]*>/g, '').toLowerCase();
   
   const notFoundIndicators = [
     'keine informationen', 'nicht gefunden', 'keine ergebnisse',
@@ -901,7 +966,15 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       knowledgeResponse = result.response.text();
       const formattedKnowledge = formatResponseText(knowledgeResponse);
       
-      const mentioned = isDomainMentioned(formattedKnowledge, cleanDomain);
+      const plainKnowledge = stripHTML(formattedKnowledge);
+      let mentioned = isDomainMentioned(plainKnowledge, cleanDomain);
+      
+      // Content-Fallback: Wenn die Antwort substanziell über das Unternehmen spricht,
+      // aber isDomainMentioned den Namen nicht matcht, trotzdem als erwähnt werten
+      if (!mentioned) {
+        mentioned = isSubstantialBusinessResponse(plainKnowledge, cleanDomain, 'knowledge');
+        if (mentioned) console.log(`   → Content-Fallback: Substanzielle Antwort erkannt trotz fehlendem Domain-Match`);
+      }
       
       const sentiment = await analyzeSentiment(formattedKnowledge, 'knowledge', mentioned);
       
@@ -965,7 +1038,12 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung wie "Okay" oder "Ich we
       
       let text = formatResponseText(result.response.text());
       
-      const mentioned = isDomainMentioned(text, cleanDomain);
+      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+      
+      if (!mentioned) {
+        mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'reviews');
+        if (mentioned) console.log(`   → Content-Fallback (Reviews): Substanzielle Antwort erkannt`);
+      }
       
       const sentiment = await analyzeSentiment(text, 'reviews', mentioned);
       
@@ -1027,7 +1105,12 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       
       let text = formatResponseText(result.response.text());
       
-      const mentioned = isDomainMentioned(text, cleanDomain);
+      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+      
+      if (!mentioned) {
+        mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'mentions');
+        if (mentioned) console.log(`   → Content-Fallback (Mentions): Substanzielle Antwort erkannt`);
+      }
       
       const sentiment = await analyzeSentiment(text, 'mentions', mentioned);
       
@@ -1096,7 +1179,13 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
           const rawText = await chatGPTQuery(test.prompt);
           const text = formatResponseText(rawText);
           
-          let mentioned = isDomainMentioned(text, cleanDomain);
+          let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+          
+          // Content-Fallback auch für ChatGPT
+          if (!mentioned) {
+            mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'knowledge');
+            if (mentioned) console.log(`   → Content-Fallback (ChatGPT): Substanzielle Antwort erkannt`);
+          }
           
           const sentiment = await analyzeSentiment(text, 'knowledge', mentioned);
           
