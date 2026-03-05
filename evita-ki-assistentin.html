@@ -20,32 +20,34 @@
     <link rel="stylesheet" href="css/article.min.css">
     
     <link rel="canonical" href="https://designare.at/evita-ki-assistentin"/>
-
-<script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "BlogPosting",
+      "@type": "Person",
+      "@id": "https://designare.at/#michael",
+      "name": "Michael Kanda",
+      "url": "https://designare.at/#michael",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://designare.at/images/michael-evita-ai.webp"
+      }
+    },
+    {
+      "@type": "TechArticle",
       "@id": "https://designare.at/evita-ki-assistentin#article",
       "headline": "Meet Evita: Meine KI-Assistentin mit Gedächtnis & RAG",
       "description": "Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.",
-      "image": "https://designare.at/images/evita-chat.webp",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://designare.at/images/michael-evita-ai.webp"
+      },
       "datePublished": "2026-02-21",
       "dateModified": "2026-02-27",
-      "author": {
-        "@type": "Person",
-        "name": "Michael Kanda",
-        "url": "https://designare.at/#michael"
-      },
-      "publisher": {
-        "@type": "Person",
-        "name": "Michael Kanda",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://designare.at/images/favicon.webp"
-        }
-      },
+      "url": "https://designare.at/evita-ki-assistentin",
+      "inLanguage": "de",
+      "author": { "@id": "https://designare.at/#michael" },
+      "publisher": { "@id": "https://designare.at/#michael" },
       "articleSection": "Künstliche Intelligenz & Webentwicklung",
       "keywords": [
         "KI Assistent",
@@ -56,13 +58,25 @@
         "Function Calling",
         "E-Mail Whitelist"
       ],
-      "hasPart": {
-        "@id": "https://designare.at/evita-ki-assistentin#faq-heading"
+      "about": {
+        "@id": "https://designare.at/evita-ki-assistentin#app"
       }
     },
     {
+      "@type": "SoftwareApplication",
+      "@id": "https://designare.at/evita-ki-assistentin#app",
+      "name": "Evita AI",
+      "applicationCategory": "AIApplication",
+      "operatingSystem": "Web",
+      "author": { "@id": "https://designare.at/#michael" },
+      "description": "RAG-basierte KI-Assistentin mit Upstash Vector, Redis-Gedächtnis und Function Calling für WordPress."
+    },
+    {
       "@type": "FAQPage",
-      "@id": "https://designare.at/evita-ki-assistentin#faq-heading",
+      "@id": "https://designare.at/evita-ki-assistentin#faq",
+      "isPartOf": {
+        "@id": "https://designare.at/evita-ki-assistentin#article"
+      },
       "mainEntity": [
         {
           "@type": "Question",
@@ -108,7 +122,7 @@
     }
   ]
 }
-</script>
+    
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/analytics-proxy.js" async></script>
@@ -154,7 +168,7 @@
 
                     <div class="summary-image">
                         <figure>
-                            <img src="images/evita-chat.webp" 
+                            <img src="images/michael-evita-ai.webp" 
                                  alt="Chatverlauf mit Evita, in dem sie den Nutzer beim Namen nennt" 
                                  title="Evita KI-Assistentin im Einsatz"
                                  loading="lazy" 
