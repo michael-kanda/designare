@@ -86,6 +86,43 @@ export default async function handler(req, res) {
         console.log(`📄 ${filteredPages.length} Seiten nach Exclude-Filter`);
 
         // ==========================================
+        // 1b. KNOWLEDGE-BASE CHUNKS AUS REDIS LADEN
+        // ==========================================
+        let kbChunkCount = 0;
+        try {
+            const kbSlugs = await redis.smembers('kb:_index') || [];
+            if (kbSlugs.length > 0) {
+                console.log(`📚 ${kbSlugs.length} Knowledge-Base Chunks gefunden`);
+                const chunkResults = await Promise.all(
+                    kbSlugs.map(slug => redis.get(`kb:${slug}`).catch(() => null))
+                );
+                for (let i = 0; i < kbSlugs.length; i++) {
+                    const raw = chunkResults[i];
+                    if (!raw) continue;
+                    try {
+                        const chunk = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                        // Als "Seite" in filteredPages einfügen – gleiche Struktur
+                        filteredPages.push({
+                            title: chunk.title,
+                            slug: `kb-${kbSlugs[i]}`,
+                            url: null, // Kein öffentlicher URL
+                            text: chunk.content,
+                            sections: [],
+                            type: 'knowledge-base',
+                            tags: chunk.tags || []
+                        });
+                        kbChunkCount++;
+                    } catch (parseErr) {
+                        console.warn(`⚠️  KB-Chunk kb:${kbSlugs[i]} nicht parsbar:`, parseErr.message);
+                    }
+                }
+                console.log(`✅ ${kbChunkCount} KB-Chunks als Seiten hinzugefügt → ${filteredPages.length} Seiten total`);
+            }
+        } catch (kbError) {
+            console.warn('⚠️  Knowledge-Base Laden fehlgeschlagen:', kbError.message);
+        }
+
+        // ==========================================
         // 2. UPSTASH VECTOR UPLOAD (Section-Chunking)
         // ==========================================
         console.log('🚀 Starte Embedding & Upload...');
@@ -177,12 +214,13 @@ export default async function handler(req, res) {
         const processingTime = Date.now() - startTime;
         const stats = {
             total_pages: filteredPages.length,
+            kb_chunks: kbChunkCount,
             vector_chunks: uploadedChunks,
             vector_upload_errors: uploadErrors,
             processing_time_ms: processingTime
         };
 
-        console.log(`✅ Vektor-DB Sync abgeschlossen: ${uploadedChunks} Chunks aus ${filteredPages.length} Seiten in ${processingTime}ms`);
+        console.log(`✅ Vektor-DB Sync abgeschlossen: ${uploadedChunks} Chunks aus ${filteredPages.length} Seiten (davon ${kbChunkCount} KB-Chunks) in ${processingTime}ms`);
 
         return res.status(200).json({
             success: true,
