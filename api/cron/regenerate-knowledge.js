@@ -106,7 +106,7 @@ export default async function handler(req, res) {
                             title: chunk.title,
                             slug: `kb-${kbSlugs[i]}`,
                             url: null, // Kein öffentlicher URL
-                            text: chunk.content,
+                            text: `${(chunk.tags || []).join(', ')}\n${chunk.content}`,
                             sections: [],
                             type: 'knowledge-base',
                             tags: chunk.tags || []
