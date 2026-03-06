@@ -224,6 +224,54 @@ export default async function handler(req, res) {
       }
     }
     
+    // ── Knowledge-Base CRUD ──────────────────────────────────────
+    if (action === 'save_knowledge') {
+      const { slug, title, tags, content } = req.body;
+      if (!slug || !title || !content) {
+        return res.status(400).json({ error: 'slug, title und content sind Pflichtfelder' });
+      }
+      const normalized = slug.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      if (normalized.length < 2) {
+        return res.status(400).json({ error: 'Slug zu kurz (min. 2 Zeichen)' });
+      }
+      try {
+        const chunk = {
+          title: title.trim(),
+          slug: normalized,
+          tags: (tags || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean),
+          content: content.trim(),
+          updated_at: new Date().toISOString()
+        };
+        // Prüfe ob neu oder Update
+        const existing = await redis.get(`kb:${normalized}`);
+        if (!existing) {
+          chunk.created_at = new Date().toISOString();
+        } else {
+          const parsed = typeof existing === 'string' ? JSON.parse(existing) : existing;
+          chunk.created_at = parsed.created_at || new Date().toISOString();
+        }
+        await redis.set(`kb:${normalized}`, JSON.stringify(chunk));
+        await redis.sadd('kb:_index', normalized);
+        console.log(`📝 Knowledge-Chunk gespeichert: kb:${normalized} (${content.length} Zeichen)`);
+        return res.status(200).json({ success: true, saved: normalized, isNew: !existing });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    if (action === 'remove_knowledge') {
+      const { slug } = req.body;
+      if (!slug) return res.status(400).json({ error: 'slug fehlt' });
+      try {
+        await redis.del(`kb:${slug}`);
+        await redis.srem('kb:_index', slug);
+        console.log(`🗑️ Knowledge-Chunk gelöscht: kb:${slug}`);
+        return res.status(200).json({ success: true, removed: slug });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
     return res.status(400).json({ error: 'Unknown action' });
   }
 
@@ -282,7 +330,8 @@ export default async function handler(req, res) {
       buildResultsRaw,
       latestBuildRaw,
       buildInventoryRaw,
-      excludedUrlsRaw
+      excludedUrlsRaw,
+      kbIndexRaw
     ] = await Promise.all([
       redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true }).catch(() => []),
       redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true }).catch(() => []),
@@ -302,6 +351,7 @@ export default async function handler(req, res) {
       redis.get('build:log:latest').catch(() => null),
       redis.get('build:log:inventory').catch(() => null),
       redis.smembers('build:exclude:urls').catch(() => []),
+      redis.smembers('kb:_index').catch(() => []),
     ]);
 
     console.log(`📊 Dashboard: ${days.length} Tage, alle Redis-Reads in ${Date.now() - t0}ms`);
@@ -437,6 +487,22 @@ export default async function handler(req, res) {
       buildInventory = typeof buildInventoryRaw === 'string' ? JSON.parse(buildInventoryRaw) : buildInventoryRaw;
     }
 
+    // ── Knowledge-Base Chunks laden (Phase 3: basierend auf Index) ──
+    const kbSlugs = (kbIndexRaw || []).sort((a, b) => a.localeCompare(b));
+    let knowledgeChunks = [];
+    if (kbSlugs.length > 0) {
+      const chunkResults = await Promise.all(
+        kbSlugs.map(slug => redis.get(`kb:${slug}`).catch(() => null))
+      );
+      knowledgeChunks = chunkResults.map((raw, i) => {
+        if (!raw) return null;
+        try {
+          const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          return { ...parsed, slug: kbSlugs[i] };
+        } catch { return null; }
+      }).filter(Boolean);
+    }
+
     // =====================================================================
     // RESPONSE (identisches Format, Frontend braucht keine Anpassung)
     // =====================================================================
@@ -533,7 +599,9 @@ export default async function handler(req, res) {
         results: buildResults,
         inventory: buildInventory,
         excludedUrls: excludedUrls
-      }
+      },
+
+      knowledgeChunks
     });
 
   } catch (error) {
