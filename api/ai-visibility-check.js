@@ -1,17 +1,27 @@
 // api/ai-visibility-check.js - KI-Sichtbarkeits-Check (Modular)
-// Version 15: Aufgeteilt in Module unter lib/
+// ─── V2 CHANGELOG ───
+// NEU: Cache-Versionierung (CACHE_VERSION) — alte Einträge werden bei Deploy automatisch ignoriert
+// NEU: Separate Gemini-Instanz (modelLight) für Branchenerkennung ohne Search-Quota
+// NEU: Zentrale Konstanten aus vis-constants.js
+// NEU: companyName im Response für Frontend
+// FIX: Firmenname aus Test 1 → Test 2+3 Prompts
+// FIX: testType an isDomainMentioned übergeben
+// FIX: Score dynamisch normalisiert (100 auch ohne ChatGPT)
+// FIX: Reputation-Teiler nur Tests mit echtem Sentiment
+// FIX: ChatGPT fehler-Tests rausfiltern bei Score
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as cheerio from 'cheerio';
 import { checkRateLimit, incrementRateLimit, getClientIP } from './rate-limiter.js';
 import { trackVisibilityCheckStats } from './evita-track.js';
 import { Redis } from '@upstash/redis';
 
-// Eigene Module
 import { chatGPTQuery, detectIndustryFromResponse } from './vis-ai-clients.js';
-import { isDomainMentioned, isSubstantialBusinessResponse, validateAndCleanDomain, sanitizeIndustry } from './vis-domain-detection.js';
+import { isDomainMentioned, isSubstantialBusinessResponse, validateAndCleanDomain, sanitizeIndustry, extractCompanyName } from './vis-domain-detection.js';
 import { escapeHTML, stripHTML, formatResponseText } from './vis-text-formatting.js';
 import { analyzeSentiment } from './vis-sentiment.js';
 import { trackVisibilityCheck, sendCheckNotification } from './vis-notifications.js';
+import { CACHE_VERSION, SCORE_WEIGHTS } from './vis-constants.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const redis = Redis.fromEnv();
@@ -49,13 +59,15 @@ export default async function handler(req, res) {
     const cleanIndustry = sanitizeIndustry(industry);
     
     // =================================================================
-    // REDIS CACHING
+    // REDIS CACHING — mit Versionierung
+    // Cache-Key enthält CACHE_VERSION → bei Code-Änderung Version hochzählen
+    // → alte Einträge werden automatisch ignoriert (und nach 24h von Redis gelöscht)
     // =================================================================
-    const cacheKey = `visibility_cache:${cleanDomain}`;
+    const cacheKey = `visibility_${CACHE_VERSION}:${cleanDomain}`;
     try {
       const cachedResult = await redis.get(cacheKey);
       if (cachedResult) {
-        console.log(`⚡ CACHE HIT: Lade Ergebnisse für ${cleanDomain} aus Redis.`);
+        console.log(`⚡ CACHE HIT (${CACHE_VERSION}): Lade Ergebnisse für ${cleanDomain} aus Redis.`);
         await incrementRateLimit(clientIP, 'visibility'); 
         cachedResult.meta.remainingChecks = (await checkRateLimit(clientIP, 'visibility', DAILY_LIMIT)).remaining;
         cachedResult.cached = true;
@@ -68,9 +80,16 @@ export default async function handler(req, res) {
     console.log(`🔍 AI Visibility Check: ${cleanDomain} (Branche: ${cleanIndustry || 'auto'})`);
     await incrementRateLimit(clientIP, 'visibility');
 
+    // Gemini MIT Google Search (für die eigentlichen Tests)
     const modelWithSearch = genAI.getGenerativeModel({ 
       model: "gemini-2.5-flash",
       generationConfig: { temperature: 0.2, maxOutputTokens: 1500 }
+    });
+
+    // NEU: Gemini OHNE Search (für Branchenerkennung — spart Search-Quota)
+    const modelLight = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: { temperature: 0.1, maxOutputTokens: 50 }
     });
 
     // =================================================================
@@ -211,6 +230,7 @@ export default async function handler(req, res) {
     
     const testResults = [];
     let detectedIndustry = cleanIndustry;
+    let companyName = null;
     
     const genericIndustries = [
       'online shop', 'onlineshop', 'webshop', 'shop', 'e-commerce', 'ecommerce',
@@ -243,15 +263,20 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       const formattedKnowledge = formatResponseText(knowledgeResponse);
       
       const plainKnowledge = stripHTML(formattedKnowledge);
-      let mentioned = isDomainMentioned(plainKnowledge, cleanDomain);
+      let mentioned = isDomainMentioned(plainKnowledge, cleanDomain, 'knowledge');
       
-      // Content-Fallback
       if (!mentioned) {
         mentioned = isSubstantialBusinessResponse(plainKnowledge, cleanDomain, 'knowledge');
         if (mentioned) console.log(`   → Content-Fallback: Substanzielle Antwort erkannt trotz fehlendem Domain-Match`);
       }
       
       const sentiment = await analyzeSentiment(formattedKnowledge, 'knowledge', mentioned);
+      
+      // Firmennamen aus Roh-Antwort extrahieren
+      companyName = extractCompanyName(knowledgeResponse, cleanDomain);
+      if (companyName) {
+        console.log(`   → Firmenname extrahiert: "${companyName}"`);
+      }
       
       testResults.push({
         id: 'knowledge',
@@ -266,8 +291,9 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       
       console.log(`   → ${mentioned ? '✅ Erwähnt' : '❌ Nicht erwähnt'} | Sentiment: ${sentiment}`);
       
+      // NEU: modelLight statt modelWithSearch für Branchenerkennung
       if ((!cleanIndustry || isGenericIndustry) && mentioned) {
-        const autoDetected = await detectIndustryFromResponse(modelWithSearch, knowledgeResponse, cleanDomain);
+        const autoDetected = await detectIndustryFromResponse(modelLight, knowledgeResponse, cleanDomain);
         if (autoDetected) {
           detectedIndustry = autoDetected;
           console.log(`   → Branche erkannt: ${detectedIndustry} (${isGenericIndustry ? 'generische Eingabe überschrieben' : 'auto-detected'})`);
@@ -292,8 +318,10 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
     // ==================== TEST 2: BEWERTUNGEN ====================
     console.log(`🧪 Test 2: Online-Reputation...`);
     
+    const companyHint = companyName ? `\n\nHINWEIS: Das Unternehmen ist auch bekannt als "${companyName}". Suche auch unter diesem Namen nach Bewertungen.` : '';
+    
     try {
-      const reviewsPrompt = `Suche nach Bewertungen und Rezensionen zu **${cleanDomain}**.
+      const reviewsPrompt = `Suche nach Bewertungen und Rezensionen zu **${cleanDomain}**.${companyHint}
 
 Prüfe: Google Reviews, Trustpilot, ProvenExpert, Kununu und ähnliche Plattformen.
 
@@ -313,11 +341,20 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung wie "Okay" oder "Ich we
       
       let text = formatResponseText(result.response.text());
       
-      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain, 'reviews');
       
       if (!mentioned) {
         mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'reviews');
         if (mentioned) console.log(`   → Content-Fallback (Reviews): Substanzielle Antwort erkannt`);
+      }
+      
+      // Firmenname-Fallback
+      if (!mentioned && companyName) {
+        const plainText = stripHTML(text).toLowerCase();
+        if (plainText.includes(companyName.toLowerCase())) {
+          mentioned = true;
+          console.log(`   → Firmenname-Match (Reviews): "${companyName}" gefunden`);
+        }
       }
       
       const sentiment = await analyzeSentiment(text, 'reviews', mentioned);
@@ -353,8 +390,10 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung wie "Okay" oder "Ich we
     // ==================== TEST 3: EXTERNE ERWÄHNUNGEN ====================
     console.log(`🧪 Test 3: Externe Erwähnungen...`);
     
+    const mentionsCompanyHint = companyName ? `\n\nHINWEIS: Das Unternehmen ist auch bekannt als "${companyName}". Suche auch unter diesem Namen.` : '';
+    
     try {
-      const mentionsPrompt = `Suche nach EXTERNEN Erwähnungen von **${cleanDomain}** auf ANDEREN Websites.
+      const mentionsPrompt = `Suche nach EXTERNEN Erwähnungen von **${cleanDomain}** auf ANDEREN Websites.${mentionsCompanyHint}
 
 WICHTIG: 
 - NUR Erwähnungen auf FREMDEN Domains zählen!
@@ -380,11 +419,19 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
       
       let text = formatResponseText(result.response.text());
       
-      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+      let mentioned = isDomainMentioned(stripHTML(text), cleanDomain, 'mentions');
       
       if (!mentioned) {
         mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'mentions');
         if (mentioned) console.log(`   → Content-Fallback (Mentions): Substanzielle Antwort erkannt`);
+      }
+      
+      if (!mentioned && companyName) {
+        const plainText = stripHTML(text).toLowerCase();
+        if (plainText.includes(companyName.toLowerCase())) {
+          mentioned = true;
+          console.log(`   → Firmenname-Match (Mentions): "${companyName}" gefunden`);
+        }
       }
       
       const sentiment = await analyzeSentiment(text, 'mentions', mentioned);
@@ -427,15 +474,18 @@ WICHTIG: Beginne DIREKT mit dem Inhalt, keine Einleitung.`;
     // PHASE 2b: ChatGPT Cross-Check
     // =================================================================
     const chatGptResults = [];
+    const hasChatGPT = !!process.env.OPENAI_API_KEY;
     
-    if (process.env.OPENAI_API_KEY) {
+    if (hasChatGPT) {
       console.log(`🤖 ChatGPT Cross-Check startet...`);
+      
+      const chatGptCompanyHint = companyName ? ` (auch bekannt als "${companyName}")` : '';
       
       const chatGptTests = [
         {
           id: 'chatgpt_knowledge',
           description: 'Bekanntheit (ChatGPT)',
-          prompt: `Was weißt du über die Website ${cleanDomain}? Beschreibe kurz:
+          prompt: `Was weißt du über die Website ${cleanDomain}${chatGptCompanyHint}? Beschreibe kurz:
 - Was bietet dieses Unternehmen an?
 - In welcher Branche ist es tätig?
 - Wo ist der Standort?
@@ -454,12 +504,18 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
           const rawText = await chatGPTQuery(test.prompt);
           const text = formatResponseText(rawText);
           
-          let mentioned = isDomainMentioned(stripHTML(text), cleanDomain);
+          let mentioned = isDomainMentioned(stripHTML(text), cleanDomain, 'knowledge');
           
-          // Content-Fallback auch für ChatGPT
           if (!mentioned) {
             mentioned = isSubstantialBusinessResponse(stripHTML(text), cleanDomain, 'knowledge');
             if (mentioned) console.log(`   → Content-Fallback (ChatGPT): Substanzielle Antwort erkannt`);
+          }
+          
+          if (!mentioned && companyName) {
+            if (stripHTML(text).toLowerCase().includes(companyName.toLowerCase())) {
+              mentioned = true;
+              console.log(`   → Firmenname-Match (ChatGPT): "${companyName}" gefunden`);
+            }
           }
           
           const sentiment = await analyzeSentiment(text, 'knowledge', mentioned);
@@ -500,7 +556,6 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       
       const results = await Promise.all(chatGptPromises);
       chatGptResults.push(...results);
-      
       testResults.push(...chatGptResults);
       
       console.log(`✅ ChatGPT Cross-Check abgeschlossen (${chatGptResults.length} Tests)`);
@@ -509,7 +564,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
     }
 
     // =================================================================
-    // PHASE 3: Score-Berechnung
+    // PHASE 3: Score-Berechnung (mit zentralen Gewichten)
     // =================================================================
     let score = 0;
     const scoreBreakdown = [];
@@ -518,59 +573,77 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
     const chatgptTests = testResults.filter(t => t.engine === 'chatgpt');
     const allTests = testResults.filter(t => t.sentiment !== 'fehler');
     
+    const weights = hasChatGPT ? SCORE_WEIGHTS.withChatGPT : SCORE_WEIGHTS.withoutChatGPT;
+    
+    // Gemini Sichtbarkeit
     const geminiMentions = geminiTests.filter(t => t.mentioned).length;
     const geminiMentionScore = geminiTests.length > 0 
-      ? Math.round((geminiMentions / geminiTests.length) * 35) 
+      ? Math.round((geminiMentions / geminiTests.length) * weights.gemini) 
       : 0;
     score += geminiMentionScore;
     scoreBreakdown.push({
       category: 'Gemini Sichtbarkeit',
       points: geminiMentionScore,
-      maxPoints: 35,
+      maxPoints: weights.gemini,
       detail: `${geminiMentions} von ${geminiTests.length} Gemini-Suchen finden die Domain`
     });
     
-    if (chatgptTests.length > 0) {
-      const chatgptMentions = chatgptTests.filter(t => t.mentioned).length;
-      const chatgptScore = Math.round((chatgptMentions / chatgptTests.length) * 15);
-      score += chatgptScore;
-      scoreBreakdown.push({
-        category: 'ChatGPT Sichtbarkeit',
-        points: chatgptScore,
-        maxPoints: 15,
-        detail: `${chatgptMentions} von ${chatgptTests.length} ChatGPT-Tests finden die Domain`
-      });
+    // ChatGPT Sichtbarkeit
+    if (hasChatGPT) {
+      const workingChatgptTests = chatgptTests.filter(t => t.sentiment !== 'fehler');
+      if (workingChatgptTests.length > 0) {
+        const chatgptMentions = workingChatgptTests.filter(t => t.mentioned).length;
+        const chatgptScore = Math.round((chatgptMentions / workingChatgptTests.length) * weights.chatgpt);
+        score += chatgptScore;
+        scoreBreakdown.push({
+          category: 'ChatGPT Sichtbarkeit',
+          points: chatgptScore,
+          maxPoints: weights.chatgpt,
+          detail: `${chatgptMentions} von ${workingChatgptTests.length} ChatGPT-Tests finden die Domain`
+        });
+      } else {
+        scoreBreakdown.push({
+          category: 'ChatGPT Sichtbarkeit',
+          points: 0,
+          maxPoints: weights.chatgpt,
+          detail: 'ChatGPT-Tests fehlgeschlagen'
+        });
+      }
     }
     
+    // Technische Authority
     let techScore = 0;
     if (domainAnalysis.hasSchema) techScore += 10;
     if (domainAnalysis.schemaTypes.length >= 3) techScore += 6;
     if (domainAnalysis.hasAboutPage) techScore += 5;
     if (domainAnalysis.hasContactPage) techScore += 5;
     if (domainAnalysis.hasAuthorInfo) techScore += 5;
-    techScore = Math.min(techScore, 30);
+    techScore = Math.min(techScore, weights.tech);
     score += techScore;
     scoreBreakdown.push({
       category: 'Technische Authority',
       points: techScore,
-      maxPoints: 30,
+      maxPoints: weights.tech,
       detail: `Schema: ${domainAnalysis.hasSchema ? '✓' : '✗'}, E-E-A-T: ${[domainAnalysis.hasAboutPage, domainAnalysis.hasContactPage, domainAnalysis.hasAuthorInfo].filter(Boolean).length}/3`
     });
     
+    // Online-Reputation (nur Tests mit echtem Sentiment als Teiler)
+    const testsWithSentiment = allTests.filter(t => t.sentiment !== 'fehlend');
     const mentionedTests = allTests.filter(t => t.mentioned);
     const positiveCount = mentionedTests.filter(t => t.sentiment === 'positiv').length;
     const neutralCount = mentionedTests.filter(t => t.sentiment === 'neutral').length;
     const negativeCount = mentionedTests.filter(t => t.sentiment === 'negativ').length;
     
-    const maxRepPoints = 20;
-    const sentimentScore = allTests.length > 0
-      ? Math.round((positiveCount * maxRepPoints + neutralCount * maxRepPoints * 0.6 + negativeCount * maxRepPoints * 0.2) / allTests.length)
-      : 0;
+    const sentimentDivisor = testsWithSentiment.length > 0 ? testsWithSentiment.length : 1;
+    const sentimentScore = Math.min(
+      Math.round((positiveCount * weights.reputation + neutralCount * weights.reputation * 0.6 + negativeCount * weights.reputation * 0.2) / sentimentDivisor),
+      weights.reputation
+    );
     score += sentimentScore;
     scoreBreakdown.push({
       category: 'Online-Reputation',
       points: sentimentScore,
-      maxPoints: maxRepPoints,
+      maxPoints: weights.reputation,
       detail: `${positiveCount} positiv, ${neutralCount} neutral, ${negativeCount} negativ`
     });
 
@@ -705,6 +778,7 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
       success: true,
       domain: cleanDomain,
       industry: detectedIndustry || cleanIndustry || null,
+      companyName: companyName || null,
       timestamp: new Date().toISOString(),
       score: { 
         total: score, 
@@ -731,14 +805,15 @@ WICHTIG: Beginne DIREKT mit dem Inhalt.`
         geminiTests: geminiTests.length,
         chatgptTests: chatgptTests.length,
         totalTests: testResults.length, 
-        remainingChecks: (await checkRateLimit(clientIP, 'visibility', DAILY_LIMIT)).remaining 
+        remainingChecks: (await checkRateLimit(clientIP, 'visibility', DAILY_LIMIT)).remaining,
+        cacheVersion: CACHE_VERSION
       }
     };
 
-    // Redis Cache speichern (24h)
+    // Redis Cache speichern (24h) — mit versioniertem Key
     try {
       await redis.set(cacheKey, finalResponse, { ex: 86400 });
-      console.log(`💾 CACHE SET: Ergebnisse für ${cleanDomain} in Redis gespeichert.`);
+      console.log(`💾 CACHE SET (${CACHE_VERSION}): Ergebnisse für ${cleanDomain} gespeichert.`);
     } catch (e) {
       console.warn(`⚠️ Cache Error: Konnte Ergebnis nicht speichern (${e.message})`);
     }
