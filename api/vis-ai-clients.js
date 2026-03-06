@@ -47,6 +47,7 @@ export async function chatGPTQuery(prompt) {
 
 // =================================================================
 // HELPER: Branche aus Antwort extrahieren
+// Wird jetzt mit modelLight (ohne Search) aufgerufen → spart Quota
 // =================================================================
 export async function detectIndustryFromResponse(model, knowledgeText, domain) {
   try {

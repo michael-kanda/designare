@@ -1,88 +1,123 @@
 // lib/domain-detection.js - Domain-Erkennung, Validierung, Content-Fallback
+// Nutzt zentrale Konstanten aus vis-constants.js
+
+import {
+  NEGATION_PATTERNS,
+  GENERIC_DOMAIN_WORDS,
+  PLATFORM_NAMES,
+  getNotFoundPatterns,
+  getSubstanceKeywords,
+} from './vis-constants.js';
 
 // =================================================================
-// HELPER: Domain-Erwähnung erkennen (flexibel)
-// Erkennt auch "Stempel Lobenhofer" für "stempel-lobenhofer.at"
+// Firmennamen aus Gemini-Antwort extrahieren
 // =================================================================
-export function isDomainMentioned(text, cleanDomain) {
+export function extractCompanyName(rawResponseText, cleanDomain) {
+  if (!rawResponseText) return null;
+  
+  const boldMatches = rawResponseText.match(/\*\*([^*]{3,80})\*\*/g);
+  if (boldMatches) {
+    const domainBase = cleanDomain.replace(/\.[^.]+$/, '').replace(/-/g, ' ').toLowerCase();
+    
+    for (const match of boldMatches) {
+      const name = match.replace(/\*\*/g, '').trim();
+      const nameLower = name.toLowerCase();
+      
+      if (nameLower === cleanDomain) continue;
+      if (/^https?:\/\//.test(nameLower) || /^[a-z0-9-]+\.(at|de|com|ch|org|net)$/i.test(nameLower)) continue;
+      if (PLATFORM_NAMES.has(nameLower)) continue;
+      
+      const domainParts = domainBase.split(/\s+/).filter(p => p.length >= 3);
+      const nameParts = nameLower.split(/\s+/);
+      const hasOverlap = domainParts.some(dp => nameParts.some(np => np.includes(dp) || dp.includes(np)));
+      
+      if (hasOverlap || /\b(gmbh|kg|og|e\.u\.|ug|ag|ohg|sarl|ltd|inc)\b/i.test(name)) {
+        return name;
+      }
+    }
+    
+    for (const match of boldMatches) {
+      const name = match.replace(/\*\*/g, '').trim();
+      if (name.length >= 5 && !/\.(at|de|com|ch|org|net)/.test(name) && name.toLowerCase() !== cleanDomain) {
+        return name;
+      }
+    }
+  }
+  
+  const aliasPatterns = [
+    /auch bekannt als\s+(?:\*\*)?([^*\n,.]{3,60})(?:\*\*)?/i,
+    /\(auch\s+([^)]{3,60})\)/i,
+  ];
+  for (const pattern of aliasPatterns) {
+    const m = rawResponseText.match(pattern);
+    if (m) return m[1].trim();
+  }
+  
+  return null;
+}
+
+// =================================================================
+// Domain-Erwähnung erkennen
+// =================================================================
+export function isDomainMentioned(text, cleanDomain, testType = 'knowledge') {
   const lower = text.toLowerCase();
   
-  // Exakte Domain (stempel-lobenhofer.at)
   if (lower.includes(cleanDomain)) {
-    if (isNegationContext(lower)) return false;
+    if (isNegationContext(lower, testType)) return false;
     return true;
   }
   
-  // Domain ohne TLD (stempel-lobenhofer)
   const domainBase = cleanDomain.replace(/\.[^.]+$/, '');
   if (lower.includes(domainBase)) {
-    if (isNegationContext(lower)) return false;
+    if (isNegationContext(lower, testType)) return false;
     return true;
   }
   
-  // Bindestriche durch Leerzeichen ersetzen (stempel lobenhofer)
   const domainWords = domainBase.replace(/-/g, ' ');
   if (domainWords !== domainBase && lower.includes(domainWords)) {
-    if (isNegationContext(lower)) return false;
+    if (isNegationContext(lower, testType)) return false;
     return true;
   }
   
-  // =================================================================
-  // EINZELTEILE-PRÜFUNG (mit Schutz gegen False Positives)
-  // =================================================================
+  // Einzelteile-Prüfung
   const parts = domainBase.split(/[-.]/).filter(p => p.length >= 4);
   
   if (parts.length >= 2) {
-    // Generische Wörter, die in KI-Antworten natürlich vorkommen
-    const genericWords = new Set([
-      // Branchen & Berufe
-      'auto', 'hotel', 'shop', 'design', 'digital', 'online', 'service',
-      'agentur', 'group', 'media', 'consulting', 'tech', 'studio', 'team',
-      'partner', 'expert', 'profi', 'center', 'haus', 'werk', 'plus',
-      'best', 'first', 'smart', 'easy', 'global', 'premium', 'prime',
-      'rechtsanwalt', 'steuerberater', 'immobilien', 'versicherung',
-      'marketing', 'software', 'development', 'solutions', 'systems',
-      'handwerk', 'elektro', 'transport', 'logistik', 'bauer', 'garten',
-      'restaurant', 'gastro', 'sport', 'fitness', 'beauty', 'dental',
-      // Orte (DACH)
-      'wien', 'graz', 'linz', 'salzburg', 'innsbruck', 'bregenz', 'klagenfurt',
-      'berlin', 'hamburg', 'münchen', 'muenchen', 'frankfurt', 'köln', 'koeln',
-      'stuttgart', 'düsseldorf', 'duesseldorf', 'dortmund', 'essen', 'leipzig',
-      'zürich', 'zuerich', 'bern', 'basel', 'genf',
-      'austria', 'österreich', 'oesterreich', 'deutschland', 'germany', 'schweiz',
-      // Generische Begriffe
-      'info', 'data', 'home', 'page', 'site', 'mail', 'news', 'blog',
-      'book', 'deal', 'sale', 'fair', 'pure', 'real', 'true', 'good',
-      'north', 'south', 'east', 'west', 'city', 'land', 'park'
-    ]);
+    const uniqueParts = parts.filter(p => !GENERIC_DOMAIN_WORDS.has(p));
+    if (uniqueParts.length === 0) return false;
     
-    // Wie viele Teile sind NICHT generisch?
-    const uniqueParts = parts.filter(p => !genericWords.has(p));
-    
-    // Fall 1: Alle Teile generisch → kein Match über Einzelteile
-    if (uniqueParts.length === 0) {
-      return false;
-    }
-    
-    // Fall 2: Mindestens ein Teil ist unique → Proximity-Check
     if (parts.every(part => lower.includes(part))) {
-      const positions = parts.map(part => {
-        const idx = lower.indexOf(part);
-        return { part, start: idx, end: idx + part.length };
+      const allPositionSets = parts.map(part => {
+        const positions = [];
+        let idx = lower.indexOf(part);
+        while (idx !== -1) {
+          positions.push({ part, start: idx, end: idx + part.length });
+          idx = lower.indexOf(part, idx + 1);
+        }
+        return positions;
       });
       
-      // Sortiere nach Position im Text
-      positions.sort((a, b) => a.start - b.start);
-      
-      // Maximaler Abstand zwischen dem Ende des ersten und Anfang des letzten Teils
-      const first = positions[0];
-      const last = positions[positions.length - 1];
-      const distance = last.start - first.end;
-      
-      // Max 60 Zeichen Abstand (≈ ein kurzer Nebensatz)
-      if (distance <= 60) {
-        if (isNegationContext(lower)) return false;
-        return true;
+      for (const anchor of allPositionSets[0]) {
+        let allClose = true;
+        let minStart = anchor.start;
+        let maxEnd = anchor.end;
+        
+        for (let i = 1; i < allPositionSets.length; i++) {
+          let closest = null;
+          let closestDist = Infinity;
+          for (const pos of allPositionSets[i]) {
+            const dist = Math.abs(pos.start - anchor.start);
+            if (dist < closestDist) { closestDist = dist; closest = pos; }
+          }
+          if (!closest) { allClose = false; break; }
+          minStart = Math.min(minStart, closest.start);
+          maxEnd = Math.max(maxEnd, closest.end);
+        }
+        
+        if (allClose && (maxEnd - minStart) <= 80) {
+          if (isNegationContext(lower, testType)) return false;
+          return true;
+        }
       }
     }
   }
@@ -91,112 +126,66 @@ export function isDomainMentioned(text, cleanDomain) {
 }
 
 // =================================================================
-// Prüft ob der Text eine Negation enthält
+// Negations-Kontext prüfen (test-typ-aware)
 // =================================================================
-function isNegationContext(textLower) {
-  // Definitive Negationen — hier ist eindeutig nichts gefunden, kein Substanz-Check nötig
-  const definitiveNegations = [
-    'keine online-bewertungen',
-    'keine bewertungen gefunden',
-    'keine rezensionen gefunden',
-    'keine bewertungen auf',
-    'wurden keine bewertungen',
-    'wurden keine online-bewertungen',
-    'keine externen erwähnungen',
-    'keine erwähnungen gefunden',
-    'wurden keine erwähnungen',
-    'keine externen erwähnungen auf anderen',
-    'beziehen sich jedoch nicht auf',
-  ];
-  if (definitiveNegations.some(p => textLower.includes(p))) return true;
+function isNegationContext(textLower, testType = 'knowledge') {
+  // Definitive Negationen
+  if (NEGATION_PATTERNS.definitive.some(p => textLower.includes(p))) return true;
 
-  // Allgemeine Negationen — werden gegen Substanz-Check geprüft
-  const negationPatterns = [
-    'keine informationen',
-    'nicht bekannt',
-    'nichts bekannt',
-    'keine daten',
-    'keine kenntnis',
-    'nicht gefunden',
-    'keine ergebnisse',
-    'mir nicht bekannt',
-    'habe ich keine',
-    'kann ich keine',
-    'wurden keine informationen',
-    'no information',
-    'not familiar',
-  ];
+  // Test-spezifische Negationen (mit Substanz+Kontradiktions-Check)
+  const specificPatterns = NEGATION_PATTERNS.testSpecific[testType] || [];
+  if (specificPatterns.some(p => textLower.includes(p))) {
+    const hasSubstance = checkSubstanceForTestType(textLower, testType);
+    const hasContradiction = /\b(?:jedoch|aber|allerdings|dennoch|trotzdem|nichtsdestotrotz|gleichzeitig)\b/.test(textLower);
+    
+    if (hasSubstance && hasContradiction) {
+      console.log(`   → Negation überstimmt: Substanz (${testType}) + Kontradiktion`);
+      return false;
+    }
+    return true;
+  }
+
+  // Allgemeine Negationen (mit Substanz-Check)
+  if (NEGATION_PATTERNS.general.some(p => textLower.includes(p))) {
+    return !checkSubstanceForTestType(textLower, testType);
+  }
   
-  const hasNegation = negationPatterns.some(p => textLower.includes(p));
-  if (!hasNegation) return false;
-  
-  // Substanz-Check: Hat die Antwort trotz Negation echte Unternehmensinfos?
-  const hasSubstance = 
-    textLower.includes('bietet') ||
-    textLower.includes('dienstleistung') ||
-    textLower.includes('unternehmen') ||
-    textLower.includes('spezialisiert') ||
-    textLower.includes('tätig') ||
-    textLower.includes('anbieter') ||
-    textLower.includes('standort') ||
-    textLower.includes('gelistet') ||      
-    textLower.includes('profil');           
-  
-  return !hasSubstance;
+  return false;
 }
 
 // =================================================================
-// Content-Fallback – Erkennt substanzielle Unternehmensantworten
-// auch wenn isDomainMentioned den exakten Domain-Namen nicht matcht
+// Substanz-Check je nach Test-Typ
+// =================================================================
+function checkSubstanceForTestType(textLower, testType) {
+  const keywords = getSubstanceKeywords(testType);
+  const matchCount = keywords.filter(kw => textLower.includes(kw)).length;
+  return matchCount >= 2;
+}
+
+// =================================================================
+// Content-Fallback
 // =================================================================
 export function isSubstantialBusinessResponse(plainText, cleanDomain, testType = 'knowledge') {
   const lower = plainText.toLowerCase();
   
-  // Prüfe ob die Antwort explizit sagt, dass nichts gefunden wurde
-  const notFoundPatterns = [
-    'keine informationen gefunden',
-    'nicht gefunden',
-    'habe ich keine informationen',
-    'keine daten verfügbar',
-    'kann ich keine angaben',
-    'mir nicht bekannt',
-    'wurden keine informationen',
-    'no information found',
-    'i don\'t have information',
-    'keine bewertungen gefunden',
-    'keine online-bewertungen',
-    'keine rezensionen gefunden',
-    'keine externen erwähnungen',
-    'keine erwähnungen gefunden'
-  ];
-  if (notFoundPatterns.some(p => lower.includes(p))) return false;
-  
-  // Substanz-Indikatoren je nach Test-Typ
-  const keywordSets = {
-    knowledge: [
-      'bietet', 'anbieter', 'dienstleistung', 'produkt', 'unternehmen',
-      'firma', 'standort', 'spezialisiert', 'tätig', 'gegründet', 'gmbh',
-      'agentur', 'vermittlung', 'betreuung', 'service', 'branche',
-      'mitarbeiter', 'geschäftsführ', 'inhaber', 'sitz in', 'ansässig'
-    ],
-    reviews: [
-      'bewertung', 'rezension', 'sterne', 'stars', 'rating', 'review',
-      'google reviews', 'trustpilot', 'provenexpert', 'kununu',
-      'zufrieden', 'empfehlen', 'erfahrung', 'kundenmeinung',
-      'positiv', 'von 5', 'durchschnitt', 'feedback'
-    ],
-    mentions: [
-      'herold', 'wko', 'gelbe seiten', 'firmenabc', 'branchenverzeichnis',
-      'facebook', 'instagram', 'linkedin', 'xing', 'erwähnt', 'gelistet',
-      'verzeichnis', 'profil', 'eintrag', 'social media', 'verlinkt'
-    ]
-  };
-  
-  const keywords = keywordSets[testType] || keywordSets.knowledge;
+  const keywords = getSubstanceKeywords(testType);
   const matchCount = keywords.filter(kw => lower.includes(kw)).length;
   
-  // Mindestens 3 Indikatoren UND mindestens 80 Zeichen Text
-  if (matchCount >= 3 && plainText.length >= 80) {
+  const hasStrongSubstance = matchCount >= 5 && plainText.length >= 100;
+  const hasMediumSubstance = matchCount >= 3 && plainText.length >= 80;
+  
+  const notFoundPatterns = getNotFoundPatterns(testType);
+  const hasNotFound = notFoundPatterns.some(p => lower.includes(p));
+  
+  if (hasNotFound) {
+    if (hasStrongSubstance) {
+      console.log(`   → Substanz-Check (${testType}): ${matchCount} Keywords überstimmen notFound`);
+      return true;
+    }
+    return false;
+  }
+  
+  if (hasMediumSubstance) {
     console.log(`   → Substanz-Check (${testType}): ${matchCount} Keywords gefunden`);
     return true;
   }
@@ -205,7 +194,7 @@ export function isSubstantialBusinessResponse(plainText, cleanDomain, testType =
 }
 
 // =================================================================
-// DOMAIN VALIDATION
+// DOMAIN VALIDATION (unverändert)
 // =================================================================
 export function validateAndCleanDomain(input) {
   if (!input || typeof input !== 'string') {
@@ -223,16 +212,9 @@ export function validateAndCleanDomain(input) {
   }
 
   const dangerousPatterns = [
-    /[<>'"`;]/,
-    /--/,
-    /\/\*/,
-    /\.\./,
-    /\x00/,
-    /javascript:/i,
-    /data:/i,
-    /vbscript:/i,
+    /[<>'"`;]/, /--/, /\/\*/, /\.\./, /\x00/,
+    /javascript:/i, /data:/i, /vbscript:/i,
   ];
-
   for (const pattern of dangerousPatterns) {
     if (pattern.test(domain)) {
       return { valid: false, domain: null, error: 'Ungültige Zeichen in der Domain' };
@@ -257,7 +239,7 @@ export function validateAndCleanDomain(input) {
 }
 
 // =================================================================
-// HELPER: Industry sanitizen
+// Industry sanitizen (unverändert)
 // =================================================================
 export function sanitizeIndustry(input) {
   if (!input || typeof input !== 'string') return null;

@@ -1,4 +1,7 @@
 // lib/sentiment.js - Sentiment-Analyse (LLM-basiert mit Keyword-Fallback)
+// Nutzt zentrale Konstanten aus vis-constants.js
+
+import { SENTIMENT_KEYWORDS } from './vis-constants.js';
 
 // =================================================================
 // SENTIMENT-ANALYSE (LLM-basiert mit Keyword-Fallback)
@@ -29,7 +32,7 @@ export async function analyzeSentiment(text, testType, domainMentioned) {
       mentions: 'Externe Erwähnungen auf anderen Websites'
     };
 
-    const prompt = `Du bist ein Sentiment-Analyzer. Bewerte den folgenden Text über ein Unternehmen.
+    const prompt = `Du bist ein Sentiment-Analyzer für einen KI-Sichtbarkeits-Check.
 
 Kontext: ${testLabels[testType] || 'Allgemeine Information'}
 Domain erwähnt: ${domainMentioned ? 'Ja' : 'Nein'}
@@ -39,11 +42,23 @@ Text:
 ${cleanText}
 """
 
-Regeln:
-- "positiv" = Unternehmen wird substantiell beschrieben, gute Bewertungen, positive Erwähnungen, oder es werden externe Quellen aufgelistet
-- "neutral" = Unternehmen wird erwähnt aber ohne klare Wertung, gemischte Signale
-- "negativ" = Explizit schlechte Bewertungen oder starke Kritik
-- "fehlend" = Unternehmen nicht gefunden, KEINE Informationen vorhanden, oder Text sagt explizit dass nichts gefunden wurde
+Bewertungsregeln je nach Kontext:
+
+BEKANNTHEIT (knowledge):
+- "positiv" = Unternehmen wird mit konkreten Details beschrieben (Branche, Standort, Dienstleistungen, Gründung) — auch wenn die Beschreibung rein faktisch ist
+- "neutral" = Unternehmen wird nur am Rande oder sehr vage erwähnt
+- "fehlend" = Text sagt explizit, dass KEINE Informationen vorhanden sind
+
+BEWERTUNGEN (reviews):
+- "positiv" = Bewertungen ≥ 3.5 Sterne, positive Kundenmeinungen, gute Reputation
+- "neutral" = Gemischte Bewertungen (ca. 3 Sterne) oder nur Plattform-Erwähnung ohne Wertung
+- "negativ" = Bewertungen < 3 Sterne, deutliche Kritik
+- "fehlend" = Keine Bewertungen gefunden / keine Daten zu Reviews
+
+ERWÄHNUNGEN (mentions):
+- "positiv" = Mehrere konkrete externe Quellen gefunden (≥ 3)
+- "neutral" = 1-2 Erwähnungen gefunden
+- "fehlend" = Keine externen Erwähnungen gefunden
 
 Antworte mit EXAKT einem Wort: positiv, neutral, negativ oder fehlend`;
 
@@ -83,30 +98,17 @@ Antworte mit EXAKT einem Wort: positiv, neutral, negativ oder fehlend`;
 }
 
 // =================================================================
-// KEYWORD-FALLBACK
+// KEYWORD-FALLBACK (nutzt zentrale Konstanten)
 // =================================================================
 function analyzeSentimentFallback(text, testType, domainMentioned) {
   const textLower = text.replace(/<[^>]*>/g, '').toLowerCase();
   
-  const notFoundIndicators = [
-    'keine informationen', 'nicht gefunden', 'keine ergebnisse',
-    'nicht bekannt', 'konnte ich keine', 'wurden keine',
-    'nichts gefunden', 'nicht zu finden', 'keine daten', 'nicht auffindbar'
-  ];
-  
-  const hasNotFound = notFoundIndicators.some(indicator => textLower.includes(indicator));
+  const hasNotFound = SENTIMENT_KEYWORDS.notFound.some(indicator => textLower.includes(indicator));
   
   if (testType === 'knowledge') {
     if (!domainMentioned) return 'fehlend';
     
-    const hasSubstantialInfo = 
-      textLower.includes('bietet') || textLower.includes('anbieter') ||
-      textLower.includes('dienstleistung') || textLower.includes('produkt') ||
-      textLower.includes('unternehmen') || textLower.includes('firma') ||
-      textLower.includes('standort') || textLower.includes('spezialisiert') ||
-      textLower.includes('tätig') || textLower.includes('gegründet') ||
-      textLower.includes('seit') || textLower.includes('agentur') ||
-      textLower.includes('service');
+    const hasSubstantialInfo = SENTIMENT_KEYWORDS.substantialInfo.some(kw => textLower.includes(kw));
     
     if (hasSubstantialInfo) return 'positiv';
     if (hasNotFound && !hasSubstantialInfo) return 'fehlend';
@@ -114,11 +116,15 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
   }
   
   if (testType === 'reviews') {
-    const noBewertungen = [
-      'keine bewertungen', 'keine rezensionen', 'keine online-bewertungen',
-      'wurden keine bewertungen', 'keine bewertungen gefunden', 'keine rezensionen gefunden'
-    ];
-    if (noBewertungen.some(phrase => textLower.includes(phrase))) return 'fehlend';
+    // Erst echte Ratings prüfen, DANN Negation
+    const hasHighRating = [
+      /\b[4-5][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[45]\s*von\s*5/i,
+      /4\.[5-9]/, /5\.0/, /5\/5/
+    ].some(p => p.test(text));
+    
+    const hasPositiveWords = SENTIMENT_KEYWORDS.positiveReviewWords.some(w => textLower.includes(w));
+    
+    if (hasHighRating || hasPositiveWords) return 'positiv';
     
     const hasLowRating = [
       /\b[1-2][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[12]\s*von\s*5/i,
@@ -126,31 +132,22 @@ function analyzeSentimentFallback(text, testType, domainMentioned) {
     ].some(p => p.test(text));
     if (hasLowRating) return 'negativ';
     
-    const hasHighRating = [
-      /\b[4-5][.,]\d?\s*(sterne|stars|von\s*5)/i, /\b[45]\s*von\s*5/i,
-      /4\.[5-9]/, /5\.0/
-    ].some(p => p.test(text));
+    if (SENTIMENT_KEYWORDS.reviewNegation.some(phrase => textLower.includes(phrase))) {
+      return 'fehlend';
+    }
     
-    const hasPositiveWords = ['zufrieden','empfehlen','positiv','sehr gut','hervorragend','ausgezeichnet']
-      .some(w => textLower.includes(w));
-    
-    if (hasHighRating || hasPositiveWords) return 'positiv';
     if ([/\b3[.,]\d?\s*(sterne|stars|von\s*5)/i, /\b3\s*von\s*5/i].some(p => p.test(text))) return 'neutral';
     return 'neutral';
   }
   
   if (testType === 'mentions') {
-    if (hasNotFound) return 'fehlend';
-    
-    const sourceCount = [
-      'herold','wko','gelbe seiten','facebook','instagram','linkedin',
-      'twitter','xing','trustpilot','provenexpert','branchenverzeichnis',
-      'artikel','blog','presse','erwähnung','youtube','firmenabc',
-      'meinanwalt','anwalt.de','kununu','xing','yelp'
-    ].filter(s => textLower.includes(s)).length;
+    // Erst Quellen zählen, DANN Negation
+    const sourceCount = SENTIMENT_KEYWORDS.mentionSources.filter(s => textLower.includes(s)).length;
     
     if (sourceCount >= 4) return 'positiv';
     if (sourceCount >= 1) return 'neutral';
+    
+    if (hasNotFound) return 'fehlend';
     if (!domainMentioned) return 'fehlend';
     return 'neutral';
   }
