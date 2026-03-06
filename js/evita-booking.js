@@ -31,12 +31,17 @@ export function createBookingModal(state, ApiHandler, ModalController) {
             }
         },
 
-        remove() {
+        remove(reopenChat = false) {
             const modal = document.getElementById('booking-modal');
             if (modal) modal.remove();
 
             document.body.classList.remove('no-scroll');
             state.selectedCallbackData = null;
+
+            // Chat-Lightbox wieder öffnen (außer bei internem Cleanup)
+            if (reopenChat) {
+                setTimeout(() => ModalController.openChatModal(), 150);
+            }
         },
 
         createHTML() {
@@ -111,13 +116,13 @@ export function createBookingModal(state, ApiHandler, ModalController) {
             // Close-Button (kein inline onclick mehr)
             const closeBtn = document.getElementById('booking-close-btn');
             if (closeBtn) {
-                closeBtn.addEventListener('click', () => this.remove());
+                closeBtn.addEventListener('click', () => this.remove(true));
             }
 
             // Confirm-Close-Button
             const confirmCloseBtn = document.getElementById('booking-confirm-close');
             if (confirmCloseBtn) {
-                confirmCloseBtn.addEventListener('click', () => this.remove());
+                confirmCloseBtn.addEventListener('click', () => this.remove(true));
             }
 
             // Accessibility: Escape zum Schließen
@@ -126,7 +131,7 @@ export function createBookingModal(state, ApiHandler, ModalController) {
                 modal.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         e.preventDefault();
-                        this.remove();
+                        this.remove(true);
                     }
                 });
             }
