@@ -2062,6 +2062,86 @@
         }
       }
 
+      // ===== KNOWLEDGE-BASE EDITOR =====
+      const kbChunks = data.knowledgeChunks || [];
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">📚 Evitas Wissens-Datenbank <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${kbChunks.length} Chunks)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:16px;">
+          Eigenes Wissen für Evita hinterlegen – ohne Blog oder Landingpage. Nach Änderungen → „🧠 Vektor-DB aktualisieren" klicken.
+        </div>
+
+        <div id="kb-editor" style="display:none; background:var(--bg-card-hover); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px;">
+          <input type="hidden" id="kb-edit-original-slug" value="">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Titel</label>
+              <input type="text" id="kb-title" placeholder="z.B. Michaels CV"
+                style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:10px 14px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none;"
+                oninput="autoGenerateSlug()">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Slug (auto-generiert)</label>
+              <input type="text" id="kb-slug" placeholder="michaels-cv"
+                style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-muted); padding:10px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;">
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Tags <span style="text-transform:none;">(kommagetrennt)</span></label>
+            <input type="text" id="kb-tags" placeholder="michael, erfahrung, cv, wordpress"
+              style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:10px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Inhalt</label>
+            <textarea id="kb-content" rows="10" placeholder="Hier das Wissen reinschreiben, das Evita kennen soll..."
+              style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:12px 14px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; resize:vertical; line-height:1.6;"></textarea>
+            <div style="display:flex; justify-content:space-between; margin-top:4px;">
+              <span id="kb-char-count" style="font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">0 Zeichen</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button onclick="cancelKnowledgeEdit()" style="background:transparent; border:1px solid var(--border); color:var(--text-secondary); padding:8px 20px; border-radius:8px; font-size:0.85rem; cursor:pointer; font-family:'DM Sans',sans-serif;">Abbrechen</button>
+            <button onclick="saveKnowledgeChunk()" style="background:var(--green); color:#fff; border:none; padding:8px 24px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">Speichern</button>
+          </div>
+        </div>
+
+        <button onclick="showKnowledgeEditor()" id="kb-add-btn" style="display:flex; align-items:center; gap:8px; background:var(--bg-card-hover); border:1px dashed var(--border); color:var(--text-secondary); padding:12px 20px; border-radius:var(--radius); font-size:0.85rem; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%; justify-content:center; margin-bottom:16px; transition:border-color 0.2s, color 0.2s;"
+          onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"
+        >+ Neuen Knowledge-Chunk anlegen</button>
+
+        ${kbChunks.length > 0 ? kbChunks.map(chunk => `
+          <div class="kb-chunk-item" style="background:var(--bg-card-hover); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:8px; transition:border-color 0.2s;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:0.95rem; font-weight:700; margin-bottom:4px;">${escHTML(chunk.title)}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-muted);">kb:${escHTML(chunk.slug)}</span>
+                  ${(chunk.tags || []).map(tag => `<span style="font-size:0.65rem; padding:1px 7px; border-radius:4px; background:var(--accent-glow); color:var(--accent); font-family:'JetBrains Mono',monospace;">${escHTML(tag)}</span>`).join('')}
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; flex-shrink:0; margin-left:12px;">
+                <button onclick="editKnowledgeChunk('${escHTML(chunk.slug)}')" style="background:none; border:1px solid var(--border); color:var(--text-secondary); width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" title="Bearbeiten"
+                  onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+                  onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"
+                >✏️</button>
+                <button onclick="deleteKnowledgeChunk('${escHTML(chunk.slug)}','${escHTML(chunk.title)}')" style="background:none; border:1px solid rgba(239,68,68,0.3); color:var(--red); width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" title="Löschen"
+                  onmouseover="this.style.background='var(--red)';this.style.color='#fff'"
+                  onmouseout="this.style.background='none';this.style.color='var(--red)'"
+                >✕</button>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.5; max-height:80px; overflow:hidden; position:relative;">
+              ${escHTML(chunk.content.substring(0, 250))}${chunk.content.length > 250 ? '<span style="color:var(--text-muted);">…</span>' : ''}
+            </div>
+            <div style="display:flex; gap:12px; margin-top:8px; font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
+              <span>${chunk.content.length} Zeichen</span>
+              ${chunk.updated_at ? `<span>Aktualisiert: ${new Date(chunk.updated_at).toLocaleString('de-AT')}</span>` : ''}
+            </div>
+          </div>
+        `).join('') : '<div class="no-data">Noch kein eigenes Wissen hinterlegt. Lege den ersten Chunk an!</div>'}
+      </div>`;
+
       // ===== KI-AUSSCHLUSS MANAGEMENT =====
       const excluded = bl.excludedUrls || [];
       html += `<div class="chart-card full-width" style="margin-bottom:24px;">
@@ -2465,6 +2545,128 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'remove_exclude_url', url })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    // ============================================================
+    // KNOWLEDGE-BASE EDITOR
+    // ============================================================
+    function showKnowledgeEditor(prefill = null) {
+      const editor = document.getElementById('kb-editor');
+      const addBtn = document.getElementById('kb-add-btn');
+      if (!editor) return;
+
+      editor.style.display = 'block';
+      if (addBtn) addBtn.style.display = 'none';
+
+      if (prefill) {
+        document.getElementById('kb-title').value = prefill.title || '';
+        document.getElementById('kb-slug').value = prefill.slug || '';
+        document.getElementById('kb-tags').value = (prefill.tags || []).join(', ');
+        document.getElementById('kb-content').value = prefill.content || '';
+        document.getElementById('kb-edit-original-slug').value = prefill.slug || '';
+      } else {
+        document.getElementById('kb-title').value = '';
+        document.getElementById('kb-slug').value = '';
+        document.getElementById('kb-tags').value = '';
+        document.getElementById('kb-content').value = '';
+        document.getElementById('kb-edit-original-slug').value = '';
+      }
+      updateCharCount();
+      document.getElementById('kb-title').focus();
+    }
+
+    function cancelKnowledgeEdit() {
+      const editor = document.getElementById('kb-editor');
+      const addBtn = document.getElementById('kb-add-btn');
+      if (editor) editor.style.display = 'none';
+      if (addBtn) addBtn.style.display = 'flex';
+    }
+
+    function autoGenerateSlug() {
+      const title = document.getElementById('kb-title')?.value || '';
+      const originalSlug = document.getElementById('kb-edit-original-slug')?.value;
+      if (!originalSlug) {
+        const slug = title.toLowerCase()
+          .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss')
+          .replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        document.getElementById('kb-slug').value = slug;
+      }
+    }
+
+    function updateCharCount() {
+      const content = document.getElementById('kb-content')?.value || '';
+      const counter = document.getElementById('kb-char-count');
+      if (counter) counter.textContent = `${content.length} Zeichen`;
+    }
+
+    document.addEventListener('input', (e) => {
+      if (e.target.id === 'kb-content') updateCharCount();
+    });
+
+    function editKnowledgeChunk(slug) {
+      const chunk = (cachedData?.knowledgeChunks || []).find(c => c.slug === slug);
+      if (!chunk) { alert('Chunk nicht gefunden'); return; }
+      showKnowledgeEditor(chunk);
+      document.getElementById('kb-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function saveKnowledgeChunk() {
+      const title = (document.getElementById('kb-title')?.value || '').trim();
+      const slug = (document.getElementById('kb-slug')?.value || '').trim();
+      const tags = (document.getElementById('kb-tags')?.value || '').trim();
+      const content = (document.getElementById('kb-content')?.value || '').trim();
+      const originalSlug = (document.getElementById('kb-edit-original-slug')?.value || '').trim();
+
+      if (!title) { alert('Bitte Titel eingeben.'); return; }
+      if (!content) { alert('Bitte Inhalt eingeben.'); return; }
+
+      if (originalSlug && originalSlug !== slug) {
+        try {
+          await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_knowledge', slug: originalSlug })
+          });
+        } catch (e) { /* neuer wird trotzdem gespeichert */ }
+      }
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save_knowledge', slug, title, tags, content })
+        });
+        const data = await res.json();
+        if (data.success) {
+          cancelKnowledgeEdit();
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function deleteKnowledgeChunk(slug, title) {
+      if (!confirm(`"${title}" wirklich löschen? Das Wissen ist dann weg.`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_knowledge', slug })
         });
         const data = await res.json();
         if (data.success) {
