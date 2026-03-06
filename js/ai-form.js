@@ -4,6 +4,7 @@ import { createApiHandler, FallbackResponses } from './evita-api.js';
 import { createBookingModal } from './evita-booking.js';
 import { createEmailUI } from './evita-email-ui.js';
 import { createFollowupChips } from './evita-chips.js';
+import { createToolbar } from './evita-toolbar.js';
 
 let isKeyboardListenerActive = false;
 
@@ -233,6 +234,9 @@ export const initAiForm = () => {
                 const chatInput = document.getElementById('ai-chat-input');
                 if (chatInput) chatInput.focus();
                 setTimeout(() => { ChatUI.scrollToBottom(); }, 400);
+
+                // Toolbar rendern + gespeicherte Schriftgröße anwenden
+                Toolbar.render();
             }, 10);
         },
 
@@ -258,6 +262,9 @@ export const initAiForm = () => {
             setTimeout(() => {
                 modalOverlay.style.display = 'none';
                 document.body.classList.remove('no-scroll');
+
+                // Fullscreen zurücksetzen
+                Toolbar.reset();
 
                 if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
                     this.previousFocus.focus();
@@ -309,6 +316,7 @@ export const initAiForm = () => {
     const BookingModal = createBookingModal(state, ApiHandler, ModalController);
     const EmailUI = createEmailUI(state, ApiHandler, ChatUI, typeWriterEffect);
     const FollowupChips = createFollowupChips(ChatUI, BookingModal);
+    const Toolbar = createToolbar(ChatUI);
 
     // ===================================================================
     // MARKDOWN RENDERING
