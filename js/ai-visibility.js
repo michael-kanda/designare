@@ -371,6 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h3 style="color: ${scoreColor}">${esc(score.label)}</h3>
                     <p class="score-domain">${esc(data.domain)}</p>
                     ${data.industry ? `<p class="score-industry"><i class="fa-solid fa-tag"></i> ${esc(data.industry)}</p>` : ''}
+                    ${data.companyName ? `<p class="score-company"><i class="fa-solid fa-building"></i> ${esc(data.companyName)}</p>` : ''}
                     ${hasChatGPT ? '<p class="score-engines"><i class="fa-solid fa-robot"></i> Geprüft mit Gemini + ChatGPT</p>' : ''}
                 </div>
             </div>
@@ -382,15 +383,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         const points = parseInt(item.points) || 0;
                         const maxPoints = parseInt(item.maxPoints) || 1;
                         const fillWidth = Math.min(100, (points / maxPoints) * 100);
+                        const fillColor = fillWidth >= 70 ? '#22c55e' : fillWidth >= 40 ? '#f59e0b' : '#ef4444';
+                        const categoryColors = {
+                            'Gemini Sichtbarkeit': '#4285f4',
+                            'ChatGPT Sichtbarkeit': '#10a37f',
+                            'Technische Authority': '#8b5cf6',
+                            'Online-Reputation': '#f59e0b'
+                        };
+                        const barColor = categoryColors[item.category] || fillColor;
                         
                         return `
                             <div class="breakdown-item">
                                 <div class="breakdown-header">
                                     <span class="breakdown-label">${esc(item.category)}</span>
-                                    <span class="breakdown-points">${points}/${maxPoints}</span>
+                                    <span class="breakdown-points" style="color: ${fillColor}">${points}/${maxPoints}</span>
                                 </div>
                                 <div class="breakdown-bar">
-                                    <div class="breakdown-fill" style="width: ${fillWidth}%"></div>
+                                    <div class="breakdown-fill" style="width: ${fillWidth}%; background: linear-gradient(90deg, ${barColor}88, ${barColor})"></div>
                                 </div>
                                 <p class="breakdown-detail">${esc(item.detail)}</p>
                             </div>
@@ -680,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // =================================================================
         html += `
             <div class="result-footer">
-                <p><i class="fa-solid fa-clock"></i> Analyse vom ${formatTimestamp(data.timestamp)}</p>
+                <p><i class="fa-solid fa-clock"></i> Analyse vom ${formatTimestamp(data.timestamp)}${data.cached ? ' <span class="cache-badge"><i class="fa-solid fa-bolt"></i> aus Cache</span>' : ''}</p>
                 <p class="disclaimer">Hinweis: KI-Antworten variieren. Dieser Test ist eine Momentaufnahme.${hasChatGPT ? ' ChatGPT nutzt Trainingswissen, Gemini durchsucht das Web live.' : ''}</p>
             </div>
         `;
