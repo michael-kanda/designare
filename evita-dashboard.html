@@ -2095,7 +2095,7 @@
             <textarea id="kb-content" rows="10" placeholder="Hier das Wissen reinschreiben, das Evita kennen soll..."
               style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:12px 14px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; resize:vertical; line-height:1.6;"></textarea>
             <div style="display:flex; justify-content:space-between; margin-top:4px;">
-              <span id="kb-char-count" style="font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">0 Zeichen</span>
+              <span id="kb-char-count" style="font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">0 / 4.000 Zeichen</span>
             </div>
           </div>
           <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -2135,7 +2135,7 @@
               ${escHTML(chunk.content.substring(0, 250))}${chunk.content.length > 250 ? '<span style="color:var(--text-muted);">…</span>' : ''}
             </div>
             <div style="display:flex; gap:12px; margin-top:8px; font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
-              <span>${chunk.content.length} Zeichen</span>
+              <span${chunk.content.length > 4000 ? ' style="color:var(--red);"' : ''}>${chunk.content.length.toLocaleString('de-AT')} / 4.000 Zeichen${chunk.content.length > 4000 ? ' ⚠️ wird abgeschnitten!' : ''}</span>
               ${chunk.updated_at ? `<span>Aktualisiert: ${new Date(chunk.updated_at).toLocaleString('de-AT')}</span>` : ''}
             </div>
           </div>
@@ -2607,7 +2607,19 @@
     function updateCharCount() {
       const content = document.getElementById('kb-content')?.value || '';
       const counter = document.getElementById('kb-char-count');
-      if (counter) counter.textContent = `${content.length} Zeichen`;
+      if (!counter) return;
+      const len = content.length;
+      const limit = 4000;
+      counter.textContent = `${len.toLocaleString('de-AT')} / ${limit.toLocaleString('de-AT')} Zeichen`;
+      if (len > limit) {
+        counter.style.color = 'var(--red)';
+        counter.textContent += ` – ${(len - limit).toLocaleString('de-AT')} zu viel! Wird beim Embedding abgeschnitten.`;
+      } else if (len > 3500) {
+        counter.style.color = 'var(--orange)';
+        counter.textContent += ' – knapp am Limit';
+      } else {
+        counter.style.color = 'var(--text-muted)';
+      }
     }
 
     document.addEventListener('input', (e) => {
