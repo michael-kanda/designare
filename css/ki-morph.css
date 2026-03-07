@@ -1,0 +1,304 @@
+/* ============================================ */
+/* KI MORPH – Vorher/Nachher Website Morphing   */
+/* Prefix: ki-morph-, ki-mb-, ki-ma-             */
+/* ============================================ */
+
+/* ── Container ── */
+.ki-morph {
+    width: 100%;
+    max-width: 340px;
+}
+
+.ki-morph-frame {
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.4s ease;
+}
+
+.ki-morph-frame.is-after {
+    border-color: rgba(196,163,90,0.3);
+}
+
+/* ── Browser-Topbar ── */
+.ki-morph-topbar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color, #222);
+    background: rgba(255,255,255,0.015);
+}
+
+.ki-morph-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.ki-morph-dot.r { background: #f87171; }
+.ki-morph-dot.y { background: #fbbf24; }
+.ki-morph-dot.g { background: #4ade80; }
+
+.ki-morph-url {
+    margin-left: 8px;
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+    font-family: 'Courier New', 'Consolas', monospace;
+    letter-spacing: 0.02em;
+}
+
+/* ── Body ── */
+.ki-morph-body {
+    padding: 16px;
+    min-height: 235px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── State Transitions ── */
+.ki-morph-before,
+.ki-morph-after {
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.ki-morph-before {
+    opacity: 1;
+}
+
+.ki-morph-after {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.ki-morph-frame.is-after .ki-morph-before {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.ki-morph-frame.is-after .ki-morph-after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── BEFORE: Wireframe-Platzhalter ── */
+.ki-mb-placeholder {
+    height: 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    margin-bottom: 8px;
+}
+
+.ki-mb-placeholder.w60 { width: 60%; }
+.ki-mb-placeholder.w80 { width: 80%; }
+.ki-mb-placeholder.w45 { width: 45%; }
+.ki-mb-placeholder.h40 { height: 40px; }
+.ki-mb-placeholder.h20 { height: 20px; }
+
+.ki-mb-label {
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+    margin-top: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── AFTER: Lebendige KI-Seite ── */
+.ki-ma-greeting {
+    font-size: 12px;
+    color: var(--accent-color, #c4a35a);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ki-ma-greeting-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: kiMorphPulse 2s ease-in-out infinite;
+}
+
+.ki-ma-card {
+    background: rgba(196,163,90,0.08);
+    border-left: 2px solid var(--accent-color, #c4a35a);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 0 2px 2px 0;
+}
+
+.ki-ma-card-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+    margin-bottom: 3px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ki-ma-card-text {
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.5;
+    font-family: 'Poppins', sans-serif;
+}
+
+.ki-ma-chips {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.ki-ma-chip {
+    font-size: 8.5px;
+    padding: 4px 10px;
+    border: 1px solid var(--accent-color, #c4a35a);
+    color: var(--accent-color, #c4a35a);
+    border-radius: 2px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.ki-ma-chip:hover {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+}
+
+/* ── Toggle-Buttons ── */
+.ki-morph-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 10px;
+}
+
+.ki-morph-btn {
+    padding: 8px 20px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.ki-morph-btn:first-child {
+    border-radius: 2px 0 0 2px;
+    border-right: none;
+}
+
+.ki-morph-btn:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.ki-morph-btn.is-active {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+    border-color: var(--accent-color, #c4a35a);
+}
+
+.ki-morph-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Keyframes ── */
+@keyframes kiMorphPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+/* ── Light Mode ── */
+body.light-mode .ki-morph-frame {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .ki-morph-frame.is-after {
+    border-color: rgba(196,163,90,0.4);
+}
+
+body.light-mode .ki-morph-topbar {
+    border-bottom-color: #e0e0e0;
+    background: rgba(0,0,0,0.02);
+}
+
+body.light-mode .ki-morph-url {
+    color: #999;
+}
+
+body.light-mode .ki-mb-placeholder {
+    background: rgba(0,0,0,0.05);
+}
+
+body.light-mode .ki-mb-label {
+    color: #aaa;
+}
+
+body.light-mode .ki-ma-card {
+    background: rgba(196,163,90,0.1);
+}
+
+body.light-mode .ki-ma-card-title {
+    color: #333;
+}
+
+body.light-mode .ki-ma-card-text {
+    color: #666;
+}
+
+body.light-mode .ki-morph-btn {
+    border-color: #ddd;
+    color: #888;
+}
+
+body.light-mode .ki-morph-btn.is-active {
+    border-color: var(--accent-color, #c4a35a);
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .ki-morph {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .ki-morph-body {
+        padding: 14px;
+        min-height: 210px;
+    }
+
+    .ki-ma-greeting {
+        font-size: 11px;
+    }
+
+    .ki-ma-card-title {
+        font-size: 9.5px;
+    }
+
+    .ki-ma-card-text {
+        font-size: 8.5px;
+    }
+
+    .ki-morph-btn {
+        padding: 7px 16px;
+        font-size: 9px;
+    }
+}
