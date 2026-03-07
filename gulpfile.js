@@ -15,8 +15,6 @@ const coreFiles = [
     'css/ai-styles.css',
     'css/evita-styles.css',
     'css/evita-toolbar.css',
-    'css/evita-animations.css',
-    'css/geo-xray.css',
     'css/booking.css',      
     'css/legal-style.css',    
     'css/light-mode.css'         // MUSS ZULETZT sein fuer Overrides
@@ -34,7 +32,10 @@ const articleFiles = [
     'css/blog-style.css',         // Basis Blog-Layout
     'css/blog-components.css',    // Blog-Komponenten
     'css/feedback-style.css',     // Feedback Formulare
-    'css/lightbox.css',           // Falls genutzt
+    'css/lightbox.css', 
+    'css/evita-animations.css',
+    'css/geo-xray.css',
+    'css/ki-morph.css',  
     'css/ai-visibility.css'
 ];
 
