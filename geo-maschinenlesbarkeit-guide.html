@@ -92,6 +92,9 @@
   ]
 }
 </script>
+
+    <link rel="stylesheet" href="css/geo-xray.css">
+
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/analytics-proxy.js" async></script>
@@ -134,16 +137,80 @@
                         </ul>
                     </div>
 
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- ENTITY X-RAY: Mensch vs. Maschine Slider  -->
+                    <!-- Ersetzt images/geo-maschinenlesbarkeit.webp -->
+                    <!-- ══════════════════════════════════════════ -->
                     <div class="summary-image">
-                        <figure>
-                            <img src="images/geo-maschinenlesbarkeit.webp" 
-                                 alt="Visualisierung: Maschinenlesbare Datenstruktur für KI-Modelle" 
-                                 title="GEO und Maschinenlesbarkeit"
-                                 loading="lazy" 
-                                 width="300" 
-                                 height="300">
-                            <figcaption class="visually-hidden">Schema-Darstellung für KI-Optimierung</figcaption>
-                        </figure>
+                        <div class="geo-xray" id="geo-xray" role="img" aria-label="Interaktiver Vergleich: Was die KI sieht vs. was der Mensch sieht" tabindex="0">
+
+                            <!-- Sizing -->
+                            <div class="geo-xray-sizer"></div>
+
+                            <!-- Scan-Linie (nur auf Machine-Seite) -->
+                            <div class="geo-xm-scanline"></div>
+
+                            <!-- Drag-Hint -->
+                            <div class="geo-xray-hint" id="geo-xray-hint">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
+                                Ziehen
+                            </div>
+
+                            <!-- Machine View (links) -->
+                            <div class="geo-xray-layer geo-xray-machine" id="geo-xray-machine">
+                                <div class="geo-xm-head">
+                                    <span class="geo-xm-dot r"></span>
+                                    <span class="geo-xm-dot y"></span>
+                                    <span class="geo-xm-dot g"></span>
+                                    <span class="geo-xm-filename">schema.jsonld</span>
+                                </div>
+                                <div class="geo-xm-code">
+<span class="geo-xm-comment">// KI-Sicht auf diese Seite</span>
+<span class="geo-xm-brace">{</span>
+  <span class="geo-xm-val">"@context"</span>: <span class="geo-xm-val">"schema.org"</span>,
+  <span class="geo-xm-val">"@type"</span>: <span class="geo-xm-attr">"TechArticle"</span>,
+  <span class="geo-xm-val">"headline"</span>: <span class="geo-xm-val">"Maschinenles..."</span>,
+  <span class="geo-xm-val">"author"</span>: <span class="geo-xm-brace">{</span>
+    <span class="geo-xm-val">"@type"</span>: <span class="geo-xm-attr">"Person"</span>,
+    <span class="geo-xm-val">"name"</span>: <span class="geo-xm-val">"Michael Kanda"</span>
+  <span class="geo-xm-brace">}</span>,
+  <span class="geo-xm-val">"keywords"</span>: [
+    <span class="geo-xm-val">"GEO"</span>,
+    <span class="geo-xm-val">"Schema.org"</span>,
+    <span class="geo-xm-val">"Entitäten"</span>,
+    <span class="geo-xm-val">"LLM"</span>
+  ],
+  <span class="geo-xm-val">"hasPart"</span>: <span class="geo-xm-brace">{</span>
+    <span class="geo-xm-val">"@type"</span>: <span class="geo-xm-attr">"FAQPage"</span>
+  <span class="geo-xm-brace">}</span>
+<span class="geo-xm-brace">}</span>
+                                </div>
+                            </div>
+
+                            <!-- Human View (rechts, darunter) -->
+                            <div class="geo-xray-layer geo-xray-human">
+                                <div class="geo-xh-title">Maschinenlesbarkeit: Der Praxis-Guide für GEO und KI-Suche</div>
+                                <div class="geo-xh-text">
+                                    Die Ära der klassischen Suchergebnis&shy;listen neigt sich dem Ende zu. Wer in der <b>KI-Suche</b> nicht als valide <b>Entität</b> erkannt wird, existiert für die Algorithmen nicht mehr.<br><br>
+                                    Dieser Guide zeigt dir, wie du deine Webseite in eine <b>maschinenlesbare Wissens&shy;datenbank</b> verwandelst.<br><br>
+                                    Von <b>Schema.org</b> über semantisches HTML bis hin zu <b>Entitäten-Verknüpfungen</b> im Knowledge Graph.
+                                </div>
+                                <span class="geo-xh-tag">10 Min. Lesezeit</span>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="geo-xray-divider" id="geo-xray-divider">
+                                <div class="geo-xray-grip">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Labels -->
+                            <div class="geo-xray-labels">
+                                <span class="geo-xray-label-l">KI sieht</span>
+                                <span class="geo-xray-label-r">Mensch sieht</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -371,6 +438,84 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- ENTITY X-RAY – Inline JS                          -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function() {
+        'use strict';
+
+        var container = document.getElementById('geo-xray');
+        var machine   = document.getElementById('geo-xray-machine');
+        var divider   = document.getElementById('geo-xray-divider');
+        var hint      = document.getElementById('geo-xray-hint');
+        if (!container || !machine || !divider) return;
+
+        var isDragging = false;
+        var hintHidden = false;
+
+        function update(clientX) {
+            var rect = container.getBoundingClientRect();
+            var pct = ((clientX - rect.left) / rect.width) * 100;
+            pct = Math.max(5, Math.min(95, pct));
+            machine.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
+            divider.style.left = pct + '%';
+
+            if (!hintHidden && hint) {
+                hint.classList.add('is-hidden');
+                hintHidden = true;
+            }
+        }
+
+        // Mouse
+        container.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            update(e.clientX);
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) update(e.clientX);
+        });
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        // Touch
+        container.addEventListener('touchstart', function(e) {
+            isDragging = true;
+            update(e.touches[0].clientX);
+        }, { passive: true });
+        document.addEventListener('touchmove', function(e) {
+            if (isDragging) update(e.touches[0].clientX);
+        }, { passive: true });
+        document.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+
+        // Keyboard accessibility
+        container.addEventListener('keydown', function(e) {
+            var rect = container.getBoundingClientRect();
+            var currentLeft = divider.getBoundingClientRect().left - rect.left;
+            var pctNow = (currentLeft / rect.width) * 100;
+            var step = 3;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                var newPct = Math.max(5, pctNow - step);
+                machine.style.clipPath = 'inset(0 ' + (100 - newPct) + '% 0 0)';
+                divider.style.left = newPct + '%';
+                if (!hintHidden && hint) { hint.classList.add('is-hidden'); hintHidden = true; }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                var newPct = Math.min(95, pctNow + step);
+                machine.style.clipPath = 'inset(0 ' + (100 - newPct) + '% 0 0)';
+                divider.style.left = newPct + '%';
+                if (!hintHidden && hint) { hint.classList.add('is-hidden'); hintHidden = true; }
+            }
+        });
+    })();
+    </script>
     
 </body>
 </html>
