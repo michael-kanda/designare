@@ -157,7 +157,7 @@ export default async function handler(req, res) {
                         data: textToEmbed,
                         metadata: {
                             title: page.title,
-                            url: page.url || `/${page.slug}.html`,
+                            url: page.url || (page.type === 'knowledge-base' ? null : `/${page.slug}.html`),
                             section_heading: null,
                             content: (page.text || '').substring(0, 2000)
                         }
@@ -189,7 +189,7 @@ export default async function handler(req, res) {
                             data: textToEmbed,
                             metadata: {
                                 title: page.title,
-                                url: page.url || `/${page.slug}.html`,
+                                url: page.url || (page.type === 'knowledge-base' ? null : `/${page.slug}.html`),
                                 section_heading: section.heading,
                                 content: section.content
                             }
