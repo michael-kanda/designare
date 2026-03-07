@@ -14,7 +14,8 @@ const coreFiles = [
     'css/menu-interactive.css',   // Interaktive Menus
     'css/ai-styles.css',
     'css/evita-styles.css',
-    'css/evita-toolbar.css',      // Toolbar: Fullscreen + Font-Size
+    'css/evita-toolbar.css',
+    'css/evita-animations.css',// Toolbar: Fullscreen + Font-Size
     'css/booking.css',      
     'css/legal-style.css',    
     'css/light-mode.css'         // MUSS ZULETZT sein fuer Overrides
