@@ -4,7 +4,7 @@ import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, track
 import { setCorsHeaders, isValidEmail, getClientIp, MAX_MESSAGE_LENGTH } from '../lib/validation.js';
 import { checkRateLimit } from '../lib/rate-limiter.js';
 import { getMemory, saveMemory, extractMemoryContext, buildUpdatedMemory } from '../lib/memory-service.js';
-import { sendEmail, isEmailBlocked, isEmailWhitelisted, MAX_EMAILS_PER_SESSION } from '../lib/email-service.js';
+import { sendEmail, isEmailBlocked, isEmailWhitelisted, normalizeEmail, MAX_EMAILS_PER_SESSION } from '../lib/email-service.js';
 import { searchContext } from '../lib/rag-service.js';
 import { buildSystemPrompt } from '../lib/prompt-builder.js';
 import { generateWithFallback, parseGeminiResponse, buildChatContents } from '../lib/gemini-client.js';
@@ -125,6 +125,8 @@ export default async function handler(req, res) {
 // E-MAIL-VERSAND (extrahierter Sub-Handler)
 // ===================================================================
 async function handleEmailSend({ pendingEmail, clientIp, emailsSent, sessionId, memory, isReturningUser, res }) {
+  // E-Mail-Adresse normalisieren (Gemini liefert manchmal Backticks/Quotes)
+  pendingEmail.to = normalizeEmail(pendingEmail.to);
   console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
 
   if (!checkRateLimit(clientIp, 'email')) {
