@@ -24,12 +24,14 @@ export function createFollowupChips(ChatUI, BookingModal) {
                     a.target = '_blank';
                     a.rel = 'noopener';
                     a.innerHTML = '<svg class="evita-chip-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5l3-3"/><path d="M9 10.5l1.5-1.5a2.83 2.83 0 0 0-4-4L5 6.5"/><path d="M7 5.5L5.5 7a2.83 2.83 0 0 0 4 4L11 9.5"/></svg>' + this.esc(chip.text);
+                    a.title = chip.text;
                     container.appendChild(a);
                 } else if (chip.type === 'booking') {
                     const btn = document.createElement('button');
                     btn.className = 'evita-followup-chip';
                     btn.type = 'button';
                     btn.innerHTML = '<i class="fa-solid fa-phone" style="margin-right: 5px;" aria-hidden="true"></i> ' + this.esc(chip.text);
+                    btn.title = chip.text;
                     btn.addEventListener('click', () => {
                         this.remove();
                         BookingModal.launch();

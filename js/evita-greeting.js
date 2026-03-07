@@ -8,7 +8,7 @@
 // ===================================================================
 const CONFIG = {
     showDelay: 2500,         // ms nach Aufruf von initEvitaGreeting()
-    autoHideDelay: 7000,     // ms nach Typewriter-Ende
+    autoHideDelay: 9500,     // ms nach Typewriter-Ende
     typewriterSpeed: 30,     // ms pro Wort
     cooldownHours: 24,       // Stunden bis zur nächsten Begrüßung
     modalCheckInterval: 500, // ms zwischen Modal-Checks
@@ -22,6 +22,18 @@ const CONFIG = {
 // ===================================================================
 // BEGRÜSSUNGSTEXTE
 // ===================================================================
+
+// Hilfsfunktion: Tageszeit-basierte Begrüßung
+function getTimeGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 10) return 'Guten Morgen';
+    if (hour >= 10 && hour < 13) return 'Hey';
+    if (hour >= 13 && hour < 17) return 'Hallo';
+    if (hour >= 17 && hour < 23) return 'Guten Abend';
+    // 23–5 Uhr
+    return 'Na, noch wach';
+}
+
 const firstVisitMessages = [
     "Hey! Ich bin Evita, Michaels KI-Assistentin. Wenn du was brauchst – klick einfach auf mein Bild hier oben!",
     "Servus! Ich bin Evita. Ich kenne mich hier aus – klick auf mein Bild im Header und frag einfach drauf los!",
@@ -29,17 +41,18 @@ const firstVisitMessages = [
     "Willkommen! Ich bin Evita. Egal ob WordPress, SEO oder Kuchenrezepte – klick oben auf mein Bild!"
 ];
 
+// {greeting} wird dynamisch durch getTimeGreeting() ersetzt
 const returningMessages = [
-    "Hey {name}, schön dich wiederzusehen! Du weißt ja, wo du mich findest 😊",
-    "Servus {name}! Na, was gibt's Neues? Ich bin wie immer hier oben für dich da.",
-    "{name}! Willkommen zurück. Klick auf mein Bild wenn ich dir helfen kann!",
-    "Hallo {name}! Schön, dass du wieder da bist."
+    "{greeting}, {name}! Schön, dass du wieder da bist.",
+    "{greeting}, {name}! Du weißt ja, wo du mich findest.",
+    "{greeting}, {name}! Brauchst du was? Ich bin hier oben für dich da.",
+    "{greeting}, {name}! Was kann ich heute für dich tun?"
 ];
 
 const returningNoNameMessages = [
-    "Hey, schön dich wiederzusehen! Ich bin oben im Header wenn du mich brauchst.",
-    "Willkommen zurück! Du weißt ja – einfach auf mein Bild klicken.",
-    "Na, wieder da? Ich freu mich! Klick oben auf mein Bild wenn du was brauchst."
+    "{greeting}! Schön, dass du wieder da bist. Ich bin oben im Header wenn du mich brauchst.",
+    "{greeting}! Du weißt ja – einfach auf mein Bild klicken.",
+    "{greeting}! Brauchst du was? Klick oben auf mein Bild."
 ];
 
 // ===================================================================
@@ -84,6 +97,10 @@ function pickMessage() {
     }
 
     let text = pool[Math.floor(Math.random() * pool.length)];
+
+    // Tageszeit-Begrüßung einsetzen
+    text = text.replace('{greeting}', getTimeGreeting());
+
     if (name) {
         text = text.replace('{name}', `<span class="evita-name">${escapeHtml(name)}</span>`);
     }
