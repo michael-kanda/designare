@@ -71,7 +71,8 @@ export default async function handler(req, res) {
     // ── System-Prompt bauen ──
     const systemPrompt = buildSystemPrompt({
       isReturningUser, knownName, visitCount: effectiveVisitCount, lastVisit, previousTopics,
-      emailsSent, currentPage, additionalContext, availableLinks
+      emailsSent, currentPage, additionalContext, availableLinks,
+      isFirstMessage: isFirstMessageInSession
     });
 
     // ── Chat-Contents + Gemini-Call ──
