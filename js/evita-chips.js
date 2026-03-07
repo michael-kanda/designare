@@ -23,14 +23,14 @@ export function createFollowupChips(ChatUI, BookingModal) {
                     a.href = chip.url;
                     a.target = '_blank';
                     a.rel = 'noopener';
-                    a.innerHTML = '<svg class="evita-chip-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5l3-3"/><path d="M9 10.5l1.5-1.5a2.83 2.83 0 0 0-4-4L5 6.5"/><path d="M7 5.5L5.5 7a2.83 2.83 0 0 0 4 4L11 9.5"/></svg>' + this.esc(chip.text);
+                    a.innerHTML = '<svg class="evita-chip-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5l3-3"/><path d="M9 10.5l1.5-1.5a2.83 2.83 0 0 0-4-4L5 6.5"/><path d="M7 5.5L5.5 7a2.83 2.83 0 0 0 4 4L11 9.5"/></svg>' + this.esc(this.truncate(chip.text));
                     a.title = chip.text;
                     container.appendChild(a);
                 } else if (chip.type === 'booking') {
                     const btn = document.createElement('button');
                     btn.className = 'evita-followup-chip';
                     btn.type = 'button';
-                    btn.innerHTML = '<i class="fa-solid fa-phone" style="margin-right: 5px;" aria-hidden="true"></i> ' + this.esc(chip.text);
+                    btn.innerHTML = '<i class="fa-solid fa-phone" style="margin-right: 5px;" aria-hidden="true"></i> ' + this.esc(this.truncate(chip.text));
                     btn.title = chip.text;
                     btn.addEventListener('click', () => {
                         this.remove();
@@ -53,6 +53,14 @@ export function createFollowupChips(ChatUI, BookingModal) {
             const d = document.createElement('div');
             d.textContent = t;
             return d.innerHTML;
+        },
+
+        /** Kürzt Text auf maxWords Wörter + "…" (nur auf Mobile) */
+        truncate(text, maxWords = 4) {
+            if (window.innerWidth > 768) return text;
+            const words = text.split(' ');
+            if (words.length <= maxWords) return text;
+            return words.slice(0, maxWords).join(' ') + ' …';
         }
     };
 
