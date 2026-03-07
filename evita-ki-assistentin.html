@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/evita-animations.css">
     
     <link rel="canonical" href="https://designare.at/evita-ki-assistentin"/>
        <script type="application/ld+json">
@@ -179,16 +180,49 @@
                         </ul>
                     </div>
 
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- KONZEPT 02: Live Chat Simulation           -->
+                    <!-- Ersetzt das statische michael-evita-ai.webp -->
+                    <!-- ══════════════════════════════════════════ -->
                     <div class="summary-image">
-                        <figure>
-                            <img src="images/michael-evita-ai.webp" 
-                                 alt="Chatverlauf mit Evita, in dem sie den Nutzer beim Namen nennt" 
-                                 title="Evita KI-Assistentin im Einsatz"
-                                 loading="lazy" 
-                                 width="300" 
-                                 height="300">
-                            <figcaption class="visually-hidden">Evita KI-Assistentin Interface</figcaption>
-                        </figure>
+                        <div class="evita-chat-sim" id="evita-chat-sim" role="button" tabindex="0" aria-label="Chat mit Evita starten">
+                            
+                            <!-- CTA Overlay bei Hover -->
+                            <div class="ecsim-cta-overlay">
+                                <span class="ecsim-cta-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    Mit Evita plaudern
+                                </span>
+                            </div>
+
+                            <!-- Header mit echtem Avatar -->
+                            <div class="ecsim-header">
+                                <img class="ecsim-avatar"
+                                     src="images/evita-ki-assistentin-button.webp"
+                                     alt="Evita"
+                                     width="34" height="34"
+                                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                <div class="ecsim-avatar-fallback">E</div>
+                                <div class="ecsim-meta">
+                                    <span class="ecsim-name">Evita</span>
+                                    <span class="ecsim-status">
+                                        <span class="ecsim-status-dot"></span>
+                                        Online
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Chat Body (wird per JS befüllt) -->
+                            <div class="ecsim-body" id="ecsim-body"></div>
+
+                            <!-- Footer -->
+                            <div class="ecsim-footer">
+                                <div class="ecsim-input-fake">Frag mich was&thinsp;...</div>
+                                <button class="ecsim-send-fake" aria-hidden="true" tabindex="-1">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -206,7 +240,48 @@
                     </div>
                 </div>
 
-                <p>Darf ich vorstellen? <strong>Evita</strong>. Benannt nach meiner Tierschutzhündin, agiert sie als meine digitale Assistentin. Sie ist keine sterile "Wie-kann-ich-Ihnen-helfen"-Maschine, sondern hat Charakter: Sie ist charmant, schlagfertig und duzt den Nutzer konsequent – verzichtet dabei aber streng auf Emojis. In diesem Artikel zeige ich dir – sowohl aus Sicht des Nutzers als auch des Entwicklers –, was passiert, wenn man Google Gemini mit Vektordatenbanken und aktivem Werkzeuggebrauch verknüpft.</p>
+                <!-- ══════════════════════════════════════════ -->
+                <!-- KONZEPT 03: Orbit Avatar — Zwei-Spalten    -->
+                <!-- Text links, Orbit-Animation rechts          -->
+                <!-- ══════════════════════════════════════════ -->
+                <div class="evita-intro-split">
+                    <div class="evita-intro-text">
+                        <p>Darf ich vorstellen? <strong>Evita</strong>. Benannt nach meiner Tierschutzhündin, agiert sie als meine digitale Assistentin. Sie ist keine sterile "Wie-kann-ich-Ihnen-helfen"-Maschine, sondern hat Charakter: Sie ist charmant, schlagfertig und duzt den Nutzer konsequent – verzichtet dabei aber streng auf Emojis. In diesem Artikel zeige ich dir – sowohl aus Sicht des Nutzers als auch des Entwicklers –, was passiert, wenn man Google Gemini mit Vektordatenbanken und aktivem Werkzeuggebrauch verknüpft.</p>
+                    </div>
+
+                    <div class="evita-intro-orbit">
+                        <div class="eorbit-container" id="eorbit-container" role="button" tabindex="0" aria-label="Chat mit Evita starten">
+                            <!-- Zentraler Avatar mit echtem Bild -->
+                            <div class="eorbit-core">
+                                <img class="eorbit-core-img"
+                                     src="images/evita-ki-assistentin.webp"
+                                     alt="Evita KI-Assistentin"
+                                     width="90" height="90"
+                                     loading="lazy">
+                            </div>
+
+                            <!-- Orbit-Ringe mit Knoten -->
+                            <div class="eorbit-ring eorbit-ring-1">
+                                <div class="eorbit-node"></div>
+                            </div>
+                            <div class="eorbit-ring eorbit-ring-2">
+                                <div class="eorbit-node"></div>
+                            </div>
+                            <div class="eorbit-ring eorbit-ring-3">
+                                <div class="eorbit-node"></div>
+                            </div>
+
+                            <!-- Feature-Labels (erscheinen bei Hover) -->
+                            <span class="eorbit-label" data-feature="rag">RAG</span>
+                            <span class="eorbit-label" data-feature="memory">Memory</span>
+                            <span class="eorbit-label" data-feature="email">E-Mail</span>
+                            <span class="eorbit-label" data-feature="gemini">Gemini</span>
+                            <span class="eorbit-label" data-feature="tools">Tools</span>
+
+                            <span class="eorbit-cta">&#9656; Hover für Details</span>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section aria-labelledby="mechanics-heading">
@@ -411,6 +486,7 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+    <script src="js/evita-animations.js"></script>
 
 </body>
 </html>
