@@ -44,7 +44,7 @@
         "url": "https://designare.at/images/michael-evita-ai.webp"
       },
       "datePublished": "2026-02-21",
-      "dateModified": "2026-02-27",
+      "dateModified": "2026-03-07",
       "url": "https://designare.at/evita-ki-assistentin",
       "inLanguage": "de",
       "author": { "@id": "https://designare.at/#michael" },
@@ -57,7 +57,10 @@
         "Redis",
         "Gemini API",
         "Function Calling",
-        "E-Mail Whitelist"
+        "E-Mail Whitelist",
+        "Knowledge-Base",
+        "Embedding-Pipeline",
+        "Serverless"
       ],
       "about": {
         "@id": "https://designare.at/evita-ki-assistentin#app"
@@ -70,7 +73,7 @@
       "applicationCategory": "AIApplication",
       "operatingSystem": "Web",
       "author": { "@id": "https://designare.at/#michael" },
-      "description": "RAG-basierte KI-Assistentin mit Upstash Vector, Redis-Gedächtnis und Function Calling für WordPress."
+      "description": "RAG-basierte KI-Assistentin mit Upstash Vector, Redis-Gedächtnis, Function Calling und eigener Knowledge-Base."
     },
     {
       "@type": "FAQPage",
@@ -100,7 +103,7 @@
           "name": "Was passiert, wenn die KI etwas Falsches sagt?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Das RAG-System verhindert Halluzinationen fast komplett. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit der Website-Datenbank ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern charmant abzublocken."
+            "text": "Das RAG-System minimiert Halluzinationen drastisch. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit der Website-Datenbank und der manuellen Knowledge-Base ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern ehrlich zu sagen, dass sie sich nicht sicher ist."
           }
         },
         {
@@ -113,10 +116,18 @@
         },
         {
           "@type": "Question",
+          "name": "Was ist die Knowledge-Base im Dashboard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Knowledge-Base erlaubt es, Evita Wissen beizubringen, das auf keiner öffentlichen Seite steht – z.B. Architektur-Details, interne Prozesse oder spezielle FAQs. Die Texte werden im Dashboard als Chunks gespeichert und beim nächsten Vektor-Rebuild automatisch in Evitas Gedächtnis übernommen."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Wie kommen neue Texte von der Website in ihr Gedächtnis?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Vollautomatisch. Ein Server-Cronjob durchsucht jede Nacht die komplette Website nach Änderungen. Neue Texte werden sofort in Vektoren übersetzt und in Evitas Datenbank hochgeladen. Am nächsten Morgen ist sie auf dem aktuellsten Stand."
+            "text": "Über zwei Wege: Erstens durchsucht eine zweistufige Cron-Pipeline jede Nacht die komplette Website – um 3:00 Uhr wird die knowledge.json gebaut, um 3:10 Uhr werden daraus Vektoren erzeugt und in die Datenbank geladen. Zweitens können über ein Dashboard eigene Wissens-Chunks hinterlegt werden, die beim nächsten Rebuild automatisch mit vektorisiert werden."
           }
         }
       ]
@@ -147,7 +158,7 @@
       
                 <div class="article-meta">
                     <time datetime="2026-02-21">21. Februar 2026</time>
-                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 9 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -162,9 +173,9 @@
                         <h3>Das Wichtigste in Kürze:</h3>
                         <ul>
                            <li><strong>Mehr als ein Chatbot:</strong> Evita ist meine digitale Assistentin, benannt nach meiner Tierschutzhündin. Sie führt Smalltalk, macht Termine aus und versendet E-Mails an freigegebene Empfänger.</li>
-                            <li><strong>RAG (Retrieval-Augmented Generation):</strong> Durch eine Vektordatenbank kennt Evita die gesamte Website auswendig und halluziniert nicht.</li>
-                            <li><strong>Function Calling:</strong> Evita ist nicht nur passiv. Sie nutzt aktiv Tools (Kalender öffnen, dynamische Chips vorschlagen).</li>
-                            <li><strong>Langzeitgedächtnis:</strong> Über Redis merkt sie sich Namen ("Servus Alfred!") und Lieblingsthemen von wiederkehrenden Besuchern.</li>
+                            <li><strong>RAG + Knowledge-Base:</strong> Durch eine Vektordatenbank und manuell hinterlegtes Wissen kennt Evita alles über die Website und manuell hinterlegtes Wissen.</li>
+                            <li><strong>Function Calling:</strong> Evita ist nicht nur passiv. Sie nutzt aktiv Tools (Kalender öffnen, Link-Chips vorschlagen, E-Mails versenden).</li>
+                            <li><strong>Langzeitgedächtnis:</strong> Über Redis merkt sie sich Namen ("Guten Morgen, Alfred!") und Lieblingsthemen von wiederkehrenden Besuchern – tageszeitabhängig.</li>
                         </ul>
                     </div>
 
@@ -186,6 +197,14 @@
                 <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
                 
                 <p>Standard-Chatbots sind oft frustrierend. Sie geben generische Antworten, vergessen nach zwei Sätzen, worum es ging, und leiten einen am Ende doch nur auf eine Kontaktseite weiter. Als Webentwickler wollte ich das auf meiner eigenen Seite besser machen.</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-microchip"></i>
+                    <div>
+                        <strong>Was hier läuft:</strong>
+                        <p>Ein selbstgebauter KI-Assistent mit RAG, Vektor-Datenbank, Session-Memory, E-Mail-Versand, Whitelist-System, proaktiver Greeting-Bubble, Dashboard mit eigener Knowledge-Base, Cron-Jobs und Embedding-Pipeline – kein Plugin, kein SaaS, alles handgemacht.</p>
+                    </div>
+                </div>
 
                 <p>Darf ich vorstellen? <strong>Evita</strong>. Benannt nach meiner Tierschutzhündin, agiert sie als meine digitale Assistentin. Sie ist keine sterile "Wie-kann-ich-Ihnen-helfen"-Maschine, sondern hat Charakter: Sie ist charmant, schlagfertig und duzt den Nutzer konsequent – verzichtet dabei aber streng auf Emojis. In diesem Artikel zeige ich dir – sowohl aus Sicht des Nutzers als auch des Entwicklers –, was passiert, wenn man Google Gemini mit Vektordatenbanken und aktivem Werkzeuggebrauch verknüpft.</p>
             </section>
@@ -213,8 +232,14 @@
                     <dt><i aria-hidden="true" class="fa-regular fa-envelope"></i> E-Mail-Service mit Empfänger-Whitelist</dt>
                     <dd>Evita kann direkt aus dem Chat E-Mails verfassen und versenden – allerdings nur an Adressen, die ich vorab im Dashboard freigegeben habe. Dadurch wird Missbrauch ausgeschlossen. Du beschreibst ihr, was drinstehen soll, sie formuliert einen Entwurf in deinem gewünschten Tonfall und sendet die E-Mail nach deiner Freigabe direkt ab.</dd>
                     
-                    <dt><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> Dynamische Folge-Chips</dt>
-                    <dd>Unter jeder Antwort bietet Evita exakt drei klickbare Buttons an (Chips): Eine logische, aus deiner Ich-Perspektive formulierte Folgefrage und zwei interne Links, die perfekt zum aktuellen Thema der Konversation passen.</dd>
+                    <dt><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> Dynamische Link-Chips</dt>
+                    <dd>Unter jeder Antwort bietet Evita klickbare Buttons an (Chips), die thematisch zur aktuellen Konversation passen. Das sind interne Links zu relevanten Seiten – auf dem Smartphone werden die Labels intelligent auf wenige Wörter gekürzt, damit sie nicht den Bildschirm sprengen.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-comment-dots"></i> Proaktive Greeting-Bubble</dt>
+                    <dd>Evita wartet nicht darauf, angesprochen zu werden. Kurz nach dem Seitenaufruf entfaltet sich eine elegante Sprechblase aus dem Header-Avatar – mit Typewriter-Effekt und einer tageszeitabhängigen Begrüßung. "Guten Morgen, Alfred!" statt generischem "Wie kann ich helfen?". Wiederkehrende Besucher werden beim Namen begrüßt, Erstbesucher charmant abgeholt. Und sie wartet, bis ein eventuelles Cookie-Banner geschlossen ist, bevor sie sich meldet.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-sliders"></i> Chat-Toolbar</dt>
+                    <dd>Im Chat-Fenster gibt es eine dezente Toolbar: Vollbild-Modus für längere Gespräche und eine Schriftgrößen-Einstellung (Aa +/−), die sich per localStorage merkt. Barrierefreiheit war hier kein Nachgedanke, sondern Pflicht.</dd>
                 </dl>
             </section>
 
@@ -233,11 +258,12 @@
 
                 <div class="step-guide">
                     <h3>1. RAG (Retrieval-Augmented Generation)</h3>
-                    <p>Damit Evita keine Fakten über meine Dienstleistungen erfindet ("Halluzinationen"), nutzt sie eine Vektordatenbank.</p>
+                    <p>Damit Evita keine Fakten über meine Dienstleistungen erfindet ("Halluzinationen"), nutzt sie eine Vektordatenbank – gespeist aus zwei Quellen:</p>
                     <ul>
-                        <li><strong>Der Vektor-Upload:</strong> Jede Nacht um 3:00 Uhr crawlt ein Cronjob meine Website. Er zerlegt alle HTML-Seiten in Textabschnitte, wandelt diese über die Gemini Embedding API in Zahlenkolonnen (Vektoren) um und speichert sie in Upstash Vector.</li>
+                        <li><strong>Die Pipeline:</strong> Jede Nacht laufen zwei Cron-Jobs. Um 3:00 Uhr baut der erste die gesamte Website in eine strukturierte knowledge.json um. Um 3:10 Uhr nimmt der zweite diese Datei, zerlegt sie in Sektionen, wandelt jede über die Gemini Embedding API in Vektoren um und speichert sie in Upstash Vector.</li>
+                        <li><strong>Die Knowledge-Base:</strong> Über ein Dashboard kann ich eigenes Wissen hinterlegen – Fakten, die auf keiner Seite stehen (z.B. Architektur-Details, interne Infos). Diese Chunks werden beim nächsten Vektor-Rebuild automatisch mit eingebettet.</li>
                         <li><strong>Die Abfrage:</strong> Stellt der Nutzer eine Frage, wandelt Evita diese ebenfalls in einen Vektor um, sucht in Millisekunden die ähnlichsten Textbausteine aus der Datenbank und nutzt diese als "Kontext" für ihre Antwort.</li>
-                        <li><strong>Der Vorteil:</strong> Ändere ich heute einen Preis auf meiner Website, weiß Evita morgen früh automatisch davon, ohne dass ich den Bot neu programmieren muss!</li>
+                        <li><strong>Der Vorteil:</strong> Ändere ich heute einen Blogartikel oder ein neues Service auf meiner Website, weiß Evita morgen früh automatisch davon, ohne dass ich den Bot neu programmieren muss!</li>
                     </ul>
                 </div>
 
@@ -246,7 +272,7 @@
                     <p>Evita ist nicht auf Textausgabe beschränkt. Ich habe ihr über die Gemini API Werkzeuge (Tools) in die Hand gegeben:</p>
                     <ul>
                         <li><code>remember_user_name</code>: Ein Tool, das im Hintergrund anspringt, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
-                        <li><code>suggest_chips</code>: Ein Tool, das die KI zwingt, ein JSON-Objekt mit exakt drei sinnvollen Folge-Aktionen zurückzugeben.</li>
+                        <li><code>suggest_chips</code>: Ein Tool, das die KI anweist, thematisch passende Link-Vorschläge als klickbare Chips unter der Antwort anzuzeigen. Nur URLs, die im RAG-Kontext auftauchen, werden vorgeschlagen.</li>
                         <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt entgegen, prüft die Adresse gegen eine Empfänger-Whitelist und baut einen versandfertigen Payload auf.</li>
                     </ul>
                 </div>
@@ -255,9 +281,9 @@
                     <h3>3. Context-Aware System Prompting</h3>
                     <p>Damit Evita menschlich wirkt, wird ihr initialer "System Prompt" bei jedem Seitenaufruf dynamisch zusammengebaut:</p>
                     <ul>
-                        <li>Sie weiß, wie spät es in Wien ist. Um 23:00 Uhr begrüßt sie dich anders als am Montagmorgen um 08:00 Uhr.</li>
-                        <li>Sie kennt die aktuelle URL. Bist du gerade auf der SEO-Seite, wird sie dir diesen Link nicht mehr als "Chip" vorschlagen.</li>
-                        <li>Sie kennt deine Historie. Warst du schon 5x im Chat, fragt sie dich nicht mehr nach deinem Anliegen, sondern steigt direkt locker ein.</li>
+                        <li>Sie weiß, wie spät es in Wien ist. Um 23:00 Uhr begrüßt sie dich mit "Na, noch wach?" statt "Guten Morgen" – und dieser Ton zieht sich nur durch die erste Nachricht, danach antwortet sie direkt.</li>
+                        <li>Sie kennt die aktuelle URL. Bist du gerade auf der SEO-Seite, wird sie dir diesen Link nicht mehr als Chip vorschlagen.</li>
+                        <li>Sie kennt deine Historie. Warst du schon mehrfach im Chat, begrüßt sie dich beim Namen und steigt direkt locker ein, statt nach deinem Anliegen zu fragen.</li>
                     </ul>
                 </div>
 
@@ -265,13 +291,13 @@
                     <i aria-hidden="true" class="fa-solid fa-code"></i>
                     <div>
                         <strong>Entwickler-Tipp:</strong>
-                        <p>Das größte Problem bei Folgefragen (Chips) in KIs ist, dass sie oft unsinnig halluzinieren. Der Trick liegt in der Schema-Definition des Tools: Man muss der KI im Description-Feld des Parameters extrem strenge Leitplanken geben (z.B. "Zwingend aus der Ich-Perspektive des Nutzers formulieren").</p>
+                        <p>Ein nicht zu unterschätzendes Detail bei Link-Chips: Auf dem Smartphone muss man die Labels intelligent kürzen. Eine reine CSS-Lösung mit text-overflow: ellipsis schneidet mitten im Wort ab – besser ist eine JS-basierte Kürzung auf Wortebene mit "…" am Ende. Der volle Text bleibt im title-Attribut für Long-Press erhalten.</p>
                     </div>
                 </aside>
             </section>
 
             <section aria-labelledby="mistakes-heading">
-                <h2 id="mistakes-heading">Warum klassische Chatbots aussterben</h2>
+                <h2 id="mistakes-heading">Warum klassische Chatbots nicht mehr zeitgemäß sind</h2>
                 
                 <p>Der Unterschied zwischen einem traditionellen Regel-Bot (If-Then-Else) und einer RAG-gestützten KI ist gewaltig:</p>
 
@@ -289,7 +315,7 @@
                         </tr>
                         <tr>
                             <td>Muss manuell mit FAQ-Bäumen gepflegt werden</td>
-                            <td>Lernt automatisch durch nächtliche Indexierung (RAG) der Website</td>
+                            <td>Lernt automatisch durch nächtliche Pipeline (RAG) und manuell hinterlegte Knowledge-Base</td>
                         </tr>
                         <tr>
                             <td>Jeder Chat beginnt bei Null (Amnesie)</td>
@@ -324,7 +350,7 @@
                     <details name="faq-group">
                         <summary>Was passiert, wenn die KI etwas Falsches sagt?</summary>
                         <div class="faq-content">
-                            <p>Das RAG-System verhindert Halluzinationen fast komplett. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit meiner Website-Datenbank ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern charmant abzublocken.</p>
+                            <p>Das RAG-System minimiert Halluzinationen drastisch. Bevor sie antwortet, gleicht sie deine Frage als Vektor mit meiner Website-Datenbank und der manuellen Knowledge-Base ab. Findet sie keine Fakten, hat sie die strikte Anweisung im System-Prompt, nichts zu erfinden, sondern ehrlich zu sagen, dass sie sich nicht sicher ist.</p>
                         </div>
                     </details>
 
@@ -336,9 +362,16 @@
                     </details>
 
                     <details name="faq-group">
+                        <summary>Was ist die Knowledge-Base im Dashboard?</summary>
+                        <div class="faq-content">
+                            <p>Die Knowledge-Base erlaubt es mir, Evita Wissen beizubringen, das auf keiner öffentlichen Seite steht – z.B. Architektur-Details, interne Prozesse oder spezielle FAQs. Die Texte werden im Dashboard als Chunks gespeichert und beim nächsten Vektor-Rebuild automatisch in Evitas Gedächtnis übernommen.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
                         <summary>Wie kommen neue Texte von der Website in ihr Gedächtnis?</summary>
                         <div class="faq-content">
-                            <p>Vollautomatisch. Ein Server-Cronjob durchsucht jede Nacht meine komplette Website nach Änderungen. Neue Texte werden sofort in Vektoren übersetzt und in Evitas Datenbank hochgeladen. Am nächsten Morgen ist sie auf dem aktuellsten Stand.</p>
+                            <p>Über zwei Wege: Erstens durchsucht eine zweistufige Cron-Pipeline jede Nacht meine komplette Website – um 3:00 Uhr wird die Wissensbasis gebaut, um 3:10 Uhr werden daraus Vektoren erzeugt und hochgeladen. Zweitens kann ich über ein Dashboard eigene Wissens-Chunks hinterlegen, die beim nächsten Rebuild automatisch mit vektorisiert werden. Am nächsten Morgen ist Evita auf dem aktuellsten Stand.</p>
                         </div>
                     </details>
                 </div>
@@ -352,13 +385,13 @@
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
                     <ul>
-                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent hält Besucher länger auf der Seite.</li>
+                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent mit proaktiver Begrüßung und tageszeitabhängigem Ton hält Besucher länger auf der Seite.</li>
                         <li><strong>Automatisierung:</strong> Termine und E-Mails werden direkt im Chat abgewickelt – datenschutzkonform durch eine Empfänger-Whitelist abgesichert.</li>
-                        <li><strong>Zero Maintenance:</strong> Durch den Cronjob und die Vektordatenbank füttert sich die KI komplett selbstständig mit Updates.</li>
+                        <li><strong>Zwei Wissensquellen:</strong> Die automatische Nacht-Pipeline hält Evita aktuell, die manuelle Knowledge-Base erlaubt Wissen ohne eigene Seite.</li>
                     </ul>
                 </div>
 
-                <p>Probier es einfach selbst aus! Klicke unten rechts auf den Chat-Button und sag Evita "Hallo" – mal sehen, ob sie sich beim nächsten Mal an dich erinnert.</p>
+                <p>Probier es einfach selbst aus! Klicke oben im Header auf Evitas Avatar und sag ihr "Hallo" – mal sehen, ob sie sich beim nächsten Mal an dich erinnert.</p>
             </section>
 
             <section class="blog-cta-wrapper">
