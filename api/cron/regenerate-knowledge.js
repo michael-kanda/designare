@@ -102,11 +102,15 @@ export default async function handler(req, res) {
                     try {
                         const chunk = typeof raw === 'string' ? JSON.parse(raw) : raw;
                         // Als "Seite" in filteredPages einfügen – gleiche Struktur
+                        // Content ZUERST, Tags am Ende – sonst verwässern Tags das Embedding
+                        const tagSuffix = (chunk.tags || []).length > 0
+                            ? `\nStichworte: ${chunk.tags.join(', ')}`
+                            : '';
                         filteredPages.push({
                             title: chunk.title,
                             slug: `kb-${kbSlugs[i]}`,
-                            url: null, // Kein öffentlicher URL
-                            text: `${(chunk.tags || []).join(', ')}\n${chunk.content}`,
+                            url: null,
+                            text: `${chunk.content}${tagSuffix}`,
                             sections: [],
                             type: 'knowledge-base',
                             tags: chunk.tags || []
