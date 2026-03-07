@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/ki-morph.css">
     
     <link rel="canonical" href="https://designare.at/ki-fuer-unternehmenswebseiten" />
 
@@ -148,16 +149,59 @@
             <p>Du fragst dich, wie künstliche Intelligenz deine Unternehmenswebseite wirklich voranbringt? Es geht nicht um Science-Fiction und auch nicht darum, jeden Trend mitzumachen. Hier sind <strong>4 handfeste Wege</strong>, wie du mit KI-gestützten Tools nicht nur deine Effizienz steigerst, sondern deinen Besuchern echten Mehrwert bietest.</p>
         </div>
 
+        <!-- ══════════════════════════════════════════ -->
+        <!-- KI MORPH: Vorher/Nachher Website Morphing  -->
+        <!-- Ersetzt images/KI-für-Unternehmenswebseiten.webp -->
+        <!-- ══════════════════════════════════════════ -->
         <div class="summary-image">
-            <figure>
-                <img src="images/KI-für-Unternehmenswebseiten.webp" 
-                     alt="Grafik: Verschiedene KI-Lösungen für Webseiten wie Chatbots und Personalisierung" 
-                     title="KI im Mittelstand: Echter Nutzen"
-                     loading="lazy" 
-                     width="300" 
-                     height="300">
-                <figcaption class="visually-hidden">Darstellung von KI-Tools, die Webseitenbesuchern echten Mehrwert bieten</figcaption>
-            </figure>
+            <div class="ki-morph" id="ki-morph">
+                <div class="ki-morph-frame" id="ki-morph-frame">
+                    <div class="ki-morph-topbar">
+                        <span class="ki-morph-dot r"></span>
+                        <span class="ki-morph-dot y"></span>
+                        <span class="ki-morph-dot g"></span>
+                        <span class="ki-morph-url">mein-unternehmen.at</span>
+                    </div>
+                    <div class="ki-morph-body">
+                        <!-- BEFORE: Statische Wireframe-Seite -->
+                        <div class="ki-morph-before">
+                            <div class="ki-mb-placeholder w60 h20"></div>
+                            <div class="ki-mb-placeholder w80"></div>
+                            <div class="ki-mb-placeholder w80"></div>
+                            <div class="ki-mb-placeholder w45"></div>
+                            <div class="ki-mb-placeholder h40" style="margin-top:12px;"></div>
+                            <div class="ki-mb-placeholder w60" style="margin-top:12px;"></div>
+                            <div class="ki-mb-placeholder w80"></div>
+                            <div class="ki-mb-placeholder w45"></div>
+                            <div class="ki-mb-label">Statische Website &middot; Keine Interaktion</div>
+                        </div>
+                        <!-- AFTER: Lebendige KI-Seite -->
+                        <div class="ki-morph-after">
+                            <div class="ki-ma-greeting">
+                                <span class="ki-ma-greeting-dot"></span>
+                                Hallo Michael! Schön, dass du wieder da bist.
+                            </div>
+                            <div class="ki-ma-card">
+                                <div class="ki-ma-card-title">Personalisiert: SEO-Paket</div>
+                                <div class="ki-ma-card-text">Basierend auf deinem letzten Besuch: Unsere neue Keyword-Analyse wartet auf dich.</div>
+                            </div>
+                            <div class="ki-ma-card">
+                                <div class="ki-ma-card-title">Evita, deine KI-Assistentin</div>
+                                <div class="ki-ma-card-text">Du hattest Fragen zur Schema.org-Integration. Soll ich dort weitermachen?</div>
+                            </div>
+                            <div class="ki-ma-chips">
+                                <span class="ki-ma-chip">Termin buchen</span>
+                                <span class="ki-ma-chip">Preise ansehen</span>
+                                <span class="ki-ma-chip">SEO-Check</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ki-morph-toggle">
+                    <button class="ki-morph-btn is-active" data-state="before" type="button">Ohne KI</button>
+                    <button class="ki-morph-btn" data-state="after" type="button">Mit KI</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -276,6 +320,49 @@
     </main>
     <script src="js/feedback.js"></script>
     <div id="footer-placeholder"></div>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- KI MORPH – Inline JS (minimal)                    -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function() {
+        'use strict';
+        var frame = document.getElementById('ki-morph-frame');
+        var btns = document.querySelectorAll('.ki-morph-btn');
+        if (!frame || !btns.length) return;
+
+        var autoTimer = null;
+        var userInteracted = false;
+
+        function setState(isAfter) {
+            btns.forEach(function(b) { b.classList.remove('is-active'); });
+            if (isAfter) {
+                frame.classList.add('is-after');
+                btns[1].classList.add('is-active');
+            } else {
+                frame.classList.remove('is-after');
+                btns[0].classList.add('is-active');
+            }
+        }
+
+        // Manueller Toggle
+        btns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                userInteracted = true;
+                if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+                setState(btn.dataset.state === 'after');
+            });
+        });
+
+        // Auto-Toggle (stoppt bei Interaktion)
+        var isAfter = false;
+        autoTimer = setInterval(function() {
+            if (userInteracted) { clearInterval(autoTimer); return; }
+            isAfter = !isAfter;
+            setState(isAfter);
+        }, 4500);
+    })();
+    </script>
 
 </body>
 </html>
