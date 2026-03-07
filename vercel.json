@@ -8,6 +8,10 @@
     {
       "path": "/api/cron-rebuild",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/regenerate-knowledge",
+      "schedule": "10 3 * * *"
     }
   ]
 }
