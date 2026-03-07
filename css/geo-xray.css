@@ -250,6 +250,34 @@
     50%      { transform: translateX(3px); }
 }
 
+/* ── Intro Zwei-Spalten Layout ── */
+.geo-intro-split {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin: 2rem 0;
+}
+
+.geo-intro-text {
+    flex: 1 1 60%;
+    min-width: 0;
+}
+
+.geo-intro-text p {
+    margin-bottom: 1rem;
+}
+
+.geo-intro-text p:last-child {
+    margin-bottom: 0;
+}
+
+.geo-intro-xray {
+    flex: 0 0 340px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* ── Light Mode ── */
 body.light-mode .geo-xray {
     background: #fafafa;
@@ -289,6 +317,21 @@ body.light-mode .geo-xray {
 @media (max-width: 991px) {
     .geo-xray {
         max-width: 100%;
+    }
+
+    .geo-intro-split {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .geo-intro-xray {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .geo-intro-text {
+        text-align: left;
     }
 }
 
