@@ -148,21 +148,6 @@
     transform: scale(0.96);
 }
 
-/* ── Mobile: Chips kürzen (nach ~3 Worten abschneiden) ── */
-@media (max-width: 768px) {
-    .evita-followup-chip {
-        max-width: 180px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
-
-@media (max-width: 380px) {
-    .evita-followup-chip {
-        max-width: 150px;
-    }
-}
-
 /* Link-Chips: dezentes Icon */
 .evita-chip-link {
     text-decoration: none;
