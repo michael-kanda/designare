@@ -11,6 +11,9 @@
 <link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
     <link rel="icon" href="images/favicon.webp" type="image/webp">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
@@ -20,6 +23,7 @@
     <link rel="stylesheet" href="css/article.min.css">
     <link rel="stylesheet" href="css/ai-visibility.css">
     <link rel="stylesheet" href="css/ai-visibility-dual-ki.css">
+    <link rel="stylesheet" href="css/ai-hero-eyes.css">
     
     <link rel="canonical" href="https://designare.at/ki-sichtbarkeit"/>
 
@@ -127,6 +131,7 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
     <script type="module" src="js/main.js"></script>
     <script src="js/ai-visibility.js" defer></script>
+    <script src="js/ai-hero-eyes.js" defer></script>
     <script src="js/analytics-proxy.js" async></script>    
 </head>
 
@@ -162,6 +167,77 @@
                     </address>
                 </div>
             </header>
+
+            <!-- Hero: Dual AI Eye Animation -->
+            <section class="ai-hero" id="aiHero" aria-label="KI-Sichtbarkeits-Animation">
+                <div class="eyes-container">
+
+                    <!-- Gemini Eye -->
+                    <div class="ai-eye eye-gemini" id="eyeGemini">
+                        <div class="eye-glow"></div>
+                        <svg class="eye-svg" viewBox="0 0 160 160">
+                            <defs>
+                                <radialGradient id="irisGemini" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#6ab1ff" />
+                                    <stop offset="100%" stop-color="#1a5ecf" />
+                                </radialGradient>
+                                <clipPath id="lidClipGemini">
+                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                </clipPath>
+                            </defs>
+                            <g clip-path="url(#lidClipGemini)">
+                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                <g class="iris" id="irisGemini">
+                                    <circle cx="80" cy="80" r="28" fill="url(#irisGemini)" />
+                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                    <circle class="pupil" cx="80" cy="80" r="11" />
+                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                </g>
+                            </g>
+                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                        </svg>
+                        <span class="eye-label">Gemini</span>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="eye-connector">
+                        <div class="connector-line"></div>
+                        <div class="connector-dot"></div>
+                    </div>
+
+                    <!-- ChatGPT Eye -->
+                    <div class="ai-eye eye-chatgpt" id="eyeChatgpt">
+                        <div class="eye-glow"></div>
+                        <svg class="eye-svg" viewBox="0 0 160 160">
+                            <defs>
+                                <radialGradient id="irisChatgpt" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#34d399" />
+                                    <stop offset="100%" stop-color="#047857" />
+                                </radialGradient>
+                                <clipPath id="lidClipChatgpt">
+                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                </clipPath>
+                            </defs>
+                            <g clip-path="url(#lidClipChatgpt)">
+                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                <g class="iris" id="irisChatgpt">
+                                    <circle cx="80" cy="80" r="28" fill="url(#irisChatgpt)" />
+                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                    <circle class="pupil" cx="80" cy="80" r="11" />
+                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                </g>
+                            </g>
+                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                        </svg>
+                        <span class="eye-label">ChatGPT</span>
+                    </div>
+                </div>
+
+                <div class="hero-text">
+                    <p class="hero-tagline"><span id="typewriter"></span><span class="typewriter-cursor">|</span></p>
+                    <p class="hero-cta-hint" id="ctaHint">Jetzt prüfen <span class="arrow">↓</span></p>
+                </div>
+            </section>
 
                         <section aria-labelledby="tool-heading" class="ai-visibility-tool">
                 <h2 id="tool-heading"><i class="fa-solid fa-robot"></i> KI-Sichtbarkeits-Check</h2>
