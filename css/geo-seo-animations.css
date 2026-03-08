@@ -415,6 +415,24 @@
     outline-offset: 2px;
 }
 
+/*
+ * Fix: .summary-image hat auf Mobile keine explizite Breite.
+ * Widgets mit dynamischem Content brauchen eine Eltern-Breite.
+ */
+.summary-image:has(.geo-search-evo),
+.summary-image:has(.geo-live-query) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.geo-search-evo),
+    .summary-image:has(.geo-live-query) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
 /* ── Light Mode ── */
 body.light-mode .lq-searchbox {
     background: rgba(0,0,0,0.03);
