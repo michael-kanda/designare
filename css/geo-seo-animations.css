@@ -51,7 +51,7 @@
 }
 
 .lq-body {
-    min-height: 220px;
+    min-height: 280px;
     position: relative;
     overflow: hidden;
 }
@@ -184,23 +184,34 @@
 /* KONZEPT 01: SEARCH EVOLUTION                  */
 /* ============================================ */
 
-/* ── Zwei-Spalten: Expert-Tip + Animation ── */
-.geo-realcheck-split {
+/* ── Animation innerhalb der Expert-Tip Box ── */
+.geo-realcheck-box {
+    /* Überschreibt den Standard expert-tip flex-row */
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.geo-realcheck-inner {
     display: flex;
     align-items: stretch;
-    gap: 2rem;
-    margin: 2rem 0;
+    width: 100%;
+    min-height: 420px; /* Feste Mindesthöhe = größte Animation */
 }
 
-.geo-realcheck-tip {
+.geo-realcheck-content {
     flex: 1 1 55%;
     min-width: 0;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
-/* Expert-Tip innerhalb des Splits: volle Breite, kein eigener Margin */
-.geo-realcheck-tip .expert-tip {
-    margin: 0;
-    height: 100%;
+.geo-realcheck-content i {
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .geo-realcheck-anim {
@@ -208,6 +219,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1.2rem;
+    border-left: 1px solid var(--border-color, #222);
+    background: rgba(0,0,0,0.15);
 }
 
 /* ── Search Evo Widget ── */
@@ -481,21 +495,31 @@ body.light-mode .se-toggle-btn.is-active {
     border-color: var(--accent-color, #c4a35a);
 }
 
+body.light-mode .geo-realcheck-anim {
+    border-left-color: #e0e0e0;
+    background: rgba(0,0,0,0.02);
+}
+
 /* ── Responsive ── */
 @media (max-width: 991px) {
     .geo-live-query {
         max-width: 100%;
     }
 
-    .geo-realcheck-split {
+    .geo-realcheck-inner {
         flex-direction: column;
-        gap: 1.5rem;
+        min-height: auto;
     }
 
     .geo-realcheck-anim {
         flex: 0 0 auto;
-        width: 100%;
-        max-width: 400px;
+        border-left: none;
+        border-top: 1px solid var(--border-color, #222);
+        padding: 1.2rem;
+    }
+
+    .geo-realcheck-content {
+        padding: 1.2rem;
     }
 }
 
