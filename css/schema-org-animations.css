@@ -244,13 +244,13 @@
 /* ── Zwei-Spalten Layout ── */
 .schema-tree-split {
     display: flex;
-    align-items: center;
-    gap: 3rem;
+    align-items: flex-start;
+    gap: 2.5rem;
     margin: 1rem 0 0;
 }
 
 .schema-tree-text {
-    flex: 1 1 55%;
+    flex: 1 1 50%;
     min-width: 0;
 }
 
@@ -259,16 +259,16 @@
 }
 
 .schema-tree-widget {
-    flex: 0 0 340px;
+    flex: 1 1 50%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
 }
 
 /* ── Tree Widget ── */
 .schema-tree {
     width: 100%;
-    max-width: 340px;
+    max-width: 480px;
 }
 
 .st-node {
@@ -283,6 +283,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .st-node:hover {
@@ -358,6 +359,7 @@
 
 /* Properties (collapsed by default) */
 .st-props {
+    flex-basis: 100%;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s ease, padding 0.4s ease, margin 0.4s ease;
@@ -372,7 +374,7 @@
 .st-node.is-expanded .st-props {
     max-height: 150px;
     padding: 10px 14px;
-    margin: 8px -14px 0;
+    margin: 4px -14px 0;
     border-top: 1px solid var(--border-color, #222);
 }
 
@@ -453,9 +455,8 @@ body.light-mode .st-desc {
     }
 
     .schema-tree-widget {
-        flex: 0 0 auto;
         width: 100%;
-        max-width: 400px;
+        max-width: 480px;
     }
 }
 
