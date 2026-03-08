@@ -17,6 +17,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/schema-org-animations.css">
     
     <link rel="canonical" href="https://designare.at/schema-org-meta-description"/>
 
@@ -183,16 +184,49 @@
                         </ul>
                     </div>
 
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- RICH RESULTS PREVIEW: Ohne vs. Mit Schema  -->
+                    <!-- Ersetzt images/schema-org.webp              -->
+                    <!-- ══════════════════════════════════════════ -->
                     <div class="summary-image">
-                        <figure>
-                            <img src="images/schema-org.webp" 
-                                 alt="Visualisierung: Schema.org strukturierte Daten als Brücke zwischen Content und KI-Suche" 
-                                 title="Schema.org für GEO und KI-Suche"
-                                 loading="lazy" 
-                                 width="300" 
-                                 height="300">
-                            <figcaption class="visually-hidden">Schema.org Markup-Struktur für KI-Optimierung</figcaption>
-                        </figure>
+                        <div class="schema-rich-preview" id="schema-rp">
+                            <div class="rp-frame" id="rp-frame">
+                                <!-- Ohne Schema -->
+                                <div class="rp-plain">
+                                    <div class="rp-plain-label">Standard-Snippet</div>
+                                    <div class="rp-plain-url">designare.at &#8250; schema-org</div>
+                                    <div class="rp-plain-title">Schema.org: Strukturierte Daten Guide</div>
+                                    <div class="rp-plain-snippet">Schema.org ist die Sprache, die LLMs verstehen. Erfahre, wie du mit JSON-LD deine GEO-Readiness maximierst...</div>
+                                    <div class="rp-plain-sep"></div>
+                                    <div class="rp-plain-url2">seo-wiki.de &#8250; schema</div>
+                                    <div class="rp-plain-title2">Was ist Schema.org? - SEO Wiki</div>
+                                    <div class="rp-plain-snippet2">Schema.org ist ein gemeinsames Vokabular für strukturierte Daten im Web...</div>
+                                </div>
+                                <!-- Mit Schema -->
+                                <div class="rp-rich">
+                                    <div class="rp-rich-label">&#10024; Rich Result + FAQ Snippet</div>
+                                    <div class="rp-rich-url">designare.at &#8250; schema-org</div>
+                                    <div class="rp-rich-title">Schema.org: Warum strukturierte Daten deine neue Meta-Description sind</div>
+                                    <div class="rp-rich-stars">
+                                        <span class="rp-rich-star">&#9733;</span><span class="rp-rich-star">&#9733;</span><span class="rp-rich-star">&#9733;</span><span class="rp-rich-star">&#9733;</span><span class="rp-rich-star">&#9733;</span>
+                                        <span class="rp-rich-rating">4.9 &middot; 127 Bewertungen &middot; TechArticle</span>
+                                    </div>
+                                    <div class="rp-rich-snippet">KI-Futter statt Textwüste: JSON-LD und Schema.org für maximale GEO-Readiness...</div>
+                                    <div class="rp-faq" id="rp-faq-1">
+                                        <div class="rp-faq-q">Was ist Schema.org? <span class="rp-faq-arrow">&#9660;</span></div>
+                                        <div class="rp-faq-a">Ein semantischer Standard von Google, Bing und Yahoo — das maschinenlesbare Vokabular für KI-Suche.</div>
+                                    </div>
+                                    <div class="rp-faq" id="rp-faq-2">
+                                        <div class="rp-faq-q">Lohnt sich Schema.org? <span class="rp-faq-arrow">&#9660;</span></div>
+                                        <div class="rp-faq-a">Ja — es ist die Eintrittskarte für Rich Snippets und KI-Zitate in der generativen Suche.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rp-toggle">
+                                <button class="rp-toggle-btn is-active" data-state="plain" type="button">Ohne Schema</button>
+                                <button class="rp-toggle-btn" data-state="rich" type="button">Mit Schema</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -447,7 +481,64 @@
                     </ul>
                 </div>
 
-                <p>Die Evolution der Suche ist in vollem Gange und verzeiht keine technologische Trägheit. Wer heute noch darauf vertraut, dass Google und Co. den Kontext deiner Seite schon "irgendwie erraten" werden, verliert den Anschluss an die KI-getriebene Konkurrenz. Schema.org ist dein strategisches Werkzeug, um die Kontrolle darüber zurückzugewinnen, wie Maschinen deine Marke verstehen und präsentieren. Du musst deine Webseite von einer rein visuellen Visitenkarte in eine hochgradig strukturierte Wissensdatenbank verwandeln. Nur wer die Maschinen mit präzisen Daten füttert, wird am Ende von den Menschen gefunden.</p>
+                <!-- ══════════════════════════════════════════ -->
+                <!-- SCHEMA TREE: Zwei-Spalten Layout            -->
+                <!-- Text links, Type-Hierarchie rechts          -->
+                <!-- ══════════════════════════════════════════ -->
+                <div class="schema-tree-split">
+                    <div class="schema-tree-text">
+                        <p>Die Evolution der Suche ist in vollem Gange und verzeiht keine technologische Trägheit. Wer heute noch darauf vertraut, dass Google und Co. den Kontext deiner Seite schon "irgendwie erraten" werden, verliert den Anschluss an die KI-getriebene Konkurrenz. Schema.org ist dein strategisches Werkzeug, um die Kontrolle darüber zurückzugewinnen, wie Maschinen deine Marke verstehen und präsentieren. Du musst deine Webseite von einer rein visuellen Visitenkarte in eine hochgradig strukturierte Wissensdatenbank verwandeln. Nur wer die Maschinen mit präzisen Daten füttert, wird am Ende von den Menschen gefunden.</p>
+                    </div>
+
+                    <div class="schema-tree-widget">
+                        <div class="schema-tree" id="schema-tree">
+                            <div class="st-node st-thing">
+                                <span class="st-icon">&#128218;</span>
+                                <div class="st-info">
+                                    <div class="st-type">Thing</div>
+                                    <div class="st-desc">Basis-Entity im Schema.org Universum</div>
+                                </div>
+                                <span class="st-expand-hint">&#9656;</span>
+                                <div class="st-props"><span class="st-prop-key">"@context"</span>: <span class="st-prop-val">"schema.org"</span><br><span class="st-prop-key">"@type"</span>: <span class="st-prop-val">"Thing"</span></div>
+                            </div>
+
+                            <div class="st-node st-creative st-indent-1">
+                                <span class="st-connector"></span>
+                                <span class="st-icon">&#9997;&#65039;</span>
+                                <div class="st-info">
+                                    <div class="st-type">CreativeWork</div>
+                                    <div class="st-desc">Inhalte mit Autor & Datum</div>
+                                </div>
+                                <span class="st-expand-hint">&#9656;</span>
+                                <div class="st-props"><span class="st-prop-key">"author"</span>: <span class="st-prop-val">Person</span><br><span class="st-prop-key">"datePublished"</span>: <span class="st-prop-val">"2026-01-03"</span><br><span class="st-prop-key">"headline"</span>: <span class="st-prop-val">"..."</span></div>
+                            </div>
+
+                            <div class="st-node st-article st-indent-2">
+                                <span class="st-connector"></span>
+                                <span class="st-icon">&#128196;</span>
+                                <div class="st-info">
+                                    <div class="st-type">Article</div>
+                                    <div class="st-desc">Generischer Artikel-Typ</div>
+                                </div>
+                                <span class="st-expand-hint">&#9656;</span>
+                                <div class="st-props"><span class="st-prop-key">"articleSection"</span>: <span class="st-prop-val">"GEO"</span><br><span class="st-prop-key">"keywords"</span>: <span class="st-prop-val">["Schema.org", ...]</span></div>
+                            </div>
+
+                            <div class="st-node st-tech st-indent-3">
+                                <span class="st-connector"></span>
+                                <span class="st-icon">&#128736;&#65039;</span>
+                                <div class="st-info">
+                                    <div class="st-type">TechArticle</div>
+                                    <div class="st-desc">Spezifisch &middot; Maximal semantisch</div>
+                                </div>
+                                <span class="st-expand-hint">&#9656;</span>
+                                <div class="st-props"><span class="st-prop-key">"proficiencyLevel"</span>: <span class="st-prop-val">"Expert"</span><br><span class="st-prop-key">"hasPart"</span>: <span class="st-prop-val">FAQPage</span><br><span class="st-prop-key">"speakable"</span>: <span class="st-prop-val">{...}</span></div>
+                            </div>
+
+                            <div class="st-caption">Thing → CreativeWork → Article → TechArticle</div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="blog-cta-wrapper">
@@ -467,6 +558,46 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- SCHEMA.ORG ANIMATIONS – Inline JS                 -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    // ── KONZEPT 02: RICH RESULTS TOGGLE ──
+    (function(){
+        var frame=document.getElementById('rp-frame');
+        var btns=document.querySelectorAll('.rp-toggle-btn');
+        if(!frame||!btns.length)return;
+        var userClicked=false,timer;
+        function set(isRich){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isRich){frame.classList.add('is-rich');btns[1].classList.add('is-active');}
+            else{frame.classList.remove('is-rich');btns[0].classList.add('is-active');}
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='rich');
+        });});
+        // FAQ Klick-Handler
+        document.querySelectorAll('.rp-faq-q').forEach(function(q){
+            q.addEventListener('click',function(){
+                q.parentElement.classList.toggle('is-open');
+            });
+        });
+        // Auto-Toggle
+        var isRich=false;
+        timer=setInterval(function(){if(userClicked)return;isRich=!isRich;set(isRich);},4500);
+    })();
+
+    // ── KONZEPT 03: SCHEMA TREE EXPAND ──
+    (function(){
+        document.querySelectorAll('.st-node').forEach(function(node){
+            node.addEventListener('click',function(){
+                node.classList.toggle('is-expanded');
+            });
+        });
+    })();
+    </script>
     
 </body>
 </html>
