@@ -37,6 +37,7 @@ const articleFiles = [
     'css/geo-xray.css',
     'css/ki-morph.css',
     'css/ai-hero-eyes.css',
+    'css/geo-seo-animations.css',
     'css/ai-visibility.css'
 ];
 
