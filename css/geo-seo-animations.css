@@ -1,0 +1,505 @@
+/* ============================================ */
+/* GEO-SEO ANIMATIONS                           */
+/* Konzept 03: Live Query (lq-)                  */
+/* Konzept 01: Search Evolution (se-)            */
+/* ============================================ */
+
+/* ============================================ */
+/* KONZEPT 03: LIVE QUERY TYPEWRITER             */
+/* ============================================ */
+.geo-live-query {
+    width: 100%;
+    max-width: 340px;
+}
+
+.lq-searchbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    margin-bottom: 14px;
+    transition: border-color 0.3s;
+}
+
+.lq-searchbox.is-active {
+    border-color: var(--accent-color, #c4a35a);
+}
+
+.lq-search-icon {
+    color: var(--text-color-subtle, #555);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.lq-search-text {
+    font-size: 12px;
+    color: var(--text-color, #e4e4e4);
+    flex: 1;
+    min-height: 16px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.lq-cursor {
+    width: 1.5px;
+    height: 15px;
+    background: var(--accent-color, #c4a35a);
+    flex-shrink: 0;
+    animation: lqCursorBlink 0.8s step-end infinite;
+}
+
+.lq-body {
+    min-height: 220px;
+    position: relative;
+    overflow: hidden;
+}
+
+.lq-scene {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lq-scene.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* KI-Antwort Box */
+.lq-ai-box {
+    background: rgba(196,163,90,0.08);
+    border-left: 2px solid var(--accent-color, #c4a35a);
+    padding: 12px 14px;
+    border-radius: 0 2px 2px 0;
+    margin-bottom: 10px;
+}
+
+.lq-ai-box-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.lq-ai-box-icon {
+    font-size: 12px;
+}
+
+.lq-ai-box-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent-color, #c4a35a);
+}
+
+.lq-ai-box-text {
+    font-size: 10.5px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.65;
+}
+
+.lq-ai-box-text b {
+    color: var(--text-color, #e4e4e4);
+    font-weight: 600;
+}
+
+.lq-ai-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    color: var(--accent-color, #c4a35a);
+    margin-top: 8px;
+    padding: 3px 8px;
+    border: 1px solid rgba(196,163,90,0.2);
+    border-radius: 2px;
+}
+
+.lq-ai-source-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent-color, #c4a35a);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Versus Divider */
+.lq-versus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 10px 0;
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+}
+
+.lq-versus-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-color, #222);
+}
+
+/* Google Results */
+.lq-google-label {
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.lq-google-item {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.lq-google-item:last-child {
+    border-bottom: none;
+}
+
+.lq-g-url {
+    font-size: 8.5px;
+    color: var(--text-color-subtle, #555);
+}
+
+.lq-g-title {
+    font-size: 11px;
+    color: #60a5fa;
+    font-weight: 500;
+}
+
+.lq-g-snippet {
+    font-size: 9.5px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.5;
+}
+
+@keyframes lqCursorBlink {
+    50% { opacity: 0; }
+}
+
+/* ============================================ */
+/* KONZEPT 01: SEARCH EVOLUTION                  */
+/* ============================================ */
+
+/* ── Zwei-Spalten: Expert-Tip + Animation ── */
+.geo-realcheck-split {
+    display: flex;
+    align-items: stretch;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.geo-realcheck-tip {
+    flex: 1 1 55%;
+    min-width: 0;
+}
+
+/* Expert-Tip innerhalb des Splits: volle Breite, kein eigener Margin */
+.geo-realcheck-tip .expert-tip {
+    margin: 0;
+    height: 100%;
+}
+
+.geo-realcheck-anim {
+    flex: 0 0 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Search Evo Widget ── */
+.geo-search-evo {
+    width: 100%;
+    max-width: 340px;
+}
+
+.se-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    margin-bottom: 12px;
+}
+
+.se-bar-icon {
+    color: var(--text-color-subtle, #555);
+    font-size: 13px;
+}
+
+.se-bar-text {
+    font-size: 11px;
+    color: var(--text-color-muted, #949494);
+    flex: 1;
+}
+
+.se-bar-cursor {
+    width: 1px;
+    height: 14px;
+    background: var(--accent-color, #c4a35a);
+    animation: lqCursorBlink 1s step-end infinite;
+}
+
+.se-results {
+    min-height: 230px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* State transitions */
+.se-serp,
+.se-ai {
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.se-serp {
+    opacity: 1;
+}
+
+.se-ai {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.geo-search-evo.is-ai .se-serp {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.geo-search-evo.is-ai .se-ai {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* SERP Items */
+.se-serp-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.se-serp-url {
+    font-size: 8.5px;
+    color: var(--text-color-subtle, #555);
+    margin-bottom: 2px;
+}
+
+.se-serp-title {
+    font-size: 11.5px;
+    color: #60a5fa;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.se-serp-snippet {
+    font-size: 9.5px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.5;
+}
+
+.se-serp-label {
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 10px;
+}
+
+/* KI Answer */
+.se-ai-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.se-ai-icon {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, var(--accent-color, #c4a35a), #8a7340);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.se-ai-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+}
+
+.se-ai-text {
+    font-size: 11px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.se-ai-text b {
+    color: var(--text-color, #e4e4e4);
+    font-weight: 600;
+}
+
+.se-ai-cite {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    color: var(--accent-color, #c4a35a);
+    border: 1px solid rgba(196,163,90,0.25);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-top: 4px;
+}
+
+.se-ai-cite-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--accent-color, #c4a35a);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Toggle */
+.se-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 12px;
+}
+
+.se-toggle-btn {
+    padding: 8px 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.se-toggle-btn:first-child {
+    border-radius: 2px 0 0 2px;
+    border-right: none;
+}
+
+.se-toggle-btn:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.se-toggle-btn.is-active {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+    border-color: var(--accent-color, #c4a35a);
+}
+
+.se-toggle-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Light Mode ── */
+body.light-mode .lq-searchbox {
+    background: rgba(0,0,0,0.03);
+    border-color: #e0e0e0;
+}
+
+body.light-mode .lq-search-text {
+    color: #333;
+}
+
+body.light-mode .lq-ai-box {
+    background: rgba(196,163,90,0.1);
+}
+
+body.light-mode .lq-ai-box-text {
+    color: #555;
+}
+
+body.light-mode .lq-ai-box-text b {
+    color: #222;
+}
+
+body.light-mode .lq-g-snippet {
+    color: #777;
+}
+
+body.light-mode .se-bar {
+    background: rgba(0,0,0,0.03);
+    border-color: #e0e0e0;
+}
+
+body.light-mode .se-ai-text {
+    color: #555;
+}
+
+body.light-mode .se-ai-text b {
+    color: #222;
+}
+
+body.light-mode .se-toggle-btn {
+    border-color: #ddd;
+    color: #888;
+}
+
+body.light-mode .se-toggle-btn.is-active {
+    border-color: var(--accent-color, #c4a35a);
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .geo-live-query {
+        max-width: 100%;
+    }
+
+    .geo-realcheck-split {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .geo-realcheck-anim {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lq-search-text {
+        font-size: 11px;
+    }
+
+    .lq-ai-box-text {
+        font-size: 9.5px;
+    }
+
+    .se-bar-text {
+        font-size: 10px;
+    }
+
+    .se-ai-text {
+        font-size: 10px;
+    }
+
+    .se-toggle-btn {
+        padding: 7px 14px;
+        font-size: 9px;
+    }
+}
