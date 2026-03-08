@@ -286,6 +286,26 @@ body.light-mode .geo-xray {
 }
 
 /* ── Responsive ── */
+
+/*
+ * Fix: .summary-image hat auf Mobile keine explizite Breite.
+ * Bilder haben intrinsische Größe, aber das X-Ray Widget mit
+ * absoluter Positionierung braucht eine Eltern-Breite.
+ */
+.summary-image:has(.geo-xray) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    /* Desktop: summary-image wird durch blog-CSS auf 33% gesetzt,
+       hier nur sicherstellen dass X-Ray darin zentriert */
+    .summary-image:has(.geo-xray) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
 @media (max-width: 991px) {
     .geo-xray {
         max-width: 100%;
