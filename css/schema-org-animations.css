@@ -1,0 +1,485 @@
+/* ============================================ */
+/* SCHEMA.ORG ANIMATIONS                         */
+/* Konzept 02: Rich Results Preview (rp-)        */
+/* Konzept 03: Schema Tree (st-)                 */
+/* ============================================ */
+
+/* ============================================ */
+/* KONZEPT 02: RICH RESULTS PREVIEW              */
+/* ============================================ */
+.schema-rich-preview {
+    width: 100%;
+    max-width: 340px;
+}
+
+.rp-frame {
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+    padding: 16px;
+    min-height: 270px;
+    position: relative;
+    transition: border-color 0.4s;
+}
+
+.rp-frame.is-rich {
+    border-color: rgba(196,163,90,0.3);
+}
+
+/* ── State Transitions ── */
+.rp-plain,
+.rp-rich {
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.rp-plain { opacity: 1; }
+
+.rp-rich {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.rp-frame.is-rich .rp-plain { opacity: 0; transform: translateY(-8px); }
+.rp-frame.is-rich .rp-rich { opacity: 1; transform: translateY(0); }
+
+/* ── Plain (Ohne Schema) ── */
+.rp-plain-label {
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.rp-plain-url,
+.rp-plain-url2 {
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+    margin-bottom: 2px;
+}
+
+.rp-plain-title,
+.rp-plain-title2 {
+    font-size: 13px;
+    color: #60a5fa;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.rp-plain-snippet,
+.rp-plain-snippet2 {
+    font-size: 10.5px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.6;
+}
+
+.rp-plain-sep {
+    height: 1px;
+    background: var(--border-color, #222);
+    margin: 12px 0;
+}
+
+/* ── Rich (Mit Schema) ── */
+.rp-rich-label {
+    font-size: 8px;
+    color: var(--accent-color, #c4a35a);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.rp-rich-url {
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+    margin-bottom: 2px;
+}
+
+.rp-rich-title {
+    font-size: 13px;
+    color: #60a5fa;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.rp-rich-snippet {
+    font-size: 10.5px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.rp-rich-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.rp-rich-star {
+    color: #fbbf24;
+    font-size: 12px;
+}
+
+.rp-rich-rating {
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+}
+
+/* FAQ Dropdown */
+.rp-faq {
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+
+.rp-faq-q {
+    padding: 8px 12px;
+    font-size: 10px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color, #e4e4e4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.02);
+    transition: background 0.2s;
+}
+
+.rp-faq-q:hover {
+    background: rgba(196,163,90,0.05);
+}
+
+.rp-faq-arrow {
+    color: var(--text-color-subtle, #555);
+    font-size: 10px;
+    transition: transform 0.3s;
+}
+
+.rp-faq.is-open .rp-faq-arrow {
+    transform: rotate(180deg);
+}
+
+.rp-faq-a {
+    padding: 0 12px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    font-size: 9.5px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.5;
+}
+
+.rp-faq.is-open .rp-faq-a {
+    max-height: 80px;
+    padding: 8px 12px;
+}
+
+/* ── Toggle ── */
+.rp-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 12px;
+}
+
+.rp-toggle-btn {
+    padding: 8px 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.rp-toggle-btn:first-child {
+    border-radius: 2px 0 0 2px;
+    border-right: none;
+}
+
+.rp-toggle-btn:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.rp-toggle-btn.is-active {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+    border-color: var(--accent-color, #c4a35a);
+}
+
+.rp-toggle-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.schema-rich-preview) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.schema-rich-preview) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ============================================ */
+/* KONZEPT 03: SCHEMA TREE                       */
+/* ============================================ */
+
+/* ── Zwei-Spalten Layout ── */
+.schema-tree-split {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin: 1rem 0 0;
+}
+
+.schema-tree-text {
+    flex: 1 1 55%;
+    min-width: 0;
+}
+
+.schema-tree-text p {
+    margin: 0;
+}
+
+.schema-tree-widget {
+    flex: 0 0 340px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ── Tree Widget ── */
+.schema-tree {
+    width: 100%;
+    max-width: 340px;
+}
+
+.st-node {
+    padding: 10px 14px;
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    margin-bottom: 6px;
+    background: var(--card-bg, #0f0f0f);
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.st-node:hover {
+    border-color: var(--accent-color, #c4a35a);
+    background: rgba(196,163,90,0.04);
+}
+
+.st-indent-1 { margin-left: 24px; }
+.st-indent-2 { margin-left: 48px; }
+.st-indent-3 { margin-left: 72px; }
+
+/* Connector Lines */
+.st-connector {
+    position: absolute;
+    left: -13px;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    background: rgba(196,163,90,0.2);
+}
+
+.st-connector::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 20px;
+    background: rgba(196,163,90,0.2);
+    transform: translateY(-100%);
+}
+
+.st-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.st-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.st-type {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.st-desc {
+    font-size: 8.5px;
+    color: var(--text-color-muted, #949494);
+    margin-top: 2px;
+    line-height: 1.4;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Type-Farben */
+.st-node.st-thing .st-type   { color: var(--text-color-muted, #949494); }
+.st-node.st-creative .st-type { color: #60a5fa; }
+.st-node.st-article .st-type  { color: #c084fc; }
+.st-node.st-tech .st-type     { color: var(--accent-color, #c4a35a); }
+
+/* Expand hint */
+.st-expand-hint {
+    font-size: 10px;
+    color: var(--text-color-subtle, #555);
+    transition: color 0.3s, transform 0.3s;
+    flex-shrink: 0;
+}
+
+.st-node:hover .st-expand-hint { color: var(--accent-color, #c4a35a); }
+.st-node.is-expanded .st-expand-hint { transform: rotate(90deg); }
+
+/* Properties (collapsed by default) */
+.st-props {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease, margin 0.4s ease;
+    margin: 0 -14px;
+    padding: 0 14px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 9.5px;
+    line-height: 1.7;
+    border-top: 0px solid transparent;
+}
+
+.st-node.is-expanded .st-props {
+    max-height: 150px;
+    padding: 10px 14px;
+    margin: 8px -14px 0;
+    border-top: 1px solid var(--border-color, #222);
+}
+
+.st-prop-key { color: #60a5fa; }
+.st-prop-val { color: #4ade80; }
+
+.st-caption {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── Light Mode ── */
+body.light-mode .rp-frame {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .rp-frame.is-rich {
+    border-color: rgba(196,163,90,0.4);
+}
+
+body.light-mode .rp-plain-snippet,
+body.light-mode .rp-plain-snippet2,
+body.light-mode .rp-rich-snippet {
+    color: #666;
+}
+
+body.light-mode .rp-faq {
+    border-color: #e0e0e0;
+}
+
+body.light-mode .rp-faq-q {
+    color: #333;
+    background: rgba(0,0,0,0.02);
+}
+
+body.light-mode .rp-faq-a {
+    color: #666;
+}
+
+body.light-mode .rp-toggle-btn {
+    border-color: #ddd;
+    color: #888;
+}
+
+body.light-mode .rp-toggle-btn.is-active {
+    border-color: var(--accent-color, #c4a35a);
+}
+
+body.light-mode .st-node {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .st-node:hover {
+    border-color: var(--accent-color, #c4a35a);
+    background: rgba(196,163,90,0.05);
+}
+
+body.light-mode .st-desc {
+    color: #888;
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .schema-rich-preview {
+        max-width: 100%;
+    }
+
+    .schema-tree-split {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .schema-tree-widget {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rp-plain-title,
+    .rp-plain-title2,
+    .rp-rich-title {
+        font-size: 12px;
+    }
+
+    .rp-plain-snippet,
+    .rp-plain-snippet2,
+    .rp-rich-snippet {
+        font-size: 9.5px;
+    }
+
+    .rp-toggle-btn {
+        padding: 7px 14px;
+        font-size: 9px;
+    }
+
+    .st-indent-1 { margin-left: 16px; }
+    .st-indent-2 { margin-left: 32px; }
+    .st-indent-3 { margin-left: 48px; }
+
+    .st-type { font-size: 10px; }
+}
