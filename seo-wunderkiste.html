@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/seo-wunderkiste-anim.css">
     
     <link rel="canonical" href="https://designare.at/seo-wunderkiste" />
 
@@ -122,16 +123,58 @@
             </ul>
         </div>
 
+        <!-- ══════════════════════════════════════════ -->
+        <!-- BLOAT KILLER: 17 Plugins vs. 1 Wunderkiste -->
+        <!-- Ersetzt images/seo-wunderkiste.webp         -->
+        <!-- ══════════════════════════════════════════ -->
         <div class="summary-image">
-            <figure>
-                <img src="images/seo-wunderkiste.webp" 
-                     alt="Grafik: SEO Wunderkiste - Modulares 17-in-1 WordPress SEO, Performance und Security Plugin" 
-                     title="SEO Wunderkiste: Weniger Plugins, mehr Speed"
-                     loading="lazy" 
-                     width="300" 
-                     height="300">
-                <figcaption class="visually-hidden">Visualisierung der modularen WordPress-Toolbox SEO Wunderkiste</figcaption>
-            </figure>
+            <div class="seo-bloat-killer" id="seo-bloat-killer">
+                <div class="bk-frame" id="bk-frame">
+                    <div class="bk-topbar">
+                        <span class="bk-dot r"></span><span class="bk-dot y"></span><span class="bk-dot g"></span>
+                        <span class="bk-url">wp-admin/plugins.php</span>
+                    </div>
+                    <div class="bk-body">
+                        <!-- BEFORE: 17 Plugins -->
+                        <div class="bk-before">
+                            <div class="bk-plugin"><span class="bk-plugin-name">Yoast SEO Premium</span><span class="bk-plugin-size">4.2 MB</span><span class="bk-plugin-status slow">Slow</span></div>
+                            <div class="bk-plugin"><span class="bk-plugin-name">ShortPixel Image</span><span class="bk-plugin-size">1.8 MB</span><span class="bk-plugin-status active">OK</span></div>
+                            <div class="bk-plugin"><span class="bk-plugin-name">SVG Support Pro</span><span class="bk-plugin-size">0.6 MB</span><span class="bk-plugin-status active">OK</span></div>
+                            <div class="bk-plugin"><span class="bk-plugin-name">Schema Pro</span><span class="bk-plugin-size">2.1 MB</span><span class="bk-plugin-status slow">Slow</span></div>
+                            <div class="bk-plugin"><span class="bk-plugin-name">Disable Comments</span><span class="bk-plugin-size">0.3 MB</span><span class="bk-plugin-status active">OK</span></div>
+                            <div class="bk-plugin"><span class="bk-plugin-name">GA Tracking + 12 weitere...</span><span class="bk-plugin-size">8.7 MB</span><span class="bk-plugin-status slow">&#9888;</span></div>
+                            <div class="bk-totals">
+                                <b>17 Plugins</b> &middot; 17.7 MB &middot; 23 DB-Tabellen &middot; 14 Frontend-Scripts<br>
+                                &#9888; <b>€47/Monat</b> Plugin-Lizenzen
+                            </div>
+                            <div class="bk-before-label">WordPress Plugin-Bloat &middot; Typisches Setup</div>
+                        </div>
+                        <!-- AFTER: Wunderkiste -->
+                        <div class="bk-after">
+                            <div class="bk-wk-header">
+                                <div class="bk-wk-icon">&#9881;&#65039;</div>
+                                <div>
+                                    <div class="bk-wk-name">SEO Wunderkiste</div>
+                                    <div class="bk-wk-ver">v2.9 &middot; 17 Module &middot; 1 Plugin</div>
+                                </div>
+                            </div>
+                            <div class="bk-wk-stat"><span class="bk-wk-stat-label">Dateigröße</span><span class="bk-wk-stat-val accent">0.4 MB</span></div>
+                            <div class="bk-wk-stat"><span class="bk-wk-stat-label">Frontend-Scripts</span><span class="bk-wk-stat-val green">0</span></div>
+                            <div class="bk-wk-stat"><span class="bk-wk-stat-label">DB-Tabellen</span><span class="bk-wk-stat-val green">0 eigene</span></div>
+                            <div class="bk-wk-stat"><span class="bk-wk-stat-label">Lizenzkosten</span><span class="bk-wk-stat-val green">€0 / Monat</span></div>
+                            <div class="bk-wk-modules">
+                                <span class="bk-wk-mod">SEO Meta</span><span class="bk-wk-mod">Schema</span><span class="bk-wk-mod">NoIndex</span>
+                                <span class="bk-wk-mod">Resizer</span><span class="bk-wk-mod">SVG</span><span class="bk-wk-mod">Tracking</span>
+                                <span class="bk-wk-mod">+11 mehr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bk-toggle">
+                    <button class="bk-toggle-btn is-active" data-state="before" type="button">17 Plugins</button>
+                    <button class="bk-toggle-btn" data-state="after" type="button">1 Wunderkiste</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -318,6 +361,29 @@
 
     <footer id="footer-placeholder"></footer>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- BLOAT KILLER – Inline JS                          -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var frame=document.getElementById('bk-frame');
+        var btns=document.querySelectorAll('.bk-toggle-btn');
+        if(!frame||!btns.length)return;
+        var userClicked=false,timer;
+        function set(isAfter){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isAfter){frame.classList.add('is-after');btns[1].classList.add('is-active');}
+            else{frame.classList.remove('is-after');btns[0].classList.add('is-active');}
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='after');
+        });});
+        var isAfter=false;
+        timer=setInterval(function(){if(userClicked)return;isAfter=!isAfter;set(isAfter);},5000);
+    })();
+    </script>
 
 </body>
 </html>
