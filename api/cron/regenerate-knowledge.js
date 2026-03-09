@@ -17,6 +17,12 @@ export const maxDuration = 300;
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
+// ── FIX: Immer die Produktions-Domain verwenden ──
+// req.headers.host liefert bei Cron-Jobs die interne Vercel-Preview-URL,
+// die durch Vercel Authentication (HTTP 401) geschützt ist.
+// Daher: Env-Variable mit Fallback auf Produktions-Domain.
+const SITE_HOST = process.env.SITE_URL || 'designare.at';
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const vectorIndex = new Index({
     url: process.env.UPSTASH_VECTOR_REST_URL,
@@ -41,15 +47,14 @@ export default async function handler(req, res) {
         // ==========================================
         // 1. KNOWLEDGE.JSON LADEN
         // ==========================================
-        const host = req.headers.host || 'designare.at';
-        const protocol = host.includes('localhost') ? 'http' : 'https';
-        const knowledgeUrl = `${protocol}://${host}/knowledge.json`;
+        // FIX: Stabile Produktions-URL statt req.headers.host
+        const knowledgeUrl = `https://${SITE_HOST}/knowledge.json`;
 
         console.log(`📥 Lade ${knowledgeUrl}...`);
 
         const jsonResponse = await fetch(knowledgeUrl);
         if (!jsonResponse.ok) {
-            throw new Error(`knowledge.json nicht erreichbar: HTTP ${jsonResponse.status}. Wurde "npm run build" ausgeführt?`);
+            throw new Error(`knowledge.json nicht erreichbar: HTTP ${jsonResponse.status} von ${knowledgeUrl}. Wurde "npm run build" ausgeführt?`);
         }
 
         const knowledgeData = await jsonResponse.json();
@@ -92,15 +97,25 @@ export default async function handler(req, res) {
         try {
             const kbSlugs = await redis.smembers('kb:_index') || [];
             if (kbSlugs.length > 0) {
-                console.log(`📚 ${kbSlugs.length} Knowledge-Base Chunks gefunden`);
+                console.log(`📚 ${kbSlugs.length} Knowledge-Base Chunks gefunden: ${kbSlugs.join(', ')}`);
                 const chunkResults = await Promise.all(
                     kbSlugs.map(slug => redis.get(`kb:${slug}`).catch(() => null))
                 );
                 for (let i = 0; i < kbSlugs.length; i++) {
                     const raw = chunkResults[i];
-                    if (!raw) continue;
+                    if (!raw) {
+                        console.warn(`⚠️  KB-Chunk kb:${kbSlugs[i]} ist leer/null – übersprungen`);
+                        continue;
+                    }
                     try {
                         const chunk = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+                        // Validierung: Content muss vorhanden sein
+                        if (!chunk.content || chunk.content.trim().length < 20) {
+                            console.warn(`⚠️  KB-Chunk kb:${kbSlugs[i]} hat zu wenig Content (${(chunk.content || '').length} Zeichen) – übersprungen`);
+                            continue;
+                        }
+
                         // Als "Seite" in filteredPages einfügen – gleiche Struktur
                         // Content ZUERST, Tags am Ende – sonst verwässern Tags das Embedding
                         const tagSuffix = (chunk.tags || []).length > 0
@@ -121,6 +136,8 @@ export default async function handler(req, res) {
                     }
                 }
                 console.log(`✅ ${kbChunkCount} KB-Chunks als Seiten hinzugefügt → ${filteredPages.length} Seiten total`);
+            } else {
+                console.log('ℹ️  Keine Knowledge-Base Chunks in Redis gefunden (kb:_index leer)');
             }
         } catch (kbError) {
             console.warn('⚠️  Knowledge-Base Laden fehlgeschlagen:', kbError.message);
@@ -168,7 +185,8 @@ export default async function handler(req, res) {
                     });
 
                     uploadedChunks++;
-                    console.log(`   📤 ${page.slug} (Seiten-Vektor)`);
+                    const typeLabel = page.type === 'knowledge-base' ? 'KB-Chunk' : 'Seiten-Vektor';
+                    console.log(`   📤 ${page.slug} (${typeLabel}, ${textToEmbed.length} Zeichen)`);
                     await new Promise(r => setTimeout(r, 300));
 
                 } catch (err) {
@@ -224,7 +242,11 @@ export default async function handler(req, res) {
             processing_time_ms: processingTime
         };
 
-        console.log(`✅ Vektor-DB Sync abgeschlossen: ${uploadedChunks} Chunks aus ${filteredPages.length} Seiten (davon ${kbChunkCount} KB-Chunks) in ${processingTime}ms`);
+        console.log(`\n✅ Vektor-DB Sync abgeschlossen:`);
+        console.log(`   📄 ${filteredPages.length} Seiten (davon ${kbChunkCount} KB-Chunks)`);
+        console.log(`   📤 ${uploadedChunks} Chunks hochgeladen`);
+        if (uploadErrors > 0) console.log(`   ❌ ${uploadErrors} Fehler`);
+        console.log(`   ⏱️  ${processingTime}ms`);
 
         return res.status(200).json({
             success: true,
