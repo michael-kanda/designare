@@ -267,6 +267,19 @@
     outline-offset: 3px;
 }
 
+/* ── Fix: summary-image braucht Breite auf Mobile ── */
+.summary-image:has(.evita-chat-sim) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.evita-chat-sim) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
 
 /* ============================================ */
 /* KONZEPT 03: ORBIT AVATAR                      */
