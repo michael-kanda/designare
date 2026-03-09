@@ -40,6 +40,7 @@ const articleFiles = [
     'css/geo-seo-animations.css',
     'css/schema-org-animations.css',
     'css/seo-wunderkiste-anim.css',
+    'css/wp-ki-core-anim.css',
     'css/ai-visibility.css'
 ];
 
