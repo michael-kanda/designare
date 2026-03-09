@@ -39,6 +39,7 @@ const articleFiles = [
     'css/ai-hero-eyes.css',
     'css/geo-seo-animations.css',
     'css/schema-org-animations.css',
+    'css/seo-wunderkiste-anim.css',
     'css/ai-visibility.css'
 ];
 
