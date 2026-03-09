@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/wp-ki-core-anim.css">
     
     <link rel="canonical" href="https://designare.at/wordpress-7-ki-core"/>
 
@@ -168,15 +169,77 @@
                         </ul>
                     </div>
 
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- PLUGIN CHAOS → CORE: WP 6.8 vs. WP 7.0   -->
+                    <!-- Ersetzt images/wp7-ai-dashboard.webp       -->
+                    <!-- ══════════════════════════════════════════ -->
                     <div class="summary-image">
-                        <figure>
-                            <img src="images/wp7-ai-dashboard.webp" 
-                                 alt="Visualisierung der WordPress KI-Architektur mit Abilities API und AI Client" 
-                                 title="WordPress AI Core Architecture"
-                                 loading="lazy" 
-                                 width="300" 
-                                 height="300">
-                        </figure>
+                        <div class="wp-chaos-core" id="wp-chaos-core">
+                            <div class="wpc-frame" id="wpc-frame">
+                                <div class="wpc-topbar">
+                                    <span class="wpc-dot r"></span><span class="wpc-dot y"></span><span class="wpc-dot g"></span>
+                                    <span class="wpc-url">wp-admin/plugins.php</span>
+                                </div>
+                                <div class="wpc-body">
+                                    <!-- BEFORE: Plugin-Chaos -->
+                                    <div class="wpc-before">
+                                        <div class="wpc-plugins">
+                                            <span class="wpc-pill">AI Writer Pro — €29/mo</span>
+                                            <span class="wpc-pill">ChatBot Plus — €19/mo</span>
+                                            <span class="wpc-pill warn">Image AI — VERALTET</span>
+                                            <span class="wpc-pill">GPT SEO Helper — €15/mo</span>
+                                            <span class="wpc-pill warn">Translate AI — KONFLIKT</span>
+                                        </div>
+                                        <div class="wpc-status">&#9888; <span class="red">3 API-Keys</span> in verschiedenen Plugins verstreut</div>
+                                        <div class="wpc-status">&#9888; <span class="red">€63/Monat</span> Plugin-Abos + API-Kosten</div>
+                                        <div class="wpc-bar"><div class="wpc-bar-fill red"></div></div>
+                                        <div class="wpc-bar-label">Server-Last: 87% &middot; 14 HTTP-Clients geladen</div>
+                                        <div class="wpc-bar"><div class="wpc-bar-fill orange"></div></div>
+                                        <div class="wpc-bar-label">Sicherheit: 3 Plugins ohne Update seit 6+ Monaten</div>
+                                        <div class="wpc-before-label">WordPress 6.8 &middot; Plugin-Flickenteppich</div>
+                                    </div>
+                                    <!-- AFTER: Clean Core -->
+                                    <div class="wpc-after">
+                                        <div class="wpc-core-header">
+                                            <div class="wpc-wp-icon">W</div>
+                                            <div>
+                                                <div class="wpc-core-title">KI-Zugangsdaten</div>
+                                                <div class="wpc-core-sub">Zentrale Konfiguration &middot; Ein API-Key für alles</div>
+                                            </div>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">Anbieter</span>
+                                            <span class="wpc-setting-val">Google Gemini &#10003;</span>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">API-Key</span>
+                                            <span class="wpc-setting-val">sk-••••••4f2a &#10003;</span>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">Modell</span>
+                                            <span class="wpc-setting-val">gemini-2.5-flash &#10003;</span>
+                                        </div>
+                                        <div class="wpc-abilities-title">Registrierte Abilities:</div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">core/generate-text</span>
+                                            <span class="wpc-ability-desc">Textgenerierung im Editor</span>
+                                        </div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">core/generate-image</span>
+                                            <span class="wpc-ability-desc">Bildgenerierung → Mediathek</span>
+                                        </div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">mcp/erstelle-entwurf</span>
+                                            <span class="wpc-ability-desc">Agenten-Zugriff via MCP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wpc-toggle">
+                                <button class="wpc-toggle-btn is-active" data-state="before" type="button">WP 6.8: Chaos</button>
+                                <button class="wpc-toggle-btn" data-state="after" type="button">WP 7.0: Core</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -505,6 +568,29 @@ if ( $prompt-&gt;is_supported_for_text_generation() ) {
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js" defer></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- WP KI CORE – Plugin Chaos Toggle JS               -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var frame=document.getElementById('wpc-frame');
+        var btns=document.querySelectorAll('.wpc-toggle-btn');
+        if(!frame||!btns.length)return;
+        var userClicked=false,timer;
+        function set(isAfter){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isAfter){frame.classList.add('is-after');btns[1].classList.add('is-active');}
+            else{frame.classList.remove('is-after');btns[0].classList.add('is-active');}
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='after');
+        });});
+        var isAfter=false;
+        timer=setInterval(function(){if(userClicked)return;isAfter=!isAfter;set(isAfter);},5000);
+    })();
+    </script>
 
 </body>
 </html>
