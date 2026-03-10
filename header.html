@@ -4,7 +4,21 @@
     </a>
     
     <nav class="header-right-controls" aria-label="Schnellzugriff">
-        <!-- Theme Toggle: Mond | Switch | Sonne -->
+        <!-- Theme Toggle: Einzelnes Icon (Material Symbols) -->
+        <button 
+            class="theme-toggle-icon" 
+            id="theme-toggle" 
+            type="button"
+            aria-label="Farbschema umschalten" 
+            aria-describedby="theme-status"
+            role="switch" 
+            aria-checked="false">
+            <span class="material-symbols-outlined theme-icon-dark">dark_mode</span>
+            <span class="material-symbols-outlined theme-icon-light">sunny</span>
+        </button>
+        <span id="theme-status" class="visually-hidden">Aktuell: Dunkelmodus</span>
+
+        <!-- AUSKOMMENTIERT: Alter Toggle mit Schalter
         <div class="theme-toggle-wrapper" role="group" aria-label="Farbschema wählen">
             <span class="toggle-icon-left" aria-hidden="true">
                 <i class="fas fa-moon"></i>
@@ -24,6 +38,7 @@
                 <i class="fas fa-sun"></i>
             </span>
         </div>
+        -->
  
         <button 
             id="cookie-settings-button" 
