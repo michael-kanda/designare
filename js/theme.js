@@ -1,16 +1,6 @@
 // js/theme.js - UPDATED: Material Symbol Icon Toggle + dynamischer Font-Load
 import { updateParticleColors } from './effects.js';
 
-// Material Symbols Font dynamisch laden (einmalig)
-(function loadMaterialSymbols() {
-    if (document.querySelector('link[href*="Material+Symbols+Outlined"]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    // HIER GEÄNDERT: cookie und mail zu den icon_names hinzugefügt
-    link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=dark_mode,sunny,cookie,mail';
-    document.head.appendChild(link);
-})();
-
 function applyTheme(theme) {
     const html = document.documentElement;
     const body = document.body;
