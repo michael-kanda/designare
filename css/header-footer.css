@@ -165,11 +165,22 @@
 .theme-toggle-icon {
     position: relative;
     overflow: hidden;
-    background: none !important;
+    /* Macht den Hintergrund komplett transparent */
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.theme-toggle-icon:hover {
-    background: none !important;
+/* Verhindert Hintergründe beim Hovern, Fokussieren (Tastatur) und Klicken */
+.theme-toggle-icon:hover,
+.theme-toggle-icon:focus,
+.theme-toggle-icon:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: var(--accent-color); /* Lässt nur das Icon beim Hover farbig werden (optional) */
 }
 
 .theme-toggle-icon .material-symbols-outlined {
@@ -179,6 +190,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    /* Sicherheitshalber auch hier transparent machen */
+    background: transparent !important;
 }
 
 /* Dark Mode (Standard): dark_mode Icon sichtbar, sunny versteckt */
