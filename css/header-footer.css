@@ -199,13 +199,13 @@
 /* Dark Mode (Standard): dark_mode Icon sichtbar, sunny versteckt */
 .theme-toggle-icon .theme-icon-dark {
     opacity: 1;
-    visibility: visible;
+    display: block;
     transform: translate(-50%, -50%) rotate(0deg);
 }
 
 .theme-toggle-icon .theme-icon-light {
     opacity: 0;
-    visibility: hidden;
+    display: none;
     transform: translate(-50%, -50%) rotate(-90deg);
 }
 
@@ -213,14 +213,14 @@
 body.light-mode .theme-toggle-icon .theme-icon-dark,
 html.light-mode .theme-toggle-icon .theme-icon-dark {
     opacity: 0;
-    visibility: hidden;
+    display: none;
     transform: translate(-50%, -50%) rotate(90deg);
 }
 
 body.light-mode .theme-toggle-icon .theme-icon-light,
 html.light-mode .theme-toggle-icon .theme-icon-light {
     opacity: 1;
-    visibility: visible;
+    display: block;
     transform: translate(-50%, -50%) rotate(0deg);
 }
 
