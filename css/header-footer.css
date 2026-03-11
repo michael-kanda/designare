@@ -192,18 +192,20 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
     background: transparent !important;
 }
 
 /* Dark Mode (Standard): dark_mode Icon sichtbar, sunny versteckt */
 .theme-toggle-icon .theme-icon-dark {
     opacity: 1;
+    visibility: visible;
     transform: translate(-50%, -50%) rotate(0deg);
 }
 
 .theme-toggle-icon .theme-icon-light {
     opacity: 0;
+    visibility: hidden;
     transform: translate(-50%, -50%) rotate(-90deg);
 }
 
@@ -211,12 +213,14 @@
 body.light-mode .theme-toggle-icon .theme-icon-dark,
 html.light-mode .theme-toggle-icon .theme-icon-dark {
     opacity: 0;
+    visibility: hidden;
     transform: translate(-50%, -50%) rotate(90deg);
 }
 
 body.light-mode .theme-toggle-icon .theme-icon-light,
 html.light-mode .theme-toggle-icon .theme-icon-light {
     opacity: 1;
+    visibility: visible;
     transform: translate(-50%, -50%) rotate(0deg);
 }
 
