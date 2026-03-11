@@ -32,37 +32,22 @@ export function showAIResponse(content, isHTML = false) {
 }
 
 // ===================================================================
-// COOKIE MODAL SETUP
+// COOKIE MODAL SETUP (Bereinigt für Consent Mode v2)
 // ===================================================================
 function setupCookieModal() {
-    const cookieInfoLightbox = document.getElementById('cookie-info-lightbox');
-    const acknowledgeCookieLightboxBtn = document.getElementById('acknowledge-cookie-lightbox');
-    const privacyPolicyLinkButton = document.getElementById('privacy-policy-link-button');
     const cookieInfoButton = document.getElementById('cookie-info-button');
 
-    if (cookieInfoLightbox && !localStorage.getItem('hasSeenCookieInfoLightbox')) {
-        setTimeout(() => openModal(cookieInfoLightbox), 2000);
-    }
+    // Das automatische Öffnen und die alten Buttons wurden entfernt.
+    // consent-banner.js kümmert sich jetzt um die Logik und das Einblenden.
 
-    if (acknowledgeCookieLightboxBtn) {
-        acknowledgeCookieLightboxBtn.addEventListener('click', () => {
-            localStorage.setItem('hasSeenCookieInfoLightbox', 'true');
-            closeModal(cookieInfoLightbox);
-        });
-    }
-
-    if (privacyPolicyLinkButton) {
-        privacyPolicyLinkButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (cookieInfoLightbox) closeModal(cookieInfoLightbox);
-            loadLegalContentWithPagination('datenschutz.html');
-        });
-    }
-
+    // Falls du auf der Seite noch einen Button (z.B. im Footer) mit der ID "cookie-info-button" hast, 
+    // leiten wir den Klick jetzt sauber an den neuen Consent Manager weiter:
     if (cookieInfoButton) {
         cookieInfoButton.addEventListener('click', (e) => {
             e.preventDefault();
-            if (cookieInfoLightbox) openModal(cookieInfoLightbox);
+            if (window.ConsentManager) {
+                window.ConsentManager.showSettings();
+            }
         });
     }
 }
