@@ -162,35 +162,39 @@
    Einzelnes Icon, kein Schalter
    =================== */
 
-.theme-toggle-icon {
-    position: relative;
-    overflow: hidden;
-    /* Macht den Hintergrund komplett transparent */
+/* ===================
+   4a. THEME TOGGLE ICON (Material Symbols)
+   Einzelnes Icon, kein Schalter
+   =================== */
+
+/* Standard-Zustand: Zwingend transparent machen */
+.header-right-controls button#theme-toggle {
     background: transparent !important;
     background-color: transparent !important;
-    border: none !important;
     box-shadow: none !important;
+    border: none !important;
 }
 
-/* Verhindert Hintergründe beim Hovern, Fokussieren (Tastatur) und Klicken */
-.theme-toggle-icon:hover,
-.theme-toggle-icon:focus,
-.theme-toggle-icon:active {
+/* Hover, Focus & Active Zustand GEZIELT überschreiben, um den farbigen Hintergrund zu blockieren */
+.header-right-controls button#theme-toggle:hover,
+.header-right-controls button#theme-toggle:focus,
+.header-right-controls button#theme-toggle:active {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
     outline: none !important;
-    color: var(--accent-color); /* Lässt nur das Icon beim Hover farbig werden (optional) */
+    color: var(--accent-color); /* Lässt das Icon beim Hover in deiner Akzentfarbe leuchten */
+    transform: scale(1.1); /* Behält den leichten Zoom-Effekt bei */
 }
 
-.theme-toggle-icon .material-symbols-outlined {
+/* Positionierung des Icons im Button */
+.header-right-controls button#theme-toggle .material-symbols-outlined {
     font-size: 24px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     transition: opacity 0.3s ease, transform 0.3s ease;
-    /* Sicherheitshalber auch hier transparent machen */
     background: transparent !important;
 }
 
@@ -217,22 +221,6 @@ html.light-mode .theme-toggle-icon .theme-icon-light {
     opacity: 1;
     transform: translate(-50%, -50%) rotate(0deg);
 }
-
-/* AUSKOMMENTIERT: Alter Toggle-Schalter Styles
-.theme-toggle-wrapper {
-    ...
-}
-.theme-toggle {
-    ...
-}
-.toggle-knob {
-    ...
-}
-.toggle-icon-left,
-.toggle-icon-right {
-    ...
-}
-*/
 
 /* ============================
    4b. EVITA HEADER AVATAR
