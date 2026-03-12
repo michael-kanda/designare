@@ -7,13 +7,15 @@ import { getMemory, saveMemory, extractMemoryContext, buildUpdatedMemory } from 
 import { sendEmail, isEmailBlocked, isEmailWhitelisted, normalizeEmail, MAX_EMAILS_PER_SESSION } from '../lib/email-service.js';
 import { searchContext } from '../lib/rag-service.js';
 import { buildSystemPrompt } from '../lib/prompt-builder.js';
-import { generateWithFallback, parseGeminiResponse, buildChatContents } from '../lib/gemini-client.js';
+import { generateWithFallback, generateWithFunctionResponse, parseGeminiResponse, buildChatContents } from '../lib/gemini-client.js';
 import { dispatchFunctionCalls } from '../lib/tool-handlers.js';
+import { getWeatherContext, getWeather, geocodeCity } from '../lib/weather-service.js';
+import { getNewsContext } from '../lib/news-service.js';
 
 // ===================================================================
 // TOPIC KEYWORDS
 // ===================================================================
-const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|speed|hosting|security|schema|css|html|javascript|react|php|python|datapeak|silas|evita|kuchen|rezept|blog|shop|woocommerce|dsgvo|daten|backup|ssl|domain|analytics|tracking|caching|cdn|responsive|mobile|design|ux|ui|server|deployment|git|docker|nginx|apache|core web vitals|pagespeed|lighthouse|sitemap|robots|meta|snippet|featured|backlinks?|keywords?|ranking|indexierung|crawl|search console|email|e-mail|brevo|newsletter)/g;
+const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|speed|hosting|security|schema|css|html|javascript|react|php|python|datapeak|silas|evita|kuchen|rezept|blog|shop|woocommerce|dsgvo|daten|backup|ssl|domain|analytics|tracking|caching|cdn|responsive|mobile|design|ux|ui|server|deployment|git|docker|nginx|apache|core web vitals|pagespeed|lighthouse|sitemap|robots|meta|snippet|featured|backlinks?|keywords?|ranking|indexierung|crawl|search console|email|e-mail|brevo|newsletter|wetter|weather)/g;
 
 // ===================================================================
 // MAIN HANDLER
@@ -65,24 +67,61 @@ export default async function handler(req, res) {
       });
     }
 
-    // ── RAG-Kontext suchen ──
-    const { additionalContext, availableLinks } = await searchContext(userMessage, currentPage);
+    // ── Kontexte parallel laden (RAG + Wetter + News) ──
+    const [ragResult, weatherContext, newsContext] = await Promise.all([
+      searchContext(userMessage, currentPage),
+      // Wetter nur bei erster Nachricht der Session laden (spart Latenz)
+      isFirstMessageInSession ? getWeatherContext() : Promise.resolve(''),
+      // News nur bei erster Nachricht laden
+      isFirstMessageInSession ? getNewsContext() : Promise.resolve('')
+    ]);
+
+    const { additionalContext, availableLinks } = ragResult;
 
     // ── System-Prompt bauen ──
     const systemPrompt = buildSystemPrompt({
       isReturningUser, knownName, visitCount: effectiveVisitCount, lastVisit, previousTopics,
       emailsSent, currentPage, additionalContext, availableLinks,
-      isFirstMessage: isFirstMessageInSession
+      isFirstMessage: isFirstMessageInSession,
+      weatherContext,
+      newsContext
     });
 
     // ── Chat-Contents + Gemini-Call ──
     const contents = buildChatContents(history, userMessage);
-    const { response, usedModel } = await generateWithFallback(contents, systemPrompt);
-    const { answerText, functionCalls } = parseGeminiResponse(response);
+    let { response, usedModel } = await generateWithFallback(contents, systemPrompt);
+    let { answerText, functionCalls } = parseGeminiResponse(response);
 
     console.log(`🤖 ${usedModel} | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
 
-    // ── Function Calls verarbeiten ──
+    // ── Wetter-Tool Roundtrip ──
+    // get_weather ist ein "Data Tool": Gemini braucht die Daten zurück um zu antworten.
+    // Andere Tools (open_booking, compose_email etc.) sind "Action Tools" und werden
+    // im Frontend verarbeitet – die brauchen keinen Roundtrip.
+    const weatherCall = functionCalls.find(fc => fc.name === 'get_weather');
+    if (weatherCall) {
+      const weatherData = await resolveWeatherCall(weatherCall);
+
+      if (weatherData) {
+        console.log(`🌤️ Wetter-Roundtrip: ${weatherData.location} → ${weatherData.temperature}°C`);
+        const followUp = await generateWithFunctionResponse(
+          contents, systemPrompt, response,
+          'get_weather', weatherData, usedModel
+        );
+        response = followUp.response;
+        usedModel = followUp.usedModel;
+
+        // Neu parsen – jetzt hat Gemini die Wetterdaten und antwortet natürlich
+        const parsed = parseGeminiResponse(response);
+        answerText = parsed.answerText;
+        // Nur die NICHT-Wetter function calls behalten
+        functionCalls = parsed.functionCalls;
+
+        console.log(`🤖 Wetter-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
+      }
+    }
+
+    // ── Function Calls verarbeiten (Action Tools) ──
     const responsePayload = dispatchFunctionCalls(functionCalls, answerText, {
       currentPage, history, userMessage
     });
@@ -119,6 +158,30 @@ export default async function handler(req, res) {
     trackChatMessage({ sessionId, userMessage: message || prompt || '', isReturningUser: false, usedFallback: true, modelUsed: 'fallback', bookingIntent: false, bookingCompleted: false });
     trackFallback(message || prompt || '');
     res.status(500).json({ answer: 'Pixelfehler im System! Michael ist dran.' });
+  }
+}
+
+// ===================================================================
+// WETTER-TOOL RESOLVER
+// ===================================================================
+async function resolveWeatherCall(weatherCall) {
+  try {
+    const cityName = weatherCall.args?.city || 'Wien';
+
+    if (cityName.toLowerCase() === 'wien' || cityName.toLowerCase() === 'vienna') {
+      return await getWeather(); // Default Wien-Koordinaten
+    }
+
+    // Andere Stadt → Geocoding
+    const location = await geocodeCity(cityName);
+    if (!location) {
+      return { error: `Stadt "${cityName}" nicht gefunden.`, location: cityName };
+    }
+
+    return await getWeather(location);
+  } catch (err) {
+    console.error('❌ Wetter-Resolver Fehler:', err.message);
+    return null;
   }
 }
 
