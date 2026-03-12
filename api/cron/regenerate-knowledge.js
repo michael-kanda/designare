@@ -29,6 +29,19 @@ const vectorIndex = new Index({
     token: process.env.UPSTASH_VECTOR_REST_TOKEN,
 });
 
+// ===================================================================
+// HELPER: Tags normalisieren (String → Array)
+// ===================================================================
+function normalizeTags(tags) {
+    if (!tags) return [];
+    if (Array.isArray(tags)) return tags.map(t => t.trim()).filter(Boolean);
+    if (typeof tags === 'string') {
+        // Komma-separierter String → Array
+        return tags.split(',').map(t => t.trim()).filter(Boolean);
+    }
+    return [];
+}
+
 export default async function handler(req, res) {
     // ── Auth: Nur Vercel Cron oder Bearer Secret ──
     const authHeader = req.headers.authorization;
@@ -116,11 +129,14 @@ export default async function handler(req, res) {
                             continue;
                         }
 
-                        // Als "Seite" in filteredPages einfügen – gleiche Struktur
+                        // FIX: Tags defensiv normalisieren (String ODER Array → immer Array)
+                        const tags = normalizeTags(chunk.tags);
+
                         // Content ZUERST, Tags am Ende – sonst verwässern Tags das Embedding
-                        const tagSuffix = (chunk.tags || []).length > 0
-                            ? `\nStichworte: ${chunk.tags.join(', ')}`
+                        const tagSuffix = tags.length > 0
+                            ? `\nStichworte: ${tags.join(', ')}`
                             : '';
+
                         filteredPages.push({
                             title: chunk.title,
                             slug: `kb-${kbSlugs[i]}`,
@@ -128,9 +144,10 @@ export default async function handler(req, res) {
                             text: `${chunk.content}${tagSuffix}`,
                             sections: [],
                             type: 'knowledge-base',
-                            tags: chunk.tags || []
+                            tags
                         });
                         kbChunkCount++;
+                        console.log(`   📚 KB-Chunk geladen: "${chunk.title}" (${chunk.content.length} Zeichen, ${tags.length} Tags)`);
                     } catch (parseErr) {
                         console.warn(`⚠️  KB-Chunk kb:${kbSlugs[i]} nicht parsbar:`, parseErr.message);
                     }
@@ -172,15 +189,18 @@ export default async function handler(req, res) {
                     const result = await embeddingModel.embedContent(textToEmbed);
                     const vector = result.embedding.values.slice(0, 768);
 
+                    // FIX: Kein `data` Feld mehr – nur `vector` + `metadata`
+                    // `data` triggert Upstash's eingebautes Embedding und kann
+                    // bei Custom-Vektor-Indizes zu Konflikten führen
                     await vectorIndex.upsert({
                         id: `page_${page.slug}`,
                         vector,
-                        data: textToEmbed,
                         metadata: {
                             title: page.title,
                             url: page.url || (page.type === 'knowledge-base' ? null : `/${page.slug}.html`),
                             section_heading: null,
-                            content: (page.text || '').substring(0, 2000)
+                            content: (page.text || '').substring(0, 2000),
+                            type: page.type || 'page'
                         }
                     });
 
@@ -205,15 +225,16 @@ export default async function handler(req, res) {
                         const result = await embeddingModel.embedContent(textToEmbed);
                         const vector = result.embedding.values.slice(0, 768);
 
+                        // FIX: Kein `data` Feld mehr
                         await vectorIndex.upsert({
                             id: `section_${page.slug}__${s}`,
                             vector,
-                            data: textToEmbed,
                             metadata: {
                                 title: page.title,
                                 url: page.url || (page.type === 'knowledge-base' ? null : `/${page.slug}.html`),
                                 section_heading: section.heading,
-                                content: section.content
+                                content: section.content,
+                                type: page.type || 'page'
                             }
                         });
 
