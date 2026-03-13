@@ -2456,6 +2456,7 @@
             if (check.details.plan) details.push(`Plan: ${check.details.plan}`);
             if (check.details.credits !== undefined) details.push(`${check.details.credits} Credits`);
             if (check.details.age_hours !== undefined) details.push(`${check.details.age_hours}h alt`);
+            if (check.details.sources !== undefined) details.push(`${check.details.sources} Quellen`);
             if (check.details.knowledge_sync) {
               const ks = check.details.knowledge_sync;
               if (ks.last_run) details.push(`Letzter Sync: ${getTimeAgo(new Date(ks.last_run))}`);
