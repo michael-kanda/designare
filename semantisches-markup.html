@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/sem-markup-anim.css">
     
     <link rel="canonical" href="https://designare.at/semantisches-markup" />
 
@@ -154,16 +155,59 @@
             </ul>
         </div>
 
+        <!-- ══════════════════════════════════════════ -->
+        <!-- DIV-SOUP → CLEAN CODE Toggle               -->
+        <!-- Ersetzt images/semantisches-html.webp       -->
+        <!-- ══════════════════════════════════════════ -->
         <div class="summary-image">
-            <figure>
-                <img src="images/semantisches-html.webp" 
-                     alt="Visualisierung: Semantisches HTML-Markup Struktur im Vergleich zu unstrukturiertem Code" 
-                     title="Semantisches Markup vs. Div-Soup"
-                     loading="lazy" 
-                     width="300" 
-                     height="300">
-                <figcaption class="visually-hidden">Grafische Darstellung der semantischen HTML-Struktur für SEO</figcaption>
-            </figure>
+            <div class="sem-soup-clean" id="sem-soup-clean">
+                <div class="sc-frame" id="sc-frame">
+                    <div class="sc-topbar">
+                        <span class="sc-dot r"></span><span class="sc-dot y"></span><span class="sc-dot g"></span>
+                        <span class="sc-filename" id="sc-filename">index.html</span>
+                    </div>
+                    <div class="sc-body">
+                        <!-- Div-Soup -->
+                        <div class="sc-soup">
+                            <div class="sc-comment">&lt;!-- Div-Soup: Was bedeutet was? --&gt;</div>
+                            <div><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"header"</span><span class="sc-tag-bad">&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"nav"</span><span class="sc-tag-bad">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"content"</span><span class="sc-tag-bad">&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"post"</span><span class="sc-tag-bad">&gt;</span></div>
+                            <div class="sc-indent-2"><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"title"</span><span class="sc-tag-bad">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div class="sc-indent-2"><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"text"</span><span class="sc-tag-bad">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"sidebar"</span><span class="sc-tag-bad">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                            <div><span class="sc-tag-bad">&lt;div</span> <span class="sc-attr">class=</span><span class="sc-str">"footer"</span><span class="sc-tag-bad">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-bad">&lt;/div&gt;</span></div>
+                        </div>
+                        <!-- Clean Code -->
+                        <div class="sc-clean">
+                            <div class="sc-comment">&lt;!-- Semantisch: Jedes Tag hat Bedeutung --&gt;</div>
+                            <div><span class="sc-tag-good">&lt;header&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-good">&lt;nav</span> <span class="sc-attr">aria-label=</span><span class="sc-str">"Hauptmenü"</span><span class="sc-tag-good">&gt;</span><span class="sc-txt">...</span><span class="sc-tag-good">&lt;/nav&gt;</span></div>
+                            <div><span class="sc-tag-good">&lt;/header&gt;</span></div>
+                            <div><span class="sc-tag-good">&lt;main&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-good">&lt;article&gt;</span></div>
+                            <div class="sc-indent-2"><span class="sc-tag-good">&lt;h1&gt;</span><span class="sc-txt">...</span><span class="sc-tag-good">&lt;/h1&gt;</span></div>
+                            <div class="sc-indent-2"><span class="sc-tag-good">&lt;time</span> <span class="sc-attr">datetime=</span><span class="sc-str">"2025-12-15"</span><span class="sc-tag-good">&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-good">&lt;/article&gt;</span></div>
+                            <div class="sc-indent"><span class="sc-tag-good">&lt;aside&gt;</span><span class="sc-txt">...</span><span class="sc-tag-good">&lt;/aside&gt;</span></div>
+                            <div><span class="sc-tag-good">&lt;/main&gt;</span></div>
+                            <div><span class="sc-tag-good">&lt;footer&gt;</span><span class="sc-txt">...</span><span class="sc-tag-good">&lt;/footer&gt;</span></div>
+                        </div>
+                    </div>
+                    <div class="sc-statusbar">
+                        <span class="sc-status-icon" id="sc-status-icon">&#10005;</span>
+                        <span class="sc-status-text" id="sc-status-text">11× &lt;div&gt; · 0 Landmarks · KI versteht: nichts</span>
+                    </div>
+                </div>
+                <div class="sc-toggle">
+                    <button class="sc-toggle-btn is-active" data-state="soup" type="button">Div-Soup</button>
+                    <button class="sc-toggle-btn" data-state="clean" type="button">Semantisch</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -403,5 +447,40 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- DIV-SOUP → CLEAN CODE – Inline JS                 -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var frame=document.getElementById('sc-frame');
+        var btns=document.querySelectorAll('.sc-toggle-btn');
+        var filename=document.getElementById('sc-filename');
+        var icon=document.getElementById('sc-status-icon');
+        var statusText=document.getElementById('sc-status-text');
+        if(!frame||!btns.length)return;
+        var userClicked=false,timer;
+        function set(isClean){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isClean){
+                frame.classList.add('is-clean');btns[1].classList.add('is-active');
+                if(filename)filename.textContent='index.html (semantic)';
+                if(icon)icon.innerHTML='&#10003;';
+                if(statusText)statusText.textContent='0 div \u00B7 6 Landmarks \u00B7 KI versteht: alles';
+            }else{
+                frame.classList.remove('is-clean');btns[0].classList.add('is-active');
+                if(filename)filename.textContent='index.html';
+                if(icon)icon.innerHTML='&#10005;';
+                if(statusText)statusText.textContent='11\u00D7 <div> \u00B7 0 Landmarks \u00B7 KI versteht: nichts';
+            }
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='clean');
+        });});
+        var isClean=false;
+        timer=setInterval(function(){if(userClicked)return;isClean=!isClean;set(isClean);},5000);
+    })();
+    </script>
 </body>
 </html>
