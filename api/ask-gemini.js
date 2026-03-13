@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     }
 
     // ── Kontexte parallel laden (RAG + Wetter + News) ──
-    const wantsNews = /news|nachrichten|tech.?news|neuigkeiten/i.test(userMessage);
+    const wantsNews = /news|nachrichten|neuigkeiten|neues\b|was gibt.{0,10}neu/i.test(userMessage);
 
     const [ragResult, weatherContext, newsContext] = await Promise.all([
       searchContext(userMessage, currentPage),
