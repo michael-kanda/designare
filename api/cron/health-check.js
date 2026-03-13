@@ -135,22 +135,22 @@ async function checkWebsite() {
 async function checkNewsBriefing() {
   const t0 = Date.now();
   try {
-    const raw = await redis.get('evita:news:briefing');
+    const raw = await redis.get('news:daily-briefing');
     if (!raw) return { status: 'warn', latency_ms: Date.now() - t0, error: 'Kein Briefing vorhanden' };
 
     const briefing = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    const updatedAt = briefing.updated_at ? new Date(briefing.updated_at) : null;
+    const updatedAt = briefing.fetchedAt ? new Date(briefing.fetchedAt) : null;
 
     if (!updatedAt) {
       return { status: 'warn', latency_ms: Date.now() - t0, error: 'Kein Timestamp im Briefing' };
     }
 
     const ageHours = (Date.now() - updatedAt.getTime()) / (1000 * 60 * 60);
-    if (ageHours > 28) {
+    if (ageHours > 20) {
       return {
         status: 'warn',
         latency_ms: Date.now() - t0,
-        error: `Briefing veraltet (${Math.round(ageHours)}h alt)`,
+        error: `Briefing veraltet (${Math.round(ageHours)}h alt, Limit: 20h)`,
         details: { age_hours: Math.round(ageHours) }
       };
     }
@@ -158,7 +158,7 @@ async function checkNewsBriefing() {
     return {
       status: 'ok',
       latency_ms: Date.now() - t0,
-      details: { age_hours: Math.round(ageHours * 10) / 10 }
+      details: { age_hours: Math.round(ageHours * 10) / 10, sources: briefing.sources?.length || 0 }
     };
   } catch (err) {
     return { status: 'error', latency_ms: Date.now() - t0, error: err.message };
