@@ -115,7 +115,18 @@ export default async function handler(req, res) {
     });
 
     // ── Chat-Contents + Gemini-Call ──
-    const contents = buildChatContents(history, userMessage);
+    // NEU: History trimmen ab Turn 10 – die letzten 10 Turns reichen für Kontext,
+    // ältere Turns verdrängen den System-Prompt (RAG + Instruktionen) aus dem Context-Window
+    const MAX_HISTORY_TURNS = 10;
+    const trimmedHistory = (history && history.length > MAX_HISTORY_TURNS * 2)
+      ? history.slice(-(MAX_HISTORY_TURNS * 2))  // *2 weil user+assistant = 2 Einträge pro Turn
+      : (history || []);
+
+    if (history && trimmedHistory.length < history.length) {
+      console.log(`✂️ History getrimmt: ${history.length} → ${trimmedHistory.length} Einträge (${MAX_HISTORY_TURNS} Turns behalten)`);
+    }
+
+    const contents = buildChatContents(trimmedHistory, userMessage);
     let { response, usedModel } = await generateWithFallback(contents, systemPrompt);
     let { answerText, functionCalls } = parseGeminiResponse(response);
 
