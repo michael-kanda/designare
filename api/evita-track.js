@@ -1,5 +1,6 @@
 // api/evita-track.js - Tracking-Helper für das Evita- & Silas-Dashboard
 // Wird von ask-gemini.js, ai-visibility-check.js und generate.js importiert
+// NEU: Intent-Tracking + RAG-Skip-Tracking
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -22,8 +23,9 @@ function hourKey() {
 
 // ===================================================================
 // EVITA CHAT TRACKING
+// NEU: intent + ragSkipped Felder
 // ===================================================================
-export async function trackChatMessage({ sessionId, userMessage, isReturningUser, usedFallback, modelUsed, bookingIntent, bookingCompleted }) {
+export async function trackChatMessage({ sessionId, userMessage, isReturningUser, usedFallback, modelUsed, bookingIntent, bookingCompleted, intent, ragSkipped }) {
   const day = todayKey();
   const hour = hourKey();
 
@@ -43,6 +45,16 @@ export async function trackChatMessage({ sessionId, userMessage, isReturningUser
 
     if (bookingCompleted) {
       pipeline.hincrby(`evita:stats:daily:${day}`, 'booking_completions', 1);
+    }
+
+    // NEU: RAG-Skip Zähler (zeigt wie viel du sparst)
+    if (ragSkipped) {
+      pipeline.hincrby(`evita:stats:daily:${day}`, 'rag_skipped', 1);
+    }
+
+    // NEU: Intent-Verteilung pro Tag
+    if (intent) {
+      pipeline.hincrby(`evita:stats:intents:${day}`, intent, 1);
     }
 
     // Modell-Tracking
@@ -68,6 +80,10 @@ export async function trackChatMessage({ sessionId, userMessage, isReturningUser
     pipeline.expire(`evita:stats:daily:${day}`, 60 * 60 * 24 * 90);
     pipeline.expire(`evita:stats:models:${day}`, 60 * 60 * 24 * 90);
     pipeline.expire(`evita:stats:unique:${day}`, 60 * 60 * 24 * 90);
+    // NEU: TTL für Intent-Stats
+    if (intent) {
+      pipeline.expire(`evita:stats:intents:${day}`, 60 * 60 * 24 * 90);
+    }
 
     await pipeline.exec();
   } catch (error) {

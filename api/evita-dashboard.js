@@ -272,6 +272,28 @@ export default async function handler(req, res) {
       }
     }
 
+    if (action === 'trigger_health_check') {
+      const cronSecret = process.env.CRON_SECRET;
+      const dashboardToken = process.env.EVITA_DASHBOARD_TOKEN;
+      const host = req.headers.host || 'designare.at';
+      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const baseUrl = `${protocol}://${host}`;
+
+      try {
+        console.log(`🏥 Health-Check via Dashboard: ${baseUrl}/api/cron/health-check`);
+        const response = await fetch(`${baseUrl}/api/cron/health-check`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${dashboardToken || cronSecret}` }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        return res.status(200).json({ success: true, health: result });
+      } catch (e) {
+        return res.status(500).json({ error: `Health-Check Fehler: ${e.message}` });
+      }
+    }
+
     return res.status(400).json({ error: 'Unknown action' });
   }
 
@@ -331,7 +353,11 @@ export default async function handler(req, res) {
       latestBuildRaw,
       buildInventoryRaw,
       excludedUrlsRaw,
-      kbIndexRaw
+      kbIndexRaw,
+      // NEU: Health-Monitoring Daten
+      healthLatestRaw,
+      healthLogRaw,
+      healthIncidentsRaw
     ] = await Promise.all([
       redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true }).catch(() => []),
       redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true }).catch(() => []),
@@ -352,6 +378,10 @@ export default async function handler(req, res) {
       redis.get('build:log:inventory').catch(() => null),
       redis.smembers('build:exclude:urls').catch(() => []),
       redis.smembers('kb:_index').catch(() => []),
+      // NEU: Health-Monitoring
+      redis.get('health:latest').catch(() => null),
+      redis.lrange('health:log', 0, 49).catch(() => []),
+      redis.lrange('health:incidents', 0, 49).catch(() => []),
     ]);
 
     console.log(`📊 Dashboard: ${days.length} Tage, alle Redis-Reads in ${Date.now() - t0}ms`);
@@ -487,6 +517,16 @@ export default async function handler(req, res) {
       buildInventory = typeof buildInventoryRaw === 'string' ? JSON.parse(buildInventoryRaw) : buildInventoryRaw;
     }
 
+    // ── Health-Monitoring Daten parsen ──
+    let healthLatest = null;
+    if (healthLatestRaw) {
+      try {
+        healthLatest = typeof healthLatestRaw === 'string' ? JSON.parse(healthLatestRaw) : healthLatestRaw;
+      } catch { /* ignore */ }
+    }
+    const healthLog = parseRedisList(healthLogRaw);
+    const healthIncidents = parseRedisList(healthIncidentsRaw);
+
     // ── Knowledge-Base Chunks laden (Phase 3: basierend auf Index) ──
     const kbSlugs = (kbIndexRaw || []).sort((a, b) => a.localeCompare(b));
     let knowledgeChunks = [];
@@ -601,7 +641,14 @@ export default async function handler(req, res) {
         excludedUrls: excludedUrls
       },
 
-      knowledgeChunks
+      knowledgeChunks,
+
+      // NEU: Health-Monitoring
+      health: {
+        latest: healthLatest,
+        log: healthLog,
+        incidents: healthIncidents
+      }
     });
 
   } catch (error) {

@@ -1,5 +1,7 @@
 // api/ask-gemini.js - REFACTORED: Schlanker Orchestrator
 // Delegiert an Service-Module in /lib
+// NEU: Intent-Filter vor RAG (spart Kosten + verbessert Qualität)
+// NEU: turnCount aus Redis (nicht mehr Frontend-abhängig)
 import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
 import { setCorsHeaders, isValidEmail, getClientIp, MAX_MESSAGE_LENGTH } from '../lib/validation.js';
 import { checkRateLimit } from '../lib/rate-limiter.js';
@@ -11,6 +13,7 @@ import { generateWithFallback, generateWithFunctionResponse, parseGeminiResponse
 import { dispatchFunctionCalls } from '../lib/tool-handlers.js';
 import { getWeatherContext, getWeather, geocodeCity } from '../lib/weather-service.js';
 import { getNewsContext } from '../lib/news-service.js';
+import { classifyIntent, getIntentHint } from '../lib/intent-filter.js';
 
 // ===================================================================
 // TOPIC KEYWORDS
@@ -47,15 +50,14 @@ export default async function handler(req, res) {
 
     // ── Memory laden ──
     const memory = await getMemory(sessionId);
-    const { isReturningUser, knownName, previousTopics, visitCount, lastVisit, emailsSent } = extractMemoryContext(memory, userName);
+    const { isReturningUser, knownName, previousTopics, visitCount, lastVisit, emailsSent, turnCount, isFirstTurn } = extractMemoryContext(memory, userName);
 
-    // visitCount nur beim ersten Turn der Session erhöhen (nicht bei jeder Nachricht)
-    const isFirstMessageInSession = !history || history.length === 0;
-    const effectiveVisitCount = isFirstMessageInSession ? visitCount : (memory?.visitCount || 1);
+    // NEU: isFirstTurn kommt jetzt aus Redis (turnCount === 0), nicht aus history.length
+    const effectiveVisitCount = isFirstTurn ? visitCount : (memory?.visitCount || 1);
 
-    console.log(`🧠 Memory: Session=${sessionId?.substring(0, 8)}... | Name=${knownName} | Visits=${effectiveVisitCount} | Emails=${emailsSent}`);
+    console.log(`🧠 Memory: Session=${sessionId?.substring(0, 8)}... | Name=${knownName} | Visits=${effectiveVisitCount} | Turn=${turnCount} | Emails=${emailsSent}`);
 
-    if (!history || history.length === 0) {
+    if (isFirstTurn) {
       trackChatSession(sessionId);
     }
 
@@ -67,28 +69,49 @@ export default async function handler(req, res) {
       });
     }
 
+    // ════════════════════════════════════════════════════════════════
+    // NEU: INTENT-FILTER VOR RAG
+    // Klassifiziert die Nachricht und entscheidet ob RAG nötig ist
+    // ════════════════════════════════════════════════════════════════
+    const intent = classifyIntent(userMessage, history);
+    console.log(`🎯 Intent: ${intent.intent} (${(intent.confidence * 100).toFixed(0)}%) | RAG: ${intent.skipRag ? 'SKIP' : 'YES'} | Reason: ${intent.reason}`);
+
     // ── Kontexte parallel laden (RAG + Wetter + News) ──
+    // RAG wird NUR geladen wenn der Intent es erfordert
     const newsRegex = /news|nachrichten|neuigkeiten|neues\b|was gibt.{0,10}neu|tech.?welt|wordpress.?news|seo.?news|google.?update|such.?update/i;
     const recentHistory = (history || []).slice(-4).map(h => h.content || h.text || '').join(' ');
     const wantsNews = newsRegex.test(userMessage) || newsRegex.test(recentHistory);
 
     const [ragResult, weatherContext, newsContext] = await Promise.all([
-      searchContext(userMessage, currentPage),
-      // Wetter nur bei erster Nachricht der Session laden (spart Latenz)
-      isFirstMessageInSession ? getWeatherContext() : Promise.resolve(''),
-      // News bei erster Nachricht ODER wenn der Nutzer explizit danach fragt
-      (isFirstMessageInSession || wantsNews) ? getNewsContext() : Promise.resolve('')
+      // NEU: RAG nur wenn Intent es verlangt
+      intent.skipRag
+        ? Promise.resolve({ additionalContext: '', availableLinks: [] })
+        : searchContext(userMessage, currentPage),
+      // Wetter nur bei erstem Turn der Session laden
+      isFirstTurn ? getWeatherContext() : Promise.resolve(''),
+      // News bei erstem Turn ODER wenn der Nutzer explizit danach fragt
+      (isFirstTurn || wantsNews) ? getNewsContext() : Promise.resolve('')
     ]);
 
+    if (intent.skipRag) {
+      console.log(`⚡ RAG übersprungen (Intent: ${intent.intent}) → schnellere Antwort`);
+    }
+
     const { additionalContext, availableLinks } = ragResult;
+
+    // ── Intent-Hint für den Prompt ──
+    const intentHint = getIntentHint(intent.intent);
 
     // ── System-Prompt bauen ──
     const systemPrompt = buildSystemPrompt({
       isReturningUser, knownName, visitCount: effectiveVisitCount, lastVisit, previousTopics,
       emailsSent, currentPage, additionalContext, availableLinks,
-      isFirstMessage: isFirstMessageInSession,
+      isFirstMessage: isFirstTurn,
       weatherContext,
-      newsContext
+      newsContext,
+      // NEU: Intent-Hint und turnCount an Prompt-Builder übergeben
+      intentHint,
+      turnCount
     });
 
     // ── Chat-Contents + Gemini-Call ──
@@ -99,9 +122,6 @@ export default async function handler(req, res) {
     console.log(`🤖 ${usedModel} | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
 
     // ── Wetter-Tool Roundtrip ──
-    // get_weather ist ein "Data Tool": Gemini braucht die Daten zurück um zu antworten.
-    // Andere Tools (open_booking, compose_email etc.) sind "Action Tools" und werden
-    // im Frontend verarbeitet – die brauchen keinen Roundtrip.
     const weatherCall = functionCalls.find(fc => fc.name === 'get_weather');
     if (weatherCall) {
       const weatherData = await resolveWeatherCall(weatherCall);
@@ -115,10 +135,8 @@ export default async function handler(req, res) {
         response = followUp.response;
         usedModel = followUp.usedModel;
 
-        // Neu parsen – jetzt hat Gemini die Wetterdaten und antwortet natürlich
         const parsed = parseGeminiResponse(response);
         answerText = parsed.answerText;
-        // Nur die NICHT-Wetter function calls behalten
         functionCalls = parsed.functionCalls;
 
         console.log(`🤖 Wetter-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
@@ -144,7 +162,10 @@ export default async function handler(req, res) {
         sessionId, userMessage, isReturningUser, usedFallback: false,
         modelUsed: usedModel,
         bookingIntent: !!responsePayload.openBooking,
-        bookingCompleted: false
+        bookingCompleted: false,
+        // NEU: Intent-Tracking für Dashboard-Analyse
+        intent: intent.intent,
+        ragSkipped: intent.skipRag
       });
       trackQuestion(userMessage);
       if (topicKeywords.length > 0) trackTopics(topicKeywords);
@@ -173,10 +194,9 @@ async function resolveWeatherCall(weatherCall) {
     const cityName = weatherCall.args?.city || 'Wien';
 
     if (cityName.toLowerCase() === 'wien' || cityName.toLowerCase() === 'vienna') {
-      return await getWeather(); // Default Wien-Koordinaten
+      return await getWeather();
     }
 
-    // Andere Stadt → Geocoding
     const location = await geocodeCity(cityName);
     if (!location) {
       return { error: `Stadt "${cityName}" nicht gefunden.`, location: cityName };
@@ -193,7 +213,6 @@ async function resolveWeatherCall(weatherCall) {
 // E-MAIL-VERSAND (extrahierter Sub-Handler)
 // ===================================================================
 async function handleEmailSend({ pendingEmail, clientIp, emailsSent, sessionId, memory, isReturningUser, res }) {
-  // E-Mail-Adresse normalisieren (Gemini liefert manchmal Backticks/Quotes)
   pendingEmail.to = normalizeEmail(pendingEmail.to);
   console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
 
