@@ -2400,7 +2400,7 @@
       if (!h || !h.latest) {
         return `<div class="no-data" style="padding:60px 0;">
           Noch keine Health-Daten vorhanden.<br>
-          <button class="build-trigger-btn" onclick="triggerHealthCheck()" style="margin-top:16px;">🏥 Jetzt Health-Check ausführen</button>
+          <button class="build-trigger-btn" id="healthCheckBtn" onclick="triggerHealthCheck()" style="margin-top:16px;">🏥 Jetzt Health-Check ausführen</button>
         </div>`;
       }
 
@@ -2661,10 +2661,10 @@
     // Health-Check manuell auslösen
     async function triggerHealthCheck() {
       const btn = document.getElementById('healthCheckBtn');
-      if (!btn) return;
-
-      btn.disabled = true;
-      btn.textContent = '⏳ Prüfe Services...';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Prüfe Services...';
+      }
 
       try {
         const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
@@ -2675,29 +2675,36 @@
         const data = await res.json();
 
         if (data.success) {
-          btn.textContent = '✅ Check abgeschlossen';
-          setTimeout(() => {
-            btn.textContent = '🏥 Jetzt prüfen';
-            btn.disabled = false;
-            loadDashboard().then(() => switchTab('health'));
-          }, 1500);
+          if (btn) btn.textContent = '✅ Check abgeschlossen';
+          setTimeout(async () => {
+            await loadDashboard();
+            switchTab('health');
+          }, 1000);
         } else {
-          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          if (btn) {
+            btn.textContent = '❌ ' + (data.error || 'Fehler');
+            btn.style.background = 'var(--red)';
+            setTimeout(() => {
+              btn.textContent = '🏥 Jetzt prüfen';
+              btn.style.background = 'var(--green)';
+              btn.disabled = false;
+            }, 4000);
+          } else {
+            alert('Health-Check Fehler: ' + (data.error || 'Unbekannt'));
+          }
+        }
+      } catch (e) {
+        if (btn) {
+          btn.textContent = '❌ ' + e.message;
           btn.style.background = 'var(--red)';
           setTimeout(() => {
             btn.textContent = '🏥 Jetzt prüfen';
             btn.style.background = 'var(--green)';
             btn.disabled = false;
           }, 4000);
+        } else {
+          alert('Health-Check Fehler: ' + e.message);
         }
-      } catch (e) {
-        btn.textContent = '❌ ' + e.message;
-        btn.style.background = 'var(--red)';
-        setTimeout(() => {
-          btn.textContent = '🏥 Jetzt prüfen';
-          btn.style.background = 'var(--green)';
-          btn.disabled = false;
-        }, 4000);
       }
     }
 
