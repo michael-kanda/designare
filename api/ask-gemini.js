@@ -145,7 +145,7 @@ export default async function handler(req, res) {
 
     // ── Function Calls verarbeiten (Action Tools) ──
     const responsePayload = dispatchFunctionCalls(functionCalls, answerText, {
-      currentPage, history, userMessage
+      currentPage, history, userMessage, availableLinks
     });
 
     // ── Post-Processing + Memory speichern ──
