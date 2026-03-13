@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/fetch-news",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
