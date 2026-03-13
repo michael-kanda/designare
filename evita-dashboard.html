@@ -160,8 +160,133 @@
       border-bottom-color: var(--blue);
     }
 
+    .tab-btn.active.health-tab {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+
+    /* ============================================ */
+    /* HEALTH TAB                                   */
+    /* ============================================ */
+    .health-status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .health-status-icon {
+      font-size: 2rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .health-status-icon.healthy { background: var(--green-bg); }
+    .health-status-icon.warning { background: var(--orange-bg); }
+    .health-status-icon.degraded { background: var(--red-bg); }
+    .health-status-icon.critical { background: var(--red-bg); }
+    .health-status-info { flex: 1; }
+    .health-status-title { font-weight: 700; font-size: 1.1rem; }
+    .health-status-meta { color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px; }
+
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .health-service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      transition: border-color 0.2s;
+    }
+    .health-service-card:hover { border-color: var(--text-muted); }
+    .health-service-card .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .health-service-card .service-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .health-service-card .service-badge {
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .service-badge.ok { background: var(--green-bg); color: var(--green); }
+    .service-badge.warn { background: var(--orange-bg); color: var(--orange); }
+    .service-badge.error { background: var(--red-bg); color: var(--red); }
+    .health-service-card .service-latency {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .health-service-card .service-detail {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+    .health-service-card .service-error {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    .health-incident {
+      padding: 10px 16px;
+      border-left: 3px solid var(--red);
+      background: var(--red-bg);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .health-incident.recovery {
+      border-left-color: var(--green);
+      background: var(--green-bg);
+    }
+    .health-incident .incident-time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .health-log-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .health-log-row:last-child { border-bottom: none; }
+    .health-log-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .health-log-dot.healthy { background: var(--green); }
+    .health-log-dot.warning { background: var(--orange); }
+    .health-log-dot.degraded { background: var(--red); }
+    .health-log-dot.critical { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
     /* ============================================ */
     /* BUILDS TAB                                   */
@@ -1144,6 +1269,7 @@
     <button class="tab-btn active" data-tab="evita" onclick="switchTab('evita')">💬 Evita Chatbot</button>
     <button class="tab-btn silas-tab" data-tab="silas" onclick="switchTab('silas')">✍️ Silas Content</button>
     <button class="tab-btn builds-tab" data-tab="builds" onclick="switchTab('builds')">🔄 KI-Datenbank</button>
+    <button class="tab-btn health-tab" data-tab="health" onclick="switchTab('health')">🏥 Health</button>
   </nav>
 
   <!-- CONTENT -->
@@ -1270,6 +1396,7 @@
       const evitaHTML = renderEvitaTab(data);
       const silasHTML = renderSilasTab(data);
       const buildsHTML = renderBuildsTab(data);
+      const healthHTML = renderHealthTab(data);
 
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'evita';
 
@@ -1277,6 +1404,7 @@
         <div id="tab-evita" class="tab-content ${activeTab === 'evita' ? 'active' : ''}">${evitaHTML}</div>
         <div id="tab-silas" class="tab-content ${activeTab === 'silas' ? 'active' : ''}">${silasHTML}</div>
         <div id="tab-builds" class="tab-content ${activeTab === 'builds' ? 'active' : ''}">${buildsHTML}</div>
+        <div id="tab-health" class="tab-content ${activeTab === 'health' ? 'active' : ''}">${healthHTML}</div>
       `;
 
       // Render charts for active tab
@@ -2264,6 +2392,168 @@
       return html;
     }
 
+    // ============================================================
+    // HEALTH TAB
+    // ============================================================
+    function renderHealthTab(data) {
+      const h = data.health;
+      if (!h || !h.latest) {
+        return `<div class="no-data" style="padding:60px 0;">
+          Noch keine Health-Daten vorhanden.<br>
+          <button class="build-trigger-btn" onclick="triggerHealthCheck()" style="margin-top:16px;">🏥 Jetzt Health-Check ausführen</button>
+        </div>`;
+      }
+
+      const latest = h.latest;
+      let html = '';
+
+      // ===== STATUS BANNER =====
+      const statusMap = {
+        healthy: { icon: '✅', label: 'Alle Systeme operational', cls: 'healthy' },
+        warning: { icon: '⚠️', label: 'Warnungen vorhanden', cls: 'warning' },
+        degraded: { icon: '🔻', label: 'Eingeschränkte Funktionalität', cls: 'degraded' },
+        critical: { icon: '🔥', label: 'Kritische Ausfälle', cls: 'critical' }
+      };
+      const st = statusMap[latest.status] || statusMap.degraded;
+      const checkTime = latest.timestamp ? new Date(latest.timestamp) : null;
+      const checkAgo = checkTime ? getTimeAgo(checkTime) : '–';
+      const checkDate = checkTime ? checkTime.toLocaleString('de-AT') : '–';
+
+      html += `<div class="health-status-banner">
+        <div class="health-status-icon ${st.cls}">${st.icon}</div>
+        <div class="health-status-info">
+          <div class="health-status-title">${st.label}</div>
+          <div class="health-status-meta">${checkDate} · ${checkAgo} · ${latest.total_latency_ms || 0}ms</div>
+        </div>
+        <button class="build-trigger-btn" id="healthCheckBtn" onclick="triggerHealthCheck()" style="background:var(--green);">🏥 Jetzt prüfen</button>
+      </div>`;
+
+      // ===== SERVICE CARDS =====
+      if (latest.checks) {
+        const serviceNames = {
+          redis: { label: 'Redis (Upstash)', icon: '🗄️' },
+          vector_db: { label: 'Vector-DB', icon: '🧠' },
+          gemini: { label: 'Gemini API', icon: '🤖' },
+          brevo: { label: 'Brevo (E-Mail)', icon: '📧' },
+          website: { label: 'Website', icon: '🌐' },
+          news_briefing: { label: 'News-Briefing', icon: '📰' },
+          cron_jobs: { label: 'Cron-Jobs', icon: '⏰' }
+        };
+
+        html += '<div class="health-grid">';
+        for (const [key, check] of Object.entries(latest.checks)) {
+          const svc = serviceNames[key] || { label: key, icon: '⚙️' };
+          const badgeCls = check.status;
+
+          let detailHtml = '';
+          if (check.error) {
+            detailHtml = `<div class="service-error">${escHTML(check.error)}</div>`;
+          }
+          if (check.details) {
+            const details = [];
+            if (check.details.vectorCount !== undefined) details.push(`${check.details.vectorCount.toLocaleString('de-AT')} Vektoren`);
+            if (check.details.dimension) details.push(`${check.details.dimension}D`);
+            if (check.details.plan) details.push(`Plan: ${check.details.plan}`);
+            if (check.details.credits !== undefined) details.push(`${check.details.credits} Credits`);
+            if (check.details.age_hours !== undefined) details.push(`${check.details.age_hours}h alt`);
+            if (check.details.knowledge_sync) {
+              const ks = check.details.knowledge_sync;
+              if (ks.last_run) details.push(`Letzter Sync: ${getTimeAgo(new Date(ks.last_run))}`);
+              else details.push('Noch nie gelaufen');
+            }
+            if (details.length > 0) {
+              detailHtml += `<div class="service-detail">${details.join(' · ')}</div>`;
+            }
+          }
+
+          html += `<div class="health-service-card">
+            <div class="service-header">
+              <span class="service-name">${svc.icon} ${svc.label}</span>
+              <span class="service-badge ${badgeCls}">${check.status}</span>
+            </div>
+            <div class="service-latency">${check.latency_ms}ms</div>
+            ${detailHtml}
+          </div>`;
+        }
+        html += '</div>';
+      }
+
+      // ===== INCIDENTS =====
+      const incidents = h.incidents || [];
+      if (incidents.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">🚨 Incidents (letzte 50)</div>`;
+        const recentIncidents = incidents.slice(0, 20);
+        recentIncidents.forEach(inc => {
+          const cls = inc.type === 'recovery' ? 'recovery' : '';
+          const icon = inc.type === 'recovery' ? '✅' : '🔴';
+          const dt = inc.started_at ? new Date(inc.started_at).toLocaleString('de-AT') : '–';
+          html += `<div class="health-incident ${cls}">
+            ${icon} <strong>${escHTML(inc.service || '')}</strong>: ${escHTML(inc.message || '')}
+            <div class="incident-time">${dt}</div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+
+      // ===== HEALTH LOG =====
+      const log = h.log || [];
+      if (log.length > 0) {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Health-Log (letzte ${log.length} Checks)</div>`;
+
+        // Uptime-Berechnung
+        const totalChecks = log.length;
+        const healthyChecks = log.filter(l => l.status === 'healthy').length;
+        const uptimePct = totalChecks > 0 ? Math.round((healthyChecks / totalChecks) * 1000) / 10 : 0;
+
+        html += `<div style="margin-bottom:16px; color:var(--text-secondary); font-size:0.85rem;">
+          Uptime: <strong style="color:${uptimePct >= 99 ? 'var(--green)' : uptimePct >= 95 ? 'var(--orange)' : 'var(--red)'}">${uptimePct}%</strong>
+          (${healthyChecks}/${totalChecks} Checks healthy) · Zeitraum: letzte ~${Math.round(totalChecks * 15 / 60)} Stunden
+        </div>`;
+
+        // Timeline-Dots (kompakte Darstellung)
+        html += '<div style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:16px;">';
+        log.slice(0, 96).reverse().forEach(entry => {
+          const dotColor = entry.status === 'healthy' ? 'var(--green)'
+            : entry.status === 'warning' ? 'var(--orange)'
+            : 'var(--red)';
+          const dt = entry.timestamp ? new Date(entry.timestamp).toLocaleString('de-AT') : '';
+          html += `<div title="${dt}: ${entry.status} (${entry.latency_ms}ms)" style="width:8px;height:20px;border-radius:2px;background:${dotColor};opacity:0.8;"></div>`;
+        });
+        html += '</div>';
+
+        // Detail-Log (letzte 15)
+        log.slice(0, 15).forEach(entry => {
+          const dt = entry.timestamp ? new Date(entry.timestamp) : null;
+          const timeStr = dt ? dt.toLocaleTimeString('de-AT') : '–';
+          const dateStr = dt ? dt.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' }) : '';
+
+          let serviceInfo = '';
+          if (entry.services) {
+            const failing = Object.entries(entry.services)
+              .filter(([, v]) => v.s !== 'ok')
+              .map(([k, v]) => `${k}: ${v.s}`);
+            if (failing.length > 0) {
+              serviceInfo = `<span style="color:var(--red); margin-left:8px;">${failing.join(', ')}</span>`;
+            }
+          }
+
+          html += `<div class="health-log-row">
+            <div class="health-log-dot ${entry.status}"></div>
+            <span style="color:var(--text-muted); font-family:'JetBrains Mono',monospace; min-width:100px;">${dateStr} ${timeStr}</span>
+            <span style="color:var(--text-secondary);">${entry.status}</span>
+            <span style="color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${entry.latency_ms}ms</span>
+            ${serviceInfo}
+          </div>`;
+        });
+
+        html += '</div>';
+      }
+
+      return html;
+    }
+
     // Zeitdifferenz als lesbarer Text
     function getTimeAgo(date) {
       const now = new Date();
@@ -2365,6 +2655,49 @@
           btn.style.background = 'var(--accent)';
           btn.disabled = false;
         }, 5000);
+      }
+    }
+
+    // Health-Check manuell auslösen
+    async function triggerHealthCheck() {
+      const btn = document.getElementById('healthCheckBtn');
+      if (!btn) return;
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Prüfe Services...';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_health_check' })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          btn.textContent = '✅ Check abgeschlossen';
+          setTimeout(() => {
+            btn.textContent = '🏥 Jetzt prüfen';
+            btn.disabled = false;
+            loadDashboard().then(() => switchTab('health'));
+          }, 1500);
+        } else {
+          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🏥 Jetzt prüfen';
+            btn.style.background = 'var(--green)';
+            btn.disabled = false;
+          }, 4000);
+        }
+      } catch (e) {
+        btn.textContent = '❌ ' + e.message;
+        btn.style.background = 'var(--red)';
+        setTimeout(() => {
+          btn.textContent = '🏥 Jetzt prüfen';
+          btn.style.background = 'var(--green)';
+          btn.disabled = false;
+        }, 4000);
       }
     }
 
