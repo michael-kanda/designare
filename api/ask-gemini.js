@@ -68,12 +68,14 @@ export default async function handler(req, res) {
     }
 
     // ── Kontexte parallel laden (RAG + Wetter + News) ──
+    const wantsNews = /news|nachrichten|tech.?news|neuigkeiten/i.test(userMessage);
+
     const [ragResult, weatherContext, newsContext] = await Promise.all([
       searchContext(userMessage, currentPage),
       // Wetter nur bei erster Nachricht der Session laden (spart Latenz)
       isFirstMessageInSession ? getWeatherContext() : Promise.resolve(''),
-      // News nur bei erster Nachricht laden
-      isFirstMessageInSession ? getNewsContext() : Promise.resolve('')
+      // News bei erster Nachricht ODER wenn der Nutzer explizit danach fragt
+      (isFirstMessageInSession || wantsNews) ? getNewsContext() : Promise.resolve('')
     ]);
 
     const { additionalContext, availableLinks } = ragResult;
