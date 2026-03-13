@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     }
 
     // ── Kontexte parallel laden (RAG + Wetter + News) ──
-    const newsRegex = /news|nachrichten|neuigkeiten|neues\b|was gibt.{0,10}neu|tech.?welt/i;
+    const newsRegex = /news|nachrichten|neuigkeiten|neues\b|was gibt.{0,10}neu|tech.?welt|wordpress.?news|seo.?news|google.?update|such.?update/i;
     const recentHistory = (history || []).slice(-4).map(h => h.content || h.text || '').join(' ');
     const wantsNews = newsRegex.test(userMessage) || newsRegex.test(recentHistory);
 
