@@ -1,131 +1,278 @@
-// lib/rag-service.js - RAG-Kontext via Upstash Vector (Section-Chunking)
-// Sucht relevante Sektionen aus Website-Inhalten zur User-Frage
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Index } from "@upstash/vector";
+// api/ask-gemini.js - REFACTORED: Schlanker Orchestrator
+// Delegiert an Service-Module in /lib
+// NEU: Intent-Filter vor RAG (spart Kosten + verbessert Qualität)
+// NEU: turnCount aus Redis (nicht mehr Frontend-abhängig)
+import { trackChatMessage, trackChatSession, trackQuestion, trackFallback, trackTopics, trackEmailSent } from './evita-track.js';
+import { setCorsHeaders, isValidEmail, getClientIp, MAX_MESSAGE_LENGTH } from '../lib/validation.js';
+import { checkRateLimit } from '../lib/rate-limiter.js';
+import { getMemory, saveMemory, extractMemoryContext, buildUpdatedMemory } from '../lib/memory-service.js';
+import { sendEmail, isEmailBlocked, isEmailWhitelisted, normalizeEmail, MAX_EMAILS_PER_SESSION } from '../lib/email-service.js';
+import { searchContext } from '../lib/rag-service.js';
+import { buildSystemPrompt } from '../lib/prompt-builder.js';
+import { generateWithFallback, generateWithFunctionResponse, parseGeminiResponse, buildChatContents } from '../lib/gemini-client.js';
+import { dispatchFunctionCalls } from '../lib/tool-handlers.js';
+import { getWeatherContext, getWeather, geocodeCity } from '../lib/weather-service.js';
+import { getNewsContext } from '../lib/news-service.js';
+import { classifyIntent, getIntentHint } from '../lib/intent-filter.js';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// ===================================================================
+// TOPIC KEYWORDS
+// ===================================================================
+const TOPIC_REGEX = /(?:wordpress|seo|performance|ki|api|website|plugin|theme|speed|hosting|security|schema|css|html|javascript|react|php|python|datapeak|silas|evita|kuchen|rezept|blog|shop|woocommerce|dsgvo|daten|backup|ssl|domain|analytics|tracking|caching|cdn|responsive|mobile|design|ux|ui|server|deployment|git|docker|nginx|apache|core web vitals|pagespeed|lighthouse|sitemap|robots|meta|snippet|featured|backlinks?|keywords?|ranking|indexierung|crawl|search console|email|e-mail|brevo|newsletter|wetter|weather)/g;
 
-const vectorIndex = new Index({
-  url: process.env.UPSTASH_VECTOR_REST_URL,
-  token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-});
+// ===================================================================
+// MAIN HANDLER
+// ===================================================================
+export default async function handler(req, res) {
+  setCorsHeaders(req, res);
 
-// Embedding-Modell (einmalig pro Cold-Start)
-const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-// Seiten die nie als Link vorgeschlagen werden sollen
-const LINK_BLACKLIST = ['CSV-Creator', 'CSV-Importer-PRO'];
-
-// Links die immer verfügbar sein sollen
-const PERMANENT_LINKS = [
-  { url: '/ki-sichtbarkeit', title: 'KI-Sichtbarkeits-Check' }
-];
-
-// FIX: Score-Schwelle leicht gesenkt (0.55 → 0.45)
-// KB-Chunks (ohne Seitenstruktur) können niedrigere Scores haben als
-// strukturierte Seiten-Sektionen, besonders bei allgemeinen Fragen.
-// 0.45 fängt auch "ungefähre" Treffer ab, die trotzdem relevant sind.
-const MIN_SCORE = 0.45;
-
-// Erhöht von 800 auf 1500: Sektions-Chunks sind kleiner als ganze Seiten,
-// daher kann mehr Kontext pro Treffer an Evita übergeben werden
-const MAX_CONTENT_LENGTH = 1500;
-
-/**
- * Sucht RAG-Kontext zur User-Nachricht.
- * @param {string} userMessage - Die aktuelle Frage des Users
- * @param {string|null} currentPage - Aktuelle URL des Users (zum Ausfiltern)
- * @returns {{ additionalContext: string, availableLinks: Array<{url: string, title: string}> }}
- */
-export async function searchContext(userMessage, currentPage = null) {
-  let additionalContext = '';
-  let availableLinks = [];
+  // Rate-Limit prüfen
+  const clientIp = getClientIp(req);
+  if (!checkRateLimit(clientIp, 'general')) {
+    console.warn(`⚠️ Rate Limit erreicht für IP: ${clientIp}`);
+    return res.status(429).json({ answer: 'Zu viele Anfragen. Bitte warte einen Moment.', rateLimited: true });
+  }
 
   try {
-    console.log("🔍 Suche in Vector-DB nach:", userMessage);
-    const embedResult = await embeddingModel.embedContent(userMessage);
-    const queryVector = embedResult.embedding.values.slice(0, 768);
+    const { prompt, source, history, message, sessionId, userName, pendingEmail, confirmEmailSend, currentPage } = req.body;
+    const userMessage = message || prompt;
 
-    const queryResult = await vectorIndex.query({
-      vector: queryVector,
-      topK: 8,
-      includeMetadata: true
+    // ── Input-Validierung ──
+    if (!userMessage || typeof userMessage !== 'string') {
+      return res.status(400).json({ answer: 'Keine Nachricht erhalten.' });
+    }
+    if (userMessage.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ answer: `Nachricht zu lang (max. ${MAX_MESSAGE_LENGTH} Zeichen). Bitte kürzer fassen!` });
+    }
+
+    // ── Memory laden ──
+    const memory = await getMemory(sessionId);
+    const { isReturningUser, knownName, previousTopics, visitCount, lastVisit, emailsSent, turnCount, isFirstTurn } = extractMemoryContext(memory, userName);
+
+    // NEU: isFirstTurn kommt jetzt aus Redis (turnCount === 0), nicht aus history.length
+    const effectiveVisitCount = isFirstTurn ? visitCount : (memory?.visitCount || 1);
+
+    console.log(`🧠 Memory: Session=${sessionId?.substring(0, 8)}... | Name=${knownName} | Visits=${effectiveVisitCount} | Turn=${turnCount} | Emails=${emailsSent}`);
+
+    if (isFirstTurn) {
+      trackChatSession(sessionId);
+    }
+
+    // ── E-Mail-Versand (Frontend-Bestätigung) ──
+    if (confirmEmailSend && pendingEmail) {
+      return await handleEmailSend({
+        pendingEmail, clientIp, emailsSent, sessionId, memory,
+        isReturningUser, res
+      });
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // NEU: INTENT-FILTER VOR RAG
+    // Klassifiziert die Nachricht und entscheidet ob RAG nötig ist
+    // ════════════════════════════════════════════════════════════════
+    const intent = classifyIntent(userMessage, history);
+    console.log(`🎯 Intent: ${intent.intent} (${(intent.confidence * 100).toFixed(0)}%) | RAG: ${intent.skipRag ? 'SKIP' : 'YES'} | Reason: ${intent.reason}`);
+
+    // ── Kontexte parallel laden (RAG + Wetter + News) ──
+    // RAG wird NUR geladen wenn der Intent es erfordert
+    const newsRegex = /news|nachrichten|neuigkeiten|neues\b|was gibt.{0,10}neu|tech.?welt|wordpress.?news|seo.?news|google.?update|such.?update/i;
+    const recentHistory = (history || []).slice(-4).map(h => h.content || h.text || '').join(' ');
+    const wantsNews = newsRegex.test(userMessage) || newsRegex.test(recentHistory);
+
+    const [ragResult, weatherContext, newsContext] = await Promise.all([
+      // NEU: RAG nur wenn Intent es verlangt
+      intent.skipRag
+        ? Promise.resolve({ additionalContext: '', availableLinks: [] })
+        : searchContext(userMessage, currentPage),
+      // Wetter nur bei erstem Turn der Session laden
+      isFirstTurn ? getWeatherContext() : Promise.resolve(''),
+      // News bei erstem Turn ODER wenn der Nutzer explizit danach fragt
+      (isFirstTurn || wantsNews) ? getNewsContext() : Promise.resolve('')
+    ]);
+
+    if (intent.skipRag) {
+      console.log(`⚡ RAG übersprungen (Intent: ${intent.intent}) → schnellere Antwort`);
+    }
+
+    const { additionalContext, availableLinks } = ragResult;
+
+    // ── Intent-Hint für den Prompt ──
+    const intentHint = getIntentHint(intent.intent);
+
+    // ── System-Prompt bauen ──
+    const systemPrompt = buildSystemPrompt({
+      isReturningUser, knownName, visitCount: effectiveVisitCount, lastVisit, previousTopics,
+      emailsSent, currentPage, additionalContext, availableLinks,
+      isFirstMessage: isFirstTurn,
+      weatherContext,
+      newsContext,
+      // NEU: Intent-Hint und turnCount an Prompt-Builder übergeben
+      intentHint,
+      turnCount
     });
 
-    // Debug: Alle Scores loggen um Threshold-Probleme zu erkennen
-    if (queryResult.length > 0) {
-      console.log('🔍 RAG Scores:', queryResult.map(m =>
-        `${m.id} → ${m.score.toFixed(3)}${m.score > MIN_SCORE ? ' ✓' : ' ✗'}`
-      ).join(' | '));
-    } else {
-      console.log('🔍 RAG: Keine Ergebnisse (Vector-DB leer oder Query-Fehler)');
+    // ── Chat-Contents + Gemini-Call ──
+    // NEU: History trimmen ab Turn 10 – die letzten 10 Turns reichen für Kontext,
+    // ältere Turns verdrängen den System-Prompt (RAG + Instruktionen) aus dem Context-Window
+    const MAX_HISTORY_TURNS = 10;
+    const trimmedHistory = (history && history.length > MAX_HISTORY_TURNS * 2)
+      ? history.slice(-(MAX_HISTORY_TURNS * 2))  // *2 weil user+assistant = 2 Einträge pro Turn
+      : (history || []);
+
+    if (history && trimmedHistory.length < history.length) {
+      console.log(`✂️ History getrimmt: ${history.length} → ${trimmedHistory.length} Einträge (${MAX_HISTORY_TURNS} Turns behalten)`);
     }
 
-    // Mindest-Content-Länge: Chunks ohne Substanz verschwenden Kontext-Plätze
-    const MIN_CONTENT_LENGTH = 50;
+    const contents = buildChatContents(trimmedHistory, userMessage);
+    let { response, usedModel } = await generateWithFallback(contents, systemPrompt);
+    let { answerText, functionCalls } = parseGeminiResponse(response);
 
-    const matchedChunks = queryResult
-      .filter(match => match.score > MIN_SCORE)
-      .filter(match => {
-        const content = match.metadata?.content || '';
-        if (content.trim().length < MIN_CONTENT_LENGTH) {
-          console.log(`🔍 RAG: Chunk "${match.id}" übersprungen – zu wenig Content (${content.trim().length} Zeichen)`);
-          return false;
-        }
-        return true;
-      })
-      .slice(0, 5)
-      .map(match => match.metadata);
+    console.log(`🤖 ${usedModel} | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
 
-    // Debug: Gefilterte Chunks loggen (mit Content-Länge)
-    if (matchedChunks.length > 0) {
-      console.log(`🔍 RAG: ${matchedChunks.length} Chunks über Schwelle (${MIN_SCORE}):`,
-        matchedChunks.map(c => {
-          const contentLen = (c.content || '').trim().length;
-          return `"${c.title}${c.section_heading ? ` – ${c.section_heading}` : ''}" (${contentLen}ch)${c.type === 'knowledge-base' ? ' [KB]' : ''}`;
-        }).join(', ')
-      );
-    } else if (queryResult.length > 0) {
-      // Es gab Ergebnisse, aber alle unter dem Threshold
-      const bestScore = queryResult[0].score;
-      const bestId = queryResult[0].id;
-      console.log(`🔍 RAG: Alle ${queryResult.length} Ergebnisse unter Schwelle ${MIN_SCORE}. Bestes: ${bestId} → ${bestScore.toFixed(3)}`);
+    // ── Wetter-Tool Roundtrip ──
+    const weatherCall = functionCalls.find(fc => fc.name === 'get_weather');
+    if (weatherCall) {
+      const weatherData = await resolveWeatherCall(weatherCall);
+
+      if (weatherData) {
+        console.log(`🌤️ Wetter-Roundtrip: ${weatherData.location} → ${weatherData.temperature}°C`);
+        const followUp = await generateWithFunctionResponse(
+          contents, systemPrompt, response,
+          'get_weather', weatherData, usedModel
+        );
+        response = followUp.response;
+        usedModel = followUp.usedModel;
+
+        const parsed = parseGeminiResponse(response);
+        answerText = parsed.answerText;
+        functionCalls = parsed.functionCalls;
+
+        console.log(`🤖 Wetter-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
+      }
     }
 
-    if (matchedChunks.length > 0) {
-      additionalContext = matchedChunks.map((chunk, i) => {
-        // Kontext-Header: Seitentitel + ggf. Sektions-Überschrift + URL
-        let header = `[Quelle ${i + 1}] ${chunk.title}`;
-        if (chunk.section_heading) header += ` – ${chunk.section_heading}`;
-        if (chunk.url) header += ` (${chunk.url})`;
-        const contentToUse = chunk.content ? chunk.content.substring(0, MAX_CONTENT_LENGTH).trim() : '';
-        return `${header}\n${contentToUse}`;
-      }).join('\n---\n');
+    // ── Function Calls verarbeiten (Action Tools) ──
+    const responsePayload = dispatchFunctionCalls(functionCalls, answerText, {
+      currentPage, history, userMessage, availableLinks
+    });
 
-      const currentPath = currentPage ? currentPage.replace(/\/$/, '') : '';
+    // ── Post-Processing + Memory speichern ──
+    if (sessionId) {
+      const topicKeywords = userMessage.toLowerCase().match(TOPIC_REGEX) || [];
 
-      // Dedupliziere Links nach URL (mehrere Sektionen können von derselben Seite stammen)
-      const seenUrls = new Set();
-      availableLinks = matchedChunks
-        .filter(c => c.url && !LINK_BLACKLIST.some(s => c.url.includes(s)))
-        .filter(c => !currentPath || !c.url.includes(currentPath))
-        .filter(c => {
-          if (seenUrls.has(c.url)) return false;
-          seenUrls.add(c.url);
-          return true;
-        })
-        .map(c => ({ url: c.url, title: c.title }));
+      const updatedMemory = buildUpdatedMemory({
+        memory, detectedName: responsePayload.detectedName, knownName,
+        visitCount: effectiveVisitCount, previousTopics, topicKeywords, userMessage, emailsSent
+      });
+      await saveMemory(sessionId, updatedMemory);
+
+      trackChatMessage({
+        sessionId, userMessage, isReturningUser, usedFallback: false,
+        modelUsed: usedModel,
+        bookingIntent: !!responsePayload.openBooking,
+        bookingCompleted: false,
+        // NEU: Intent-Tracking für Dashboard-Analyse
+        intent: intent.intent,
+        ragSkipped: intent.skipRag
+      });
+      trackQuestion(userMessage);
+      if (topicKeywords.length > 0) trackTopics(topicKeywords);
+
+      if (!responsePayload.detectedName && knownName) {
+        responsePayload.detectedName = knownName;
+      }
     }
+
+    return res.status(200).json(responsePayload);
+
   } catch (error) {
-    console.error('❌ RAG / Vector Fehler:', error.message);
+    console.error("API Error:", error);
+    const { sessionId, message, prompt } = req.body || {};
+    trackChatMessage({ sessionId, userMessage: message || prompt || '', isReturningUser: false, usedFallback: true, modelUsed: 'fallback', bookingIntent: false, bookingCompleted: false });
+    trackFallback(message || prompt || '');
+    res.status(500).json({ answer: 'Pixelfehler im System! Michael ist dran.' });
+  }
+}
+
+// ===================================================================
+// WETTER-TOOL RESOLVER
+// ===================================================================
+async function resolveWeatherCall(weatherCall) {
+  try {
+    const cityName = weatherCall.args?.city || 'Wien';
+
+    if (cityName.toLowerCase() === 'wien' || cityName.toLowerCase() === 'vienna') {
+      return await getWeather();
+    }
+
+    const location = await geocodeCity(cityName);
+    if (!location) {
+      return { error: `Stadt "${cityName}" nicht gefunden.`, location: cityName };
+    }
+
+    return await getWeather(location);
+  } catch (err) {
+    console.error('❌ Wetter-Resolver Fehler:', err.message);
+    return null;
+  }
+}
+
+// ===================================================================
+// E-MAIL-VERSAND (extrahierter Sub-Handler)
+// ===================================================================
+async function handleEmailSend({ pendingEmail, clientIp, emailsSent, sessionId, memory, isReturningUser, res }) {
+  pendingEmail.to = normalizeEmail(pendingEmail.to);
+  console.log('📧 E-Mail-Versand bestätigt für:', pendingEmail.to);
+
+  if (!checkRateLimit(clientIp, 'email')) {
+    console.warn(`⚠️ E-Mail Rate Limit erreicht für IP: ${clientIp}`);
+    return res.status(429).json({ answer: 'Zu viele E-Mails in kurzer Zeit. Bitte warte einen Moment.' });
   }
 
-  // Permanente Links hinzufügen (sofern nicht aktuelle Seite / bereits enthalten)
-  for (const pl of PERMANENT_LINKS) {
-    const isCurrentPage = currentPage && currentPage.replace(/\/$/, '') === pl.url;
-    const alreadyIncluded = availableLinks.some(l => l.url === pl.url);
-    if (!isCurrentPage && !alreadyIncluded) availableLinks.push(pl);
+  if (emailsSent >= MAX_EMAILS_PER_SESSION) {
+    return res.status(200).json({
+      answer: `Du hast bereits ${MAX_EMAILS_PER_SESSION} E-Mails in dieser Session gesendet. Das ist das Maximum pro Sitzung.`
+    });
   }
 
-  return { additionalContext, availableLinks };
+  if (!isValidEmail(pendingEmail.to)) {
+    return res.status(200).json({ answer: `Hmm, "${pendingEmail.to}" sieht nicht nach einer gültigen E-Mail-Adresse aus.` });
+  }
+
+  if (!(await isEmailWhitelisted(pendingEmail.to))) {
+    return res.status(200).json({
+      answer: `Die Adresse ${pendingEmail.to} ist nicht in der Empfänger-Whitelist hinterlegt. E-Mails dürfen nur an freigegebene Adressen versendet werden. Bitte wende dich an Michael, damit er die Adresse im Dashboard freischaltet.`
+    });
+  }
+
+  if (await isEmailBlocked(pendingEmail.to)) {
+    return res.status(200).json({ answer: `Die Adresse ${pendingEmail.to} hat den Empfang von E-Mails über designare.at blockiert.` });
+  }
+
+  try {
+    const result = await sendEmail({
+      to: pendingEmail.to, toName: pendingEmail.toName || '',
+      subject: pendingEmail.subject, body: pendingEmail.body, sessionId
+    });
+
+    if (sessionId) {
+      await saveMemory(sessionId, { ...(memory || {}), emailsSent: emailsSent + 1, lastEmailAt: new Date().toISOString() });
+    }
+
+    trackChatMessage({ sessionId, userMessage: `[EMAIL_SENT] ${pendingEmail.to}`, isReturningUser, usedFallback: false, modelUsed: 'email', bookingIntent: false, bookingCompleted: false });
+    trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: true });
+
+    return res.status(200).json({
+      answer: `Erledigt! Die E-Mail an ${pendingEmail.to} mit Betreff „${pendingEmail.subject}" ist raus. Kann ich noch was tun?`,
+      emailSent: true, messageId: result.messageId
+    });
+
+  } catch (emailError) {
+    console.error('📧 Brevo-Fehler:', emailError.message);
+    trackEmailSent({ sessionId, to: pendingEmail.to, subject: pendingEmail.subject, success: false });
+    return res.status(200).json({ answer: 'Da ist leider was schiefgelaufen beim Versand.', emailSent: false });
+  }
 }
