@@ -7,6 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ── RSS-Feed-Quellen ──
 const RSS_FEEDS = [
+  // ── Tech allgemein ──
   {
     name: 'heise',
     url: 'https://www.heise.de/rss/heise-top-atom.xml',
@@ -21,6 +22,33 @@ const RSS_FEEDS = [
     name: 'Hacker News (Best)',
     url: 'https://hnrss.org/best?count=15',
     category: 'tech-en'
+  },
+  // ── SEO & Search ──
+  {
+    name: 'Search Engine Journal',
+    url: 'https://www.searchenginejournal.com/feed/',
+    category: 'seo'
+  },
+  {
+    name: 'Google Search Central',
+    url: 'https://developers.google.com/search/blog/rss.xml',
+    category: 'seo'
+  },
+  {
+    name: 'SEO Südwest',
+    url: 'https://www.seo-suedwest.de/rss/all-stories.xml',
+    category: 'seo-de'
+  },
+  // ── WordPress ──
+  {
+    name: 'WP Tavern',
+    url: 'https://wptavern.com/feed',
+    category: 'wordpress'
+  },
+  {
+    name: 'WordPress News',
+    url: 'https://wordpress.org/news/feed/',
+    category: 'wordpress'
   }
 ];
 
@@ -105,11 +133,16 @@ async function generateBriefing(feedResults) {
     return { summary: '', sources: [] };
   }
 
-  const prompt = `Du bist ein Tech-News-Kurator. Hier sind die heutigen Headlines aus Tech-Quellen:
+  const prompt = `Du bist ein Tech-News-Kurator für eine Webentwicklungs-Agentur. Hier sind die heutigen Headlines aus verschiedenen Quellen:
 
 ${allHeadlines.join('\n')}
 
-Erstelle ein KURZES Briefing (max. 4-5 Sätze, deutsch) mit den 3-4 relevantesten Themen/Trends des Tages. Fokus auf: Web-Entwicklung, KI/AI, SEO, und allgemeine Tech-Trends. Formuliere es so, dass eine Chat-Assistentin ("Evita") das Wissen beiläufig in Gespräche einfließen lassen kann – NICHT als Nachrichtensendung, sondern als "was heute in der Tech-Welt los ist". Keine Links, keine Quellenangaben, keine Aufzählungen.`;
+Erstelle ein KURZES Briefing (max. 6-8 Sätze, deutsch) mit den 4-6 relevantesten Themen/Trends des Tages. Decke dabei DREI Bereiche ab, sofern es relevante News gibt:
+1. **Tech/KI** – Allgemeine Tech-Trends, KI/AI-Entwicklungen
+2. **SEO/Search** – Google-Updates, Ranking-Änderungen, Search Console, Core Web Vitals
+3. **WordPress** – Plugin-Updates, Core-Releases, Gutenberg, Sicherheitslücken
+
+Formuliere es so, dass eine Chat-Assistentin ("Evita") das Wissen beiläufig in Gespräche einfließen lassen kann – NICHT als Nachrichtensendung, sondern als "was heute in der Tech-Welt los ist". Keine Links, keine Quellenangaben, keine Aufzählungen. Natürlicher Fließtext.`;
 
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
