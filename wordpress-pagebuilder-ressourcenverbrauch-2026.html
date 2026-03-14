@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/pagebuilder-anim.css">
     
     <link rel="canonical" href="https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026" />
 
@@ -124,16 +125,22 @@
             </ul>
         </div>
 
+        <!-- ══════════════════════════════════════════ -->
+        <!-- RAM METER: PageBuilder vs. Clean Code      -->
+        <!-- Ersetzt images/wordpress-ressourcenverbrauch.webp -->
+        <!-- ══════════════════════════════════════════ -->
         <div class="summary-image">
-            <figure>
-                <img src="images/wordpress-ressourcenverbrauch.webp" 
-                     alt="Technische Visualisierung: Hoher RAM-Verbrauch durch WordPress PageBuilder im Vergleich zu Clean Code" 
-                     title="Ressourcen-Hunger: PageBuilder vs. Performance"
-                     loading="lazy" 
-                     width="300" 
-                     height="300">
-                <figcaption class="visually-hidden">Grafik zur Darstellung der 512MB-Speichergrenze bei komplexen CMS-Setups</figcaption>
-            </figure>
+            <div class="pb-ram-meter" id="pb-ram-meter">
+                <div class="rm-header">
+                    <span class="rm-title">PHP Memory Usage</span>
+                    <span class="rm-live"><span class="rm-live-dot"></span> Live</span>
+                </div>
+                <div class="rm-body" id="rm-body"></div>
+                <div class="rm-toggle">
+                    <button class="rm-toggle-btn is-active" data-state="bloat" type="button">PageBuilder</button>
+                    <button class="rm-toggle-btn" data-state="clean" type="button">Clean Code</button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -277,5 +284,79 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- RAM METER – Inline JS                             -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var body=document.getElementById('rm-body');
+        var btns=document.querySelectorAll('.rm-toggle-btn');
+        if(!body||!btns.length)return;
+
+        var DATA={
+            bloat:{
+                gauges:[
+                    {label:'PHP Memory',val:'448 MB / 512 MB',pct:87,color:'red'},
+                    {label:'DOM Nodes',val:'1.847',pct:92,color:'red'}
+                ],
+                stats:[
+                    {label:'CSS-Dateien',val:'14',cls:'red'},
+                    {label:'JS-Dateien',val:'22',cls:'red'},
+                    {label:'PageSpeed Score',val:'34 / 100',cls:'red'},
+                    {label:'TTFB',val:'2.4s',cls:'red'},
+                    {label:'Hosting-Kosten',val:'\u20AC49 / Monat',cls:'red'}
+                ]
+            },
+            clean:{
+                gauges:[
+                    {label:'PHP Memory',val:'31 MB / 256 MB',pct:12,color:'green'},
+                    {label:'DOM Nodes',val:'127',pct:6,color:'green'}
+                ],
+                stats:[
+                    {label:'CSS-Dateien',val:'1',cls:'green'},
+                    {label:'JS-Dateien',val:'2',cls:'green'},
+                    {label:'PageSpeed Score',val:'98 / 100',cls:'green'},
+                    {label:'TTFB',val:'0.18s',cls:'green'},
+                    {label:'Hosting-Kosten',val:'\u20AC9 / Monat',cls:'green'}
+                ]
+            }
+        };
+
+        function render(state){
+            var d=DATA[state];
+            var h='';
+            d.gauges.forEach(function(g){
+                h+='<div class="rm-gauge-title"><span>'+g.label+'</span><span>'+g.val+'</span></div>';
+                h+='<div class="rm-gauge"><div class="rm-gauge-fill '+g.color+'" data-pct="'+g.pct+'"></div><span class="rm-gauge-label">'+g.pct+'%</span></div>';
+            });
+            h+='<div class="rm-divider"></div>';
+            d.stats.forEach(function(s){
+                h+='<div class="rm-stat"><span class="rm-stat-label">'+s.label+'</span><span class="rm-stat-val '+s.cls+'">'+s.val+'</span></div>';
+            });
+            body.innerHTML=h;
+            setTimeout(function(){
+                body.querySelectorAll('.rm-gauge-fill').forEach(function(el){
+                    el.style.width=el.dataset.pct+'%';
+                });
+            },50);
+        }
+
+        var userClicked=false,timer;
+        function set(state){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(state==='clean')btns[1].classList.add('is-active');
+            else btns[0].classList.add('is-active');
+            render(state);
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state);
+        });});
+        set('bloat');
+        var isBloat=true;
+        timer=setInterval(function(){if(userClicked)return;isBloat=!isBloat;set(isBloat?'bloat':'clean');},5000);
+    })();
+    </script>
 </body>
 </html>
