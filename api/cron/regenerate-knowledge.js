@@ -308,6 +308,63 @@ export default async function handler(req, res) {
         }
 
         // ==========================================
+        // 2c. VERIFICATION: Prüfen ob KB-Chunks wirklich da sind
+        // ==========================================
+        // Sicherheitsnetz: Nach dem Sync stichprobenartig prüfen ob
+        // die Knowledge-Base Chunks tatsächlich in der Vector-DB gelandet sind.
+        // Schreibt Warnung ins Build-Log wenn was fehlt.
+        let verificationResult = { status: 'ok', missing: [], checked: 0, found: 0 };
+
+        if (kbChunkCount > 0) {
+            try {
+                console.log('🔍 Verification: Prüfe ob KB-Chunks in Vector-DB vorhanden...');
+                const allIdsAfterSync = await getAllExistingIds();
+                const allIdSet = new Set(allIdsAfterSync);
+
+                // KB-Chunks haben IDs wie "page_kb-{slug}"
+                const expectedKbIds = filteredPages
+                    .filter(p => p.type === 'knowledge-base')
+                    .map(p => `page_${p.slug}`);
+
+                const missingKbIds = expectedKbIds.filter(id => !allIdSet.has(id));
+                verificationResult.checked = expectedKbIds.length;
+                verificationResult.found = expectedKbIds.length - missingKbIds.length;
+
+                if (missingKbIds.length > 0) {
+                    verificationResult.status = 'warning';
+                    verificationResult.missing = missingKbIds;
+                    console.error(`🚨 VERIFICATION FAILED: ${missingKbIds.length}/${expectedKbIds.length} KB-Chunks fehlen in Vector-DB!`);
+                    console.error(`   Fehlende IDs: ${missingKbIds.join(', ')}`);
+
+                    // Warnung ins Build-Log schreiben (sichtbar im Dashboard)
+                    const warningEntry = {
+                        timestamp: new Date().toISOString(),
+                        trigger: 'verification-warning',
+                        status: 'warning',
+                        message: `${missingKbIds.length} KB-Chunks fehlen nach Sync: ${missingKbIds.join(', ')}`,
+                        details: { expected: expectedKbIds.length, found: verificationResult.found, missing: missingKbIds }
+                    };
+                    await redis.lpush('build:log:triggers', JSON.stringify(warningEntry));
+                    await redis.ltrim('build:log:triggers', 0, 99);
+                } else {
+                    console.log(`✅ Verification OK: Alle ${expectedKbIds.length} KB-Chunks sind in der Vector-DB`);
+                }
+
+                // Zusätzlich: Gesamtzahl prüfen (sind auch HTML-Seiten da?)
+                const expectedTotal = uploadedIds.size;
+                const actualTotal = allIdsAfterSync.length;
+                if (actualTotal < expectedTotal * 0.8) {
+                    console.warn(`⚠️  Vector-DB hat nur ${actualTotal} von ${expectedTotal} erwarteten Vektoren (< 80%)`);
+                    verificationResult.status = 'warning';
+                }
+
+            } catch (verifyErr) {
+                console.warn('⚠️  Verification fehlgeschlagen (unkritisch):', verifyErr.message);
+                verificationResult.status = 'error';
+            }
+        }
+
+        // ==========================================
         // 3. ERGEBNIS
         // ==========================================
         const processingTime = Date.now() - startTime;
@@ -317,7 +374,8 @@ export default async function handler(req, res) {
             vector_chunks: uploadedChunks,
             vector_upload_errors: uploadErrors,
             orphans_deleted: orphansDeleted,
-            processing_time_ms: processingTime
+            processing_time_ms: processingTime,
+            verification: verificationResult
         };
 
         console.log(`\n✅ Vektor-DB Sync (Safe-Sync) abgeschlossen:`);
@@ -325,6 +383,10 @@ export default async function handler(req, res) {
         console.log(`   📤 ${uploadedChunks} Chunks hochgeladen (upsert)`);
         if (orphansDeleted > 0) console.log(`   🧹 ${orphansDeleted} veraltete Vektoren entfernt`);
         if (uploadErrors > 0) console.log(`   ❌ ${uploadErrors} Fehler`);
+        if (verificationResult.checked > 0) {
+            const icon = verificationResult.status === 'ok' ? '✅' : '🚨';
+            console.log(`   ${icon} Verification: ${verificationResult.found}/${verificationResult.checked} KB-Chunks bestätigt`);
+        }
         console.log(`   ⏱️  ${processingTime}ms`);
 
         return res.status(200).json({
