@@ -3050,6 +3050,14 @@
         const data = await res.json();
         if (data.success) {
           cancelKnowledgeEdit();
+          // Hinweis auf Auto-Sync anzeigen
+          if (data.vectorSyncTriggered) {
+            const syncHint = document.createElement('div');
+            syncHint.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111119;border:1px solid #1e1e2e;color:#00d68f;padding:14px 20px;border-radius:10px;font-size:0.85rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            syncHint.innerHTML = '🧠 Gespeichert! Vektor-DB wird automatisch synchronisiert …';
+            document.body.appendChild(syncHint);
+            setTimeout(() => syncHint.remove(), 5000);
+          }
           await loadDashboard();
           switchTab('builds');
         } else {
@@ -3070,6 +3078,14 @@
         });
         const data = await res.json();
         if (data.success) {
+          // Hinweis auf Auto-Sync anzeigen
+          if (data.vectorSyncTriggered) {
+            const syncHint = document.createElement('div');
+            syncHint.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111119;border:1px solid #1e1e2e;color:#ff6b6b;padding:14px 20px;border-radius:10px;font-size:0.85rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            syncHint.innerHTML = '🗑️ Gelöscht! Vektor-DB wird automatisch bereinigt …';
+            document.body.appendChild(syncHint);
+            setTimeout(() => syncHint.remove(), 5000);
+          }
           await loadDashboard();
           switchTab('builds');
         } else {
