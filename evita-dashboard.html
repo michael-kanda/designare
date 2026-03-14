@@ -2391,20 +2391,40 @@
               if (event.type === 'trigger') {
                 const triggerLabel = event.trigger === 'cron' ? 'Automatisch (Cron)' 
                   : event.trigger === 'dashboard' ? 'Manuell (Dashboard)' 
+                  : event.trigger === 'dashboard-vector' ? 'Vektor-Sync (Dashboard)'
+                  : event.trigger === 'auto-after-kb-change' ? 'Auto-Sync (KB geändert)'
+                  : event.trigger === 'verification-warning' ? 'Verification-Warnung'
                   : event.trigger === 'manual' ? 'Manuell (API)'
                   : 'Unbekannt';
-                const tagClass = event.trigger === 'cron' ? 'cron' : event.trigger === 'dashboard' ? 'dashboard' : 'manual';
-                const dotClass = event.status === 'error' ? 'error' : 'triggered';
+                const tagClass = event.trigger === 'cron' ? 'cron' 
+                  : event.trigger === 'dashboard' ? 'dashboard' 
+                  : event.trigger === 'auto-after-kb-change' ? 'cron'
+                  : event.trigger === 'dashboard-vector' ? 'dashboard'
+                  : event.trigger === 'verification-warning' ? 'manual'
+                  : 'manual';
+                const dotClass = event.status === 'error' ? 'error' 
+                  : event.status === 'warning' ? 'partial'
+                  : event.trigger === 'verification-warning' ? 'partial'
+                  : 'triggered';
 
-                return `<div class="build-log-item">
+                const titleIcon = event.trigger === 'verification-warning' ? '🚨 KB-Chunks fehlen!'
+                  : event.trigger === 'auto-after-kb-change' ? '🧠 Auto-Sync'
+                  : event.trigger === 'dashboard-vector' ? '🧠 Vektor-Sync'
+                  : event.status === 'error' ? '❌ Trigger fehlgeschlagen' 
+                  : '🚀 Deploy getriggert';
+
+                const extraDetails = event.message ? ` · ${escHTML(event.message)}` : '';
+                const statsDetails = event.stats ? ` · ${event.stats.vector_chunks ?? '?'} Chunks, ${event.stats.kb_chunks ?? '?'} KB` : '';
+
+                return `<div class="build-log-item"${event.trigger === 'verification-warning' ? ' style="background:var(--red-bg);border-left:3px solid var(--red);"' : ''}>
                   <div class="build-log-dot ${dotClass}"></div>
                   <div class="build-log-content">
                     <div class="build-log-title">
-                      ${event.status === 'error' ? '❌ Trigger fehlgeschlagen' : '🚀 Deploy getriggert'}
+                      ${titleIcon}
                       <span class="build-tag ${tagClass}">${event.trigger}</span>
                     </div>
                     <div class="build-log-details">
-                      ${triggerLabel}${event.error ? ` · ${escHTML(event.error)}` : ''}${event.deployment_id ? ` · ID: ${escHTML(event.deployment_id)}` : ''}
+                      ${triggerLabel}${event.error ? ` · ${escHTML(event.error)}` : ''}${event.deployment_id ? ` · ID: ${escHTML(event.deployment_id)}` : ''}${extraDetails}${statsDetails}
                     </div>
                   </div>
                   <div class="build-log-time">${timeStr}<br>${timeAgoStr}</div>
