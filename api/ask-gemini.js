@@ -14,6 +14,7 @@ import { dispatchFunctionCalls } from '../lib/tool-handlers.js';
 import { getWeatherContext, getWeather, geocodeCity } from '../lib/weather-service.js';
 import { getNewsContext } from '../lib/news-service.js';
 import { classifyIntent, getIntentHint } from '../lib/intent-filter.js';
+import { roastWebsite } from '../lib/website-roast.js';
 
 // ===================================================================
 // TOPIC KEYWORDS
@@ -154,6 +155,28 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Website-Roast-Tool Roundtrip ──
+    const roastCall = functionCalls.find(fc => fc.name === 'website_roast');
+    if (roastCall) {
+      const roastData = await resolveRoastCall(roastCall);
+
+      if (roastData) {
+        console.log(`🔥 Roast-Roundtrip: ${roastData.url} → Note ${roastData.overall?.note || '?'}`);
+        const followUp = await generateWithFunctionResponse(
+          contents, systemPrompt, response,
+          'website_roast', roastData, usedModel
+        );
+        response = followUp.response;
+        usedModel = followUp.usedModel;
+
+        const parsed = parseGeminiResponse(response);
+        answerText = parsed.answerText;
+        functionCalls = parsed.functionCalls;
+
+        console.log(`🤖 Roast-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
+      }
+    }
+
     // ── Function Calls verarbeiten (Action Tools) ──
     const responsePayload = dispatchFunctionCalls(functionCalls, answerText, {
       currentPage, history, userMessage, availableLinks
@@ -217,6 +240,65 @@ async function resolveWeatherCall(weatherCall) {
   } catch (err) {
     console.error('❌ Wetter-Resolver Fehler:', err.message);
     return null;
+  }
+}
+
+// ===================================================================
+// WEBSITE-ROAST RESOLVER
+// ===================================================================
+async function resolveRoastCall(roastCall) {
+  try {
+    const url = roastCall.args?.url;
+    if (!url) {
+      return { error: 'Keine URL angegeben.', summary: 'Ohne URL kann ich leider nichts roasten!' };
+    }
+
+    console.log(`🔥 Website-Roast gestartet: ${url}`);
+    const result = await roastWebsite(url);
+
+    // Kompakte Zusammenfassung für Gemini bauen (wie im API-Endpoint)
+    const { overall, categories, highlights } = result;
+
+    let summary = `WEBSITE-ROAST ERGEBNIS für ${result.url}:\n`;
+    summary += `Gesamtnote: ${overall.note} (${overall.label}) – ${overall.score}%\n`;
+    summary += `Antwortzeit: ${result.responseTime}\n\n`;
+
+    summary += `ZEUGNIS:\n`;
+    for (const [key, cat] of Object.entries(categories)) {
+      summary += `• ${cat.name}: Note ${cat.note} (${cat.label}, ${cat.score}%)\n`;
+      for (const item of cat.items) {
+        const icon = item.status === 'pass' ? '✓' : item.status === 'fail' ? '✗' : '~';
+        summary += `  ${icon} ${item.check}: ${item.detail}\n`;
+      }
+    }
+
+    summary += `\nHIGHLIGHTS:\n`;
+    summary += `Beste Kategorie: ${highlights.bestCategory[1].name} (${highlights.bestCategory[1].score}%)\n`;
+    summary += `Schwächste Kategorie: ${highlights.worstCategory[1].name} (${highlights.worstCategory[1].score}%)\n`;
+    if (highlights.criticalFails.length > 0) {
+      summary += `Kritische Fehler: ${highlights.criticalFails.join(', ')}\n`;
+    }
+    if (highlights.quickWins.length > 0) {
+      summary += `Quick Wins: ${highlights.quickWins.join(' | ')}\n`;
+    }
+
+    summary += `\nGIB DEN ROAST IN DEINEM EVITA-STIL:\n`;
+    summary += `- Charmant-frech, wie eine Kollegin die das Zeugnis vorliest\n`;
+    summary += `- Starte mit der Gesamtnote als "Schulnote"\n`;
+    summary += `- Hebe 2-3 gute Dinge hervor (mit Augenzwinkern)\n`;
+    summary += `- Nenne 2-3 Probleme direkt beim Namen (mit Humor)\n`;
+    summary += `- Ende mit einem konkreten Quick Win\n`;
+    summary += `- Max 6-8 Sätze, KEINE Aufzählungen, KEINE Emojis\n`;
+    summary += `- Bei Note 1-2: respektvoll loben. Bei 3: "geht besser". Bei 4-5: liebevoll zerstören.\n`;
+    summary += `- Erwähne beiläufig den KI-Sichtbarkeits-Check (/ki-sichtbarkeit) als nächsten Schritt. Nutze suggest_chips mit Link zu /ki-sichtbarkeit.\n`;
+
+    return { summary, url: result.url, overall: result.overall };
+  } catch (err) {
+    console.error('❌ Roast-Resolver Fehler:', err.message);
+    return {
+      error: err.message,
+      summary: `Ich konnte die Website leider nicht analysieren: ${err.message}. Ist die URL korrekt und die Seite erreichbar?`
+    };
   }
 }
 
