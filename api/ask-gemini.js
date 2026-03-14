@@ -290,6 +290,7 @@ async function resolveRoastCall(roastCall) {
     summary += `- Ende mit einem konkreten Quick Win\n`;
     summary += `- Max 6-8 Sätze, KEINE Aufzählungen, KEINE Emojis\n`;
     summary += `- Bei Note 1-2: respektvoll loben. Bei 3: "geht besser". Bei 4-5: liebevoll zerstören.\n`;
+    summary += `- WICHTIG: Schreibe den Roast NEUTRAL – nimm NIEMALS an, wer die Website erstellt hat. Auch nicht Michael! Du bewertest die Seite, nicht den Ersteller.\n`;
     summary += `- Erwähne beiläufig den KI-Sichtbarkeits-Check (/ki-sichtbarkeit) als nächsten Schritt. Nutze suggest_chips mit Link zu /ki-sichtbarkeit.\n`;
 
     return { summary, url: result.url, overall: result.overall };
