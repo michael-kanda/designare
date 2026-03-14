@@ -1,0 +1,225 @@
+/* ============================================ */
+/* PAGEBUILDER – RAM Meter Dashboard              */
+/* Prefix: rm-                                    */
+/* ============================================ */
+
+.pb-ram-meter {
+    width: 100%;
+    max-width: 340px;
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.rm-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #222);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rm-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+}
+
+.rm-live {
+    font-size: 9px;
+    color: #f87171;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rm-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f87171;
+    animation: rmPulse 1.5s ease-in-out infinite;
+}
+
+.rm-body {
+    padding: 16px;
+}
+
+/* ── Gauge Bar ── */
+.rm-gauge-title {
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Poppins', sans-serif;
+}
+
+.rm-gauge {
+    position: relative;
+    height: 22px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.rm-gauge-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0;
+}
+
+.rm-gauge-fill.green  { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.rm-gauge-fill.yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.rm-gauge-fill.red    { background: linear-gradient(90deg, #dc2626, #f87171); }
+
+.rm-gauge-label {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* ── Divider ── */
+.rm-divider {
+    height: 1px;
+    background: var(--border-color, #222);
+    margin: 12px 0;
+}
+
+/* ── Stats ── */
+.rm-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 10px;
+}
+
+.rm-stat-label {
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+}
+
+.rm-stat-val {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 10px;
+}
+
+.rm-stat-val.red   { color: #f87171; }
+.rm-stat-val.green { color: #4ade80; }
+
+/* ── Toggle ── */
+.rm-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 10px;
+}
+
+.rm-toggle-btn {
+    padding: 8px 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.rm-toggle-btn:first-child {
+    border-radius: 2px 0 0 2px;
+    border-right: none;
+}
+
+.rm-toggle-btn:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.rm-toggle-btn.is-active {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+    border-color: var(--accent-color, #c4a35a);
+}
+
+.rm-toggle-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+@keyframes rmPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.pb-ram-meter) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.pb-ram-meter) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Light Mode ── */
+body.light-mode .pb-ram-meter {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .rm-header {
+    border-bottom-color: #e0e0e0;
+}
+
+body.light-mode .rm-gauge {
+    background: rgba(0,0,0,0.04);
+}
+
+body.light-mode .rm-divider {
+    background: #e0e0e0;
+}
+
+body.light-mode .rm-stat-label { color: #666; }
+
+body.light-mode .rm-toggle-btn {
+    border-color: #ddd;
+    color: #888;
+}
+
+body.light-mode .rm-toggle-btn.is-active {
+    border-color: var(--accent-color, #c4a35a);
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .pb-ram-meter {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .rm-gauge-title { font-size: 8.5px; }
+    .rm-stat { font-size: 9px; }
+    .rm-stat-val { font-size: 9px; }
+
+    .rm-toggle-btn {
+        padding: 7px 14px;
+        font-size: 9px;
+    }
+}
