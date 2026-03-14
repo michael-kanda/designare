@@ -15,6 +15,9 @@ import { getWeatherContext, getWeather, geocodeCity } from '../lib/weather-servi
 import { getNewsContext } from '../lib/news-service.js';
 import { classifyIntent, getIntentHint } from '../lib/intent-filter.js';
 import { roastWebsite } from '../lib/website-roast.js';
+import { Redis } from '@upstash/redis';
+
+const roastRedis = Redis.fromEnv();
 
 // ===================================================================
 // TOPIC KEYWORDS
@@ -268,6 +271,26 @@ async function resolveRoastCall(roastCall) {
 
     console.log(`🔥 Website-Roast gestartet: ${url}`);
     const result = await roastWebsite(url);
+
+    // ── Tracking für Dashboard ──
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await Promise.all([
+        roastRedis.hincrby(`evita:roast:daily:${today}`, 'total', 1),
+        roastRedis.hincrby(`evita:roast:daily:${today}`, `note_${result.overall.note}`, 1),
+        roastRedis.lpush('evita:roast:recent', JSON.stringify({
+          url: result.url,
+          note: result.overall.note,
+          label: result.overall.label,
+          score: result.overall.score,
+          timestamp: new Date().toISOString()
+        })),
+        roastRedis.ltrim('evita:roast:recent', 0, 49),
+        roastRedis.expire(`evita:roast:daily:${today}`, 90 * 86400)
+      ]);
+    } catch (trackErr) {
+      console.warn('⚠️ Roast-Tracking Fehler:', trackErr.message);
+    }
 
     // Kompakte Zusammenfassung für Gemini bauen (wie im API-Endpoint)
     const { overall, categories, highlights } = result;
