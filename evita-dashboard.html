@@ -2152,6 +2152,19 @@
         }
       }
 
+      // ===== VEKTOR-INVENTAR: Was hat Evita wirklich? =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;" id="vector-inventory-card">
+        <div class="chart-title">🔎 Evitas aktives Wissen <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Live aus Vector-DB)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:16px;">
+          Zeigt alle Vektoren die Evita gerade tatsächlich zum Antworten nutzen kann.
+        </div>
+        <div id="vector-inventory-content">
+          <button onclick="loadVectorInventory()" id="vector-inventory-btn" class="build-trigger-btn" style="background:var(--accent);width:100%;">
+            🔎 Vektor-Inventar laden
+          </button>
+        </div>
+      </div>`;
+
       // ===== INVENTORY: Detaillierte Seitenlisten =====
       const inv = bl.inventory;
       if (inv) {
@@ -2242,7 +2255,7 @@
       html += `<div class="chart-card full-width" style="margin-bottom:24px;">
         <div class="chart-title">📚 Evitas Wissens-Datenbank <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${kbChunks.length} Chunks)</span></div>
         <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:16px;">
-          Eigenes Wissen für Evita hinterlegen – ohne Blog oder Landingpage. Nach Änderungen → „🧠 Vektor-DB aktualisieren" klicken.
+          Eigenes Wissen für Evita hinterlegen – ohne Blog oder Landingpage. Nach Änderungen wird die Vektor-DB automatisch synchronisiert.
         </div>
 
         <div id="kb-editor" style="display:none; background:var(--bg-card-hover); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px;">
@@ -3113,6 +3126,147 @@
         }
       } catch (e) {
         alert('Fehler: ' + e.message);
+      }
+    }
+
+    // ============================================================
+    // VEKTOR-INVENTAR
+    // ============================================================
+    async function loadVectorInventory() {
+      const container = document.getElementById('vector-inventory-content');
+      const btn = document.getElementById('vector-inventory-btn');
+      if (!container) return;
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Lade Vektoren aus Upstash…';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_vector_inventory' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Unbekannter Fehler');
+
+        let html = '';
+
+        // Zusammenfassung
+        html += `<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:20px;">
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--accent);">${data.total}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Vektoren gesamt</div>
+          </div>
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--green);">${data.breakdown.knowledgeBase}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Wissensbank</div>
+          </div>
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--blue);">${data.breakdown.articles + data.breakdown.pages}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Webseiten</div>
+          </div>
+        </div>`;
+
+        // Wissensbank-Chunks
+        const kb = data.knowledgeBase || [];
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-kb')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">📚</span>
+              <span class="inventory-toggle-title">Wissensbank-Chunks in Vector-DB</span>
+              <span class="inventory-toggle-count">${kb.length}</span>
+              ${kb.length === 0 ? '<span style="color:var(--red);font-size:0.75rem;margin-left:8px;">⚠️ Keine KB-Chunks gefunden!</span>' : '<span style="color:var(--green);font-size:0.75rem;margin-left:8px;">✓ aktiv</span>'}
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-kb-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-kb-list">
+            ${kb.length > 0 ? kb.map((v, i) => `
+              <div class="inventory-item">
+                <span class="inventory-item-num">${i + 1}</span>
+                <div class="inventory-item-content">
+                  <div class="inventory-item-title">${escHTML(v.title)}</div>
+                  <div class="inventory-item-meta">
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-muted);">${escHTML(v.id)}</span>
+                    <span style="color:var(--text-muted);">· ${v.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="no-data" style="padding:20px;">Keine Wissensbank-Chunks in der Vector-DB. Erstelle einen KB-Chunk und synchronisiere.</div>'}
+          </div>
+        </div>`;
+
+        // Blog-Artikel (gruppiert nach Seite)
+        const articleGroups = data.articleGroups || [];
+        const articleSections = articleGroups.reduce((sum, g) => sum + g.sections.length, 0);
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-articles')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">📝</span>
+              <span class="inventory-toggle-title">Blog-Artikel Sektionen</span>
+              <span class="inventory-toggle-count">${articleSections} Sektionen · ${articleGroups.length} Artikel</span>
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-articles-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-articles-list">
+            ${articleGroups.map(group => `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:0.85rem; font-weight:600; padding:6px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${escHTML(group.title)}</span>
+                  <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${group.sections.length} Sektionen${group.url ? ' · ' + escHTML(group.url) : ''}</span>
+                </div>
+                ${group.sections.map(s => `
+                  <div style="display:flex; align-items:center; gap:8px; padding:4px 0 4px 16px; font-size:0.78rem; color:var(--text-secondary);">
+                    <span style="color:var(--text-muted);">§</span>
+                    <span>${escHTML(s.heading || 'Ganzer Text')}</span>
+                    <span style="color:var(--text-muted); font-size:0.68rem; font-family:'JetBrains Mono',monospace; margin-left:auto;">${s.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+
+        // Weitere Seiten (gruppiert nach Seite)
+        const pageGroups = data.pageGroups || [];
+        const pageSections = pageGroups.reduce((sum, g) => sum + g.sections.length, 0);
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-pages')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">🌐</span>
+              <span class="inventory-toggle-title">Webseiten Sektionen</span>
+              <span class="inventory-toggle-count">${pageSections} Sektionen · ${pageGroups.length} Seiten</span>
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-pages-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-pages-list">
+            ${pageGroups.map(group => `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:0.85rem; font-weight:600; padding:6px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${escHTML(group.title)}</span>
+                  <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${group.sections.length} Sektionen${group.url ? ' · ' + escHTML(group.url) : ''}</span>
+                </div>
+                ${group.sections.map(s => `
+                  <div style="display:flex; align-items:center; gap:8px; padding:4px 0 4px 16px; font-size:0.78rem; color:var(--text-secondary);">
+                    <span style="color:var(--text-muted);">§</span>
+                    <span>${escHTML(s.heading || 'Ganzer Text')}</span>
+                    <span style="color:var(--text-muted); font-size:0.68rem; font-family:'JetBrains Mono',monospace; margin-left:auto;">${s.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+
+        // Timestamp
+        html += `<div style="text-align:right; font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-top:12px;">
+          Stand: ${new Date(data.timestamp).toLocaleString('de-AT')} · <a href="#" onclick="loadVectorInventory();return false;" style="color:var(--accent);text-decoration:none;">↻ Aktualisieren</a>
+        </div>`;
+
+        container.innerHTML = html;
+
+      } catch (e) {
+        container.innerHTML = `<div style="color:var(--red);font-size:0.85rem;padding:16px;">❌ Fehler: ${escHTML(e.message)}</div>
+          <button onclick="loadVectorInventory()" class="build-trigger-btn" style="background:var(--accent);width:100%;margin-top:8px;">🔄 Nochmal versuchen</button>`;
       }
     }
 
