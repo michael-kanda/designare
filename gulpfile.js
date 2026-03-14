@@ -42,6 +42,7 @@ const articleFiles = [
     'css/seo-wunderkiste-anim.css',
     'css/wp-ki-core-anim.css',
     'css/sem-markup-anim.css',
+    'css/pagebuilder-anim.css',
     'css/ai-visibility.css'
 ];
 
