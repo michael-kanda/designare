@@ -3,6 +3,7 @@
 // REFACTORED: Alle Redis-Reads parallelisiert via Promise.all
 // NEU: Website-Roast Tracking-Daten
 import { Redis } from "@upstash/redis";
+import { Index } from "@upstash/vector";
 
 // Vercel Pro: Erlaube bis zu 5 Min (nötig für Vektor-DB Rebuild via Dashboard)
 export const maxDuration = 300;
@@ -345,6 +346,78 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, health: result });
       } catch (e) {
         return res.status(500).json({ error: `Health-Check Fehler: ${e.message}` });
+      }
+    }
+
+    // ── Vektor-Inventar: Alle Vektoren aus der DB auflisten ──
+    if (action === 'get_vector_inventory') {
+      try {
+        const vectorIndex = new Index({
+          url: process.env.UPSTASH_VECTOR_REST_URL,
+          token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+        });
+
+        const allVectors = [];
+        let cursor = '0';
+
+        do {
+          const result = await vectorIndex.range({
+            cursor,
+            limit: 100,
+            includeMetadata: true,
+            includeVectors: false
+          });
+
+          for (const item of result.vectors || []) {
+            allVectors.push({
+              id: item.id,
+              title: item.metadata?.title || '?',
+              section: item.metadata?.section_heading || null,
+              url: item.metadata?.url || null,
+              type: item.metadata?.type || 'page',
+              contentLength: (item.metadata?.content || '').length
+            });
+          }
+
+          cursor = result.nextCursor || '';
+        } while (cursor && cursor !== '0' && cursor !== '');
+
+        // Gruppieren
+        const kbChunks = allVectors.filter(v => v.type === 'knowledge-base');
+        const articles = allVectors.filter(v => v.type === 'article');
+        const pages = allVectors.filter(v => v.type !== 'knowledge-base' && v.type !== 'article');
+
+        // Nach Seite gruppieren (für Sektionen-Ansicht)
+        const groupByTitle = (vectors) => {
+          const groups = {};
+          for (const v of vectors) {
+            const key = v.title || '?';
+            if (!groups[key]) groups[key] = { title: key, url: v.url, type: v.type, sections: [] };
+            groups[key].sections.push({
+              id: v.id,
+              heading: v.section,
+              contentLength: v.contentLength
+            });
+          }
+          return Object.values(groups).sort((a, b) => a.title.localeCompare(b.title, 'de'));
+        };
+
+        return res.status(200).json({
+          success: true,
+          total: allVectors.length,
+          breakdown: {
+            knowledgeBase: kbChunks.length,
+            articles: articles.length,
+            pages: pages.length
+          },
+          knowledgeBase: kbChunks.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'de')),
+          articleGroups: groupByTitle(articles),
+          pageGroups: groupByTitle(pages),
+          timestamp: new Date().toISOString()
+        });
+
+      } catch (e) {
+        return res.status(500).json({ error: `Vektor-Inventar Fehler: ${e.message}` });
       }
     }
 
