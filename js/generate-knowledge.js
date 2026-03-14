@@ -1,37 +1,19 @@
-// js/generate-knowledge.js - VERBESSERTE VERSION + VECTOR-DB UPLOAD
-// Crawlt HTML → generiert knowledge.json → uploaded nach Upstash Vector
-// Läuft bei jedem Build (npm run build), dadurch ist die Vector-DB immer synchron
+// js/generate-knowledge.js - Knowledge-JSON Generator (Build-Time only)
+// Crawlt HTML → generiert knowledge.json + knowledge.min.json
+// Läuft bei jedem Build (npm run build)
+//
+// ═══════════════════════════════════════════════════════════════════
+// WICHTIG: Dieses Script macht KEINEN Vector-DB Upload mehr!
+// Der Vector-Upload wird ausschließlich von regenerate-knowledge.js
+// (Cron um 3:30 oder Dashboard-Button) per Safe-Sync erledigt.
+//
+// Grund: Jeder Build führte zu reset() → Vector-DB komplett leer →
+// KB-Chunks aus Redis gingen verloren bis zum nächsten Cron-Lauf.
+// ═══════════════════════════════════════════════════════════════════
 
 import fs from 'fs';
 import path from 'path';
 import * as cheerio from 'cheerio';
-
-// ── Upstash Vector & Gemini (optional – wenn Env-Vars fehlen, wird nur JSON generiert) ──
-let vectorIndex = null;
-let embeddingModel = null;
-
-try {
-    if (process.env.UPSTASH_VECTOR_REST_URL && process.env.GEMINI_API_KEY) {
-        const { Index } = await import("@upstash/vector");
-        const { GoogleGenerativeAI } = await import("@google/generative-ai");
-
-        vectorIndex = new Index({
-            url: process.env.UPSTASH_VECTOR_REST_URL,
-            token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-        });
-
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // WICHTIG: Muss mit rag-service.js übereinstimmen (gemini-embedding-001 + slice 768)
-        embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-
-        console.log('🔗 Vector-DB Verbindung initialisiert (gemini-embedding-001)\n');
-    } else {
-        console.log('⚠️  UPSTASH/GEMINI Env-Vars fehlen → nur lokale JSON-Generierung (kein Vector-Upload)\n');
-    }
-} catch (initError) {
-    console.error('⚠️  Vector-DB Init fehlgeschlagen:', initError.message);
-    console.log('   → Fahre ohne Vector-Upload fort\n');
-}
 
 // ── Redis: KI-Ausschluss-Liste laden (optional, für Dashboard-Feature) ──
 let dynamicExcludes = [];
@@ -286,107 +268,10 @@ function generateSearchIndex(knowledgeBase) {
 }
 
 /**
- * Uploaded alle Sektionen in die Upstash Vector-DB (Section-basiertes Chunking)
- * Jede H2-Sektion + Einleitung wird als eigener Vektor gespeichert.
- * Seiten ohne Sektionen bekommen einen Fallback-Vektor mit dem gesamten Text.
- */
-async function uploadToVectorDB(knowledgeBase) {
-    if (!vectorIndex || !embeddingModel) {
-        console.log('\n⏭️  Vector-Upload übersprungen (keine Verbindung)\n');
-        return { uploaded: 0, errors: 0, chunks: 0 };
-    }
-
-    let expectedChunks = 0;
-    for (const page of knowledgeBase) {
-        expectedChunks += (page.sections && page.sections.length > 0) ? page.sections.length : 1;
-    }
-
-    console.log(`\n🚀 Starte Vector-DB Upload (Section-Chunking: ${expectedChunks} Chunks aus ${knowledgeBase.length} Seiten)...\n`);
-
-    try {
-        await vectorIndex.reset();
-        console.log('🗑️  Vector-DB zurückgesetzt (alte Einträge entfernt)\n');
-    } catch (resetError) {
-        console.error('⚠️  Vector-DB Reset fehlgeschlagen:', resetError.message);
-    }
-
-    let uploaded = 0;
-    let errors = 0;
-
-    for (const page of knowledgeBase) {
-        const sections = page.sections || [];
-
-        if (sections.length === 0) {
-            // ── FALLBACK: Seite ohne Sektionen → gesamten Text als einen Chunk ──
-            const textToEmbed = `${page.title}\n${page.meta_description}\n${page.text}`;
-
-            try {
-                const result = await embeddingModel.embedContent(textToEmbed);
-                const vector = result.embedding.values.slice(0, 768);
-
-                await vectorIndex.upsert({
-                    id: `page_${page.slug}`,
-                    vector: vector,
-                    data: textToEmbed,
-                    metadata: {
-                        title: page.title,
-                        url: page.url,
-                        section_heading: null,
-                        content: page.text.substring(0, 2000)
-                    }
-                });
-
-                uploaded++;
-                console.log(`   📤 ${page.slug} (Seiten-Vektor, keine Sektionen)`);
-                await new Promise(r => setTimeout(r, 300));
-
-            } catch (error) {
-                errors++;
-                console.error(`   ❌ ${page.slug}: ${error.message}`);
-            }
-        } else {
-            // ── SECTION-CHUNKING: Ein Vektor pro Sektion (inkl. Einleitung) ──
-            for (let i = 0; i < sections.length; i++) {
-                const section = sections[i];
-                const textToEmbed = `${page.title} – ${section.heading}\n${section.content}`;
-
-                try {
-                    const result = await embeddingModel.embedContent(textToEmbed);
-                    const vector = result.embedding.values.slice(0, 768);
-
-                    await vectorIndex.upsert({
-                        id: `section_${page.slug}__${i}`,
-                        vector: vector,
-                        data: textToEmbed,
-                        metadata: {
-                            title: page.title,
-                            url: page.url,
-                            section_heading: section.heading,
-                            content: section.content
-                        }
-                    });
-
-                    uploaded++;
-                    console.log(`   📤 ${page.slug} → §${i}: "${section.heading.substring(0, 50)}"`);
-                    await new Promise(r => setTimeout(r, 300));
-
-                } catch (error) {
-                    errors++;
-                    console.error(`   ❌ ${page.slug} §${i}: ${error.message}`);
-                }
-            }
-        }
-    }
-
-    console.log(`\n✅ Vector-Upload abgeschlossen: ${uploaded} Chunks OK, ${errors} Fehler`);
-    return { uploaded, errors, chunks: uploaded };
-}
-
-/**
  * Hauptfunktion
  */
 async function generateKnowledge() {
-    console.log('🚀 Starte Knowledge-Base Generierung...\n');
+    console.log('🚀 Starte Knowledge-Base Generierung (nur JSON – kein Vector-Upload)...\n');
     const startTime = Date.now();
     
     // Finde alle HTML-Dateien
@@ -472,6 +357,8 @@ async function generateKnowledge() {
     };
     fs.writeFileSync('./knowledge.min.json', JSON.stringify(compactOutput));
 
+    const totalTime = Date.now() - startTime;
+
     console.log('═'.repeat(50));
     console.log(`✅ Knowledge-Base erfolgreich erstellt!`);
     console.log(`   📊 ${knowledgeBase.length} Seiten indexiert`);
@@ -479,18 +366,12 @@ async function generateKnowledge() {
     console.log(`   📑 ${totalSections} Sektionen erfasst`);
     console.log(`   💾 Gespeichert in: ${OUTPUT_FILE}`);
     console.log(`   💾 Kompakt-Version: knowledge.min.json`);
+    console.log(`   ⏱️  ${totalTime}ms`);
+    console.log('');
+    console.log(`   ℹ️  Vector-DB wird NICHT hier aktualisiert.`);
+    console.log(`   ℹ️  → Automatisch: Cron um 3:30 (regenerate-knowledge.js)`);
+    console.log(`   ℹ️  → Manuell: Dashboard → "Vektor-DB Sync" Button`);
     console.log('═'.repeat(50));
-
-    // ══════════════════════════════════════════════════════════════
-    // VECTOR-DB UPLOAD (nur wenn Env-Vars vorhanden)
-    // ══════════════════════════════════════════════════════════════
-    const vectorResult = await uploadToVectorDB(knowledgeBase);
-
-    const totalTime = Date.now() - startTime;
-    console.log(`\n⏱️  Gesamtzeit: ${totalTime}ms`);
-    if (vectorResult.uploaded > 0) {
-        console.log(`🧠 Vector-DB: ${vectorResult.chunks} Chunks aus ${knowledgeBase.length} Seiten synchronisiert (Section-Chunking)`);
-    }
 }
 
 generateKnowledge().catch(console.error);
