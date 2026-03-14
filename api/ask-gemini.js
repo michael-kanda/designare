@@ -136,6 +136,7 @@ export default async function handler(req, res) {
     // ── Wetter-Tool Roundtrip ──
     const weatherCall = functionCalls.find(fc => fc.name === 'get_weather');
     if (weatherCall) {
+      const preservedChipsWeather = functionCalls.find(fc => fc.name === 'suggest_chips');
       const weatherData = await resolveWeatherCall(weatherCall);
 
       if (weatherData) {
@@ -151,6 +152,10 @@ export default async function handler(req, res) {
         answerText = parsed.answerText;
         functionCalls = parsed.functionCalls;
 
+        if (preservedChipsWeather && !functionCalls.find(fc => fc.name === 'suggest_chips')) {
+          functionCalls.push(preservedChipsWeather);
+        }
+
         console.log(`🤖 Wetter-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
       }
     }
@@ -158,6 +163,9 @@ export default async function handler(req, res) {
     // ── Website-Roast-Tool Roundtrip ──
     const roastCall = functionCalls.find(fc => fc.name === 'website_roast');
     if (roastCall) {
+      // Chips aus dem ersten Call sichern (Gemini gibt sie oft zusammen mit dem Tool-Call)
+      const preservedChips = functionCalls.find(fc => fc.name === 'suggest_chips');
+
       const roastData = await resolveRoastCall(roastCall);
 
       if (roastData) {
@@ -172,6 +180,11 @@ export default async function handler(req, res) {
         const parsed = parseGeminiResponse(response);
         answerText = parsed.answerText;
         functionCalls = parsed.functionCalls;
+
+        // Chips wiederherstellen wenn der Followup keine eigenen hat
+        if (preservedChips && !functionCalls.find(fc => fc.name === 'suggest_chips')) {
+          functionCalls.push(preservedChips);
+        }
 
         console.log(`🤖 Roast-Followup | Text: ${answerText.length}ch | Tools: ${functionCalls.map(f => f.name).join(', ') || 'none'}`);
       }
