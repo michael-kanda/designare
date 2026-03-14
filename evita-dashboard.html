@@ -1643,6 +1643,53 @@
         }
       </div>`;
 
+      // ===== WEBSITE ROAST =====
+      const roast = data.roast;
+      if (roast && (roast.today?.total > 0 || roast.recentChecks?.length > 0)) {
+        const rt = roast.today || {};
+        const gradeColor = (note) => note <= 2 ? 'var(--green)' : note <= 3 ? 'var(--orange)' : 'var(--red)';
+
+        html += `<div class="section-title" style="margin-top:32px;">🔥 Website-Roast</div>
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-label">Roasts heute</div>
+              <div class="kpi-value accent">${rt.total || 0}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 1-2</div>
+              <div class="kpi-value green">${(rt.note_1 || 0) + (rt.note_2 || 0)}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 3</div>
+              <div class="kpi-value orange">${rt.note_3 || 0}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 4-5</div>
+              <div class="kpi-value red">${(rt.note_4 || 0) + (rt.note_5 || 0)}</div>
+            </div>
+          </div>`;
+
+        if (roast.recentChecks && roast.recentChecks.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-top:16px;">
+            <div class="chart-title">Letzte Roasts</div>
+            ${roast.recentChecks.slice(0, 15).map(r => {
+              const color = gradeColor(r.note);
+              const time = new Date(r.timestamp).toLocaleString('de-AT', {
+                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+              });
+              return `<div class="list-item">
+                <span class="list-item-text" style="flex:1">
+                  <span style="color:${color};font-weight:700;font-family:'JetBrains Mono',monospace;margin-right:10px;">Note ${r.note}</span>
+                  <span style="color:var(--text-secondary)">${escHTML(r.url)}</span>
+                  ${r.label ? `<span style="color:var(--text-muted);font-size:0.75rem;margin-left:8px">(${escHTML(r.label)}, ${r.score}%)</span>` : ''}
+                </span>
+                <span class="list-item-count" style="font-size:0.75rem;color:var(--text-muted)">${time}</span>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }
+      }
+
       return html;
     }
 
