@@ -1,6 +1,7 @@
 // api/evita-dashboard.js - Dashboard-API für Evita- & Silas-Statistiken
 // Authentifizierung via Bearer Token (EVITA_DASHBOARD_TOKEN in Vercel Env)
 // REFACTORED: Alle Redis-Reads parallelisiert via Promise.all
+// NEU: Website-Roast Tracking-Daten
 import { Redis } from "@upstash/redis";
 
 // Vercel Pro: Erlaube bis zu 5 Min (nötig für Vektor-DB Rebuild via Dashboard)
@@ -92,10 +93,13 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized. Token required.' });
   }
 
-  // ── POST: Admin-Aktionen (unverändert) ──
+  // ═════════════════════════════════════════════════════════════════
+  // POST: Admin-Aktionen
+  // ═════════════════════════════════════════════════════════════════
   if (req.method === 'POST') {
     const { action, email } = req.body || {};
-    
+
+    // ── E-Mail Blocklist ──
     if (action === 'remove_blocklist' && email) {
       try {
         await redis.srem('evita:email:blocklist', email.toLowerCase().trim());
@@ -105,6 +109,7 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── E-Mail Whitelist ──
     if (action === 'add_whitelist' && email) {
       try {
         const normalized = email.toLowerCase().trim();
@@ -127,6 +132,7 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Build Exclude URLs ──
     if (action === 'add_exclude_url' && req.body.url) {
       try {
         const normalized = req.body.url.trim().toLowerCase()
@@ -152,6 +158,7 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Vercel Deploy Rebuild ──
     if (action === 'trigger_rebuild') {
       const deployHookUrl = process.env.VERCEL_DEPLOY_HOOK;
       if (!deployHookUrl) {
@@ -177,6 +184,7 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Vektor-DB Rebuild ──
     if (action === 'trigger_vector_rebuild') {
       const cronSecret = process.env.CRON_SECRET;
       const host = req.headers.host || 'designare.at';
@@ -223,8 +231,8 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: `Vektor-DB Fehler: ${e.message}` });
       }
     }
-    
-    // ── Knowledge-Base CRUD ──────────────────────────────────────
+
+    // ── Knowledge-Base CRUD ──
     if (action === 'save_knowledge') {
       const { slug, title, tags, content } = req.body;
       if (!slug || !title || !content) {
@@ -242,7 +250,6 @@ export default async function handler(req, res) {
           content: content.trim(),
           updated_at: new Date().toISOString()
         };
-        // Prüfe ob neu oder Update
         const existing = await redis.get(`kb:${normalized}`);
         if (!existing) {
           chunk.created_at = new Date().toISOString();
@@ -272,6 +279,7 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Health-Check Trigger ──
     if (action === 'trigger_health_check') {
       const cronSecret = process.env.CRON_SECRET;
       const dashboardToken = process.env.EVITA_DASHBOARD_TOKEN;
@@ -299,18 +307,19 @@ export default async function handler(req, res) {
 
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  // =====================================================================
+  // ═════════════════════════════════════════════════════════════════
   // GET: Dashboard-Daten laden – ALLES PARALLEL
-  // =====================================================================
+  // ═════════════════════════════════════════════════════════════════
   try {
     const range = parseInt(req.query?.range || '30');
     const days = getLastNDays(range);
+    const todayKey = days[days.length - 1];
     const t0 = Date.now();
 
-    // ── PHASE 1: Alle tagesbasierten Reads parallel ──────────────────
-    // Pro Tag: 2 Evita (daily + unique) + 2 Silas (daily + unique) 
+    // ── PHASE 1: Alle tagesbasierten Reads parallel ──────────────
+    // Pro Tag: 2 Evita (daily + unique) + 2 Silas (daily + unique)
     //        + 4 Aggregationen (topics, intents, evita-models, silas-models)
-    // = 8 Calls × 30 Tage = 240 Calls parallel statt sequenziell
+    // = 8 Calls × N Tage parallel
 
     const [
       evitaDailyResults,
@@ -332,7 +341,7 @@ export default async function handler(req, res) {
       Promise.all(days.map(d => redis.hgetall(`silas:stats:models:${d}`).catch(() => null))),
     ]);
 
-    // ── PHASE 2: Alle Einzel-Reads parallel ──────────────────────────
+    // ── PHASE 2: Alle Einzel-Reads parallel ──────────────────────
 
     const [
       topQuestionsRaw,
@@ -354,10 +363,13 @@ export default async function handler(req, res) {
       buildInventoryRaw,
       excludedUrlsRaw,
       kbIndexRaw,
-      // NEU: Health-Monitoring Daten
+      // Health-Monitoring
       healthLatestRaw,
       healthLogRaw,
-      healthIncidentsRaw
+      healthIncidentsRaw,
+      // Website-Roast
+      roastRecentRaw,
+      roastTodayRaw
     ] = await Promise.all([
       redis.zrange('evita:stats:top_questions', 0, 19, { rev: true, withScores: true }).catch(() => []),
       redis.zrange('silas:stats:top_keywords', 0, 29, { rev: true, withScores: true }).catch(() => []),
@@ -378,17 +390,20 @@ export default async function handler(req, res) {
       redis.get('build:log:inventory').catch(() => null),
       redis.smembers('build:exclude:urls').catch(() => []),
       redis.smembers('kb:_index').catch(() => []),
-      // NEU: Health-Monitoring
+      // Health-Monitoring
       redis.get('health:latest').catch(() => null),
       redis.lrange('health:log', 0, 49).catch(() => []),
       redis.lrange('health:incidents', 0, 49).catch(() => []),
+      // Website-Roast
+      redis.lrange('evita:roast:recent', 0, 19).catch(() => []),
+      redis.hgetall(`evita:roast:daily:${todayKey}`).catch(() => null),
     ]);
 
     console.log(`📊 Dashboard: ${days.length} Tage, alle Redis-Reads in ${Date.now() - t0}ms`);
 
-    // =====================================================================
+    // ═════════════════════════════════════════════════════════════════
     // VERARBEITUNG (pure Berechnung, keine I/O mehr)
-    // =====================================================================
+    // ═════════════════════════════════════════════════════════════════
 
     // ── 1. Daily Stats – Evita ──
     const dailyStats = days.map((day, i) => {
@@ -527,7 +542,11 @@ export default async function handler(req, res) {
     const healthLog = parseRedisList(healthLogRaw);
     const healthIncidents = parseRedisList(healthIncidentsRaw);
 
-    // ── Knowledge-Base Chunks laden (Phase 3: basierend auf Index) ──
+    // ── Website-Roast Daten parsen ──
+    const roastRecent = parseRedisList(roastRecentRaw);
+    const roastToday = roastTodayRaw || {};
+
+    // ── Knowledge-Base Chunks laden (basierend auf Index) ──
     const kbSlugs = (kbIndexRaw || []).sort((a, b) => a.localeCompare(b));
     let knowledgeChunks = [];
     if (kbSlugs.length > 0) {
@@ -543,9 +562,9 @@ export default async function handler(req, res) {
       }).filter(Boolean);
     }
 
-    // =====================================================================
-    // RESPONSE (identisches Format, Frontend braucht keine Anpassung)
-    // =====================================================================
+    // ═════════════════════════════════════════════════════════════════
+    // RESPONSE
+    // ═════════════════════════════════════════════════════════════════
     return res.status(200).json({
       success: true,
       generated_at: new Date().toISOString(),
@@ -564,14 +583,14 @@ export default async function handler(req, res) {
         },
         period: {
           ...totals,
-          avg_messages_per_chat: totals.total_chats > 0 
-            ? Math.round((totals.total_messages / totals.total_chats) * 10) / 10 
+          avg_messages_per_chat: totals.total_chats > 0
+            ? Math.round((totals.total_messages / totals.total_chats) * 10) / 10
             : 0,
-          fallback_rate: totals.total_messages > 0 
-            ? Math.round((totals.fallback_count / totals.total_messages) * 1000) / 10 
+          fallback_rate: totals.total_messages > 0
+            ? Math.round((totals.fallback_count / totals.total_messages) * 1000) / 10
             : 0,
-          booking_conversion: totals.booking_intents > 0 
-            ? Math.round((totals.booking_completions / totals.booking_intents) * 1000) / 10 
+          booking_conversion: totals.booking_intents > 0
+            ? Math.round((totals.booking_completions / totals.booking_intents) * 1000) / 10
             : 0,
           returning_rate: (totals.new_users + totals.returning_users) > 0
             ? Math.round((totals.returning_users / (totals.new_users + totals.returning_users)) * 1000) / 10
@@ -643,11 +662,23 @@ export default async function handler(req, res) {
 
       knowledgeChunks,
 
-      // NEU: Health-Monitoring
       health: {
         latest: healthLatest,
         log: healthLog,
         incidents: healthIncidents
+      },
+
+      // NEU: Website-Roast
+      roast: {
+        today: {
+          total: safeInt(roastToday?.total),
+          note_1: safeInt(roastToday?.note_1),
+          note_2: safeInt(roastToday?.note_2),
+          note_3: safeInt(roastToday?.note_3),
+          note_4: safeInt(roastToday?.note_4),
+          note_5: safeInt(roastToday?.note_5)
+        },
+        recentChecks: roastRecent
       }
     });
 
