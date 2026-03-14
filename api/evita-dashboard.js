@@ -79,6 +79,44 @@ function aggregateHashesByDay(hashResults) {
 }
 
 // ===================================================================
+// HELPER: Vektor-DB Sync im Hintergrund triggern (Fire-and-Forget)
+// Wird nach KB-Änderungen automatisch aufgerufen, damit Evita
+// sofort das neue Wissen findet – ohne manuellen Button-Klick.
+// ===================================================================
+function triggerVectorSync(req) {
+  const cronSecret = process.env.CRON_SECRET;
+  const host = req.headers.host || 'designare.at';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  const baseUrl = `${protocol}://${host}`;
+
+  // Fire-and-Forget: Request absenden, aber nicht auf Antwort warten.
+  // regenerate-knowledge.js läuft als eigene Serverless Function weiter.
+  fetch(`${baseUrl}/api/cron/regenerate-knowledge`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${cronSecret}` }
+  })
+    .then(async (response) => {
+      if (response.ok) {
+        const result = await response.json().catch(() => ({}));
+        const logEntry = {
+          timestamp: new Date().toISOString(),
+          trigger: 'auto-after-kb-change',
+          status: 'completed',
+          stats: result.stats || null
+        };
+        await redis.lpush('build:log:triggers', JSON.stringify(logEntry));
+        await redis.ltrim('build:log:triggers', 0, 99);
+        console.log(`🧠 Auto-Sync abgeschlossen: ${result.stats?.vector_chunks ?? '?'} Chunks`);
+      } else {
+        console.warn(`⚠️  Auto-Sync fehlgeschlagen: HTTP ${response.status}`);
+      }
+    })
+    .catch((err) => {
+      console.warn(`⚠️  Auto-Sync konnte nicht gestartet werden: ${err.message}`);
+    });
+}
+
+// ===================================================================
 // MAIN HANDLER
 // ===================================================================
 export default async function handler(req, res) {
@@ -260,7 +298,11 @@ export default async function handler(req, res) {
         await redis.set(`kb:${normalized}`, JSON.stringify(chunk));
         await redis.sadd('kb:_index', normalized);
         console.log(`📝 Knowledge-Chunk gespeichert: kb:${normalized} (${content.length} Zeichen)`);
-        return res.status(200).json({ success: true, saved: normalized, isNew: !existing });
+
+        // Auto-Sync: Vektor-DB im Hintergrund aktualisieren
+        triggerVectorSync(req);
+
+        return res.status(200).json({ success: true, saved: normalized, isNew: !existing, vectorSyncTriggered: true });
       } catch (e) {
         return res.status(500).json({ error: e.message });
       }
@@ -273,7 +315,11 @@ export default async function handler(req, res) {
         await redis.del(`kb:${slug}`);
         await redis.srem('kb:_index', slug);
         console.log(`🗑️ Knowledge-Chunk gelöscht: kb:${slug}`);
-        return res.status(200).json({ success: true, removed: slug });
+
+        // Auto-Sync: Vektor-DB im Hintergrund aktualisieren (Orphan-Cleanup entfernt den gelöschten Chunk)
+        triggerVectorSync(req);
+
+        return res.status(200).json({ success: true, removed: slug, vectorSyncTriggered: true });
       } catch (e) {
         return res.status(500).json({ error: e.message });
       }
