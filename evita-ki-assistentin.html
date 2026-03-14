@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <title>Meet Evita: Meine KI-Assistentin mit Gedächtnis & RAG | Michael Kanda</title>
-    <meta name="description" content="Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Gemini, Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.">
+    <meta name="description" content="Ein Blick unter die Haube von Evita: KI-Assistentin mit Gemini, RAG, Website-Roast, News-Briefing, Wetter-Integration, Feiertags-Awareness und Health-Monitoring.">
     <meta name="author" content="Michael Kanda">
     <meta name="robots" content="index, follow">
 
@@ -39,13 +39,13 @@
       "@type": "TechArticle",
       "@id": "https://designare.at/evita-ki-assistentin#article",
       "headline": "Meet Evita: Meine KI-Assistentin mit Gedächtnis & RAG",
-      "description": "Ein Blick unter die Haube von Evita: Wie eine moderne KI-Assistentin mit Vektordatenbanken (RAG), Redis-Gedächtnis und Function Calling funktioniert.",
+      "description": "Ein Blick unter die Haube von Evita: KI-Assistentin mit Gemini, RAG, Website-Roast, News-Briefing, Wetter-Integration, Feiertags-Awareness und Health-Monitoring.",
       "image": {
         "@type": "ImageObject",
         "url": "https://designare.at/images/michael-evita-ai.webp"
       },
       "datePublished": "2026-02-21",
-      "dateModified": "2026-03-07",
+      "dateModified": "2026-03-14",
       "url": "https://designare.at/evita-ki-assistentin",
       "inLanguage": "de",
       "author": { "@id": "https://designare.at/#michael" },
@@ -61,7 +61,12 @@
         "E-Mail Whitelist",
         "Knowledge-Base",
         "Embedding-Pipeline",
-        "Serverless"
+        "Serverless",
+        "Website-Roast",
+        "News-Briefing",
+        "Wetter-Integration",
+        "Health-Monitoring",
+        "Intent-Filter"
       ],
       "about": {
         "@id": "https://designare.at/evita-ki-assistentin#app"
@@ -74,7 +79,7 @@
       "applicationCategory": "AIApplication",
       "operatingSystem": "Web",
       "author": { "@id": "https://designare.at/#michael" },
-      "description": "RAG-basierte KI-Assistentin mit Upstash Vector, Redis-Gedächtnis, Function Calling und eigener Knowledge-Base."
+      "description": "RAG-basierte KI-Assistentin mit Upstash Vector, Redis-Gedächtnis, Function Calling, Website-Roast, News-Briefing, Wetter-Integration und eigener Knowledge-Base."
     },
     {
       "@type": "FAQPage",
@@ -128,7 +133,23 @@
           "name": "Wie kommen neue Texte von der Website in ihr Gedächtnis?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Über zwei Wege: Erstens durchsucht eine zweistufige Cron-Pipeline jede Nacht die komplette Website – um 3:00 Uhr wird die knowledge.json gebaut, um 3:10 Uhr werden daraus Vektoren erzeugt und in die Datenbank geladen. Zweitens können über ein Dashboard eigene Wissens-Chunks hinterlegt werden, die beim nächsten Rebuild automatisch mit vektorisiert werden."
+            "text": "Über zwei Wege: Erstens durchsucht eine vierstufige Cron-Pipeline die komplette Website – um 3:00 Uhr wird die Website gebaut, um 3:30 Uhr werden Vektoren erzeugt, um 5:00 Uhr das News-Briefing geholt und alle 15 Minuten ein Health-Check durchgeführt. Zweitens können über ein Dashboard eigene Wissens-Chunks hinterlegt werden, die beim nächsten Rebuild automatisch mit vektorisiert werden."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was ist der Website-Roast?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Der Website-Roast ist ein interaktives Feature: Du gibst Evita eine URL und sie analysiert die Seite in Echtzeit – SEO-Basics, Performance via Google PageSpeed Insights, Mobile-Tauglichkeit, Social-Media-Tags und Technik. Das Ergebnis ist eine Schulnote von 1 bis 5 nach österreichischem Notensystem, charmant-frech präsentiert."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Woher hat Evita ihre Tech-News?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Jeden Morgen um 6:00 Uhr holt ein Cron-Job RSS-Feeds von Quellen wie heise, t3n, Hacker News, Search Engine Roundtable, Google Search Central, SEO Südwest, WP Tavern und WordPress News. Gemini fasst die Headlines zu einem kompakten Briefing zusammen, das Evita dann beiläufig in Gespräche einfließen lassen kann."
           }
         }
       ]
@@ -159,7 +180,7 @@
       
                 <div class="article-meta">
                     <time datetime="2026-02-21">21. Februar 2026</time>
-                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 9 Min. Lesezeit</span>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 12 Min. Lesezeit</span>
                     <address class="author">
                         Von <a href="index.html#michael" rel="author">Michael Kanda</a>
                     </address>
@@ -175,8 +196,9 @@
                         <ul>
                            <li><strong>Mehr als ein Chatbot:</strong> Evita ist meine digitale Assistentin, benannt nach meiner Tierschutzhündin. Sie führt Smalltalk, macht Termine aus und versendet E-Mails an freigegebene Empfänger.</li>
                             <li><strong>RAG + Knowledge-Base:</strong> Durch eine Vektordatenbank und manuell hinterlegtes Wissen kennt Evita alles über die Website und manuell hinterlegtes Wissen.</li>
-                            <li><strong>Function Calling:</strong> Evita ist nicht nur passiv. Sie nutzt aktiv Tools (Kalender öffnen, Link-Chips vorschlagen, E-Mails versenden).</li>
+                            <li><strong>6 aktive Tools:</strong> Evita nutzt aktiv Werkzeuge – Kalender, E-Mails, Link-Chips, Wetter-Daten, Website-Roast und Namensgedächtnis.</li>
                             <li><strong>Langzeitgedächtnis:</strong> Über Redis merkt sie sich Namen ("Guten Morgen, Alfred!") und Lieblingsthemen von wiederkehrenden Besuchern – tageszeitabhängig.</li>
+                            <li><strong>Website-Roast:</strong> Schick ihr eine URL und sie analysiert die Seite in Echtzeit – SEO, Performance, Mobile, Social und Technik, bewertet mit österreichischem Notensystem.</li>
                         </ul>
                     </div>
 
@@ -236,7 +258,7 @@
                     <i aria-hidden="true" class="fa-solid fa-microchip"></i>
                     <div>
                         <strong>Was hier läuft:</strong>
-                        <p>Ein selbstgebauter KI-Assistent mit RAG, Vektor-Datenbank, Session-Memory, E-Mail-Versand, Whitelist-System, proaktiver Greeting-Bubble, Dashboard mit eigener Knowledge-Base, Cron-Jobs und Embedding-Pipeline – kein Plugin, kein SaaS, alles handgemacht.</p>
+                        <p>Ein selbstgebauter KI-Assistent mit RAG, Vektor-Datenbank, Session-Memory, E-Mail-Versand mit Whitelist-System, Website-Roast mit Schulnoten, täglichem News-Briefing, Wetter-Integration, Feiertags-Awareness, Intent-Filter, Health-Monitoring, proaktiver Greeting-Bubble, Dashboard mit eigener Knowledge-Base, Cron-Jobs und Embedding-Pipeline – kein Plugin, kein SaaS, alles handgemacht.</p>
                     </div>
                 </div>
 
@@ -315,6 +337,18 @@
                     
                     <dt><i aria-hidden="true" class="fa-solid fa-sliders"></i> Chat-Toolbar</dt>
                     <dd>Im Chat-Fenster gibt es eine dezente Toolbar: Vollbild-Modus für längere Gespräche und eine Schriftgrößen-Einstellung (Aa +/−), die sich per localStorage merkt. Barrierefreiheit war hier kein Nachgedanke, sondern Pflicht.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-fire"></i> Website-Roast</dt>
+                    <dd>Das Highlight-Feature: Schick Evita eine URL und sie zerlegt die Seite in Echtzeit. Im Hintergrund wird parallel das HTML geparst und die Google PageSpeed Insights API abgefragt. Das Ergebnis ist ein Zeugnis in fünf Kategorien – SEO-Basics, Performance, Mobile &amp; UX, Social &amp; Sharing, Technik &amp; Sicherheit – bewertet mit österreichischem Notensystem von 1 (Sehr gut) bis 5 (Nicht genügend). Evita präsentiert das Ganze charmant-frech und verweist am Ende auf den KI-Sichtbarkeits-Check als logischen nächsten Schritt.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-cloud-sun"></i> Wetter-Integration</dt>
+                    <dd>Evita kennt das aktuelle Wiener Wetter schon beim ersten Laden – für beiläufige Kommentare wie "Schönes Wetter zum Coden heute." Fragt man explizit nach dem Wetter in einer anderen Stadt, nutzt sie das <code>get_weather</code>-Tool mit Geocoding und liefert Echtzeit-Daten via Open-Meteo API.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-newspaper"></i> Tägliches News-Briefing</dt>
+                    <dd>Jeden Morgen holt ein Cron-Job RSS-Feeds von acht Quellen: heise, t3n und Hacker News für Tech, Search Engine Roundtable, Google Search Central und SEO Südwest für SEO, WP Tavern und WordPress News für WordPress. Gemini fasst die Headlines zu einem kompakten Briefing zusammen, das Evita beiläufig in Gespräche einfließen lassen kann – sie ist kein Nachrichtenportal, gibt aber die Richtung.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-regular fa-calendar"></i> Feiertags-Awareness</dt>
+                    <dd>Eine rein offline arbeitende Feiertags-Engine berechnet alle österreichischen Feiertage inklusive beweglicher Feiertage über die Gaußsche Osterformel. An Weihnachten begrüßt sie mit "Frohe Weihnachten", an Silvester mit "Guten Rutsch" – und wenn ein Feiertag in den nächsten drei Tagen ansteht, erwähnt sie es beiläufig. Fragt jemand direkt, wann der nächste Feiertag ist, hat sie die Antwort parat.</dd>
                 </dl>
             </section>
 
@@ -325,7 +359,7 @@
                     <i aria-hidden="true" class="fa-solid fa-server"></i>
                     <div>
                         <strong>Architektur:</strong>
-                        <p>Das System läuft komplett Serverless. Es basiert auf <strong>Google Gemini (2.5-flash)</strong> als "Gehirn", gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis) und <strong>Upstash Vector</strong> (für RAG).</p>
+                        <p>Das System läuft komplett Serverless. Es basiert auf <strong>Google Gemini</strong> als "Gehirn" (mit automatischer Fallback-Kaskade: 2.5-flash → 2.0-flash), gekoppelt mit <strong>Upstash Redis</strong> (als Kurzzeitgedächtnis), <strong>Upstash Vector</strong> (für RAG) und einer vierstufigen <strong>Cron-Pipeline</strong> für automatische Aktualisierung.</p>
                     </div>
                 </div>
 
@@ -335,20 +369,24 @@
                     <h3>1. RAG (Retrieval-Augmented Generation)</h3>
                     <p>Damit Evita keine Fakten über meine Dienstleistungen erfindet ("Halluzinationen"), nutzt sie eine Vektordatenbank – gespeist aus zwei Quellen:</p>
                     <ul>
-                        <li><strong>Die Pipeline:</strong> Jede Nacht laufen zwei Cron-Jobs. Um 3:00 Uhr baut der erste die gesamte Website in eine strukturierte knowledge.json um. Um 3:10 Uhr nimmt der zweite diese Datei, zerlegt sie in Sektionen, wandelt jede über die Gemini Embedding API in Vektoren um und speichert sie in Upstash Vector.</li>
+                        <li><strong>Die Pipeline:</strong> Jede Nacht laufen vier Cron-Jobs. Um 3:00 Uhr wird die Website gebaut, um 3:30 Uhr werden daraus Vektoren erzeugt und in Upstash Vector geladen, um 5:00 UTC holt ein News-Cron die aktuellen Tech-Headlines, und alle 15 Minuten prüft ein Health-Check ob alle Dienste erreichbar sind.</li>
                         <li><strong>Die Knowledge-Base:</strong> Über ein Dashboard kann ich eigenes Wissen hinterlegen – Fakten, die auf keiner Seite stehen (z.B. Architektur-Details, interne Infos). Diese Chunks werden beim nächsten Vektor-Rebuild automatisch mit eingebettet.</li>
                         <li><strong>Die Abfrage:</strong> Stellt der Nutzer eine Frage, wandelt Evita diese ebenfalls in einen Vektor um, sucht in Millisekunden die ähnlichsten Textbausteine aus der Datenbank und nutzt diese als "Kontext" für ihre Antwort.</li>
+                        <li><strong>Intent-Filter:</strong> Bevor die Vektordatenbank überhaupt angefragt wird, prüft ein Intent-Filter ob die Nachricht eine Faktenfrage oder Smalltalk ist. Bei "wie geht's dir?" wird die teure Vektor-Suche komplett übersprungen – das spart Latenz und Kosten.</li>
                         <li><strong>Der Vorteil:</strong> Ändere ich heute einen Blogartikel oder ein neues Service auf meiner Website, weiß Evita morgen früh automatisch davon, ohne dass ich den Bot neu programmieren muss!</li>
                     </ul>
                 </div>
 
                 <div class="step-guide">
                     <h3>2. Native Function Calling (Tools)</h3>
-                    <p>Evita ist nicht auf Textausgabe beschränkt. Ich habe ihr über die Gemini API Werkzeuge (Tools) in die Hand gegeben:</p>
+                    <p>Evita ist nicht auf Textausgabe beschränkt. Ich habe ihr über die Gemini API sechs Werkzeuge (Tools) in die Hand gegeben:</p>
                     <ul>
-                        <li><code>remember_user_name</code>: Ein Tool, das im Hintergrund anspringt, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
-                        <li><code>suggest_chips</code>: Ein Tool, das die KI anweist, thematisch passende Link-Vorschläge als klickbare Chips unter der Antwort anzuzeigen. Nur URLs, die im RAG-Kontext auftauchen, werden vorgeschlagen.</li>
+                        <li><code>open_booking</code>: Öffnet direkt im Chat den Buchungskalender für einen Rückruf-Termin, wenn der Nutzer nach einem Call oder Gespräch fragt.</li>
                         <li><code>compose_email</code>: Nimmt Empfänger, Betreff und Inhalt entgegen, prüft die Adresse gegen eine Empfänger-Whitelist und baut einen versandfertigen Payload auf.</li>
+                        <li><code>remember_user_name</code>: Springt im Hintergrund an, sobald ein Nutzer sich vorstellt. Es speichert den Vornamen in Redis.</li>
+                        <li><code>suggest_chips</code>: Weist die KI an, thematisch passende Link-Vorschläge als klickbare Chips unter der Antwort anzuzeigen. Nur URLs, die im RAG-Kontext auftauchen, werden vorgeschlagen.</li>
+                        <li><code>get_weather</code>: Ruft Echtzeit-Wetterdaten ab – für Wien ist der Kontext bereits im Prompt, für andere Städte wird per Geocoding die Position ermittelt und die Open-Meteo API abgefragt.</li>
+                        <li><code>website_roast</code>: Das neueste Tool. Analysiert eine beliebige URL parallel via HTML-Parsing und Google PageSpeed Insights API, bewertet in fünf Kategorien und liefert eine Schulnote zurück.</li>
                     </ul>
                 </div>
 
@@ -359,6 +397,10 @@
                         <li>Sie weiß, wie spät es in Wien ist. Um 23:00 Uhr begrüßt sie dich mit "Na, noch wach?" statt "Guten Morgen" – und dieser Ton zieht sich nur durch die erste Nachricht, danach antwortet sie direkt.</li>
                         <li>Sie kennt die aktuelle URL. Bist du gerade auf der SEO-Seite, wird sie dir diesen Link nicht mehr als Chip vorschlagen.</li>
                         <li>Sie kennt deine Historie. Warst du schon mehrfach im Chat, begrüßt sie dich beim Namen und steigt direkt locker ein, statt nach deinem Anliegen zu fragen.</li>
+                        <li>Sie kennt das aktuelle Wiener Wetter und kann es beiläufig in Gespräche einfließen lassen.</li>
+                        <li>Sie liest jeden Morgen Tech-News aus acht RSS-Quellen und weiß, was in der Web- und SEO-Welt los ist.</li>
+                        <li>Sie kennt alle österreichischen Feiertage – inklusive beweglicher Feiertage über die Gaußsche Osterformel – und passt ihre Begrüßung an.</li>
+                        <li>Ein Intent-Filter entscheidet vorab, ob überhaupt die Vektordatenbank angefragt wird oder ob Smalltalk auch ohne RAG funktioniert.</li>
                     </ul>
                 </div>
 
@@ -399,6 +441,14 @@
                         <tr>
                             <td>Gibt oft tote Links oder Textwüsten aus</td>
                             <td>Bietet smarte Aktionen via Function Calling (Kalender, E-Mail-Versand an freigegebene Empfänger)</td>
+                        </tr>
+                        <tr>
+                            <td>Kennt weder Tageszeit noch Kontext</td>
+                            <td>Weiß wie spät es ist, welches Wetter herrscht, welche Feiertage anstehen und was in der Tech-Welt los ist</td>
+                        </tr>
+                        <tr>
+                            <td>Kann nur reden, nicht analysieren</td>
+                            <td>Analysiert Websites live mit SEO-Check, PageSpeed und Schulnote (Website-Roast)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -446,7 +496,21 @@
                     <details name="faq-group">
                         <summary>Wie kommen neue Texte von der Website in ihr Gedächtnis?</summary>
                         <div class="faq-content">
-                            <p>Über zwei Wege: Erstens durchsucht eine zweistufige Cron-Pipeline jede Nacht meine komplette Website – um 3:00 Uhr wird die Wissensbasis gebaut, um 3:10 Uhr werden daraus Vektoren erzeugt und hochgeladen. Zweitens kann ich über ein Dashboard eigene Wissens-Chunks hinterlegen, die beim nächsten Rebuild automatisch mit vektorisiert werden. Am nächsten Morgen ist Evita auf dem aktuellsten Stand.</p>
+                            <p>Über zwei Wege: Erstens durchsucht eine vierstufige Cron-Pipeline meine komplette Website – um 3:00 Uhr wird die Website gebaut, um 3:30 Uhr werden Vektoren erzeugt und hochgeladen, um 5:00 UTC holt ein News-Cron die aktuellen Tech-Headlines und alle 15 Minuten prüft ein Health-Check ob alle Dienste erreichbar sind. Zweitens kann ich über ein Dashboard eigene Wissens-Chunks hinterlegen, die beim nächsten Rebuild automatisch mit vektorisiert werden. Am nächsten Morgen ist Evita auf dem aktuellsten Stand.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was ist der Website-Roast?</summary>
+                        <div class="faq-content">
+                            <p>Das ist ein interaktives Feature: Du gibst Evita eine URL und sie analysiert die Seite in Echtzeit. Im Hintergrund wird parallel das HTML geparst und die Google PageSpeed Insights API abgefragt. Das Ergebnis ist ein Zeugnis in fünf Kategorien – SEO-Basics, Performance, Mobile &amp; UX, Social &amp; Sharing, Technik &amp; Sicherheit – bewertet mit österreichischem Notensystem von 1 (Sehr gut) bis 5 (Nicht genügend). Evita präsentiert das Ganze charmant-frech und verweist am Ende auf den KI-Sichtbarkeits-Check als logischen nächsten Schritt.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Woher hat Evita ihre Tech-News?</summary>
+                        <div class="faq-content">
+                            <p>Jeden Morgen um 6:00 Uhr (MEZ) holt ein Cron-Job RSS-Feeds von acht Quellen: heise, t3n und Hacker News für Tech, Search Engine Roundtable, Google Search Central und SEO Südwest für SEO, WP Tavern und WordPress News für WordPress. Gemini fasst die Headlines zu einem kompakten Briefing zusammen, das in Redis zwischengespeichert wird. So kann Evita beiläufig erwähnen, was gerade in der Tech-Welt los ist – ohne Nachrichtenportal zu spielen.</p>
                         </div>
                     </details>
                 </div>
@@ -460,9 +524,10 @@
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
                     <ul>
-                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent mit proaktiver Begrüßung und tageszeitabhängigem Ton hält Besucher länger auf der Seite.</li>
-                        <li><strong>Automatisierung:</strong> Termine und E-Mails werden direkt im Chat abgewickelt – datenschutzkonform durch eine Empfänger-Whitelist abgesichert.</li>
-                        <li><strong>Zwei Wissensquellen:</strong> Die automatische Nacht-Pipeline hält Evita aktuell, die manuelle Knowledge-Base erlaubt Wissen ohne eigene Seite.</li>
+                        <li><strong>Gesteigerte UX:</strong> Ein charmanter Agent mit proaktiver Begrüßung, tageszeitabhängigem Ton, Wetter- und Feiertags-Kontext hält Besucher länger auf der Seite.</li>
+                        <li><strong>Automatisierung:</strong> Termine, E-Mails und Website-Analysen werden direkt im Chat abgewickelt – datenschutzkonform durch eine Empfänger-Whitelist abgesichert.</li>
+                        <li><strong>Drei Wissensquellen:</strong> Die automatische Nacht-Pipeline hält Evita aktuell, die manuelle Knowledge-Base erlaubt Wissen ohne eigene Seite, und das tägliche News-Briefing sorgt für Aktualität.</li>
+                        <li><strong>Website-Roast:</strong> Ein interaktives Feature das Besucher aktiviert und den Mehrwert einer professionellen Web-Analyse greifbar macht – inklusive Überleitung zum KI-Sichtbarkeits-Check.</li>
                     </ul>
                 </div>
 
