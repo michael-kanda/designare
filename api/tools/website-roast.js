@@ -102,6 +102,7 @@ function formatForEvita(result) {
   text += `- Ende mit einem konkreten "Quick Win" den man sofort umsetzen kann\n`;
   text += `- Max 6-8 Sätze, KEINE Aufzählungen, KEINE Emojis\n`;
   text += `- Bei Note 1-2: respektvoll loben. Bei 3: "geht besser". Bei 4-5: liebevoll zerstören.\n`;
+  text += `- WICHTIG: Schreibe den Roast NEUTRAL – nimm NIEMALS an, wer die Website erstellt hat. Auch nicht Michael! Du bewertest die Seite, nicht den Ersteller.\n`;
   text += `- WICHTIG: Erwähne am Ende beiläufig den KI-Sichtbarkeits-Check (/ki-sichtbarkeit) als nächsten logischen Schritt. Z.B.: "Willst du auch wissen, wie KI-Systeme wie ChatGPT und Gemini deine Seite sehen? Dafür haben wir den KI-Sichtbarkeits-Check." Nutze suggest_chips mit einem Link-Chip zu /ki-sichtbarkeit.\n`;
 
   return text;
