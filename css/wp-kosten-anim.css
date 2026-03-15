@@ -707,7 +707,76 @@
    RESPONSIVE
    =================== */
 
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.kosten-kompass) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.kosten-kompass) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Kosten-Matrix: Scrollbar auf Mobile ── */
+.kosten-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+}
+
+.kosten-matrix {
+    min-width: 600px;
+}
+
+.kosten-matrix th,
+.kosten-matrix td {
+    white-space: nowrap;
+    min-width: 130px;
+}
+
+.kosten-matrix td:first-child {
+    white-space: normal;
+    min-width: 140px;
+}
+
+.kosten-matrix td:first-child,
+.kosten-matrix th:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--card-bg, #0f0f0f);
+    z-index: 2;
+    min-width: 130px;
+}
+
+.kosten-matrix thead th:first-child {
+    background: rgba(255,255,255,0.04);
+}
+
+/* Scroll-Hinweis auf Mobile */
+.kosten-table-scroll::after {
+    content: '← scrollen →';
+    display: none;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-color-subtle, #555);
+    letter-spacing: 0.1em;
+    padding: 6px 0 0;
+}
+
 @media (max-width: 768px) {
+    .kosten-table-scroll::after {
+        display: block;
+    }
+
+    .kosten-matrix td:first-child,
+    .kosten-matrix th:first-child {
+        box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+    }
+
     .kosten-kompass {
         max-width: 100%;
     }
@@ -765,5 +834,24 @@
         flex-direction: column;
         gap: 8px;
         align-items: flex-start;
+    }
+}
+
+/* ===================
+   LIGHT MODE
+   =================== */
+body.light-mode .kosten-matrix td:first-child,
+body.light-mode .kosten-matrix th:first-child {
+    background: #fafafa;
+}
+
+body.light-mode .kosten-matrix thead th:first-child {
+    background: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+    body.light-mode .kosten-matrix td:first-child,
+    body.light-mode .kosten-matrix th:first-child {
+        box-shadow: 4px 0 8px rgba(0,0,0,0.08);
     }
 }
