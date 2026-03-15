@@ -1,5 +1,6 @@
 import { redis } from '../../lib/redis.js';
 import Parser from 'rss-parser';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ── RSS-Feed-Quellen (aktualisiert 2026-03-15) ──
 const RSS_FEEDS = [
@@ -51,6 +52,7 @@ const RSS_FEEDS = [
 // ── Konfig ──
 const KV_KEY = 'news:latest';          // Haupt-Key für aktuelle News
 const KV_KEY_HISTORY = 'news:history';  // Archiv (optional)
+const KV_KEY_BRIEFING = 'news:daily-briefing'; // Zusammenfassung für Chatbot
 const MAX_ITEMS_PER_FEED = 10;          // Max. Artikel pro Feed
 const FETCH_TIMEOUT_MS = 8000;          // Timeout pro Feed (ms)
 
@@ -107,6 +109,60 @@ function deduplicateItems(items) {
     seen.add(item.link);
     return true;
   });
+}
+
+/**
+ * Generiert ein News-Briefing per Gemini und speichert es für den Chatbot.
+ * Schreibt nach news:daily-briefing (Format das news-service.js erwartet).
+ */
+async function generateAndSaveBriefing(items, feedSummary) {
+  if (!process.env.GEMINI_API_KEY) {
+    console.log('[fetch-news] Kein GEMINI_API_KEY – Briefing übersprungen');
+    return null;
+  }
+
+  try {
+    // Top-Artikel für Zusammenfassung vorbereiten (max. 30 für Token-Limit)
+    const topItems = items.slice(0, 30);
+    const articleList = topItems.map((item, i) =>
+      `${i + 1}. [${item.source}] ${item.title}${item.snippet ? ` – ${item.snippet.slice(0, 150)}` : ''}`
+    ).join('\n');
+
+    const sources = [...new Set(items.map((item) => item.source))];
+
+    const prompt = `Du bist ein Tech-News-Redakteur. Erstelle ein kompaktes deutsches News-Briefing aus diesen Artikeln.
+
+REGELN:
+- Maximal 600 Zeichen
+- Gruppiere nach Themen (SEO, Tech, WordPress)
+- Nenne die wichtigsten 3-5 Neuigkeiten in Stichpunkten
+- Keine Einleitung, direkt die News
+- Wenn SEO/Google-News dabei sind, priorisiere diese
+
+ARTIKEL:
+${articleList}`;
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    const summary = result.response.text();
+
+    // Im Format speichern, das news-service.js erwartet
+    const briefingData = {
+      summary,
+      sources,
+      fetchedAt: new Date().toISOString(),
+    };
+
+    // TTL: 28 Stunden (Puffer für 12h-Intervall)
+    await redis.set(KV_KEY_BRIEFING, JSON.stringify(briefingData), { ex: 100800 });
+
+    console.log(`[fetch-news] Briefing generiert (${summary.length} Zeichen, ${sources.length} Quellen)`);
+    return briefingData;
+  } catch (err) {
+    console.error('[fetch-news] Briefing-Generierung fehlgeschlagen:', err.message);
+    return null;
+  }
 }
 
 // ── Handler (Vercel Serverless Function) ──
@@ -170,10 +226,14 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Redis-Schreibfehler', detail: kvError.message });
   }
 
+  // ── Briefing für Chatbot generieren (news:daily-briefing) ──
+  const briefing = await generateAndSaveBriefing(uniqueItems, summary);
+
   return res.status(200).json({
     ok: true,
     fetchedAt: payload.fetchedAt,
     totalItems: uniqueItems.length,
     feeds: summary,
+    briefing: briefing ? { generated: true, chars: briefing.summary.length, sources: briefing.sources.length } : { generated: false },
   });
 }
