@@ -1,0 +1,485 @@
+/* ══════════════════════════════════════════════════
+   WP-KOSTEN-ANIM.CSS
+   Animationen für den WordPress-Kosten-2026-Artikel
+   Stil: Passend zu wp-diaet-anim.css & pagebuilder-anim.css
+   ══════════════════════════════════════════════════ */
+
+/* ===================
+   1. KOSTEN-KOMPASS (Summary Box)
+   =================== */
+
+.kosten-kompass {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: inherit;
+}
+
+.kk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255,255,255,0.02);
+}
+
+.kk-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.kk-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.4s ease;
+}
+
+.kk-badge.günstig { background: rgba(81,207,102,0.15); color: #51cf66; }
+.kk-badge.mittel { background: rgba(196,163,90,0.2); color: var(--accent-color); }
+.kk-badge.premium { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+.kk-body {
+    padding: 16px;
+    min-height: 220px;
+    transition: opacity 0.3s ease;
+}
+
+/* Gauge Rows */
+.kk-gauge-title {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    margin-bottom: 4px;
+    color: var(--text-color-muted);
+}
+
+.kk-gauge-title span:last-child {
+    font-weight: 400;
+    color: var(--text-color);
+}
+
+.kk-gauge {
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.kk-gauge-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0;
+    transition: width 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+.kk-gauge-fill.green { background: linear-gradient(90deg, #2b8a3e, #51cf66); }
+.kk-gauge-fill.gold  { background: linear-gradient(90deg, #b8941f, var(--accent-color)); }
+.kk-gauge-fill.red   { background: linear-gradient(90deg, #c92a2a, #ff6b6b); }
+
+.kk-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 14px 0;
+}
+
+/* Stat Rows */
+.kk-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 0.8rem;
+}
+
+.kk-stat-label {
+    color: var(--text-color-muted);
+}
+
+.kk-stat-val {
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.kk-stat-val.green { color: #51cf66; }
+.kk-stat-val.gold { color: var(--accent-color); }
+.kk-stat-val.red { color: #ff6b6b; }
+
+/* Icon + Label */
+.kk-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.kk-icon {
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+}
+
+.kk-icon.diy { background: rgba(81,207,102,0.12); color: #51cf66; }
+.kk-icon.agentur { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+.kk-icon.ki { background: rgba(196,163,90,0.15); color: var(--accent-color); }
+
+.kk-icon-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.kk-icon-sub {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: var(--text-color-muted);
+    margin-top: 1px;
+}
+
+/* Toggle */
+.kk-toggle {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+}
+
+.kk-toggle-btn {
+    flex: 1;
+    padding: 10px 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-color-muted);
+    font-size: 0.78rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    border-right: 1px solid var(--border-color);
+}
+
+.kk-toggle-btn:last-child {
+    border-right: none;
+}
+
+.kk-toggle-btn:hover {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-color);
+}
+
+.kk-toggle-btn.is-active {
+    background: rgba(196,163,90,0.1);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+
+/* ===================
+   2. 5-JAHRES-KALKULATOR (Inline)
+   =================== */
+
+.kosten-timeline {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2.5rem 0;
+}
+
+.kt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255,255,255,0.02);
+}
+
+.kt-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.kt-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.kt-toggle-btn {
+    padding: 5px 14px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border-color);
+    color: var(--text-color-muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.kt-toggle-btn:last-child { border-right: none; }
+
+.kt-toggle-btn:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.kt-toggle-btn.is-active {
+    background: rgba(196,163,90,0.15);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.kt-body {
+    padding: 20px;
+}
+
+/* Bar Row */
+.kt-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.kt-bar-label {
+    width: 90px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-color);
+    text-align: right;
+}
+
+.kt-bar-track {
+    flex: 1;
+    height: 32px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.kt-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #fff;
+    transition: width 1s cubic-bezier(0.25,0.46,0.45,0.94);
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.kt-bar-fill.green { background: linear-gradient(90deg, #1a6b2b, #51cf66); }
+.kt-bar-fill.gold  { background: linear-gradient(90deg, #8a6d1a, var(--accent-color)); }
+.kt-bar-fill.red   { background: linear-gradient(90deg, #8a1a1a, #ff6b6b); }
+
+.kt-bar-amount {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0;
+    transition: opacity 0.5s ease 0.8s;
+}
+
+.kt-bar-amount.visible { opacity: 1; }
+
+/* Legend / Takeaway */
+.kt-takeaway {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.kt-takeaway i {
+    color: var(--accent-color);
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.kt-takeaway-text {
+    font-size: 0.82rem;
+    color: var(--text-color-muted);
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+.kt-takeaway-text strong {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+
+/* ===================
+   3. ENTSCHEIDUNGS-FLOW (Inline)
+   =================== */
+
+.entscheidungs-flow {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 2.5rem 0;
+    flex-wrap: wrap;
+}
+
+.ef-card {
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.ef-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+    background: rgba(196,163,90,0.04);
+}
+
+.ef-card-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.ef-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 6px;
+}
+
+.ef-card-price {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+.ef-card-price.green { color: #51cf66; }
+.ef-card-price.gold { color: var(--accent-color); }
+.ef-card-price.red { color: #ff6b6b; }
+
+.ef-card-sub {
+    font-size: 0.72rem;
+    color: var(--text-color-muted);
+    margin-bottom: 12px;
+}
+
+.ef-card-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.ef-card-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+.ef-card-bar-fill.green { background: #51cf66; }
+.ef-card-bar-fill.gold  { background: var(--accent-color); }
+.ef-card-bar-fill.red   { background: #ff6b6b; }
+
+.ef-card-verdict {
+    font-size: 0.75rem;
+    color: var(--text-color-muted);
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+
+/* ===================
+   RESPONSIVE
+   =================== */
+
+@media (max-width: 768px) {
+    .kosten-kompass {
+        max-width: 100%;
+    }
+
+    .kk-toggle-btn {
+        font-size: 0.7rem;
+        padding: 8px 4px;
+    }
+
+    .kt-bar-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .kt-bar-label {
+        width: auto;
+        text-align: left;
+    }
+
+    .kt-bar-track {
+        width: 100%;
+    }
+
+    .kt-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .entscheidungs-flow {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ef-card {
+        max-width: 100%;
+        width: 100%;
+    }
+}
