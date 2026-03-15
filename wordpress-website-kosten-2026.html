@@ -339,7 +339,23 @@
             <section aria-labelledby="vergleich-heading">
                 <h2 id="vergleich-heading">Der große Vergleich: <span class="article-white">Alle drei Wege auf einen Blick</span></h2>
                 
-                <p>Jetzt wird es konkret. Hier siehst du alle drei Optionen im direkten Vergleich – für eine typische Unternehmenswebsite mit 5–10 Seiten.</p>
+                <p>Jetzt wird es konkret. Aber bevor wir Preise vergleichen, stell dir die entscheidende Frage: <strong>Was willst du mit deiner Website eigentlich erreichen?</strong> Denn je nach Ziel ist der „günstigste" Weg nicht immer der klügste.</p>
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- ZIEL-RECHNER: Goal-based Calculator         -->
+                <!-- ══════════════════════════════════════════ -->
+                <div class="ziel-rechner" id="ziel-rechner">
+                    <div class="zr-header">
+                        <span class="zr-title"><i aria-hidden="true" class="fa-solid fa-compass" style="margin-right:6px"></i>Kosten &amp; Wert-Rechner</span>
+                    </div>
+                    <div class="zr-body">
+                        <div class="zr-question">Was ist dein primäres Ziel mit der Website?</div>
+                        <div class="zr-goals" id="zr-goals"></div>
+                        <div id="zr-result"></div>
+                    </div>
+                </div>
+
+                <p>Und hier die nackten Zahlen im Überblick – für eine typische Unternehmenswebsite mit 5–10 Seiten:</p>
 
                 <table class="comparison-table" style="margin: 2rem 0;">
                     <thead>
@@ -413,7 +429,7 @@
                 <!-- ══════════════════════════════════════════ -->
                 <div class="kosten-timeline" id="kosten-timeline">
                     <div class="kt-header">
-                        <span class="kt-title">Gesamtkosten-Rechner</span>
+                        <span class="kt-title"><i aria-hidden="true" class="fa-solid fa-calculator" style="margin-right:6px"></i>Gesamtkosten über Zeit</span>
                         <div class="kt-toggle">
                             <button class="kt-toggle-btn is-active" data-period="1" type="button">1. Jahr</button>
                             <button class="kt-toggle-btn" data-period="3" type="button">3 Jahre</button>
@@ -480,28 +496,40 @@
                 <!-- ══════════════════════════════════════════ -->
                 <div class="entscheidungs-flow" id="ef-flow">
                     <div class="ef-card" data-path="ki">
-                        <span class="ef-card-icon">🤖</span>
+                        <span class="ef-card-icon"><i aria-hidden="true" class="fa-solid fa-robot"></i></span>
                         <div class="ef-card-title">KI-Baukasten</div>
                         <div class="ef-card-price gold">3–17 €<span style="font-size:0.6em;font-weight:300">/Monat</span></div>
                         <div class="ef-card-sub">Visitenkarte &amp; Nebenprojekte</div>
                         <div class="ef-card-bar"><div class="ef-card-bar-fill gold" data-pct="20"></div></div>
                         <div class="ef-card-verdict">Schnell online, aber du mietest – du besitzt nichts.</div>
+                        <div class="ef-card-vals">
+                            <div class="ef-val"><span class="ef-val-l">Lead-Potenzial</span><span class="ef-val-v low">Kaum</span></div>
+                            <div class="ef-val"><span class="ef-val-l">SEO</span><span class="ef-val-v low">Begrenzt</span></div>
+                        </div>
                     </div>
                     <div class="ef-card" data-path="diy">
-                        <span class="ef-card-icon">🔧</span>
+                        <span class="ef-card-icon"><i aria-hidden="true" class="fa-solid fa-wrench"></i></span>
                         <div class="ef-card-title">WordPress DIY</div>
                         <div class="ef-card-price green">72–500 €<span style="font-size:0.6em;font-weight:300">/Jahr</span></div>
                         <div class="ef-card-sub">Technik-Begeisterte mit Zeit</div>
                         <div class="ef-card-bar"><div class="ef-card-bar-fill green" data-pct="55"></div></div>
                         <div class="ef-card-verdict">Volle Kontrolle, steile Lernkurve. Nur für Motivierte.</div>
+                        <div class="ef-card-vals">
+                            <div class="ef-val"><span class="ef-val-l">Lead-Potenzial</span><span class="ef-val-v mid">Mit Know-how</span></div>
+                            <div class="ef-val"><span class="ef-val-l">SEO</span><span class="ef-val-v high">Hoch</span></div>
+                        </div>
                     </div>
                     <div class="ef-card" data-path="agentur">
-                        <span class="ef-card-icon">🚀</span>
+                        <span class="ef-card-icon"><i aria-hidden="true" class="fa-solid fa-rocket"></i></span>
                         <div class="ef-card-title">Freelancer / Agentur</div>
                         <div class="ef-card-price red">3.000–10.000 €<span style="font-size:0.6em;font-weight:300"> einmalig</span></div>
                         <div class="ef-card-sub">Business-Website, die Kunden bringt</div>
                         <div class="ef-card-bar"><div class="ef-card-bar-fill red" data-pct="95"></div></div>
                         <div class="ef-card-verdict">Höchste Investition = höchster Return on Investment.</div>
+                        <div class="ef-card-vals">
+                            <div class="ef-val"><span class="ef-val-l">Lead-Potenzial</span><span class="ef-val-v high">Maximiert</span></div>
+                            <div class="ef-val"><span class="ef-val-l">SEO</span><span class="ef-val-v high">Sehr hoch</span></div>
+                        </div>
                     </div>
                 </div>
 
@@ -650,6 +678,7 @@
                 ],
                 stats:[
                     {label:'Laufend / Jahr',val:'200–500 €',cls:'green'},
+                    {label:'Kundengewinnung',val:'Mit SEO-Know-how',cls:'gold'},
                     {label:'Individualität',val:'Hoch',cls:'green'},
                     {label:'Daten-Eigentum',val:'100 % bei dir',cls:'green'},
                     {label:'Risiko',val:'Anfängerfehler',cls:'gold'}
@@ -665,6 +694,7 @@
                 ],
                 stats:[
                     {label:'Laufend / Jahr',val:'600–5.400 €',cls:'red'},
+                    {label:'Kundengewinnung',val:'Optimiert ab Tag 1',cls:'green'},
                     {label:'Individualität',val:'Sehr hoch',cls:'green'},
                     {label:'Daten-Eigentum',val:'100 % bei dir',cls:'green'},
                     {label:'Risiko',val:'Falsche Agentur-Wahl',cls:'gold'}
@@ -680,6 +710,7 @@
                 ],
                 stats:[
                     {label:'Laufend / Jahr',val:'36–200 €',cls:'green'},
+                    {label:'Kundengewinnung',val:'Kaum möglich',cls:'red'},
                     {label:'Individualität',val:'Gering–Mittel',cls:'gold'},
                     {label:'Daten-Eigentum',val:'Plattform-abhängig',cls:'red'},
                     {label:'Risiko',val:'Platform Lock-in',cls:'red'}
@@ -739,6 +770,146 @@
     </script>
 
     <!-- ══════════════════════════════════════════════════ -->
+    <!-- ZIEL-RECHNER – Inline JS                           -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var goalsWrap=document.getElementById('zr-goals');
+        var resultWrap=document.getElementById('zr-result');
+        if(!goalsWrap||!resultWrap)return;
+
+        var GOALS=[
+            {id:'visitenkarte',icon:'fa-solid fa-address-card',label:'Online-Visitenkarte'},
+            {id:'leads',icon:'fa-solid fa-bullseye',label:'Leads & Kunden gewinnen'},
+            {id:'reichweite',icon:'fa-solid fa-chart-line',label:'Reichweite & SEO'},
+            {id:'shop',icon:'fa-solid fa-cart-shopping',label:'Online-Shop'}
+        ];
+
+        var DATA={
+            visitenkarte:{
+                cards:[
+                    {name:'KI-Baukasten',nameIcon:'fa-solid fa-robot',price:'3–17 €/Mo',sub:'Schnell online, reicht völlig',badge:'best',badgeTxt:'Ideal',
+                    vals:[{l:'Ziel erreicht?',v:'Ja',c:'high',pct:90},{l:'SEO-Sichtbarkeit',v:'Egal hier',c:'mid',pct:30},{l:'Skalierbar?',v:'Nein',c:'low',pct:15},{l:'Daten bei dir?',v:'Nein',c:'low',pct:10}]},
+                    {name:'WordPress DIY',nameIcon:'fa-solid fa-wrench',price:'72–500 €/J.',sub:'Kann mehr, braucht mehr',badge:'ok',badgeTxt:'Overkill',
+                    vals:[{l:'Ziel erreicht?',v:'Ja',c:'high',pct:95},{l:'SEO-Sichtbarkeit',v:'Möglich',c:'mid',pct:60},{l:'Skalierbar?',v:'Ja',c:'high',pct:85},{l:'Daten bei dir?',v:'Ja',c:'high',pct:100}]},
+                    {name:'Freelancer / Agentur',nameIcon:'fa-solid fa-rocket',price:'1.500–4.000 €',sub:'Professionell, aber unnötig',badge:'ok',badgeTxt:'Zu viel',
+                    vals:[{l:'Ziel erreicht?',v:'Ja',c:'high',pct:100},{l:'SEO-Sichtbarkeit',v:'Hoch',c:'high',pct:90},{l:'Skalierbar?',v:'Ja',c:'high',pct:95},{l:'Daten bei dir?',v:'Ja',c:'high',pct:100}]}
+                ],
+                insight:'Für eine reine Visitenkarte reicht ein <strong>KI-Baukasten</strong>. Du brauchst keine SEO-Power und keine Skalierbarkeit – du brauchst eine Adresse im Netz. Spar dir das Budget für den Moment, wo du mehr willst.',
+                rec:0
+            },
+            leads:{
+                cards:[
+                    {name:'KI-Baukasten',nameIcon:'fa-solid fa-robot',price:'3–17 €/Mo',sub:'Sieht ok aus, bringt keine Leads',badge:'nope',badgeTxt:'Ungeeignet',
+                    vals:[{l:'Lead-Generierung',v:'Kaum',c:'low',pct:10},{l:'SEO-Sichtbarkeit',v:'Sehr begrenzt',c:'low',pct:15},{l:'Conversion-Rate',v:'Generisch',c:'low',pct:20},{l:'KI-Sichtbarkeit',v:'Nicht vorhanden',c:'low',pct:5}]},
+                    {name:'WordPress DIY',nameIcon:'fa-solid fa-wrench',price:'200–500 €/J.',sub:'Geht, wenn du SEO lernst',badge:'ok',badgeTxt:'Möglich',
+                    vals:[{l:'Lead-Generierung',v:'Mit Know-how',c:'mid',pct:50},{l:'SEO-Sichtbarkeit',v:'Hoch (mit Arbeit)',c:'mid',pct:65},{l:'Conversion-Rate',v:'Mittel',c:'mid',pct:45},{l:'KI-Sichtbarkeit',v:'Möglich',c:'mid',pct:40}]},
+                    {name:'Freelancer / Agentur',nameIcon:'fa-solid fa-rocket',price:'3.000–8.000 €',sub:'Bringt Kunden ab Tag 1',badge:'best',badgeTxt:'Empfohlen',
+                    vals:[{l:'Lead-Generierung',v:'Optimiert',c:'high',pct:92},{l:'SEO-Sichtbarkeit',v:'Sehr hoch',c:'high',pct:95},{l:'Conversion-Rate',v:'Profi-Niveau',c:'high',pct:88},{l:'KI-Sichtbarkeit',v:'Ja',c:'high',pct:85}]}
+                ],
+                insight:'Wenn dein Ziel <strong>Kunden gewinnen</strong> ist, wird der KI-Baukasten zum teuersten Weg – weil er nichts bringt. Ein Profi-Setup kostet mehr, aber <strong>ein einziger gewonnener Kunde</strong> kann die gesamte Investition zurückspielen.',
+                rec:2
+            },
+            reichweite:{
+                cards:[
+                    {name:'KI-Baukasten',nameIcon:'fa-solid fa-robot',price:'3–17 €/Mo',sub:'Google ignoriert generischen Code',badge:'nope',badgeTxt:'Ungeeignet',
+                    vals:[{l:'Google-Ranking',v:'Sehr schwach',c:'low',pct:12},{l:'Content-Flexibilität',v:'Stark begrenzt',c:'low',pct:18},{l:'Core Web Vitals',v:'Unkontrollierbar',c:'low',pct:25},{l:'Langfristig skalierbar',v:'Nein',c:'low',pct:10}]},
+                    {name:'WordPress DIY',nameIcon:'fa-solid fa-wrench',price:'200–500 €/J.',sub:'Starkes SEO-Fundament möglich',badge:'ok',badgeTxt:'Gut möglich',
+                    vals:[{l:'Google-Ranking',v:'Hoch (mit Arbeit)',c:'mid',pct:70},{l:'Content-Flexibilität',v:'Unbegrenzt',c:'high',pct:90},{l:'Core Web Vitals',v:'Optimierbar',c:'high',pct:80},{l:'Langfristig skalierbar',v:'Ja',c:'high',pct:90}]},
+                    {name:'Freelancer / Agentur',nameIcon:'fa-solid fa-rocket',price:'3.000–10.000 €',sub:'SEO-Architektur vom Profi',badge:'best',badgeTxt:'Empfohlen',
+                    vals:[{l:'Google-Ranking',v:'Maximiert',c:'high',pct:96},{l:'Content-Flexibilität',v:'Unbegrenzt',c:'high',pct:95},{l:'Core Web Vitals',v:'Professionell',c:'high',pct:95},{l:'Langfristig skalierbar',v:'Ja',c:'high',pct:95}]}
+                ],
+                insight:'SEO ist kein Feature, das man nachträglich anschraubt – es ist <strong>Architektur</strong>. Wer Reichweite will, braucht ein sauberes technisches Fundament, strategischen Content und Performance. Das bekommst du mit WordPress DIY (wenn du es lernst) oder deutlich schneller mit einem Profi.',
+                rec:2
+            },
+            shop:{
+                cards:[
+                    {name:'KI-Baukasten',nameIcon:'fa-solid fa-robot',price:'17–40 €/Mo',sub:'Nur für Mini-Shops mit wenigen Produkten',badge:'ok',badgeTxt:'Sehr begrenzt',
+                    vals:[{l:'Produktanzahl',v:'Begrenzt',c:'low',pct:20},{l:'Zahlungsoptionen',v:'Basis',c:'mid',pct:40},{l:'Individualisierung',v:'Minimal',c:'low',pct:15},{l:'Skalierbarkeit',v:'Kaum',c:'low',pct:10}]},
+                    {name:'WooCommerce DIY',nameIcon:'fa-solid fa-wrench',price:'500–2.000 €/J.',sub:'Flexibel, aber komplex',badge:'ok',badgeTxt:'Für Techies',
+                    vals:[{l:'Produktanzahl',v:'Unbegrenzt',c:'high',pct:90},{l:'Zahlungsoptionen',v:'Alle',c:'high',pct:95},{l:'Individualisierung',v:'Hoch',c:'high',pct:85},{l:'Skalierbarkeit',v:'Ja',c:'high',pct:85}]},
+                    {name:'Agentur',nameIcon:'fa-solid fa-rocket',price:'8.000–30.000 €',sub:'Conversion-optimierter Shop',badge:'best',badgeTxt:'Empfohlen',
+                    vals:[{l:'Produktanzahl',v:'Unbegrenzt',c:'high',pct:100},{l:'Zahlungsoptionen',v:'Alle + Custom',c:'high',pct:100},{l:'Individualisierung',v:'Komplett',c:'high',pct:98},{l:'Skalierbarkeit',v:'Enterprise-ready',c:'high',pct:100}]}
+                ],
+                insight:'Ein Shop der verkauft braucht <strong>Trust-Signale, schnelle Ladezeiten und optimierte Checkout-Flows</strong>. Das ist keine Frage des Templates – das ist Conversion-Optimierung. Die Agentur-Investition rechnet sich ab dem ersten Quartal durch höhere Conversion-Rates.',
+                rec:2
+            }
+        };
+
+        // Build goal buttons
+        GOALS.forEach(function(g){
+            var b=document.createElement('button');
+            b.type='button';
+            b.className='zr-goal-btn';
+            b.dataset.goal=g.id;
+            b.innerHTML='<i aria-hidden="true" class="'+g.icon+'"></i>'+g.label;
+            goalsWrap.appendChild(b);
+        });
+
+        var goalBtns=goalsWrap.querySelectorAll('.zr-goal-btn');
+
+        function renderGoal(goalId){
+            var d=DATA[goalId];
+            if(!d)return;
+
+            // Activate button
+            goalBtns.forEach(function(b){b.classList.remove('is-active');});
+            goalBtns.forEach(function(b){if(b.dataset.goal===goalId)b.classList.add('is-active');});
+
+            var h='<div class="zr-cards">';
+            d.cards.forEach(function(c,i){
+                var cls='zr-card';
+                if(i===d.rec) cls+=' zr-recommended';
+                else if(c.badge==='nope') cls+=' zr-dimmed';
+
+                h+='<div class="'+cls+'">';
+                h+='<div class="zr-card-head">';
+                h+='<span class="zr-card-name"><i aria-hidden="true" class="'+c.nameIcon+'"></i>'+c.name+'</span>';
+                h+='<span class="zr-badge '+c.badge+'">'+c.badgeTxt+'</span>';
+                h+='</div>';
+                h+='<div class="zr-card-price">'+c.price+'</div>';
+                h+='<div class="zr-card-sub">'+c.sub+'</div>';
+
+                c.vals.forEach(function(v){
+                    h+='<div class="zr-val-row">';
+                    h+='<span class="zr-val-label">'+v.l+'</span>';
+                    h+='<span class="zr-val-score '+v.c+'">'+v.v+'</span>';
+                    h+='</div>';
+                    h+='<div class="zr-val-bar"><div class="zr-val-bar-fill '+v.c+'" data-pct="'+v.pct+'"></div></div>';
+                });
+
+                h+='</div>';
+            });
+            h+='</div>';
+
+            h+='<div class="zr-insight">';
+            h+='<i aria-hidden="true" class="fa-solid fa-lightbulb"></i>';
+            h+='<div class="zr-insight-text">'+d.insight+'</div>';
+            h+='</div>';
+
+            resultWrap.innerHTML=h;
+
+            // Animate bars
+            setTimeout(function(){
+                resultWrap.querySelectorAll('.zr-val-bar-fill').forEach(function(el){
+                    el.style.width=el.dataset.pct+'%';
+                });
+            },50);
+        }
+
+        // Button click handlers
+        goalBtns.forEach(function(b){
+            b.addEventListener('click',function(){
+                renderGoal(b.dataset.goal);
+            });
+        });
+
+        // Default: "Leads & Kunden"
+        renderGoal('leads');
+    })();
+    </script>
+
+    <!-- ══════════════════════════════════════════════════ -->
     <!-- 5-JAHRES-KALKULATOR – Inline JS                   -->
     <!-- ══════════════════════════════════════════════════ -->
     <script>
@@ -755,9 +926,9 @@
         };
 
         var TAKEAWAYS={
-            1:'Im ersten Jahr ist der KI-Baukasten am günstigsten. Aber: Du bekommst auch am wenigsten.',
-            3:'Nach 3 Jahren hat sich der DIY-Weg als günstigste Profi-Lösung etabliert. Die Agentur-Investition zahlt sich durch Kundengewinnung zurück.',
-            5:'Über 5 Jahre zeigt sich: Der KI-Baukasten wird durch laufende Gebühren teurer als DIY. Die Agentur-Website hat längst ihren ROI eingespielt.'
+            1:'Im ersten Jahr ist der KI-Baukasten am günstigsten – aber du bekommst auch am wenigsten. Kein SEO, keine Leads, kein Eigentum. Die Frage ist nicht was du zahlst, sondern was du dafür bekommst.',
+            3:'Nach 3 Jahren hat sich der DIY-Weg als günstigste Profi-Lösung etabliert. Die Agentur-Investition? Hat sich durch Kundengewinnung längst bezahlt gemacht – wenn die Website rankt und konvertiert.',
+            5:'Über 5 Jahre zeigt sich das wahre Bild: Der KI-Baukasten wird durch laufende Gebühren teurer als DIY – ohne je einen Kunden gebracht zu haben. Die Agentur-Website hat ihren ROI um ein Vielfaches eingespielt.'
         };
 
         function calcTotal(key, years){
