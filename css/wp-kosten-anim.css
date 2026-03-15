@@ -729,7 +729,35 @@
 }
 
 .kosten-matrix {
+    width: 100%;
     min-width: 600px;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.kosten-matrix thead {
+    border-bottom: 2px solid var(--accent-color, #c4a35a);
+}
+
+.kosten-matrix th {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent-color, #c4a35a);
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+}
+
+.kosten-matrix td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-color-muted, #949494);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.kosten-matrix tbody tr:hover {
+    background: rgba(255,255,255,0.02);
 }
 
 .kosten-matrix th,
@@ -847,6 +875,19 @@ body.light-mode .kosten-matrix th:first-child {
 
 body.light-mode .kosten-matrix thead th:first-child {
     background: #f5f5f5;
+}
+
+body.light-mode .kosten-matrix thead {
+    border-bottom-color: var(--accent-color, #c4a35a);
+}
+
+body.light-mode .kosten-matrix td {
+    border-bottom-color: rgba(0,0,0,0.06);
+    color: #666;
+}
+
+body.light-mode .kosten-matrix tbody tr:hover {
+    background: rgba(0,0,0,0.02);
 }
 
 @media (max-width: 768px) {
