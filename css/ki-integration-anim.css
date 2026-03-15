@@ -253,51 +253,18 @@ body.light-mode .rt-replay-btn {
 /* Prefix: cs-                                   */
 /* ============================================ */
 
-/* ── Box Layout (inside expert-tip) ── */
-.cs-evita-box {
-    flex-direction: column !important;
-    gap: 0 !important;
-    padding: 0 !important;
-    overflow: hidden;
-}
+/* ── Box: Standard expert-tip, no override needed ── */
 
-.cs-evita-inner {
-    display: flex;
-    align-items: stretch;
-    width: 100%;
-}
-
-.cs-evita-content {
-    flex: 1 1 55%;
-    min-width: 0;
-    padding: 1.5rem;
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-}
-
-.cs-evita-content i {
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.cs-evita-anim {
-    flex: 0 0 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.2rem 1rem;
-    border-left: 1px solid var(--border-color, #222);
-    background: rgba(0,0,0,0.15);
-}
-
-/* ── Flow Widget ── */
+/* ── Flow Widget (horizontal, below text) ── */
 .cs-flow {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: center;
     gap: 0;
-    width: 100%;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border-color, #222);
+    overflow-x: auto;
 }
 
 /* ── Nodes ── */
@@ -305,24 +272,29 @@ body.light-mode .rt-replay-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 12px;
+    padding: 8px 10px;
     border: 1px solid var(--border-color, #222);
     border-radius: 2px;
-    background: var(--card-bg, #0f0f0f);
-    min-width: 90px;
+    background: rgba(255,255,255,0.02);
+    min-width: 68px;
     text-align: center;
     transition: border-color 0.4s, box-shadow 0.4s;
-    position: relative;
+    flex-shrink: 0;
 }
 
 .cs-flow-node.is-active {
     border-color: var(--accent-color, #c4a35a);
-    box-shadow: 0 0 12px rgba(196,163,90,0.15);
+    box-shadow: 0 0 14px rgba(196,163,90,0.12);
 }
 
 .cs-flow-icon {
     font-size: 14px;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    color: var(--text-color-muted, #949494);
+}
+
+.cs-flow-node.is-active .cs-flow-icon {
+    color: var(--accent-color, #c4a35a);
 }
 
 .cs-flow-label {
@@ -330,39 +302,40 @@ body.light-mode .rt-replay-btn {
     font-weight: 600;
     color: var(--text-color, #e4e4e4);
     font-family: 'Poppins', sans-serif;
+    line-height: 1.2;
 }
 
 .cs-flow-sub {
     font-size: 7.5px;
-    color: var(--text-color-muted, #949494);
+    color: var(--text-color-subtle, #555);
     font-family: 'Poppins', sans-serif;
 }
 
-/* Node colors */
-.cs-node-user    { border-color: rgba(255,255,255,0.15); }
-.cs-node-edge    { border-color: rgba(74,222,128,0.25); }
-.cs-node-redis   { border-color: rgba(196,163,90,0.25); }
-.cs-node-gemini  { border-color: rgba(96,165,250,0.25); }
-.cs-node-response{ border-color: rgba(74,222,128,0.25); }
-
-.cs-node-edge.is-active    { border-color: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.2); }
+/* Node accent colors on active */
+.cs-node-edge.is-active    { border-color: #4ade80; box-shadow: 0 0 14px rgba(74,222,128,0.15); }
+.cs-node-edge.is-active .cs-flow-icon { color: #4ade80; }
 .cs-node-redis.is-active   { border-color: var(--accent-color, #c4a35a); }
-.cs-node-gemini.is-active  { border-color: #60a5fa; box-shadow: 0 0 12px rgba(96,165,250,0.2); }
-.cs-node-response.is-active{ border-color: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.25); }
+.cs-node-redis.is-active .cs-flow-icon { color: var(--accent-color, #c4a35a); }
+.cs-node-gemini.is-active  { border-color: #60a5fa; box-shadow: 0 0 14px rgba(96,165,250,0.15); }
+.cs-node-gemini.is-active .cs-flow-icon { color: #60a5fa; }
+.cs-node-response.is-active{ border-color: #4ade80; box-shadow: 0 0 14px rgba(74,222,128,0.2); }
+.cs-node-response.is-active .cs-flow-icon { color: #4ade80; }
 
-/* ── Connectors ── */
+/* ── Connectors (horizontal) ── */
 .cs-flow-connector {
     position: relative;
-    width: 2px;
-    height: 22px;
+    height: 2px;
+    width: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
+    flex-shrink: 0;
 }
 
 .cs-flow-line {
-    width: 1px;
-    height: 100%;
+    width: 100%;
+    height: 1px;
     background: rgba(196,163,90,0.15);
 }
 
@@ -374,28 +347,27 @@ body.light-mode .rt-replay-btn {
     background: var(--accent-color, #c4a35a);
     box-shadow: 0 0 8px rgba(196,163,90,0.4);
     opacity: 0;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    transition: top 0.3s ease, opacity 0.2s;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .cs-flow-dot.is-traveling {
     opacity: 1;
-    animation: csDotTravel 0.3s ease forwards;
+    animation: csDotH 0.3s ease forwards;
 }
 
-@keyframes csDotTravel {
-    from { top: 0; }
-    to   { top: 100%; }
+@keyframes csDotH {
+    from { left: 0; }
+    to   { left: calc(100% - 6px); }
 }
 
 /* ── Ping Labels ── */
 .cs-flow-ping {
     position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 8px;
     font-family: 'Courier New', 'Consolas', monospace;
     font-weight: 600;
@@ -410,58 +382,31 @@ body.light-mode .rt-replay-btn {
 }
 
 /* ── Light Mode ── */
-body.light-mode .cs-evita-anim {
-    border-left-color: #e0e0e0;
-    background: rgba(0,0,0,0.02);
+body.light-mode .cs-flow {
+    border-top-color: #e0e0e0;
 }
 
 body.light-mode .cs-flow-node {
-    background: #fafafa;
+    background: rgba(0,0,0,0.02);
+    border-color: #e0e0e0;
 }
 
 /* ── Responsive ── */
 @media (max-width: 991px) {
-    .cs-evita-inner {
-        flex-direction: column;
-    }
-
-    .cs-evita-anim {
-        flex: 0 0 auto;
-        border-left: none;
-        border-top: 1px solid var(--border-color, #222);
-        padding: 1.2rem;
-    }
-
     .cs-flow {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0;
-    }
-
-    .cs-flow-connector {
-        width: 22px;
-        height: 2px;
-    }
-
-    .cs-flow-line {
-        width: 100%;
-        height: 1px;
-    }
-
-    .cs-flow-dot.is-traveling {
-        animation: csDotTravelH 0.3s ease forwards;
-    }
-
-    .cs-flow-ping {
-        left: 50%;
-        top: auto;
-        bottom: -14px;
-        transform: translateX(-50%);
+        justify-content: flex-start;
+        padding-bottom: 4px;
     }
 }
 
-@keyframes csDotTravelH {
-    from { left: 0; top: 50%; transform: translateY(-50%); }
-    to   { left: 100%; top: 50%; transform: translateY(-50%); }
+@media (max-width: 480px) {
+    .cs-flow-node {
+        min-width: 56px;
+        padding: 6px 8px;
+    }
+
+    .cs-flow-label { font-size: 8px; }
+    .cs-flow-icon { font-size: 12px; }
+    .cs-flow-connector { width: 18px; }
+    .cs-flow-ping { font-size: 7px; top: -14px; }
 }
