@@ -45,6 +45,7 @@ const articleFiles = [
     'css/pagebuilder-anim.css',
     'css/ki-integration-anim.css',
     'css/wp-diaet-anim.css',
+    'css/wp-kosten-anim.css',
     'css/ai-visibility.css'
 ];
 
