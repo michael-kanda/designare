@@ -1,7 +1,7 @@
 import { redis } from '../../lib/redis.js';
 import Parser from 'rss-parser';
 
-// ── RSS-Feed-Quellen (aktualisiert 2026-03-14) ──
+// ── RSS-Feed-Quellen (aktualisiert 2026-03-15) ──
 const RSS_FEEDS = [
   // ── Tech allgemein ──
   {
@@ -15,19 +15,19 @@ const RSS_FEEDS = [
     category: 'tech-de',
   },
   {
-    name: 'Hacker News (Best)',
-    url: 'https://hnrss.org/best?count=15',
+    name: 'Hacker News (Frontpage)',
+    url: 'https://hnrss.org/frontpage?points=100&count=15',
     category: 'tech-en',
   },
   // ── SEO & Search ──
   {
     name: 'Search Engine Roundtable',
-    url: 'https://www.seroundtable.com/feed',
+    url: 'https://www.seroundtable.com/index.xml',
     category: 'seo',
   },
   {
-    name: 'Google Search Central',
-    url: 'https://developers.google.com/search/blog/atom.xml',
+    name: 'Search Engine Land',
+    url: 'https://searchengineland.com/feed',
     category: 'seo',
   },
   {
