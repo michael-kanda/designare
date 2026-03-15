@@ -264,7 +264,6 @@ body.light-mode .rt-replay-btn {
     margin-top: 1.2rem;
     padding-top: 1.8rem;
     border-top: 1px solid var(--border-color, #222);
-    overflow-x: auto;
 }
 
 /* ── Nodes ── */
@@ -331,7 +330,6 @@ body.light-mode .rt-replay-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: center;
     flex-shrink: 0;
 }
 
@@ -364,10 +362,10 @@ body.light-mode .rt-replay-btn {
     to   { left: calc(100% - 6px); }
 }
 
-/* ── Ping Labels ── */
+/* ── Ping Labels (above connector) ── */
 .cs-flow-ping {
     position: absolute;
-    top: -20px;
+    top: -22px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
@@ -393,23 +391,54 @@ body.light-mode .cs-flow-node {
     border-color: #e0e0e0;
 }
 
-/* ── Responsive ── */
+/* ── Responsive: Vertical on mobile ── */
 @media (max-width: 991px) {
     .cs-flow {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 1.2rem;
+    }
+
+    .cs-flow-node {
+        width: 140px;
+        height: auto;
+        flex-direction: row;
         justify-content: flex-start;
-        padding-bottom: 4px;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .cs-flow-icon { margin-bottom: 0; }
+
+    .cs-flow-connector {
+        width: 2px;
+        height: 24px;
+    }
+
+    .cs-flow-line {
+        width: 1px;
+        height: 100%;
+    }
+
+    .cs-flow-dot.is-traveling {
+        animation: csDotV 0.3s ease forwards;
+    }
+
+    .cs-flow-ping {
+        top: 50%;
+        left: auto;
+        right: -52px;
+        transform: translateY(-50%);
     }
 }
 
-@media (max-width: 480px) {
-    .cs-flow-node {
-        width: 64px;
-        height: 64px;
-        padding: 8px 6px;
-    }
+@keyframes csDotV {
+    from { left: 50%; top: 0; transform: translateX(-50%); }
+    to   { left: 50%; top: calc(100% - 6px); transform: translateX(-50%); }
+}
 
-    .cs-flow-label { font-size: 8px; }
-    .cs-flow-icon { font-size: 12px; }
-    .cs-flow-connector { width: 16px; }
-    .cs-flow-ping { font-size: 9px; top: -18px; }
+@media (max-width: 480px) {
+    .cs-flow-node { width: 130px; }
+    .cs-flow-label { font-size: 9px; }
+    .cs-flow-ping { font-size: 10px; right: -48px; }
 }
