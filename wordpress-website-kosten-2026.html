@@ -424,21 +424,6 @@
                     </tbody>
                 </table>
 
-                <!-- ══════════════════════════════════════════ -->
-                <!-- 5-JAHRES-KALKULATOR                        -->
-                <!-- ══════════════════════════════════════════ -->
-                <div class="kosten-timeline" id="kosten-timeline">
-                    <div class="kt-header">
-                        <span class="kt-title"><i aria-hidden="true" class="fa-solid fa-calculator" style="margin-right:6px"></i>Gesamtkosten über Zeit</span>
-                        <div class="kt-toggle">
-                            <button class="kt-toggle-btn is-active" data-period="1" type="button">1. Jahr</button>
-                            <button class="kt-toggle-btn" data-period="3" type="button">3 Jahre</button>
-                            <button class="kt-toggle-btn" data-period="5" type="button">5 Jahre</button>
-                        </div>
-                    </div>
-                    <div class="kt-body" id="kt-body"></div>
-                </div>
-
             </section>
 
             <section aria-labelledby="versteckt-heading">
@@ -906,74 +891,6 @@
 
         // Default: "Leads & Kunden"
         renderGoal('leads');
-    })();
-    </script>
-
-    <!-- ══════════════════════════════════════════════════ -->
-    <!-- 5-JAHRES-KALKULATOR – Inline JS                   -->
-    <!-- ══════════════════════════════════════════════════ -->
-    <script>
-    (function(){
-        var body=document.getElementById('kt-body');
-        var btns=document.querySelectorAll('.kt-toggle-btn');
-        if(!body||!btns.length)return;
-
-        // Costs: [year1, perYear after]
-        var COSTS={
-            diy:    {setup:350, yearly:400, label:'WordPress DIY', color:'green'},
-            agentur:{setup:6000, yearly:1800, label:'Freelancer / Agentur', color:'red'},
-            ki:     {setup:0, yearly:150, label:'KI-Baukasten', color:'gold'}
-        };
-
-        var TAKEAWAYS={
-            1:'Im ersten Jahr ist der KI-Baukasten am günstigsten – aber du bekommst auch am wenigsten. Kein SEO, keine Leads, kein Eigentum. Die Frage ist nicht was du zahlst, sondern was du dafür bekommst.',
-            3:'Nach 3 Jahren hat sich der DIY-Weg als günstigste Profi-Lösung etabliert. Die Agentur-Investition? Hat sich durch Kundengewinnung längst bezahlt gemacht – wenn die Website rankt und konvertiert.',
-            5:'Über 5 Jahre zeigt sich das wahre Bild: Der KI-Baukasten wird durch laufende Gebühren teurer als DIY – ohne je einen Kunden gebracht zu haben. Die Agentur-Website hat ihren ROI um ein Vielfaches eingespielt.'
-        };
-
-        function calcTotal(key, years){
-            var c=COSTS[key];
-            return c.setup + c.yearly * years;
-        }
-
-        function render(years){
-            var maxVal=0;
-            var order=['ki','diy','agentur'];
-            order.forEach(function(k){ var v=calcTotal(k,years); if(v>maxVal)maxVal=v; });
-
-            var h='';
-            order.forEach(function(k){
-                var c=COSTS[k];
-                var total=calcTotal(k,years);
-                var pct=Math.round((total/maxVal)*100);
-                var formatted=total.toLocaleString('de-DE')+ ' €';
-                h+='<div class="kt-bar-row">';
-                h+='<div class="kt-bar-label">'+c.label+'</div>';
-                h+='<div class="kt-bar-track">';
-                h+='<div class="kt-bar-fill '+c.color+'" data-pct="'+pct+'" data-amount="'+formatted+'"></div>';
-                h+='</div>';
-                h+='</div>';
-            });
-
-            h+='<div class="kt-takeaway"><i aria-hidden="true" class="fa-solid fa-arrow-trend-up"></i>';
-            h+='<div class="kt-takeaway-text">'+TAKEAWAYS[years]+'</div></div>';
-
-            body.innerHTML=h;
-            setTimeout(function(){
-                body.querySelectorAll('.kt-bar-fill').forEach(function(el){
-                    el.style.width=el.dataset.pct+'%';
-                    el.textContent=el.dataset.amount;
-                });
-            },50);
-        }
-
-        btns.forEach(function(b){b.addEventListener('click',function(){
-            btns.forEach(function(x){x.classList.remove('is-active');});
-            b.classList.add('is-active');
-            render(parseInt(b.dataset.period));
-        });});
-
-        render(1);
     })();
     </script>
 
