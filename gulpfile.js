@@ -43,6 +43,7 @@ const articleFiles = [
     'css/wp-ki-core-anim.css',
     'css/sem-markup-anim.css',
     'css/pagebuilder-anim.css',
+    'css/ki-integration-anim.css',
     'css/ai-visibility.css'
 ];
 
