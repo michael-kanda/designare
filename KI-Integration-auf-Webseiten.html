@@ -231,6 +231,71 @@
                     </div>
                 </aside>
 
+                <!-- ══════════════════════════════════════════ -->
+                <!-- CASE STUDY: Evita – Serverless in der Praxis -->
+                <!-- Expert-Tip Box mit Architektur-Flow Animation -->
+                <!-- ══════════════════════════════════════════ -->
+                <aside class="expert-tip cs-evita-box">
+                    <div class="cs-evita-inner">
+                        <div class="cs-evita-content">
+                            <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                            <div>
+                                <strong>Case Study: Evita – Serverless in der Praxis</strong>
+                                <p>Meine KI-Assistentin <a href="https://designare.at/evita-ki-assistentin" title="Evita: KI-Assistentin mit Gedächtnis">Evita</a> ist ein konkretes Beispiel für diese Architektur. Sie läuft auf Vercel Edge Functions (Standort Wien), nutzt Gemini 2.5 Flash als Sprachmodell, Redis für Session-Memory und eine Vektordatenbank für RAG. Eingebettet in WordPress per Web Component – der WordPress-Server wird nie belastet.</p>
+                                <p style="margin-top: 8px;">Die Zahlen sprechen für sich: <strong>~350ms</strong> bis zum ersten Token (TTFT), <strong>80ms</strong> Cold Start, <strong>~€3/Monat</strong> Pay-per-Use statt Plugin-Abo. Ein typisches WP-ChatGPT-Plugin braucht für dieselbe Aufgabe <strong>~1.800ms</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="cs-evita-anim">
+                            <div class="cs-flow" id="cs-flow">
+                                <div class="cs-flow-node cs-node-user" id="cs-node-0">
+                                    <span class="cs-flow-icon">&#128100;</span>
+                                    <span class="cs-flow-label">User</span>
+                                </div>
+                                <div class="cs-flow-connector" id="cs-conn-0">
+                                    <div class="cs-flow-line"></div>
+                                    <div class="cs-flow-dot" id="cs-dot-0"></div>
+                                    <span class="cs-flow-ping" id="cs-ping-0">+15ms</span>
+                                </div>
+                                <div class="cs-flow-node cs-node-edge" id="cs-node-1">
+                                    <span class="cs-flow-icon">&#9889;</span>
+                                    <span class="cs-flow-label">Vercel Edge</span>
+                                    <span class="cs-flow-sub">Wien</span>
+                                </div>
+                                <div class="cs-flow-connector" id="cs-conn-1">
+                                    <div class="cs-flow-line"></div>
+                                    <div class="cs-flow-dot" id="cs-dot-1"></div>
+                                    <span class="cs-flow-ping" id="cs-ping-1">+8ms</span>
+                                </div>
+                                <div class="cs-flow-node cs-node-redis" id="cs-node-2">
+                                    <span class="cs-flow-icon">&#129504;</span>
+                                    <span class="cs-flow-label">Redis</span>
+                                    <span class="cs-flow-sub">Memory</span>
+                                </div>
+                                <div class="cs-flow-connector" id="cs-conn-2">
+                                    <div class="cs-flow-line"></div>
+                                    <div class="cs-flow-dot" id="cs-dot-2"></div>
+                                    <span class="cs-flow-ping" id="cs-ping-2">+280ms</span>
+                                </div>
+                                <div class="cs-flow-node cs-node-gemini" id="cs-node-3">
+                                    <span class="cs-flow-icon">&#10024;</span>
+                                    <span class="cs-flow-label">Gemini</span>
+                                    <span class="cs-flow-sub">2.5 Flash</span>
+                                </div>
+                                <div class="cs-flow-connector" id="cs-conn-3">
+                                    <div class="cs-flow-line"></div>
+                                    <div class="cs-flow-dot" id="cs-dot-3"></div>
+                                    <span class="cs-flow-ping" id="cs-ping-3">+12ms</span>
+                                </div>
+                                <div class="cs-flow-node cs-node-response" id="cs-node-4">
+                                    <span class="cs-flow-icon">&#128172;</span>
+                                    <span class="cs-flow-label">Response</span>
+                                    <span class="cs-flow-sub">~315ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
                 <div class="key-points">
                     <h3>Zusammenfassung:</h3>
                     <ul>
@@ -338,6 +403,69 @@
             }
         },{threshold:0.5});
         observer.observe(document.getElementById('ki-race-track'));
+    })();
+
+    // ── CASE STUDY: ARCHITECTURE FLOW ──
+    (function(){
+        var nodes=document.querySelectorAll('.cs-flow-node');
+        var dots=document.querySelectorAll('.cs-flow-dot');
+        var pings=document.querySelectorAll('.cs-flow-ping');
+        if(!nodes.length)return;
+
+        var step=0,totalSteps=5,running=false;
+
+        function reset(){
+            nodes.forEach(function(n){n.classList.remove('is-active');});
+            dots.forEach(function(d){d.classList.remove('is-traveling');});
+            pings.forEach(function(p){p.classList.remove('is-visible');});
+            step=0;
+        }
+
+        function advance(){
+            if(step>=totalSteps)return;
+            // Activate node
+            nodes[step].classList.add('is-active');
+            // If there's a connector before this node (step>0), animate dot and show ping
+            if(step>0){
+                var connIdx=step-1;
+                dots[connIdx].classList.remove('is-traveling');
+                void dots[connIdx].offsetWidth; // reflow
+                dots[connIdx].classList.add('is-traveling');
+                setTimeout(function(){
+                    pings[connIdx].classList.add('is-visible');
+                },250);
+            }
+            step++;
+        }
+
+        function play(){
+            if(running)return;
+            running=true;
+            reset();
+            var i=0;
+            function next(){
+                if(i>=totalSteps){running=false;return;}
+                advance();
+                i++;
+                setTimeout(next,500);
+            }
+            next();
+        }
+
+        // Auto-play when visible, loop
+        var flowEl=document.getElementById('cs-flow');
+        if(!flowEl)return;
+        var obs=new IntersectionObserver(function(entries){
+            if(entries[0].isIntersecting){
+                setTimeout(play,400);
+                obs.disconnect();
+                // Loop
+                setInterval(function(){
+                    if(!running){reset();setTimeout(play,300);}
+                },5500);
+            }
+        },{threshold:0.4});
+        obs.observe(flowEl);
     })();
     </script>
 </body>
