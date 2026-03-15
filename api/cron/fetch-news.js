@@ -111,9 +111,11 @@ function deduplicateItems(items) {
 
 // ── Handler (Vercel Serverless Function) ──
 export default async function handler(req, res) {
-  // Nur Cron / autorisierte Aufrufe zulassen
+  // Nur Cron / autorisierte Aufrufe zulassen (Header ODER Query-Parameter)
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && req.headers.authorization !== `Bearer ${cronSecret}`) {
+  const authHeader = req.headers.authorization === `Bearer ${cronSecret}`;
+  const authQuery = req.query?.secret === cronSecret;
+  if (cronSecret && !authHeader && !authQuery) {
     return res.status(401).json({ error: 'Nicht autorisiert' });
   }
 
