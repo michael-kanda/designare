@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/ki-integration-anim.css">
     
     <link rel="canonical" href="https://designare.at/KI-Integration-auf-Webseiten"/>
 
@@ -95,16 +96,51 @@
             </ul>
         </div>
 
+        <!-- ══════════════════════════════════════════ -->
+        <!-- RACE TRACK: Serverless vs. WP Plugin       -->
+        <!-- Ersetzt images/serverless-computing.webp    -->
+        <!-- ══════════════════════════════════════════ -->
         <div class="summary-image">
-            <figure>
-                <img src="images/serverless-computing.webp" 
-                     alt="Illustration: Vergleich zwischen schlanker Serverless-Architektur und komplexer CMS-Struktur" 
-                     title="Serverless Speed vs. Plugin Ballast"
-                     loading="lazy" 
-                     width="300" 
-                     height="300">
-                <figcaption class="visually-hidden">Technische Visualisierung: Direkte API-Verbindung vs. Umweg über CMS-Plugins</figcaption>
-            </figure>
+            <div class="ki-race-track" id="ki-race-track">
+                <div class="rt-header">
+                    <span class="rt-title">API Request Race</span>
+                    <span class="rt-status" id="rt-status">Ready</span>
+                </div>
+                <div class="rt-body">
+                    <!-- Serverless Lane -->
+                    <div class="rt-lane">
+                        <div class="rt-lane-header">
+                            <span class="rt-lane-name fast">&#9889; Serverless (Vercel)</span>
+                            <span class="rt-lane-time fast" id="rt-time-fast">0ms</span>
+                        </div>
+                        <div class="rt-track">
+                            <div class="rt-car fast" id="rt-car-fast"><span class="rt-car-icon">&#9889;</span>API</div>
+                        </div>
+                        <div class="rt-checkpoints"><span>Start</span><span>Edge</span><span>API</span><span>Response</span></div>
+                    </div>
+                    <!-- Plugin Lane -->
+                    <div class="rt-lane">
+                        <div class="rt-lane-header">
+                            <span class="rt-lane-name slow">&#127869; WP Plugin</span>
+                            <span class="rt-lane-time slow" id="rt-time-slow">0ms</span>
+                        </div>
+                        <div class="rt-track">
+                            <div class="rt-car slow" id="rt-car-slow"><span class="rt-car-icon">&#127869;</span>Plugin</div>
+                        </div>
+                        <div class="rt-checkpoints"><span>Start</span><span>PHP Boot</span><span>Plugins</span><span>API</span></div>
+                    </div>
+                    <!-- Details -->
+                    <div class="rt-detail fast-detail" id="rt-detail-fast">
+                        <b>Serverless:</b> Request → Edge Function → Gemini API → Response. <b>Direkt, keine Umwege.</b>
+                    </div>
+                    <div class="rt-detail slow-detail" id="rt-detail-slow">
+                        <b>WP Plugin:</b> Request → PHP Boot (120ms) → 47 Plugins (380ms) → DB Query (90ms) → API. <b>590ms Overhead bevor die KI überhaupt gefragt wird.</b>
+                    </div>
+                    <div class="rt-replay">
+                        <button class="rt-replay-btn" id="rt-replay-btn" type="button">&#9654; Race starten</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -220,5 +256,89 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- RACE TRACK – Inline JS                            -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var carFast=document.getElementById('rt-car-fast');
+        var carSlow=document.getElementById('rt-car-slow');
+        var timeFast=document.getElementById('rt-time-fast');
+        var timeSlow=document.getElementById('rt-time-slow');
+        var status=document.getElementById('rt-status');
+        var detailFast=document.getElementById('rt-detail-fast');
+        var detailSlow=document.getElementById('rt-detail-slow');
+        var replayBtn=document.getElementById('rt-replay-btn');
+        if(!carFast||!replayBtn)return;
+
+        var running=false;
+
+        function reset(){
+            carFast.style.left='0';carSlow.style.left='0';
+            timeFast.textContent='0ms';timeSlow.textContent='0ms';
+            detailFast.classList.remove('is-visible');
+            detailSlow.classList.remove('is-visible');
+            status.textContent='Ready';status.style.color='';
+        }
+
+        function race(){
+            if(running)return;
+            running=true;
+            reset();
+            status.textContent='Racing...';status.style.color='#4ade80';
+            replayBtn.textContent='\u23F3 Racing...';
+
+            var startTime=performance.now();
+            var fastDone=false,slowDone=false;
+            var fastTarget=220,slowTarget=1200;
+            var trackWidth=carFast.parentElement.offsetWidth-60;
+
+            function frame(){
+                var elapsed=performance.now()-startTime;
+
+                if(!fastDone){
+                    var fastPct=Math.min(elapsed/fastTarget,1);
+                    var fastEased=1-Math.pow(1-fastPct,2);
+                    carFast.style.left=(fastEased*trackWidth)+'px';
+                    timeFast.textContent=Math.round(fastPct*fastTarget)+'ms';
+                    if(fastPct>=1){fastDone=true;detailFast.classList.add('is-visible');}
+                }
+
+                if(!slowDone){
+                    var slowPct=Math.min(elapsed/slowTarget,1);
+                    var slowEased;
+                    if(slowPct<0.15)slowEased=slowPct/0.15*0.12;
+                    else if(slowPct<0.25)slowEased=0.12;
+                    else if(slowPct<0.55)slowEased=0.12+(slowPct-0.25)/0.3*0.35;
+                    else if(slowPct<0.65)slowEased=0.47;
+                    else slowEased=0.47+(slowPct-0.65)/0.35*0.53;
+                    carSlow.style.left=(slowEased*trackWidth)+'px';
+                    timeSlow.textContent=Math.round(slowPct*slowTarget)+'ms';
+                    if(slowPct>=1){slowDone=true;detailSlow.classList.add('is-visible');}
+                }
+
+                if(!fastDone||!slowDone){requestAnimationFrame(frame);}
+                else{
+                    status.textContent='5.5\u00D7 schneller!';status.style.color='';
+                    replayBtn.textContent='\u21BB Nochmal';
+                    running=false;
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        replayBtn.addEventListener('click',race);
+
+        // Auto-start when visible
+        var observer=new IntersectionObserver(function(entries){
+            if(entries[0].isIntersecting&&!running){
+                setTimeout(race,600);
+                observer.disconnect();
+            }
+        },{threshold:0.5});
+        observer.observe(document.getElementById('ki-race-track'));
+    })();
+    </script>
 </body>
 </html>
