@@ -50,7 +50,60 @@
         "@id": "https://designare.at/KI-Integration-auf-Webseiten.html"
       },
       "articleSection": "Webentwicklung",
-      "keywords": ["KI Integration", "Serverless", "WordPress", "Web Performance", "Chatbot Architektur"]
+      "keywords": ["KI Integration", "Serverless", "WordPress", "Web Performance", "Chatbot Architektur"],
+      "hasPart": {
+        "@id": "https://designare.at/KI-Integration-auf-Webseiten#faq"
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": "https://designare.at/KI-Integration-auf-Webseiten#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist der Unterschied zwischen Serverless und einem WordPress-Plugin für KI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ein WordPress-Plugin läuft innerhalb des CMS: Bei jeder Anfrage muss der gesamte WordPress-Kern, die Datenbank und alle aktiven Plugins geladen werden, bevor die eigentliche KI-Anfrage überhaupt abgeschickt wird. Eine Serverless Function (z.B. auf Vercel oder AWS Lambda) ist eine isolierte, schlanke Funktion, die nur den Code ausführt, der für die KI-Kommunikation nötig ist – ohne CMS-Overhead."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Brauche ich für Serverless einen eigenen Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nein, das ist das Prinzip: Du schreibst eine Funktion, lädst sie bei einem Anbieter wie Vercel, Netlify oder AWS hoch, und der Anbieter kümmert sich um Infrastruktur, Skalierung und Verfügbarkeit. Du zahlst nur für tatsächliche Ausführungen (Pay-per-Use) – kein Server-Management, kein Hosting-Paket."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich Serverless auch mit WordPress kombinieren?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, das ist sogar der empfohlene Ansatz für KI-Features. Die WordPress-Seite bleibt dein Frontend und CMS, aber die KI-Kommunikation wird an eine externe Serverless Function ausgelagert. Die Einbindung erfolgt per iFrame, Web Component oder JavaScript-Fetch-Aufruf. So profitierst du von WordPress als Content-Plattform und Serverless für Performance-kritische Funktionen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was kostet eine Serverless-KI-Integration im Vergleich zu einem Plugin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KI-Plugins kosten typischerweise €15–€50/Monat als Abo, plus die API-Kosten des KI-Anbieters. Bei einer Serverless-Lösung entfällt das Plugin-Abo komplett. Du zahlst nur die reinen API-Kosten (z.B. an OpenAI oder Google) und minimale Serverless-Hosting-Kosten – bei normaler Nutzung oft unter €5/Monat gesamt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist eine Serverless-Lösung sicherer als ein Plugin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, aus zwei Gründen: Erstens laufen API-Keys serverseitig in der Serverless Function und sind im Quellcode der Website nicht sichtbar. Zweitens reduzierst du die Angriffsfläche, weil kein zusätzliches Plugin mit eigenem Code, eigenen Datenbanktabellen und eigenen Sicherheitslücken in WordPress installiert werden muss."
+          }
+        }
+      ]
     }
     </script>
      <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
@@ -301,6 +354,47 @@
                     </ul>
                 </div>
             </section>
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Was ist der Unterschied zwischen Serverless und einem WordPress-Plugin für KI?</summary>
+                        <div class="faq-content">
+                            <p>Ein WordPress-Plugin läuft <em>innerhalb</em> des CMS: Bei jeder Anfrage muss der gesamte WordPress-Kern, die Datenbank und alle aktiven Plugins geladen werden, bevor die eigentliche KI-Anfrage überhaupt abgeschickt wird. Eine Serverless Function (z.B. auf Vercel oder AWS Lambda) ist eine isolierte, schlanke Funktion, die <strong>nur</strong> den Code ausführt, der für die KI-Kommunikation nötig ist – ohne CMS-Overhead. Der Unterschied in der Praxis: ~200ms vs. ~1.200ms bis zur Antwort.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Brauche ich für Serverless einen eigenen Server?</summary>
+                        <div class="faq-content">
+                            <p>Nein, das ist das Prinzip: Du schreibst eine Funktion, lädst sie bei einem Anbieter wie <strong>Vercel</strong>, Netlify oder AWS hoch, und der Anbieter kümmert sich um Infrastruktur, Skalierung und Verfügbarkeit. Du zahlst nur für tatsächliche Ausführungen (Pay-per-Use) – kein Server-Management, kein Hosting-Paket. Bei normaler Nutzung sind das oft wenige Euro pro Monat.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Kann ich Serverless auch mit WordPress kombinieren?</summary>
+                        <div class="faq-content">
+                            <p>Ja, das ist sogar der empfohlene Ansatz für KI-Features. Die WordPress-Seite bleibt dein Frontend und CMS, aber die KI-Kommunikation wird an eine externe Serverless Function ausgelagert. Die Einbindung erfolgt per iFrame, Web Component oder JavaScript-Fetch-Aufruf. So profitierst du von WordPress als Content-Plattform und Serverless für Performance-kritische Funktionen.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was kostet eine Serverless-KI-Integration im Vergleich zu einem Plugin?</summary>
+                        <div class="faq-content">
+                            <p>KI-Plugins kosten typischerweise <strong>€15–€50/Monat</strong> als Abo, plus die API-Kosten des KI-Anbieters. Bei einer Serverless-Lösung entfällt das Plugin-Abo komplett. Du zahlst nur die reinen API-Kosten (z.B. an OpenAI oder Google) und minimale Hosting-Kosten – bei normaler Nutzung oft <strong>unter €5/Monat</strong> gesamt.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Ist eine Serverless-Lösung sicherer als ein Plugin?</summary>
+                        <div class="faq-content">
+                            <p>Ja, aus zwei Gründen: Erstens laufen API-Keys serverseitig in der Serverless Function und sind im Quellcode der Website <strong>nicht sichtbar</strong>. Zweitens reduzierst du die Angriffsfläche, weil kein zusätzliches Plugin mit eigenem Code, eigenen Datenbanktabellen und eigenen Sicherheitslücken in WordPress installiert werden muss.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
 <section class="blog-cta-wrapper">
     <h2>Klingt nach Raketenwissenschaft?</h2>
     <p>Ist es aber nicht. Serverless klingt wild, ist aber oft einfacher (und billiger) als ein aufgeblähtes Hosting-Paket. Wenn du wissen willst, wie ich das für meine Projekte umsetze:</p>
