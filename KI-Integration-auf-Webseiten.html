@@ -236,61 +236,56 @@
                 <!-- Expert-Tip Box mit Architektur-Flow Animation -->
                 <!-- ══════════════════════════════════════════ -->
                 <aside class="expert-tip cs-evita-box">
-                    <div class="cs-evita-inner">
-                        <div class="cs-evita-content">
-                            <i aria-hidden="true" class="fa-solid fa-flask"></i>
-                            <div>
-                                <strong>Case Study: Evita – Serverless in der Praxis</strong>
-                                <p>Meine KI-Assistentin <a href="https://designare.at/evita-ki-assistentin" title="Evita: KI-Assistentin mit Gedächtnis">Evita</a> ist ein konkretes Beispiel für diese Architektur. Sie läuft auf Vercel Edge Functions (Standort Wien), nutzt Gemini 2.5 Flash als Sprachmodell, Redis für Session-Memory und eine Vektordatenbank für RAG. Eingebettet in WordPress per Web Component – der WordPress-Server wird nie belastet.</p>
-                                <p style="margin-top: 8px;">Die Zahlen sprechen für sich: <strong>~350ms</strong> bis zum ersten Token (TTFT), <strong>80ms</strong> Cold Start, <strong>~€3/Monat</strong> Pay-per-Use statt Plugin-Abo. Ein typisches WP-ChatGPT-Plugin braucht für dieselbe Aufgabe <strong>~1.800ms</strong>.</p>
+                    <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                    <div>
+                        <strong>Case Study: Evita – Serverless in der Praxis</strong>
+                        <p>Meine KI-Assistentin <a href="https://designare.at/evita-ki-assistentin" title="Evita: KI-Assistentin mit Gedächtnis">Evita</a> ist ein konkretes Beispiel für diese Architektur. Sie läuft auf Vercel Edge Functions (Standort Wien), nutzt Gemini 2.5 Flash als Sprachmodell, Redis für Session-Memory und eine Vektordatenbank für RAG. Die statische Website kommuniziert direkt mit der Serverless-Funktion – kein CMS, kein Plugin, kein Overhead dazwischen.</p>
+                        <p style="margin-top: 8px;">Die Zahlen sprechen für sich: <strong>~350ms</strong> bis zum ersten Token (TTFT), <strong>80ms</strong> Cold Start, <strong>~€3/Monat</strong> Pay-per-Use statt Plugin-Abo. Ein typisches WP-ChatGPT-Plugin braucht für dieselbe Aufgabe <strong>~1.800ms</strong>.</p>
+                        <!-- Horizontal Flow Animation -->
+                        <div class="cs-flow" id="cs-flow">
+                            <div class="cs-flow-node cs-node-user" id="cs-node-0">
+                                <span class="cs-flow-icon"><i aria-hidden="true" class="fa-solid fa-user"></i></span>
+                                <span class="cs-flow-label">User</span>
                             </div>
-                        </div>
-                        <div class="cs-evita-anim">
-                            <div class="cs-flow" id="cs-flow">
-                                <div class="cs-flow-node cs-node-user" id="cs-node-0">
-                                    <span class="cs-flow-icon">&#128100;</span>
-                                    <span class="cs-flow-label">User</span>
-                                </div>
-                                <div class="cs-flow-connector" id="cs-conn-0">
-                                    <div class="cs-flow-line"></div>
-                                    <div class="cs-flow-dot" id="cs-dot-0"></div>
-                                    <span class="cs-flow-ping" id="cs-ping-0">+15ms</span>
-                                </div>
-                                <div class="cs-flow-node cs-node-edge" id="cs-node-1">
-                                    <span class="cs-flow-icon">&#9889;</span>
-                                    <span class="cs-flow-label">Vercel Edge</span>
-                                    <span class="cs-flow-sub">Wien</span>
-                                </div>
-                                <div class="cs-flow-connector" id="cs-conn-1">
-                                    <div class="cs-flow-line"></div>
-                                    <div class="cs-flow-dot" id="cs-dot-1"></div>
-                                    <span class="cs-flow-ping" id="cs-ping-1">+8ms</span>
-                                </div>
-                                <div class="cs-flow-node cs-node-redis" id="cs-node-2">
-                                    <span class="cs-flow-icon">&#129504;</span>
-                                    <span class="cs-flow-label">Redis</span>
-                                    <span class="cs-flow-sub">Memory</span>
-                                </div>
-                                <div class="cs-flow-connector" id="cs-conn-2">
-                                    <div class="cs-flow-line"></div>
-                                    <div class="cs-flow-dot" id="cs-dot-2"></div>
-                                    <span class="cs-flow-ping" id="cs-ping-2">+280ms</span>
-                                </div>
-                                <div class="cs-flow-node cs-node-gemini" id="cs-node-3">
-                                    <span class="cs-flow-icon">&#10024;</span>
-                                    <span class="cs-flow-label">Gemini</span>
-                                    <span class="cs-flow-sub">2.5 Flash</span>
-                                </div>
-                                <div class="cs-flow-connector" id="cs-conn-3">
-                                    <div class="cs-flow-line"></div>
-                                    <div class="cs-flow-dot" id="cs-dot-3"></div>
-                                    <span class="cs-flow-ping" id="cs-ping-3">+12ms</span>
-                                </div>
-                                <div class="cs-flow-node cs-node-response" id="cs-node-4">
-                                    <span class="cs-flow-icon">&#128172;</span>
-                                    <span class="cs-flow-label">Response</span>
-                                    <span class="cs-flow-sub">~315ms</span>
-                                </div>
+                            <div class="cs-flow-connector" id="cs-conn-0">
+                                <div class="cs-flow-line"></div>
+                                <div class="cs-flow-dot" id="cs-dot-0"></div>
+                                <span class="cs-flow-ping" id="cs-ping-0">+15ms</span>
+                            </div>
+                            <div class="cs-flow-node cs-node-edge" id="cs-node-1">
+                                <span class="cs-flow-icon"><i aria-hidden="true" class="fa-solid fa-bolt"></i></span>
+                                <span class="cs-flow-label">Edge</span>
+                                <span class="cs-flow-sub">Wien</span>
+                            </div>
+                            <div class="cs-flow-connector" id="cs-conn-1">
+                                <div class="cs-flow-line"></div>
+                                <div class="cs-flow-dot" id="cs-dot-1"></div>
+                                <span class="cs-flow-ping" id="cs-ping-1">+8ms</span>
+                            </div>
+                            <div class="cs-flow-node cs-node-redis" id="cs-node-2">
+                                <span class="cs-flow-icon"><i aria-hidden="true" class="fa-solid fa-database"></i></span>
+                                <span class="cs-flow-label">Redis</span>
+                                <span class="cs-flow-sub">Memory</span>
+                            </div>
+                            <div class="cs-flow-connector" id="cs-conn-2">
+                                <div class="cs-flow-line"></div>
+                                <div class="cs-flow-dot" id="cs-dot-2"></div>
+                                <span class="cs-flow-ping" id="cs-ping-2">+280ms</span>
+                            </div>
+                            <div class="cs-flow-node cs-node-gemini" id="cs-node-3">
+                                <span class="cs-flow-icon"><i aria-hidden="true" class="fa-solid fa-microchip"></i></span>
+                                <span class="cs-flow-label">Gemini</span>
+                                <span class="cs-flow-sub">2.5 Flash</span>
+                            </div>
+                            <div class="cs-flow-connector" id="cs-conn-3">
+                                <div class="cs-flow-line"></div>
+                                <div class="cs-flow-dot" id="cs-dot-3"></div>
+                                <span class="cs-flow-ping" id="cs-ping-3">+12ms</span>
+                            </div>
+                            <div class="cs-flow-node cs-node-response" id="cs-node-4">
+                                <span class="cs-flow-icon"><i aria-hidden="true" class="fa-solid fa-comment-dots"></i></span>
+                                <span class="cs-flow-label">Response</span>
+                                <span class="cs-flow-sub">~315ms</span>
                             </div>
                         </div>
                     </div>
