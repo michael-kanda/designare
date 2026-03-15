@@ -247,3 +247,221 @@ body.light-mode .rt-replay-btn {
         font-size: 9px;
     }
 }
+
+/* ============================================ */
+/* CASE STUDY: Evita Architektur-Flow            */
+/* Prefix: cs-                                   */
+/* ============================================ */
+
+/* ── Box Layout (inside expert-tip) ── */
+.cs-evita-box {
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.cs-evita-inner {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+.cs-evita-content {
+    flex: 1 1 55%;
+    min-width: 0;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.cs-evita-content i {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cs-evita-anim {
+    flex: 0 0 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem 1rem;
+    border-left: 1px solid var(--border-color, #222);
+    background: rgba(0,0,0,0.15);
+}
+
+/* ── Flow Widget ── */
+.cs-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+}
+
+/* ── Nodes ── */
+.cs-flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    background: var(--card-bg, #0f0f0f);
+    min-width: 90px;
+    text-align: center;
+    transition: border-color 0.4s, box-shadow 0.4s;
+    position: relative;
+}
+
+.cs-flow-node.is-active {
+    border-color: var(--accent-color, #c4a35a);
+    box-shadow: 0 0 12px rgba(196,163,90,0.15);
+}
+
+.cs-flow-icon {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.cs-flow-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+    font-family: 'Poppins', sans-serif;
+}
+
+.cs-flow-sub {
+    font-size: 7.5px;
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Node colors */
+.cs-node-user    { border-color: rgba(255,255,255,0.15); }
+.cs-node-edge    { border-color: rgba(74,222,128,0.25); }
+.cs-node-redis   { border-color: rgba(196,163,90,0.25); }
+.cs-node-gemini  { border-color: rgba(96,165,250,0.25); }
+.cs-node-response{ border-color: rgba(74,222,128,0.25); }
+
+.cs-node-edge.is-active    { border-color: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.2); }
+.cs-node-redis.is-active   { border-color: var(--accent-color, #c4a35a); }
+.cs-node-gemini.is-active  { border-color: #60a5fa; box-shadow: 0 0 12px rgba(96,165,250,0.2); }
+.cs-node-response.is-active{ border-color: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.25); }
+
+/* ── Connectors ── */
+.cs-flow-connector {
+    position: relative;
+    width: 2px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-flow-line {
+    width: 1px;
+    height: 100%;
+    background: rgba(196,163,90,0.15);
+}
+
+.cs-flow-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-color, #c4a35a);
+    box-shadow: 0 0 8px rgba(196,163,90,0.4);
+    opacity: 0;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 0.3s ease, opacity 0.2s;
+}
+
+.cs-flow-dot.is-traveling {
+    opacity: 1;
+    animation: csDotTravel 0.3s ease forwards;
+}
+
+@keyframes csDotTravel {
+    from { top: 0; }
+    to   { top: 100%; }
+}
+
+/* ── Ping Labels ── */
+.cs-flow-ping {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-weight: 600;
+    color: var(--accent-color, #c4a35a);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.cs-flow-ping.is-visible {
+    opacity: 1;
+}
+
+/* ── Light Mode ── */
+body.light-mode .cs-evita-anim {
+    border-left-color: #e0e0e0;
+    background: rgba(0,0,0,0.02);
+}
+
+body.light-mode .cs-flow-node {
+    background: #fafafa;
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .cs-evita-inner {
+        flex-direction: column;
+    }
+
+    .cs-evita-anim {
+        flex: 0 0 auto;
+        border-left: none;
+        border-top: 1px solid var(--border-color, #222);
+        padding: 1.2rem;
+    }
+
+    .cs-flow {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .cs-flow-connector {
+        width: 22px;
+        height: 2px;
+    }
+
+    .cs-flow-line {
+        width: 100%;
+        height: 1px;
+    }
+
+    .cs-flow-dot.is-traveling {
+        animation: csDotTravelH 0.3s ease forwards;
+    }
+
+    .cs-flow-ping {
+        left: 50%;
+        top: auto;
+        bottom: -14px;
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes csDotTravelH {
+    from { left: 0; top: 50%; transform: translateY(-50%); }
+    to   { left: 100%; top: 50%; transform: translateY(-50%); }
+}
