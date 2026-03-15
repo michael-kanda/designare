@@ -18,6 +18,7 @@
     
     <link rel="stylesheet" href="css/core.min.css">
     <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/wp-diaet-anim.css">
     
     <link rel="canonical" href="https://designare.at/wordpress-diaet-guide" />
 
@@ -184,16 +185,51 @@
                         </ul>
                     </div>
 
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- PLUGIN-WAAGE: Vorher vs. Nach Diät        -->
+                    <!-- Ersetzt images/wordpress-diaet.webp        -->
+                    <!-- ══════════════════════════════════════════ -->
                     <div class="summary-image">
-                        <figure>
-                            <img src="images/wordpress-diaet.webp" 
-                                 alt="Visualisierung: WordPress Performance-Optimierung durch Plugin-Reduktion" 
-                                 title="WordPress-Diaet: Von Plugin-Chaos zu High-Performance"
-                                 loading="lazy" 
-                                 width="300" 
-                                 height="300">
-                            <figcaption class="visually-hidden">Grafische Darstellung der WordPress-Performance-Optimierung</figcaption>
-                        </figure>
+                        <div class="wp-plugin-waage" id="wp-plugin-waage">
+                            <div class="pw-frame is-bloat" id="pw-frame">
+                                <div class="pw-scale">
+                                    <!-- Left Pan: Plugins -->
+                                    <div class="pw-pan pw-pan-left">
+                                        <div class="pw-pills" id="pw-pills-left"></div>
+                                        <span class="pw-pan-count" id="pw-count-left">32</span>
+                                        <span class="pw-pan-label">Plugins</span>
+                                    </div>
+                                    <!-- Fulcrum -->
+                                    <div class="pw-fulcrum"></div>
+                                    <!-- Beam -->
+                                    <div class="pw-beam"></div>
+                                    <!-- Right Pan: Performance -->
+                                    <div class="pw-pan pw-pan-right">
+                                        <span class="pw-pan-count" id="pw-perf-score">28</span>
+                                        <span class="pw-pan-label">PageSpeed</span>
+                                    </div>
+                                </div>
+                                <!-- Stats -->
+                                <div class="pw-stats">
+                                    <div class="pw-stat">
+                                        <span class="pw-stat-val red" id="pw-ttfb">4.2s</span>
+                                        <span class="pw-stat-label">TTFB</span>
+                                    </div>
+                                    <div class="pw-stat">
+                                        <span class="pw-stat-val red" id="pw-ram">512 MB</span>
+                                        <span class="pw-stat-label">PHP RAM</span>
+                                    </div>
+                                    <div class="pw-stat">
+                                        <span class="pw-stat-val red" id="pw-size">2.5 MB</span>
+                                        <span class="pw-stat-label">Page Size</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pw-toggle">
+                                <button class="pw-toggle-btn is-active" data-state="bloat" type="button">Vorher</button>
+                                <button class="pw-toggle-btn" data-state="diet" type="button">Nach Diät</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -427,6 +463,44 @@
 
                 <p>Deine Webseite ist dein wichtigster Vertriebsmitarbeiter im Netz. Wuerdest du jemanden im Sales einstellen, der erst fünf Minuten braucht, um die Tür zu öffnen? Sicher nicht. Die WordPress-Diaet ist der einzige Weg, um aus einer lahmen Ente ein echtes High-Performance-Tool zu machen.</p>
 
+                <!-- ══════════════════════════════════════════ -->
+                <!-- CASE STUDY: WordPress-Diät in der Praxis   -->
+                <!-- ══════════════════════════════════════════ -->
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                    <div>
+                        <strong>Case Study: WordPress-Diät in der Praxis</strong>
+                        <p>Ein typisches Kundenprojekt zeigt den Unterschied. Die Ausgangslage: WordPress mit Elementor Pro, Yoast Premium, 34 aktive Plugins, ein schweres Multi-Purpose-Theme. TTFB 3.8 Sekunden, PageSpeed 31. Nach der Diät: <strong>GeneratePress One</strong> als Theme, <strong>GenerateBlocks</strong> statt PageBuilder, Gutenberg-Patterns statt Shortcodes. Die Plugin-Liste: von 34 auf 9 essenzielle Plugins (inkl. <a href="https://designare.at/seo-wunderkiste" title="SEO Wunderkiste: 17 Module, Null Ballast">SEO Wunderkiste</a>). GeneratePress bringt nur 7.5 KB Seitengröße mit, null jQuery, 2 HTTP-Requests — das Theme allein ist leichter als ein einziges Elementor-Widget.</p>
+                        <p style="margin-top: 8px;">Das Ergebnis: <strong>TTFB 0.4s</strong> (war 3.8s), <strong>PageSpeed 97</strong> (war 31), <strong>PHP-RAM 72 MB</strong> (war 512 MB), <strong>Seitengröße 180 KB</strong> (war 2.8 MB). Gleicher Content, gleiches Hosting — nur die Architektur hat sich geändert.</p>
+                        <!-- Stack-Vergleich Animation -->
+                        <div class="wds-flow" id="wds-flow">
+                            <!-- Vorher: Aufgeblähtes WP -->
+                            <div class="wds-stack">
+                                <span class="wds-stack-title red">Vorher: Elementor-Setup</span>
+                                <div class="wds-layer bloat">Multi-Purpose Theme<span class="wds-layer-time">280ms</span></div>
+                                <div class="wds-layer bloat">Elementor Pro<span class="wds-layer-time">420ms</span></div>
+                                <div class="wds-layer bloat">34 Plugins<span class="wds-layer-time">680ms</span></div>
+                                <div class="wds-layer bloat">Yoast Premium<span class="wds-layer-time">140ms</span></div>
+                                <div class="wds-layer bloat">jQuery + 18 Scripts<span class="wds-layer-time">520ms</span></div>
+                                <div class="wds-layer bloat">14 CSS-Dateien<span class="wds-layer-time">360ms</span></div>
+                                <div class="wds-total red">TTFB 3.8s &middot; 2.8 MB &middot; PS 31</div>
+                            </div>
+                            <!-- VS -->
+                            <span class="wds-vs">vs.</span>
+                            <!-- Nachher: GeneratePress -->
+                            <div class="wds-stack">
+                                <span class="wds-stack-title green">Nachher: GeneratePress</span>
+                                <div class="wds-layer lean">GP Theme<span class="wds-layer-time">7.5 KB</span></div>
+                                <div class="wds-layer lean">GenerateBlocks<span class="wds-layer-time">45ms</span></div>
+                                <div class="wds-layer lean">9 Plugins<span class="wds-layer-time">120ms</span></div>
+                                <div class="wds-layer lean">Lokale Fonts<span class="wds-layer-time">15ms</span></div>
+                                <div class="wds-layer lean">2 JS + 1 CSS<span class="wds-layer-time">30ms</span></div>
+                                <div class="wds-total green">TTFB 0.4s &middot; 180 KB &middot; PS 97</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
                 <p>Es geht nicht darum, Features zu streichen, sondern sie <strong>intelligent, sauber und ohne unnuetigen Code-Muell</strong> umzusetzen. Hoer auf, dein Marketing-Budget in teure Plugin-Abos und die Fehlersuche in ueberladenen Themes zu versenken. Investiere lieber in eine technische Basis, die stabil steht und blitzschnell ausliefert. Dein Business verdient eine Seite, die fliegt - und deine Nerven haben endlich Ruhe vor dem naechsten White Screen of Death. Fang heute an, den digitalen Muell rauszubringen. <strong>Es lohnt sich ab der ersten Millisekunde.</strong></p>
             </section>
 
@@ -447,5 +521,63 @@
 
     <div id="footer-placeholder"></div>
     <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- PLUGIN-WAAGE – Inline JS                          -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var frame=document.getElementById('pw-frame');
+        var btns=document.querySelectorAll('.pw-toggle-btn');
+        var pillsEl=document.getElementById('pw-pills-left');
+        var countLeft=document.getElementById('pw-count-left');
+        var perfScore=document.getElementById('pw-perf-score');
+        var ttfb=document.getElementById('pw-ttfb');
+        var ram=document.getElementById('pw-ram');
+        var size=document.getElementById('pw-size');
+        if(!frame||!btns.length||!pillsEl)return;
+
+        // Generate pills
+        function renderPills(total,activeCount,cls){
+            pillsEl.innerHTML='';
+            for(var i=0;i<total;i++){
+                var p=document.createElement('span');
+                p.className='pw-pill '+(i<activeCount?cls:'gone');
+                pillsEl.appendChild(p);
+            }
+        }
+
+        var DATA={
+            bloat:{pills:32,activeCount:32,pillCls:'active',count:'32',perf:'28',
+                ttfb:'4.2s',ttfbCls:'red',ram:'512 MB',ramCls:'red',size:'2.5 MB',sizeCls:'red',frameCls:'is-bloat'},
+            diet:{pills:32,activeCount:8,pillCls:'clean',count:'8',perf:'96',
+                ttfb:'0.3s',ttfbCls:'green',ram:'64 MB',ramCls:'green',size:'320 KB',sizeCls:'green',frameCls:'is-diet'}
+        };
+
+        function set(state){
+            var d=DATA[state];
+            frame.className='pw-frame '+d.frameCls;
+            renderPills(d.pills,d.activeCount,d.pillCls);
+            countLeft.textContent=d.count;
+            perfScore.textContent=d.perf;
+            ttfb.textContent=d.ttfb;ttfb.className='pw-stat-val '+d.ttfbCls;
+            ram.textContent=d.ram;ram.className='pw-stat-val '+d.ramCls;
+            size.textContent=d.size;size.className='pw-stat-val '+d.sizeCls;
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(state==='diet')btns[1].classList.add('is-active');
+            else btns[0].classList.add('is-active');
+        }
+
+        var userClicked=false,timer;
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state);
+        });});
+
+        set('bloat');
+        var isBloat=true;
+        timer=setInterval(function(){if(userClicked)return;isBloat=!isBloat;set(isBloat?'bloat':'diet');},5000);
+    })();
+    </script>
 </body>
 </html>
