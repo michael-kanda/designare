@@ -259,11 +259,12 @@ body.light-mode .rt-replay-btn {
 .cs-flow {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 0;
     margin-top: 1.2rem;
     padding-top: 1.8rem;
     border-top: 1px solid var(--border-color, #222);
+    width: 100%;
 }
 
 /* ── Nodes ── */
@@ -276,8 +277,8 @@ body.light-mode .rt-replay-btn {
     border: 1px solid var(--border-color, #222);
     border-radius: 2px;
     background: rgba(255,255,255,0.02);
-    width: 80px;
-    height: 72px;
+    width: 84px;
+    height: 78px;
     text-align: center;
     transition: border-color 0.4s, box-shadow 0.4s;
     flex-shrink: 0;
@@ -289,7 +290,7 @@ body.light-mode .rt-replay-btn {
 }
 
 .cs-flow-icon {
-    font-size: 14px;
+    font-size: 18px;
     margin-bottom: 4px;
     color: var(--text-color-muted, #949494);
 }
@@ -299,7 +300,7 @@ body.light-mode .rt-replay-btn {
 }
 
 .cs-flow-label {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-color, #e4e4e4);
     font-family: 'Poppins', sans-serif;
@@ -307,8 +308,8 @@ body.light-mode .rt-replay-btn {
 }
 
 .cs-flow-sub {
-    font-size: 7.5px;
-    color: var(--text-color-subtle, #555);
+    font-size: 8.5px;
+    color: var(--text-color-muted, #949494);
     font-family: 'Poppins', sans-serif;
 }
 
@@ -326,11 +327,11 @@ body.light-mode .rt-replay-btn {
 .cs-flow-connector {
     position: relative;
     height: 2px;
-    width: 36px;
+    flex: 1;
+    min-width: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 }
 
 .cs-flow-line {
@@ -400,7 +401,7 @@ body.light-mode .cs-flow-node {
     }
 
     .cs-flow-node {
-        width: 140px;
+        width: 160px;
         height: auto;
         flex-direction: row;
         justify-content: flex-start;
@@ -411,8 +412,10 @@ body.light-mode .cs-flow-node {
     .cs-flow-icon { margin-bottom: 0; }
 
     .cs-flow-connector {
+        flex: 0 0 auto;
         width: 2px;
         height: 24px;
+        min-width: auto;
     }
 
     .cs-flow-line {
@@ -427,7 +430,7 @@ body.light-mode .cs-flow-node {
     .cs-flow-ping {
         top: 50%;
         left: auto;
-        right: -52px;
+        right: -56px;
         transform: translateY(-50%);
     }
 }
@@ -438,7 +441,7 @@ body.light-mode .cs-flow-node {
 }
 
 @media (max-width: 480px) {
-    .cs-flow-node { width: 130px; }
-    .cs-flow-label { font-size: 9px; }
-    .cs-flow-ping { font-size: 10px; right: -48px; }
+    .cs-flow-node { width: 150px; }
+    .cs-flow-label { font-size: 10px; }
+    .cs-flow-ping { font-size: 10px; right: -50px; }
 }
