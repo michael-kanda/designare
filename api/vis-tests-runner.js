@@ -327,6 +327,7 @@ export async function runTestsAndBuildResponse(ctx) {
       schema: {
         found: domainAnalysis.hasSchema,
         types: [...new Set(domainAnalysis.schemaTypes)],
+        valuableTypes: domainAnalysis.valuableTypes || [],
         valuableCount: domainAnalysis.valuableSchemaCount,
       },
       eeat: {
