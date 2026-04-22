@@ -861,3 +861,160 @@
         flex-direction: column;
     }
 }
+
+/* ================================================================
+   KI-Sichtbarkeits-Check — Ergänzungen für Schema-Differenzierung
+   und neue KI-Crawler-Karte.
+   
+   Diesen Block ans Ende von css/ai-visibility.css anhängen.
+   Nach Deploy: gulpfile baut daraus neue article.min.css (Bundle).
+   ================================================================ */
+
+/* --- 3-Spalten-Grid auf größeren Screens, sauberer Fallback --- */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+/* --- Schema-Tags: wertvoll vs. neutral visuell unterscheiden --- */
+.schema-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    margin: 0.2rem 0.2rem 0.2rem 0;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.schema-tag-valuable {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.35);
+    font-weight: 600;
+}
+
+.schema-tag-valuable .fa-star {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+
+.schema-tag-neutral {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.25);
+}
+
+.schema-valuable-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.schema-legend {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-muted, #94a3b8);
+    opacity: 0.8;
+}
+
+.schema-legend .fa-star {
+    color: #22c55e;
+    font-size: 0.7rem;
+}
+
+/* --- KI-Crawler-Karte --- */
+.crawler-section {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.crawler-note {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-muted, #94a3b8);
+}
+
+.crawler-note-good {
+    color: #22c55e;
+}
+
+.crawler-note-warn {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.crawler-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+}
+
+.crawler-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    border: 1px solid transparent;
+}
+
+.crawler-tag-blocked {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    font-weight: 600;
+}
+
+.crawler-tag-blocked .fa-ban {
+    font-size: 0.7rem;
+}
+
+/* --- Light-Mode Overrides (falls vorhanden) --- */
+.light-mode .schema-tag-valuable {
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+    border-color: rgba(22, 163, 74, 0.4);
+}
+
+.light-mode .schema-tag-neutral {
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+    border-color: rgba(100, 116, 139, 0.25);
+}
+
+.light-mode .schema-valuable-badge {
+    background: rgba(22, 163, 74, 0.15);
+    color: #15803d;
+}
+
+.light-mode .crawler-tag-blocked {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.35);
+}
+
+.light-mode .crawler-note-good {
+    color: #15803d;
+}
+
+.light-mode .crawler-note-warn {
+    color: #b91c1c;
+}
