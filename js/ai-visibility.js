@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Alle ANDEREN Felder werden hier im Frontend via esc() escaped.
     // =================================================================
     function renderResults(data) {
-        const { score, domainAnalysis, aiTests, competitors, recommendations, reportToken } = data;
+        const { score, domainAnalysis, aiTests, competitors, recommendations, reportToken, crawlerAccess } = data;
 
         // Tests nach Engine trennen
         const geminiTests = aiTests.filter(t => !t.engine || t.engine === 'gemini');
@@ -614,6 +614,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // DOMAIN ANALYSE
         // =================================================================
         if (data.hasDomain) {
+        // Wertvolle Typen als Set (lower-case) für schnellen Lookup beim Rendern
+        const valuableSet = new Set(
+            (domainAnalysis.schema.valuableTypes || []).map(t => String(t).toLowerCase())
+        );
+
+        // Crawler-Karte: Daten vorbereiten (kann null sein, wenn robots.txt-Check fehlgeschlagen)
+        const ca = crawlerAccess || {};
+        const robotsFound = !!ca.robotsTxtFound;
+        const llmsFound   = !!ca.llmsTxtFound;
+        const blocked     = Array.isArray(ca.blockedCrawlers) ? ca.blockedCrawlers : [];
+        const allowed     = Array.isArray(ca.allowedCrawlers) ? ca.allowedCrawlers : [];
+        const crawlerError = ca.error || null;
+
         html += `
             <div class="result-section">
                 <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Domain-Analyse</h3>
@@ -624,11 +637,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="analysis-status ${domainAnalysis.schema.found ? 'status-good' : 'status-bad'}">
                             <i class="fa-solid ${domainAnalysis.schema.found ? 'fa-check' : 'fa-xmark'}"></i>
                             ${domainAnalysis.schema.found ? 'Vorhanden' : 'Nicht gefunden'}
+                            ${domainAnalysis.schema.found && domainAnalysis.schema.valuableCount > 0 ? `
+                                <span class="schema-valuable-badge">${domainAnalysis.schema.valuableCount} wertvoll</span>
+                            ` : ''}
                         </div>
                         ${domainAnalysis.schema.types.length > 0 ? `
                             <div class="schema-types">
-                                ${domainAnalysis.schema.types.map(t => `<span class="schema-tag">${esc(t)}</span>`).join('')}
+                                ${domainAnalysis.schema.types.map(t => {
+                                    const isValuable = valuableSet.has(String(t).toLowerCase());
+                                    const cls = isValuable ? 'schema-tag schema-tag-valuable' : 'schema-tag schema-tag-neutral';
+                                    const icon = isValuable ? '<i class="fa-solid fa-star"></i>' : '';
+                                    const title = isValuable
+                                        ? 'Wertvoller Typ für KI-Sichtbarkeit'
+                                        : 'Struktureller Typ (neutral)';
+                                    return `<span class="${cls}" title="${title}">${icon}${esc(t)}</span>`;
+                                }).join('')}
                             </div>
+                            <p class="schema-legend">
+                                <i class="fa-solid fa-star"></i> KI-relevant &nbsp;·&nbsp; ohne Stern: strukturell
+                            </p>
                         ` : ''}
                     </div>
 
@@ -648,6 +675,50 @@ document.addEventListener('DOMContentLoaded', function() {
                                 Autoren-Informationen
                             </li>
                         </ul>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h4>KI-Crawler & Standards</h4>
+                        ${crawlerError ? `
+                            <div class="analysis-status status-bad">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                robots.txt-Check fehlgeschlagen
+                            </div>
+                            <p class="crawler-note">${esc(crawlerError)}</p>
+                        ` : `
+                            <ul class="eeat-list">
+                                <li class="${robotsFound ? 'check' : 'missing'}">
+                                    <i class="fa-solid ${robotsFound ? 'fa-check' : 'fa-xmark'}"></i>
+                                    robots.txt ${robotsFound ? 'gefunden' : 'nicht gefunden'}
+                                </li>
+                                <li class="${llmsFound ? 'check' : 'missing'}">
+                                    <i class="fa-solid ${llmsFound ? 'fa-check' : 'fa-xmark'}"></i>
+                                    llms.txt ${llmsFound ? 'gefunden' : 'nicht vorhanden'}
+                                </li>
+                            </ul>
+                            ${robotsFound ? `
+                                <div class="crawler-section">
+                                    ${blocked.length === 0 ? `
+                                        <p class="crawler-note crawler-note-good">
+                                            <i class="fa-solid fa-check"></i>
+                                            Alle ${allowed.length} geprüften KI-Crawler sind erlaubt
+                                        </p>
+                                    ` : `
+                                        <p class="crawler-note crawler-note-warn">
+                                            <i class="fa-solid fa-ban"></i>
+                                            ${blocked.length} KI-Crawler blockiert:
+                                        </p>
+                                        <div class="crawler-tags">
+                                            ${blocked.map(b => `
+                                                <span class="crawler-tag crawler-tag-blocked" title="${esc(b.vendor || '')} – ${esc(b.purpose || '')}">
+                                                    <i class="fa-solid fa-ban"></i>${esc(b.name)}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    `}
+                                </div>
+                            ` : ''}
+                        `}
                     </div>
                 </div>
             </div>
