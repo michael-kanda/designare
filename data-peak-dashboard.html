@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>DataPeak: Dein SEO-Dashboard mit KI-Analyse | Michael Kanda</title>
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="DataPeak vereint Search Console, Analytics und KI-Analyse in einem Dashboard. Verstehe deine Website-Daten auf einen Blick — ohne 5 offene Google-Tabs.">
+    <meta name="author" content="Michael Kanda">
+
+    <link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+
+    <link rel="stylesheet" href="css/datapeak-anim.css">
+    <style>
+    /* ══ LIVE WIDGET: KPI GRID ══ */
+    .dp-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0; }
+    .dp-kpi-card {
+        background: var(--card-bg, #131315); border: 1px solid var(--border-color, #2a2a2e);
+        border-radius: 6px; padding: 1.1rem 1.2rem; position: relative; overflow: hidden;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .dp-kpi-card:hover { border-color: #333; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .dp-kpi-card__bar {
+        position: absolute; left: 0; top: 0; bottom: 0; opacity: 0.1; border-radius: 6px 0 0 6px;
+        animation: dp-bar-grow 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes dp-bar-grow { from { width: 0; } }
+    .dp-kpi-card__inner { position: relative; z-index: 1; }
+    .dp-kpi-card__header {
+        display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;
+    }
+    .dp-kpi-card__title-row {
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .dp-kpi-card__color-bar {
+        display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; font-weight: 700;
+        color: #fff; padding: 0.2rem 0.55rem; border-radius: 3px; letter-spacing: 0.01em;
+    }
+    .dp-kpi-card__prev { font-size: 0.72rem; color: var(--text-color-subtle, #555); font-family: 'Courier New', monospace; font-weight: 600; }
+    .dp-kpi-card__value {
+        font-size: 1.65rem; font-weight: 800; color: var(--text-color, #e4e4e4);
+        font-family: 'Courier New', 'Consolas', monospace; letter-spacing: -0.03em; line-height: 1.1;
+    }
+    .dp-kpi-card__label { font-size: 0.62rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-top: 0.15rem; }
+    .dp-kpi-card__change { font-size: 0.82rem; font-weight: 700; margin-top: 0.3rem; }
+    .dp-kpi-card__change.up { color: #4ade80; }
+    .dp-kpi-card__change.down { color: #f87171; }
+    .dp-kpi-card__change span { font-size: 0.62rem; color: var(--text-color-subtle, #555); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-left: 0.4rem; }
+    .dp-kpi-card__spark { height: 40px; margin-top: 0.5rem; opacity: 0.85; }
+    .dp-kpi-card__spark svg { width: 100%; height: 100%; }
+    .dp-kpi-card__foot { font-size: 0.6rem; color: var(--text-color-subtle, #444); margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color, #1a1a1a); font-weight: 500; }
+    .dp-kpi-section-label {
+        font-size: 0.65rem; font-weight: 700; color: var(--text-color-subtle, #444);
+        text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.8rem; padding: 0 0.2rem;
+        display: flex; align-items: center; gap: 0.8rem;
+    }
+    .dp-kpi-section-label::before, .dp-kpi-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-color, #222); }
+
+    /* ══ LIVE WIDGET: DONUT CHARTS ══ */
+    .dp-donut-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin: 2rem 0; }
+    .dp-donut-card {
+        background: var(--card-bg, #131315); border: 1px solid var(--border-color, #2a2a2e);
+        border-radius: 6px; padding: 1.2rem; text-align: center; transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .dp-donut-card:hover { border-color: #333; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .dp-donut-card__title { font-size: 0.75rem; font-weight: 700; color: var(--text-color-muted, #949494); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem; }
+    .dp-donut-card__svg { width: 130px; height: 130px; margin: 0 auto 0.8rem; }
+    .dp-donut-ring-bg { fill: none; stroke: rgba(255,255,255,0.04); stroke-width: 14; }
+    .dp-donut-ring { fill: none; stroke-width: 14; stroke-linecap: butt; transition: stroke-dashoffset 0.6s ease; }
+    .dp-donut-center { font-size: 0.85rem; font-weight: 700; font-family: 'Courier New', monospace; fill: var(--text-color, #e4e4e4); }
+    .dp-donut-legend { display: flex; flex-direction: column; gap: 0.35rem; text-align: left; padding: 0 0.3rem; }
+    .dp-donut-legend__item { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; color: var(--text-color-muted, #949494); }
+    .dp-donut-legend__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dp-donut-legend__val { margin-left: auto; font-family: 'Courier New', monospace; font-weight: 600; font-size: 0.7rem; color: var(--text-color, #e4e4e4); }
+
+    /* ══ LIVE WIDGET: KI-TRAFFIC ══ */
+    .dp-ki-layout { display: grid; grid-template-columns: 1fr 2.2fr; gap: 1.5rem; margin: 2rem 0; align-items: stretch; }
+    .dp-ki-card {
+        background: var(--card-bg, #131315); border: 1px solid var(--border-color, #2a2a2e);
+        border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .dp-ki-card__head {
+        padding: 0.9rem 1.1rem; display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--border-color, #2a2a2e);
+    }
+    .dp-ki-card__title { font-size: 0.82rem; font-weight: 700; color: var(--text-color, #e4e4e4); display: flex; align-items: center; gap: 0.45rem; }
+    .dp-ki-card__title i { color: #7c5cfc; }
+    .dp-ki-card__badge { font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 9px; font-weight: 700; background: rgba(124,92,252,0.15); color: #a78bfa; }
+    .dp-ki-card__stats { display: flex; border-bottom: 1px solid var(--border-color, #222); }
+    .dp-ki-card__stat { flex: 1; padding: 0.9rem 1rem; text-align: center; border-right: 1px solid var(--border-color, #222); }
+    .dp-ki-card__stat:last-child { border-right: none; }
+    .dp-ki-card__stat-label { font-size: 0.58rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
+    .dp-ki-card__stat-label i { font-size: 0.7rem; color: #7c5cfc; }
+    .dp-ki-card__stat-val { font-size: 1.4rem; font-weight: 800; font-family: 'Courier New', monospace; color: #a78bfa; }
+    .dp-ki-card__stat-change { font-size: 0.62rem; font-weight: 600; color: #4ade80; margin-top: 0.15rem; }
+    .dp-ki-card__sources { padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border-color, #222); flex: 1; }
+    .dp-ki-card__sources-title { font-size: 0.58rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; font-weight: 700; }
+    .dp-ki-card__source { display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0; font-size: 0.75rem; }
+    .dp-ki-card__source-name { color: var(--text-color-muted, #949494); display: flex; align-items: center; gap: 0.45rem; }
+    .dp-ki-card__source-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dp-ki-card__source-vals { font-family: 'Courier New', monospace; font-size: 0.75rem; color: var(--text-color, #e4e4e4); font-weight: 600; }
+    .dp-ki-card__source-pct { color: var(--text-color-subtle, #555); font-size: 0.65rem; margin-left: 0.5rem; }
+    .dp-ki-card__chart { padding: 0.8rem 1.1rem; }
+    .dp-ki-card__chart-title { font-size: 0.58rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; font-weight: 700; }
+    .dp-ki-card__chart svg { width: 100%; height: 55px; }
+    .dp-ki-card__foot { padding: 0.6rem 1.1rem; border-top: 1px solid var(--border-color, #222); font-size: 0.6rem; color: var(--text-color-subtle, #444); }
+
+    /* KI detail panel (right side) */
+    .dp-ki-detail {
+        background: var(--card-bg, #131315); border: 1px solid var(--border-color, #2a2a2e);
+        border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .dp-ki-detail__head { padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--border-color, #2a2a2e); display: flex; align-items: center; justify-content: space-between; }
+    .dp-ki-detail__title { font-size: 0.82rem; font-weight: 700; color: var(--text-color, #e4e4e4); display: flex; align-items: center; gap: 0.45rem; }
+    .dp-ki-detail__title i { color: #7c5cfc; }
+    .dp-ki-detail__meta { font-size: 0.6rem; color: var(--text-color-subtle, #555); display: flex; align-items: center; gap: 0.5rem; }
+    .dp-ki-detail__meta-badge { background: rgba(255,255,255,0.06); padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: 600; color: var(--text-color-muted, #949494); }
+    .dp-ki-detail__kpis { display: flex; border-bottom: 1px solid var(--border-color, #222); }
+    .dp-ki-detail__kpi { flex: 1; padding: 0.7rem 0.8rem; text-align: center; border-right: 1px solid var(--border-color, #222); }
+    .dp-ki-detail__kpi:last-child { border-right: none; }
+    .dp-ki-detail__kpi-label { font-size: 0.55rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
+    .dp-ki-detail__kpi-label i { font-size: 0.65rem; }
+    .dp-ki-detail__kpi-val { font-size: 1rem; font-weight: 800; font-family: 'Courier New', monospace; color: var(--text-color, #e4e4e4); }
+    .dp-ki-detail__kpi-change { font-size: 0.55rem; font-weight: 600; color: #4ade80; }
+    .dp-ki-detail__kpi-val.purple { color: #a78bfa; }
+    .dp-ki-detail__tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-color, #222); padding: 0 1rem; }
+    .dp-ki-detail__tab {
+        font-size: 0.6rem; padding: 0.6rem 0.7rem; color: var(--text-color-subtle, #555);
+        border-bottom: 2px solid transparent; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;
+        cursor: default; transition: color 0.2s;
+    }
+    .dp-ki-detail__tab.active { color: #a78bfa; border-bottom-color: #7c5cfc; }
+    .dp-ki-detail__body { flex: 1; padding: 1rem 1.1rem; display: flex; gap: 1.2rem; }
+    .dp-ki-detail__chart-col { flex: 1.2; }
+    .dp-ki-detail__table-col { flex: 1; }
+    .dp-ki-detail__bar-label { font-size: 0.6rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; font-weight: 700; }
+    .dp-ki-detail__bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .dp-ki-detail__bar-name { font-size: 0.65rem; color: var(--text-color-muted, #949494); width: 55px; text-align: right; flex-shrink: 0; }
+    .dp-ki-detail__bar-track { flex: 1; height: 16px; background: rgba(255,255,255,0.03); border-radius: 2px; overflow: hidden; position: relative; }
+    .dp-ki-detail__bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+    .dp-ki-detail__perf-table { width: 100%; }
+    .dp-ki-detail__perf-head { font-size: 0.6rem; color: var(--text-color-subtle, #555); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; font-weight: 700; }
+    .dp-ki-detail__perf-row { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.65rem; }
+    .dp-ki-detail__perf-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dp-ki-detail__perf-name { flex: 1; color: var(--text-color-muted, #949494); }
+    .dp-ki-detail__perf-val { font-family: 'Courier New', monospace; font-weight: 600; color: var(--text-color, #e4e4e4); min-width: 28px; text-align: right; }
+    .dp-ki-detail__perf-pct { font-family: 'Courier New', monospace; font-weight: 600; min-width: 42px; text-align: right; }
+    .dp-ki-detail__perf-pct.green { color: #4ade80; }
+    .dp-ki-detail__perf-pct.red { color: #f87171; }
+    .dp-ki-detail__foot { padding: 0.5rem 1.1rem; border-top: 1px solid var(--border-color, #222); font-size: 0.55rem; color: var(--text-color-subtle, #3a3a3a); font-style: italic; }
+
+    /* ══ SEARCH TABLE WIDGET ══ */
+    .dp-search-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; align-items: stretch; }
+    .dp-search-card {
+        background: var(--card-bg, #131315); border: 1px solid var(--border-color, #2a2a2e);
+        border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .dp-search-card > div:nth-child(2) { flex: 1; }
+    .dp-search-card__head {
+        padding: 0.8rem 1.1rem; display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--border-color, #222);
+    }
+    .dp-search-card__title { font-size: 0.82rem; font-weight: 700; color: var(--text-color, #e4e4e4); display: flex; align-items: center; gap: 0.45rem; }
+    .dp-search-card__title i { color: #c4a35a; }
+    .dp-search-card__meta { font-size: 0.6rem; color: var(--text-color-subtle, #555); display: flex; align-items: center; gap: 0.5rem; }
+    .dp-search-card__meta-badge { background: rgba(255,255,255,0.06); padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: 600; color: var(--text-color-muted, #949494); font-size: 0.58rem; }
+    .dp-search-card__meta-count { background: rgba(196,163,90,0.12); color: #c4a35a; padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: 700; font-size: 0.58rem; }
+    .dp-search-table { width: 100%; border-collapse: collapse; }
+    .dp-search-table thead th {
+        font-size: 0.6rem; color: #c4a35a; text-transform: uppercase; letter-spacing: 0.06em;
+        padding: 0.5rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border-color, #222); font-weight: 700;
+    }
+    .dp-search-table thead th:not(:first-child) { text-align: right; }
+    .dp-search-table tbody td {
+        font-size: 0.7rem; padding: 0.55rem 0.7rem; border-bottom: 1px solid rgba(255,255,255,0.03);
+        color: var(--text-color-muted, #949494);
+    }
+    .dp-search-table tbody td:not(:first-child) { text-align: right; font-family: 'Courier New', monospace; font-weight: 600; color: var(--text-color, #e4e4e4); }
+    .dp-search-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .dp-search-table__query { max-width: 220px; }
+    .dp-search-table__url { font-size: 0.55rem; color: var(--text-color-subtle, #444); display: block; margin-top: 0.1rem; }
+    .dp-search-table__pos { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 20px; border-radius: 3px; font-size: 0.65rem; font-weight: 700; }
+    .dp-search-table__pos.top3 { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .dp-search-table__pos.top10 { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .dp-search-table__pos.rest { background: rgba(255,255,255,0.06); color: var(--text-color-muted, #949494); }
+    .dp-search-card__foot { padding: 0.6rem 1rem; border-top: 1px solid var(--border-color, #222); font-size: 0.6rem; color: var(--text-color-subtle, #444); display: flex; align-items: center; gap: 0.4rem; }
+    .dp-search-card__foot strong { color: var(--text-color, #e4e4e4); font-family: 'Courier New', monospace; }
+
+    /* Landingpages mini card */
+    .dp-lp-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.7rem; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.65rem; }
+    .dp-lp-row:hover { background: rgba(255,255,255,0.02); }
+    .dp-lp-path { flex: 1; color: var(--text-color-muted, #949494); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dp-lp-path a { color: var(--text-color-muted, #949494); text-decoration: none; }
+    .dp-lp-metrics { display: flex; gap: 0.6rem; flex-shrink: 0; }
+    .dp-lp-metric { font-family: 'Courier New', monospace; font-weight: 600; font-size: 0.62rem; padding: 0.15rem 0.45rem; border-radius: 3px; }
+    .dp-lp-metric.blue { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .dp-lp-metric.green { background: rgba(74,222,128,0.1); color: #4ade80; }
+    .dp-lp-metric.purple { background: rgba(139,92,246,0.12); color: #a78bfa; }
+
+    /* ══ FULL-WIDTH IMAGE (kept for Traffic segmentation) ══ */
+    .dp-img-full { margin: 2rem 0; }
+    .dp-img-full a { display: block; border: 1px solid var(--border-color, #222); border-radius: 6px; overflow: hidden; transition: border-color 0.3s; }
+    .dp-img-full a:hover { border-color: var(--accent-color, #c4a35a); }
+    .dp-img-full img { width: 100%; height: auto; display: block; cursor: pointer; }
+    .dp-img-full figcaption { padding: 0.6rem 1rem; font-size: 0.8rem; color: var(--text-color-muted, #949494); border-top: 1px solid var(--border-color, #222); background: rgba(0,0,0,0.15); text-align: center; }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 991px) {
+        .dp-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        .dp-ki-layout { grid-template-columns: 1fr; }
+        .dp-search-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+        .dp-kpi-grid { grid-template-columns: 1fr; }
+        .dp-donut-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+        .dp-kpi-card__value { font-size: 1.3rem; }
+        .dp-ki-detail__kpis { flex-wrap: wrap; }
+        .dp-ki-detail__kpi { min-width: 33%; }
+        .dp-ki-detail__body { flex-direction: column; }
+    }
+
+    /* ══ LIGHT MODE ══ */
+    body.light-mode .dp-kpi-card,
+    body.light-mode .dp-donut-card,
+    body.light-mode .dp-ki-card,
+    body.light-mode .dp-ki-detail,
+    body.light-mode .dp-search-card { background: #fafafa; border-color: #e0e0e0; }
+    body.light-mode .dp-kpi-card__value { color: #1a1a1a; }
+    body.light-mode .dp-search-table tbody td:not(:first-child) { color: #1a1a1a; }
+    </style>
+    
+    <link rel="canonical" href="https://designare.at/data-peak-dashboard"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://designare.at/data-peak-dashboard",
+  "name": "DataPeak SEO Dashboard",
+  "headline": "DataPeak: Dein SEO-Dashboard mit KI-Analyse",
+  "description": "Ein KI-gestütztes SEO-Dashboard, das Search Console, Analytics und KI-Traffic-Analyse in einem Interface vereint.",
+  "image": [
+    "https://designare.at/images/datamax-chatbot.webp",
+    "https://designare.at/images/ki-traffic.webp",
+    "https://designare.at/images/traffic-reichweite.webp"
+  ],
+  "screenshot": "https://designare.at/images/traffic-reichweite.webp",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/LimitedAvailability",
+    "description": "Exklusive Testzugänge verfügbar"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Michael Kanda",
+    "url": "https://designare.at/#michael"
+  },
+  "datePublished": "2025-12-21",
+  "dateModified": "2026-03-18",
+  "featureList": [
+    "KI-Traffic-Analyse (ChatGPT, Claude, Perplexity, Gemini) mit Folgepfaden",
+    "Top 100 Suchanfragen mit automatischer Landingpage-Zuordnung",
+    "Top Landingpages mit zugeordneten Suchbegriffen",
+    "Traffic-Segmentierung nach Channel, Land und Endgerät",
+    "Wetter- und Feiertagsanzeige für Performance-Korrelation",
+    "DataMax KI-Assistent für Dateninterpretation",
+    "User-Journey & Intent-Analyse",
+    "Professionelle PDF-Reports",
+    "Google Search Console Integration",
+    "Google Analytics 4 Integration"
+  ],
+  "keywords": ["DataPeak", "SEO Dashboard", "KI-Traffic", "GEO", "KI-Suche", "Google Search Console", "Google Analytics"]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://designare.at/data-peak-dashboard#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Was zeigt DataPeak, was Google Analytics nicht zeigt?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "DataPeak kombiniert deine GA4-Daten mit Search Console und KI-Analyse in einer einzigen Ansicht. Statt zwischen 5 Google-Tabs zu springen, siehst du Klicks, Impressionen, Conversions, Suchanfragen und KI-Traffic auf einen Blick — inklusive Trends und Handlungsempfehlungen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was ist KI-Traffic und warum ist er wichtig?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "KI-Traffic sind Besucher, die über ChatGPT, Claude, Perplexity oder Google Gemini auf deine Website kommen. DataPeak erkennt diese Quellen automatisch und zeigt dir, wie viele Nutzer von KI-Suchmaschinen kommen — ein wachsender Kanal, den klassische Analyse-Tools noch ignorieren. <a href=\"https://designare.at/ki-traffic-messen\">Zum KI-Traffic-Guide</a>"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wie sicher sind meine Daten?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Die Anwendung nutzt offizielle Google-APIs via OAuth2. Daten werden nur dort verarbeitet, wo sie gebraucht werden, sicher gelagert in einer dedizierten Vercel-Umgebung."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Brauche ich technisches Wissen, um DataPeak zu nutzen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein. Das Dashboard ist so gebaut, dass Ergebnisse und Handlungsempfehlungen sofort verständlich sind — auch ohne SEO-Hintergrund. Der KI-Assistent DataMax erklärt deine Daten in Klartext."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ersetzt DataPeak klassische Tools wie Semrush oder Sistrix?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "DataPeak ist kein Ersatz, sondern eine Intelligenz-Schicht. Während klassische Tools riesige Keyword-Datenbanken bieten, nutzt DataPeak deine eigenen GSC- und GA4-Daten und verwandelt sie per KI in konkrete Handlungen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wer kann DataPeak nutzen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jeder Webseitenbetreiber mit Zugang zu Google Search Console und Google Analytics 4. Aktuell vergebe ich exklusive Testzugänge — eine Self-Service-Version ist in Planung."
+      }
+    }
+  ]
+}
+</script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
+</head>
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+      <div id="breadcrumb-placeholder"></div>
+                <h1>DataPeak: <span class="article-white">Dein SEO-Dashboard mit KI-Analyse</span></h1>
+            </header>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SUMMARY BOX                                -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+                <div class="summary-box">
+                    <div class="summary-content">
+                        <h3>Das Wichtigste in Kürze:</h3>
+                        <ul>
+                            <li><strong>Alles auf einen Blick:</strong> Search Console, Analytics und KI-Traffic in einem einzigen Dashboard — statt 5 offene Google-Tabs.</li>
+                            <li><strong>KI-Traffic sichtbar:</strong> Sieh zum ersten Mal, wie viele Besucher über ChatGPT, Claude oder Perplexity auf deine Website kommen.</li>
+                            <li><strong>Verstehen statt rätseln:</strong> Der KI-Assistent DataMax erklärt deine Daten in Klartext und liefert konkrete Empfehlungen.</li>
+                        </ul>
+                    </div>
+
+                    <div class="summary-image">
+                        <a href="#lb-datamax" aria-label="DataMax KI-Assistent vergrößern">
+                            <img src="images/datamax-chatbot.webp" alt="DataMax: KI-Assistent für SEO- und Analytics-Dateninterpretation" loading="lazy" width="400" height="500" decoding="async" style="border-radius:8px;max-height:340px;width:auto;">
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- EINLEITUNG (End-User Fokus)                -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                <p>Du kennst das: Um zu verstehen, was auf deiner Website passiert, musst du zwischen Search Console, Google Analytics, Trends und diversen Tabellen hin- und herspringen. Das kostet Zeit, Nerven und am Ende weißt du trotzdem nicht genau, was du als Nächstes tun sollst. Genau dafür habe ich <strong>DataPeak</strong> gebaut — ein Dashboard, das deine wichtigsten Daten an einem Ort bündelt und dir in Klartext sagt, was funktioniert und was nicht.</p>
+
+                <p>Dazu kommt ein Kanal, den die meisten noch gar nicht auf dem Radar haben: <strong>KI-Traffic</strong>. Immer mehr Besucher kommen über ChatGPT, Claude, Perplexity und Google Gemini auf Websites. DataPeak erkennt diese Quellen automatisch und zeigt dir, wie groß dieser wachsende Kanal für dich bereits ist. So bleibst du nicht nur bei Google sichtbar, sondern auch in der <a href="https://designare.at/geo-seo" title="GEO: So wirst du zur KI-Quelle">KI-Suche</a>.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- TECH-STACK                                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="tech-heading">
+                <h2 id="tech-heading">Das technische Fundament <span class="article-white">(Kompakt & Performant)</span></h2>
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-gear"></i>
+                    <div>
+                        <strong>Stack & Performance:</strong>
+                        <p>Unter der Haube arbeitet DataPeak nach dem Puristen-Kodex: Ein Next.js 14 Framework bildet das Rückgrat, kombiniert mit TypeScript für sauberen Code. Die Daten fließen über das Vercel AI SDK direkt in die neuesten Google Gemini-Modelle, während eine Vercel Postgres-Datenbank für blitzschnelle Zugriffszeiten sorgt — ohne den Ballast schwerer Drittsysteme.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- DEIN DASHBOARD                             -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="dashboard-heading">
+                <h2 id="dashboard-heading">Dein Dashboard — <span class="article-white">Alles auf einen Blick</span></h2>
+                
+                <p>Nach dem Login siehst du sofort, wo deine Website steht: Impressionen, Klicks, Besucher, Conversions, Verweildauer und Absprungrate — alles mit Vergleich zum Vormonat. Der KI-Assistent <strong>DataMax</strong> begrüßt dich mit einer kurzen Analyse und schlägt vor, welche Daten du dir genauer ansehen solltest.</p>
+
+                <section class="screenshot-gallery" aria-labelledby="gallery-dashboard">
+                    <h3 id="gallery-dashboard" class="visually-hidden">Dashboard Widgets</h3>
+
+                    <div class="dp-kpi-section-label">Traffic, Reichweite & Qualität</div>
+                    <div class="dp-kpi-grid">
+                        <!-- Impressionen -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#8b5cf6;width:82%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#8b5cf6">Impressionen <span style="margin-left:0.3rem;font-weight:800">28.934</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">23.658.217</span>
+                                </div>
+                                <div class="dp-kpi-card__value">28.934</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+22.3% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gPurple" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,30 C20,28 30,22 50,25 C70,28 80,18 100,15 C120,12 140,20 160,10 C180,5 190,8 200,6" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+                                        <path d="M0,30 C20,28 30,22 50,25 C70,28 80,18 100,15 C120,12 140,20 160,10 C180,5 190,8 200,6 L200,40 L0,40Z" fill="url(#gPurple)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                        <!-- Google Klicks -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#3b82f6;width:68%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#3b82f6">Google Klicks <span style="margin-left:0.3rem;font-weight:800">1.247</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">1.052.321</span>
+                                </div>
+                                <div class="dp-kpi-card__value">1.247</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+18.5% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,25 C25,22 40,28 60,20 C80,12 100,18 120,14 C140,10 160,16 180,8 C190,6 195,9 200,7" fill="none" stroke="#3b82f6" stroke-width="2"/>
+                                        <path d="M0,25 C25,22 40,28 60,20 C80,12 100,18 120,14 C140,10 160,16 180,8 C190,6 195,9 200,7 L200,40 L0,40Z" fill="url(#gBlue)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                        <!-- Neue Besucher -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#6366f1;width:75%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#6366f1">Neue Besucher <span style="margin-left:0.3rem;font-weight:800">1.923</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">1.584,02</span>
+                                </div>
+                                <div class="dp-kpi-card__value">1.923</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+21.4% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gIndigo" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,32 C30,28 50,20 70,24 C90,28 110,15 130,12 C150,9 170,14 185,8 C195,5 198,7 200,5" fill="none" stroke="#6366f1" stroke-width="2"/>
+                                        <path d="M0,32 C30,28 50,20 70,24 C90,28 110,15 130,12 C150,9 170,14 185,8 C195,5 198,7 200,5 L200,40 L0,40Z" fill="url(#gIndigo)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                        <!-- Interaktionsrate -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#ec4899;width:69%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#ec4899">Interaktionsrate <span style="margin-left:0.3rem;font-weight:800">68.5%</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">63.3%</span>
+                                </div>
+                                <div class="dp-kpi-card__value">68.5%</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+8.3% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gPink" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ec4899" stop-opacity="0.3"/><stop offset="100%" stop-color="#ec4899" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,22 C20,20 40,25 60,18 C80,15 100,20 120,16 C140,13 160,18 180,12 C190,10 195,11 200,9" fill="none" stroke="#ec4899" stroke-width="2"/>
+                                        <path d="M0,22 C20,20 40,25 60,18 C80,15 100,20 120,16 C140,13 160,18 180,12 C190,10 195,11 200,9 L200,40 L0,40Z" fill="url(#gPink)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                        <!-- Conversions -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#10b981;width:72%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#10b981">Conversions <span style="margin-left:0.3rem;font-weight:800">127</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">96.578</span>
+                                </div>
+                                <div class="dp-kpi-card__value">127</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+31.5% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,35 C25,30 45,32 65,25 C85,18 105,22 125,15 C145,10 165,12 180,7 C190,5 195,6 200,4" fill="none" stroke="#10b981" stroke-width="2"/>
+                                        <path d="M0,35 C25,30 45,32 65,25 C85,18 105,22 125,15 C145,10 165,12 180,7 C190,5 195,6 200,4 L200,40 L0,40Z" fill="url(#gGreen)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                        <!-- Ø Verweildauer -->
+                        <div class="dp-kpi-card">
+                            <div class="dp-kpi-card__bar" style="background:#f59e0b;width:65%"></div>
+                            <div class="dp-kpi-card__inner">
+                                <div class="dp-kpi-card__header">
+                                    <div class="dp-kpi-card__title-row">
+                                        <span class="dp-kpi-card__color-bar" style="background:#f59e0b;color:#0f0f0f">Ø Verweildauer <span style="margin-left:0.3rem;font-weight:800">4m 5s</span></span>
+                                    </div>
+                                    <span class="dp-kpi-card__prev">3m 37s</span>
+                                </div>
+                                <div class="dp-kpi-card__value">4m 5s</div>
+                                <div class="dp-kpi-card__label">Letzte 30 Tage</div>
+                                <div class="dp-kpi-card__change up">+12.8% <span>Veränderung</span></div>
+                                <div class="dp-kpi-card__spark">
+                                    <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                                        <defs><linearGradient id="gAmber" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></linearGradient></defs>
+                                        <path d="M0,28 C30,25 50,30 70,22 C90,16 110,20 130,17 C150,14 170,18 185,11 C195,8 198,10 200,8" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                                        <path d="M0,28 C30,25 50,30 70,22 C90,16 110,20 130,17 C150,14 170,18 185,11 C195,8 198,10 200,8 L200,40 L0,40Z" fill="url(#gAmber)"/>
+                                    </svg>
+                                </div>
+                                <div class="dp-kpi-card__foot">17.02. – 18.03.2026</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- WAS SUCHEN DEINE BESUCHER?                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="search-heading">
+                <h2 id="search-heading">Was suchen <span class="article-white">deine Besucher?</span></h2>
+                
+                <p>Die spannendste Frage für jeden Webseitenbetreiber: Welche Begriffe tippen Menschen in Google ein, bevor sie auf deiner Seite landen? DataPeak zeigt dir die Top 100 Suchanfragen mit Klicks, Impressionen, CTR und durchschnittlicher Position — sortierbar, filterbar, auf einen Blick erfassbar. Dazu siehst du, welche Landingpages die meisten Besucher anziehen und welche Suchbegriffe zu welcher Seite führen.</p>
+
+                <section class="screenshot-gallery" aria-labelledby="gallery-search">
+                    <h3 id="gallery-search" class="visually-hidden">Suchanfragen & Landingpages</h3>
+                    <div class="dp-search-layout">
+                        <!-- Top Landingpages (LINKS) -->
+                        <div class="dp-search-card">
+                            <div class="dp-search-card__head">
+                                <div class="dp-search-card__title"><i aria-hidden="true" class="fa-solid fa-file-lines"></i> Top Landingpages</div>
+                                <div class="dp-search-card__meta">
+                                    <span class="dp-search-card__meta-badge">Quelle: GA4 + GSC</span>
+                                </div>
+                            </div>
+                            <div style="padding:0;">
+                                <div class="dp-lp-row" style="border-bottom:1px solid var(--border-color,#2a2a2e);padding:0.4rem 0.7rem;">
+                                    <span style="flex:1;font-size:0.6rem;color:var(--text-color-subtle,#555);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Seite</span>
+                                    <span class="dp-lp-metrics" style="gap:0.4rem;">
+                                        <span style="font-size:0.55rem;color:var(--text-color-subtle,#555);min-width:52px;text-align:center;text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Besucher</span>
+                                        <span style="font-size:0.55rem;color:var(--text-color-subtle,#555);min-width:42px;text-align:center;text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Klicks</span>
+                                        <span style="font-size:0.55rem;color:var(--text-color-subtle,#555);min-width:38px;text-align:center;text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Conv.</span>
+                                    </span>
+                                </div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/anstatz-waffen-weg-wann-ist-ein-waffenverbot-gerechtfertigt/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">443</span><span class="dp-lp-metric green">312</span><span class="dp-lp-metric purple">8</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/honor-anwaltskosten-oesterreich/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">391</span><span class="dp-lp-metric green">267</span><span class="dp-lp-metric purple">12</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/immissionen-also-laerm-abwasser-rauch-gase-waerme-geruch-erschuetterung/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">305</span><span class="dp-lp-metric green">198</span><span class="dp-lp-metric purple">5</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/fuehrerscheinentzug-oesterreich/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">249</span><span class="dp-lp-metric green">181</span><span class="dp-lp-metric purple">6</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/waffenpass-beantragen-aber-wie/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">212</span><span class="dp-lp-metric green">172</span><span class="dp-lp-metric purple">9</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/ersatzmaut-oesterreich-einspruch/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">197</span><span class="dp-lp-metric green">141</span><span class="dp-lp-metric purple">4</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/lenkerauskunft/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">163</span><span class="dp-lp-metric green">98</span><span class="dp-lp-metric purple">3</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/die-5-groessten-fehler-nach-einem-verkehrsunfall/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">148</span><span class="dp-lp-metric green">87</span><span class="dp-lp-metric purple">2</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/anzeige-wegen-gefaehrlicher-drohung-oder-noetigung/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">132</span><span class="dp-lp-metric green">74</span><span class="dp-lp-metric purple">1</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/fehlende-vignette-strafe-und-einspruch/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">118</span><span class="dp-lp-metric green">62</span><span class="dp-lp-metric purple">3</span></span></div>
+                                <div class="dp-lp-row"><span class="dp-lp-path">/sachverstaendiger-kosten-oesterreich/</span><span class="dp-lp-metrics"><span class="dp-lp-metric blue">95</span><span class="dp-lp-metric green">53</span><span class="dp-lp-metric purple">1</span></span></div>
+                            </div>
+                            <div class="dp-search-card__foot"><i aria-hidden="true" class="fa-solid fa-file-lines" style="color:#c4a35a"></i> Automatische Zuordnung: GSC-Keywords → GA4-Landingpages</div>
+                        </div>
+                        <!-- Top 100 Suchanfragen (RECHTS) -->
+                        <div class="dp-search-card">
+                            <div class="dp-search-card__head">
+                                <div class="dp-search-card__title"><i aria-hidden="true" class="fa-solid fa-clock-rotate-left"></i> Top 100 Suchanfragen (Quelle: GSC)</div>
+                                <div class="dp-search-card__meta">
+                                    <span class="dp-search-card__meta-badge">Letzte 6 Monate</span>
+                                    <span class="dp-search-card__meta-count">100 Einträge</span>
+                                </div>
+                            </div>
+                            <div style="overflow-x:auto;">
+                                <table class="dp-search-table">
+                                    <thead><tr><th>Suchanfrage <i aria-hidden="true" class="fa-solid fa-filter" style="opacity:0.4;margin-left:0.3rem;font-size:0.5rem"></i></th><th>Klicks</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="dp-search-table__query">österreich vignette vergessen nachträglich kaufen<span class="dp-search-table__url">/fehlende-vignette-strafe-und-einspruch</span></td><td>113</td><td>1.117</td><td>10.1%</td><td><span class="dp-search-table__pos top3">2.0</span></td></tr>
+                                        <tr><td class="dp-search-table__query">asfinag strafe trotz gültiger vignette<span class="dp-search-table__url">/fehlende-vignette-strafe-und-einspruch</span></td><td>108</td><td>4.011</td><td>2.7%</td><td><span class="dp-search-table__pos top10">5.6</span></td></tr>
+                                        <tr><td class="dp-search-table__query">führerscheinentzug österreich<span class="dp-search-table__url">/fuehrerscheinentzug-oesterreich</span></td><td>95</td><td>4.094</td><td>2.3%</td><td><span class="dp-search-table__pos top3">3.9</span></td></tr>
+                                        <tr><td class="dp-search-table__query">bedarfsbegründung waffenpass<span class="dp-search-table__url">/waffenpass-beantragen-aber-wie</span></td><td>83</td><td>504</td><td>16.5%</td><td><span class="dp-search-table__pos top3">1.4</span></td></tr>
+                                        <tr><td class="dp-search-table__query">ersatzmaut österreich kulanz<span class="dp-search-table__url">/ersatzmaut-oesterreich-einspruch</span></td><td>70</td><td>2.202</td><td>3.2%</td><td><span class="dp-search-table__pos top3">3.3</span></td></tr>
+                                        <tr><td class="dp-search-table__query">betretungsverbot zu unrecht<span class="dp-search-table__url">/betretungs-und-annaeherungsverbot-welche-rechtlichen-konsequenzen-drohen</span></td><td>69</td><td>554</td><td>12.5%</td><td><span class="dp-search-table__pos top3">1.1</span></td></tr>
+                                        <tr><td class="dp-search-table__query">ohne vignette österreich strafe<span class="dp-search-table__url">/fehlende-vignette-strafe-und-einspruch</span></td><td>66</td><td>2.386</td><td>2.8%</td><td><span class="dp-search-table__pos top3">2.4</span></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="dp-search-card__foot"><i aria-hidden="true" class="fa-solid fa-chart-column" style="color:#c4a35a"></i> Klicks: <strong>3.647</strong> &nbsp;·&nbsp; Impressionen: <strong>137.703</strong></div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- WOHER KOMMT DEIN TRAFFIC? (Donut Charts)   -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="traffic-heading">
+                <h2 id="traffic-heading">Woher kommt <span class="article-white">dein Traffic?</span></h2>
+                
+                <p>Nicht jeder Besucher ist gleich. DataPeak segmentiert deinen Traffic automatisch nach drei Dimensionen: Über welchen Kanal kommen die Nutzer (Google, Direkteingabe, Social Media)? Aus welchem Land? Und auf welchem Gerät? So erkennst du sofort, ob deine Website vor allem mobil genutzt wird, ob du regional stark bist — oder ob es ungenutzte Potenziale gibt.</p>
+
+                <div class="dp-donut-row">
+                    <!-- Channel -->
+                    <div class="dp-donut-card">
+                        <div class="dp-donut-card__title">Zugriffe nach Channel</div>
+                        <svg class="dp-donut-card__svg" viewBox="0 0 130 130">
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring-bg"/>
+                            <!-- Organic 62% -->
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#3b82f6" stroke-dasharray="194.78 314.16" stroke-dashoffset="0" transform="rotate(-90 65 65)"/>
+                            <!-- Direct 18% -->
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#8b5cf6" stroke-dasharray="56.55 314.16" stroke-dashoffset="-194.78" transform="rotate(-90 65 65)"/>
+                            <!-- Referral 12% -->
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#10b981" stroke-dasharray="37.70 314.16" stroke-dashoffset="-251.33" transform="rotate(-90 65 65)"/>
+                            <!-- Social 8% -->
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#f59e0b" stroke-dasharray="25.13 314.16" stroke-dashoffset="-289.03" transform="rotate(-90 65 65)"/>
+                            <text x="65" y="63" class="dp-donut-center" text-anchor="middle">62%</text>
+                            <text x="65" y="76" text-anchor="middle" style="font-size:7px;fill:#555;">Organic</text>
+                        </svg>
+                        <div class="dp-donut-legend">
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#3b82f6"></span>Organic Search<span class="dp-donut-legend__val">62%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#8b5cf6"></span>Direct<span class="dp-donut-legend__val">18%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#10b981"></span>Referral<span class="dp-donut-legend__val">12%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#f59e0b"></span>Social<span class="dp-donut-legend__val">8%</span></div>
+                        </div>
+                    </div>
+                    <!-- Land -->
+                    <div class="dp-donut-card">
+                        <div class="dp-donut-card__title">Zugriffe nach Land</div>
+                        <svg class="dp-donut-card__svg" viewBox="0 0 130 130">
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring-bg"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#3b82f6" stroke-dasharray="226.19 314.16" stroke-dashoffset="0" transform="rotate(-90 65 65)"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#8b5cf6" stroke-dasharray="56.55 314.16" stroke-dashoffset="-226.19" transform="rotate(-90 65 65)"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#10b981" stroke-dasharray="31.42 314.16" stroke-dashoffset="-282.74" transform="rotate(-90 65 65)"/>
+                            <text x="65" y="63" class="dp-donut-center" text-anchor="middle">72%</text>
+                            <text x="65" y="76" text-anchor="middle" style="font-size:7px;fill:#555;">Österreich</text>
+                        </svg>
+                        <div class="dp-donut-legend">
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#3b82f6"></span>Österreich<span class="dp-donut-legend__val">72%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#8b5cf6"></span>Deutschland<span class="dp-donut-legend__val">18%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#10b981"></span>Schweiz<span class="dp-donut-legend__val">10%</span></div>
+                        </div>
+                    </div>
+                    <!-- Endgerät -->
+                    <div class="dp-donut-card">
+                        <div class="dp-donut-card__title">Zugriffe nach Endgerät</div>
+                        <svg class="dp-donut-card__svg" viewBox="0 0 130 130">
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring-bg"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#3b82f6" stroke-dasharray="175.92 314.16" stroke-dashoffset="0" transform="rotate(-90 65 65)"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#ec4899" stroke-dasharray="113.10 314.16" stroke-dashoffset="-175.92" transform="rotate(-90 65 65)"/>
+                            <circle cx="65" cy="65" r="50" class="dp-donut-ring" stroke="#f59e0b" stroke-dasharray="25.13 314.16" stroke-dashoffset="-289.02" transform="rotate(-90 65 65)"/>
+                            <text x="65" y="63" class="dp-donut-center" text-anchor="middle">56%</text>
+                            <text x="65" y="76" text-anchor="middle" style="font-size:7px;fill:#555;">Desktop</text>
+                        </svg>
+                        <div class="dp-donut-legend">
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#3b82f6"></span>Desktop<span class="dp-donut-legend__val">56%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#ec4899"></span>Mobile<span class="dp-donut-legend__val">36%</span></div>
+                            <div class="dp-donut-legend__item"><span class="dp-donut-legend__dot" style="background:#f59e0b"></span>Tablet<span class="dp-donut-legend__val">8%</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- KI-TRAFFIC                                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="ki-traffic-heading">
+                <h2 id="ki-traffic-heading">KI-Traffic: <span class="article-white">Wer kommt von ChatGPT & Co.?</span></h2>
+                
+                <p>Ein völlig neuer Kanal, den die meisten Webseitenbetreiber noch nicht einmal messen: Besucher, die über KI-Suchmaschinen auf deine Website kommen. DataPeak erkennt automatisch Traffic von ChatGPT, Claude, Perplexity und Google Gemini und zeigt dir Sitzungen, Nutzer und den zeitlichen Verlauf. Das ist kein Zukunftsthema — es passiert jetzt. Und die Frage ist, ob du es siehst oder nicht.</p>
+
+                <div class="dp-ki-layout">
+                    <!-- LEFT: KI-Traffic Card -->
+                    <div class="dp-ki-card">
+                        <div class="dp-ki-card__head">
+                            <div class="dp-ki-card__title"><i aria-hidden="true" class="fa-solid fa-microchip"></i> KI-Traffic</div>
+                            <span class="dp-ki-card__badge">3.5% Anteil</span>
+                        </div>
+                        <div style="padding:0.4rem 1rem;font-size:0.58rem;color:var(--text-color-subtle,#555);display:flex;align-items:center;gap:0.4rem;">
+                            <span style="background:rgba(255,255,255,0.06);padding:0.12rem 0.4rem;border-radius:3px;font-weight:600;color:var(--text-color-muted,#949494)">Quelle: GA4</span>
+                            <span style="color:#3a3a3a">·</span>
+                            <span>16.02.2026 – 18.03.2026</span>
+                        </div>
+                        <div class="dp-ki-card__stats">
+                            <div class="dp-ki-card__stat">
+                                <div class="dp-ki-card__stat-label"><i aria-hidden="true" class="fa-solid fa-chart-line"></i> Sitzungen</div>
+                                <div class="dp-ki-card__stat-val">158</div>
+                                <div class="dp-ki-card__stat-change">↑ 28.5%</div>
+                            </div>
+                            <div class="dp-ki-card__stat">
+                                <div class="dp-ki-card__stat-label"><i aria-hidden="true" class="fa-solid fa-users"></i> Nutzer</div>
+                                <div class="dp-ki-card__stat-val">134</div>
+                                <div class="dp-ki-card__stat-change">↑ 31.2%</div>
+                            </div>
+                        </div>
+                        <div class="dp-ki-card__sources">
+                            <div class="dp-ki-card__sources-title">Top KI-Quellen</div>
+                            <div class="dp-ki-card__source"><span class="dp-ki-card__source-name"><span class="dp-ki-card__source-dot" style="background:#10a37f"></span>ChatGPT</span><span class="dp-ki-card__source-vals">89 <span class="dp-ki-card__source-pct">56.3%</span></span></div>
+                            <div class="dp-ki-card__source"><span class="dp-ki-card__source-name"><span class="dp-ki-card__source-dot" style="background:#4285f4"></span>Google Gemini</span><span class="dp-ki-card__source-vals">42 <span class="dp-ki-card__source-pct">26.6%</span></span></div>
+                            <div class="dp-ki-card__source"><span class="dp-ki-card__source-name"><span class="dp-ki-card__source-dot" style="background:#6366f1"></span>Perplexity</span><span class="dp-ki-card__source-vals">27 <span class="dp-ki-card__source-pct">17.1%</span></span></div>
+                        </div>
+                        <div class="dp-ki-card__chart">
+                            <div class="dp-ki-card__chart-title">Sitzungs-Trend (KI)</div>
+                            <svg viewBox="0 0 300 55" preserveAspectRatio="none" style="width:100%;height:55px">
+                                <defs><linearGradient id="gKI" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c5cfc" stop-opacity="0.2"/><stop offset="100%" stop-color="#7c5cfc" stop-opacity="0"/></linearGradient></defs>
+                                <path d="M0,40 C15,38 25,42 40,35 C55,28 70,32 85,30 C100,28 115,25 130,28 C145,31 160,22 175,20 C190,18 205,24 220,18 C235,14 250,20 265,15 C280,12 290,16 300,14" fill="url(#gKI)" stroke="none"/>
+                                <path d="M0,40 C15,38 25,42 40,35 C55,28 70,32 85,30 C100,28 115,25 130,28 C145,31 160,22 175,20 C190,18 205,24 220,18 C235,14 250,20 265,15 C280,12 290,16 300,14" fill="none" stroke="#7c5cfc" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="dp-ki-card__foot">KI-Traffic umfasst Besuche von bekannten KI-Bots wie ChatGPT, Claude, Perplexity und Google Gemini.</div>
+                    </div>
+
+                    <!-- RIGHT: KI-Traffic Detail Analysis -->
+                    <div class="dp-ki-detail">
+                        <div class="dp-ki-detail__head">
+                            <div class="dp-ki-detail__title"><i aria-hidden="true" class="fa-solid fa-microscope"></i> KI-Traffic Analyse</div>
+                            <div class="dp-ki-detail__meta">
+                                <span class="dp-ki-detail__meta-badge">GA4</span>
+                                <span>· 18.09.2025 – 18.03.2026</span>
+                                <span style="color:#4ade80;font-weight:600;margin-left:0.3rem">● Aktualisieren</span>
+                            </div>
+                        </div>
+                        <div class="dp-ki-detail__kpis">
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-chart-line" style="color:#7c5cfc"></i> Sessions</div><div class="dp-ki-detail__kpi-val purple">93</div><div class="dp-ki-detail__kpi-change">+16.7%</div></div>
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-user" style="color:#7c5cfc"></i> Nutzer</div><div class="dp-ki-detail__kpi-val">89</div></div>
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-clock" style="color:#f59e0b"></i> Ø Verweildauer</div><div class="dp-ki-detail__kpi-val">3:21</div></div>
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-hand-pointer" style="color:#ec4899"></i> Interaktionsrate</div><div class="dp-ki-detail__kpi-val">60.2%</div></div>
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-bullseye" style="color:#10b981"></i> Conversions</div><div class="dp-ki-detail__kpi-val">1</div></div>
+                            <div class="dp-ki-detail__kpi"><div class="dp-ki-detail__kpi-label"><i aria-hidden="true" class="fa-solid fa-copy" style="color:#6366f1"></i> Ø Seiten/Session</div><div class="dp-ki-detail__kpi-val">1.7</div></div>
+                        </div>
+                        <div class="dp-ki-detail__tabs">
+                            <span class="dp-ki-detail__tab"><i aria-hidden="true" class="fa-solid fa-table-cells-large"></i> Übersicht</span>
+                            <span class="dp-ki-detail__tab"><i aria-hidden="true" class="fa-solid fa-brain"></i> Intent-Analyse</span>
+                            <span class="dp-ki-detail__tab"><i aria-hidden="true" class="fa-solid fa-route"></i> User-Journey</span>
+                            <span class="dp-ki-detail__tab"><i aria-hidden="true" class="fa-solid fa-globe"></i> Alle Seiten</span>
+                            <span class="dp-ki-detail__tab active"><i aria-hidden="true" class="fa-solid fa-robot"></i> KI-Quellen</span>
+                        </div>
+                        <div class="dp-ki-detail__body">
+                            <!-- Bar chart -->
+                            <div class="dp-ki-detail__chart-col">
+                                <div class="dp-ki-detail__bar-label"><i aria-hidden="true" class="fa-solid fa-chart-bar" style="color:#7c5cfc;margin-right:0.3rem"></i> Verteilung der KI-Quellen</div>
+                                <div class="dp-ki-detail__bar-row"><span class="dp-ki-detail__bar-name">ChatGPT</span><div class="dp-ki-detail__bar-track"><div class="dp-ki-detail__bar-fill" style="width:100%;background:linear-gradient(90deg,#10a37f,#10a37f88)"></div></div></div>
+                                <div class="dp-ki-detail__bar-row"><span class="dp-ki-detail__bar-name">Perplexity</span><div class="dp-ki-detail__bar-track"><div class="dp-ki-detail__bar-fill" style="width:38%;background:linear-gradient(90deg,#6366f1,#6366f188)"></div></div></div>
+                                <div class="dp-ki-detail__bar-row"><span class="dp-ki-detail__bar-name">Copilot</span><div class="dp-ki-detail__bar-track"><div class="dp-ki-detail__bar-fill" style="width:15%;background:linear-gradient(90deg,#00a4ef,#00a4ef88)"></div></div></div>
+                                <div class="dp-ki-detail__bar-row"><span class="dp-ki-detail__bar-name">Gemini</span><div class="dp-ki-detail__bar-track"><div class="dp-ki-detail__bar-fill" style="width:2%;background:linear-gradient(90deg,#4285f4,#4285f488)"></div></div></div>
+                            </div>
+                            <!-- Performance table -->
+                            <div class="dp-ki-detail__table-col">
+                                <div class="dp-ki-detail__perf-head">Performance nach Plattform</div>
+                                <div class="dp-ki-detail__perf-row" style="font-weight:700;color:var(--text-color-subtle,#555);border-bottom:1px solid var(--border-color,#222);font-size:0.55rem;text-transform:uppercase;letter-spacing:0.04em;">
+                                    <span class="dp-ki-detail__perf-dot" style="opacity:0"></span>
+                                    <span class="dp-ki-detail__perf-name">Plattform</span>
+                                    <span class="dp-ki-detail__perf-val">Sessions</span>
+                                    <span class="dp-ki-detail__perf-val">Nutzer</span>
+                                    <span class="dp-ki-detail__perf-pct" style="color:var(--text-color-subtle,#555)">Interaktionsrate</span>
+                                </div>
+                                <div class="dp-ki-detail__perf-row"><span class="dp-ki-detail__perf-dot" style="background:#10a37f"></span><span class="dp-ki-detail__perf-name">ChatGPT</span><span class="dp-ki-detail__perf-val">60</span><span class="dp-ki-detail__perf-val">57</span><span class="dp-ki-detail__perf-pct green">60.0%</span></div>
+                                <div class="dp-ki-detail__perf-row"><span class="dp-ki-detail__perf-dot" style="background:#6366f1"></span><span class="dp-ki-detail__perf-name">Perplexity</span><span class="dp-ki-detail__perf-val">23</span><span class="dp-ki-detail__perf-val">22</span><span class="dp-ki-detail__perf-pct green">56.5%</span></div>
+                                <div class="dp-ki-detail__perf-row"><span class="dp-ki-detail__perf-dot" style="background:#00a4ef"></span><span class="dp-ki-detail__perf-name">Copilot</span><span class="dp-ki-detail__perf-val">9</span><span class="dp-ki-detail__perf-val">9</span><span class="dp-ki-detail__perf-pct green">88.7%</span></div>
+                                <div class="dp-ki-detail__perf-row"><span class="dp-ki-detail__perf-dot" style="background:#4285f4"></span><span class="dp-ki-detail__perf-name">Gemini</span><span class="dp-ki-detail__perf-val">1</span><span class="dp-ki-detail__perf-val">1</span><span class="dp-ki-detail__perf-pct green">100.0%</span></div>
+                            </div>
+                        </div>
+                        <div class="dp-ki-detail__foot"><i aria-hidden="true" class="fa-solid fa-info-circle" style="margin-right:0.3rem"></i> Intent-Kategorisierung: Seiten werden automatisch anhand ihrer URL-Struktur kategorisiert. Die User-Journey zeigt, welche Seiten nach dem KI-Einstieg besucht werden.</div>
+                    </div>
+                </div>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Tipp: So wirst du für KI-Suchmaschinen sichtbar</strong>
+                        <p>Wer wissen will, wie man für KI-Suchmaschinen optimiert, findet im <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Der Praxis-Guide">Maschinenlesbarkeits-Guide</a> die technische Anleitung. Der <a href="https://designare.at/ki-sichtbarkeit" title="KI-Sichtbarkeits-Check: Wirst du empfohlen?">KI-Sichtbarkeits-Check</a> zeigt dir kostenlos, ob deine Website bereits zitiert wird.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FUNKTIONEN (End-User Sprache)              -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="functions-heading">
+                <h2 id="functions-heading">Was DataPeak <span class="article-white">noch kann</span></h2>
+                <p>Neben den Kern-Dashboards bietet DataPeak Werkzeuge, die dir im Alltag echte Arbeit abnehmen:</p>
+
+                <dl class="feature-list">
+                    <dt>Top 100 Suchanfragen mit Landingpages</dt>
+                    <dd>DataPeak zeigt dir nicht nur, welche Keywords Klicks bringen — sondern ordnet jeder Suchanfrage automatisch die dazugehörige Landingpage zu. So erkennst du sofort, welche Seite für welches Keyword rankt und wo Potenzial brachliegt. Quelle: Google Search Console, kombiniert mit GA4-Daten.</dd>
+                    
+                    <dt>Wetter- & Feiertagsanzeige</dt>
+                    <dd>Für Branchen wie Autowaschanlagen, Gastronomie oder Tourismus ist Wetter der unsichtbare Traffic-Faktor. DataMax zeigt dir Wetterdaten und Feiertage direkt neben deinen Performance-Kurven — so erkennst du auf einen Blick, warum der Traffic am Dienstag eingebrochen ist (Feiertag) oder warum die Klicks am Wochenende explodiert sind (Sonnenschein).</dd>
+                    
+                    <dt>KI-Traffic mit Folgepfaden</dt>
+                    <dd>DataPeak zeigt nicht nur, dass Besucher von ChatGPT kamen — sondern auch, was sie danach tun. Welche Seiten besuchen sie als Nächstes? Wie hoch ist die Interaktionsrate? So verstehst du den Wert dieses neuen Kanals und kannst deine Inhalte gezielt für die <a href="https://designare.at/geo-seo" title="GEO: So wirst du zur KI-Quelle">KI-Suche</a> optimieren.</dd>
+                    
+                    <dt>Professionelle Reports auf Knopfdruck</dt>
+                    <dd>Erstelle PDF-Analysen direkt aus dem Interface — für dich selbst oder als Reporting für Stakeholder. Sauberer Output für saubere Entscheidungen.</dd>
+                </dl>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- VERGLEICHSTABELLE                          -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="comparison-heading">
+                <h2 id="comparison-heading">Der Reality-Check: <span class="article-white">Dein Workflow heute vs. mit DataPeak</span></h2>
+                <table class="comparison-table dp-vs">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="th-wrong">Ohne DataPeak <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Mit DataPeak <i aria-hidden="true" class="fa-solid fa-check"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Zwischen Search Console, GA4 und Trends hin- und herspringen</td>
+                            <td>Eine zentrale Sicht auf alle Metriken</td>
+                        </tr>
+                        <tr>
+                            <td>Suchanfragen ohne Zuordnung zur Landingpage</td>
+                            <td>Top 100 Suchanfragen (GSC) mit automatischer Landingpage-Zuordnung</td>
+                        </tr>
+                        <tr>
+                            <td>KI-Traffic? Wird gar nicht erfasst</td>
+                            <td>ChatGPT, Claude & Co. erkannt — inkl. Folgepfade und Interaktionsrate</td>
+                        </tr>
+                        <tr>
+                            <td>Traffic-Einbruch? Keine Ahnung warum</td>
+                            <td>Wetter- & Feiertagsanzeige direkt neben den Performance-Kurven</td>
+                        </tr>
+                        <tr>
+                            <td>Daten anschauen und rätseln, was sie bedeuten</td>
+                            <td>DataMax erklärt Trends und empfiehlt nächste Schritte</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAQ                                        -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Was zeigt DataPeak, was Google Analytics nicht zeigt?</summary>
+                        <div class="faq-content">
+                            <p>DataPeak kombiniert deine GA4-Daten mit Search Console und KI-Analyse in einer einzigen Ansicht. Statt zwischen 5 Google-Tabs zu springen, siehst du Klicks, Impressionen, Conversions, Suchanfragen und KI-Traffic auf einen Blick — inklusive Trends und Handlungsempfehlungen vom KI-Assistenten DataMax.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was ist KI-Traffic und warum ist er wichtig?</summary>
+                        <div class="faq-content">
+                            <p>KI-Traffic sind Besucher, die über ChatGPT, Claude, Perplexity oder Google Gemini auf deine Website kommen. DataPeak erkennt diese Quellen automatisch und zeigt dir, wie viele Nutzer von KI-Suchmaschinen kommen. Ein wachsender Kanal, den klassische Analyse-Tools noch komplett ignorieren. Der <a href="ki-traffic-messen.html" title="KI-Traffic messen: So trackst du Besucher von ChatGPT & Co.">KI-Traffic-Guide</a> erklärt Schritt für Schritt, wie du diesen Kanal sichtbar machst. Wie du deine Website für diese KI-Quellen optimierst, zeigt der <a href="https://designare.at/geo-seo" title="GEO: So wirst du zur KI-Quelle">GEO-Guide</a>.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Ersetzt DataPeak klassische Tools wie Semrush oder Sistrix?</summary>
+                        <div class="faq-content">
+                            <p>DataPeak ist kein Ersatz, sondern eine <strong>Intelligenz-Schicht</strong>. Während klassische Tools riesige Keyword-Datenbanken bieten, nutzt DataPeak <em>deine</em> eigenen GSC- und GA4-Daten und verwandelt sie per KI in konkrete Handlungen. Es ist das Werkzeug für die tägliche Umsetzung — nicht für die Marktforschung.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Brauche ich technisches Wissen?</summary>
+                        <div class="faq-content">
+                            <p>Nein. Das Dashboard ist so gebaut, dass Ergebnisse und Empfehlungen sofort verständlich sind — auch ohne SEO-Hintergrund. Der KI-Assistent DataMax erklärt deine Daten in Klartext und schlägt konkrete nächste Schritte vor.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie sicher sind meine Daten?</summary>
+                        <div class="faq-content">
+                            <p>DataPeak nutzt offizielle Google-APIs via OAuth2. Daten werden nur dort verarbeitet, wo sie gebraucht werden, sicher gelagert in einer dedizierten Vercel-Umgebung. Kein Drittanbieter sieht deine Analytics-Daten.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wer kann DataPeak nutzen?</summary>
+                        <div class="faq-content">
+                            <p>Jeder Webseitenbetreiber mit Zugang zu Google Search Console und Google Analytics 4. Aktuell vergebe ich exklusive Testzugänge — eine Self-Service-Version ist in Planung.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAZIT                                      -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Verstehe deine Website — und handle</span></h2>
+                <p>DataPeak macht Schluss mit dem Tab-Chaos. Statt Zahlenfriedhöfe in Google-Tools zu durchforsten, bekommst du ein Dashboard, das dir in Klartext sagt, was auf deiner Website passiert, woher deine Besucher kommen und was du als Nächstes tun solltest. Mit der KI-Traffic-Analyse bist du außerdem einer der Ersten, die diesen wachsenden Kanal systematisch im Blick haben. Für die Optimierung deiner Inhalte liefern die Guides zu <a href="https://designare.at/semantisches-markup" title="Semantisches HTML für bessere Rankings">semantischem Markup</a>, <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Der Praxis-Guide">Maschinenlesbarkeit</a> und <a href="https://designare.at/schema-org-meta-description" title="Schema.org für KI-Sichtbarkeit">strukturierten Daten</a> die technische Anleitung.</p>
+            </section>
+
+            <section class="blog-cta-wrapper">
+                <h2>Neugierig geworden?</h2>
+                <p>Ich vergebe aktuell exklusive Testzugänge für Webseitenbetreiber, die ihre Daten endlich verstehen wollen. Lass uns schauen, was DataPeak aus deiner Website herausholen kann.</p>
+                
+                <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+                    <i aria-hidden="true" class="fa-solid fa-rocket"></i> Testzugang anfragen
+                </button>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- LIGHTBOXES                                 -->
+            <!-- ══════════════════════════════════════════ -->
+
+            <div id="lb-dashboard" class="lightbox" role="dialog" aria-modal="true" aria-label="Dashboard-Übersicht">
+                <a href="#dashboard-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#dashboard-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/traffic-reichweite.webp" alt="DataPeak Dashboard: Traffic, Reichweite und Qualität">
+                    <div class="lightbox-caption"><strong>Dashboard:</strong> Alle KPIs, Trends und Qualitätsindikatoren auf einen Blick.</div>
+                </div>
+            </div>
+
+            <div id="lb-verlauf" class="lightbox" role="dialog" aria-modal="true" aria-label="Verlauf & Analyse">
+                <a href="#dashboard-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#dashboard-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/verlauf-analyse.webp" alt="Verlauf & Analyse: Impressionen und neue Besucher im Zeitverlauf">
+                    <div class="lightbox-caption"><strong>Verlauf:</strong> Impressionen und neue Besucher im Zeitverlauf mit Vergleichsdaten.</div>
+                </div>
+            </div>
+
+            <div id="lb-datamax" class="lightbox" role="dialog" aria-modal="true" aria-label="DataMax KI-Assistent">
+                <a href="#summary-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#summary-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/datamax-chatbot.webp" alt="DataMax KI-Assistent">
+                    <div class="lightbox-caption"><strong>DataMax:</strong> Der KI-Assistent analysiert deine Daten und gibt konkrete Empfehlungen.</div>
+                </div>
+            </div>
+
+            <div id="lb-top100" class="lightbox" role="dialog" aria-modal="true" aria-label="Top 100 Suchanfragen">
+                <a href="#search-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#search-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/suchanfragen.webp" alt="Top 100 Suchanfragen">
+                    <div class="lightbox-caption"><strong>Suchanfragen:</strong> Deine Top-Keywords sortiert nach Klicks, Impressionen und Position.</div>
+                </div>
+            </div>
+
+            <div id="lb-landingpages" class="lightbox" role="dialog" aria-modal="true" aria-label="Top Landingpages">
+                <a href="#search-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#search-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/top-landingpages.webp" alt="Top Landingpages mit Suchbegriffen">
+                    <div class="lightbox-caption"><strong>Landingpages:</strong> Welche Seiten ziehen Besucher an — und mit welchen Suchbegriffen.</div>
+                </div>
+            </div>
+
+            <div id="lb-zugriffe" class="lightbox" role="dialog" aria-modal="true" aria-label="Zugriffe nach Channel, Land und Endgerät">
+                <a href="#traffic-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#traffic-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/zugriffe.webp" alt="Zugriffe: Channel, Land und Endgerät">
+                    <div class="lightbox-caption"><strong>Zugriffe:</strong> Traffic-Segmentierung nach Channel, Land und Endgerät.</div>
+                </div>
+            </div>
+
+            <div id="lb-ki-traffic" class="lightbox" role="dialog" aria-modal="true" aria-label="KI-Traffic Übersicht">
+                <a href="#ki-traffic-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#ki-traffic-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/ki-traffic.webp" alt="KI-Traffic: Sitzungen, Nutzer und Quellen">
+                    <div class="lightbox-caption"><strong>KI-Traffic:</strong> Sitzungen, Nutzer und Top KI-Quellen im Überblick.</div>
+                </div>
+            </div>
+
+            <div id="lb-ki-journey" class="lightbox" role="dialog" aria-modal="true" aria-label="KI-Traffic User-Journey">
+                <a href="#ki-traffic-heading" class="lightbox-close-bg" aria-label="Schließen"></a>
+                <a href="#ki-traffic-heading" class="lightbox-close-btn" aria-label="Lightbox schließen"><i aria-hidden="true" class="fa-solid fa-xmark"></i></a>
+                <div class="lightbox-inner">
+                    <img src="images/ki-traffic-analyse.webp" alt="KI-Traffic Analyse: Intent-Kategorisierung und User-Journey">
+                    <div class="lightbox-caption"><strong>KI-Traffic:</strong> Intent-Kategorisierung und User-Journey für Besucher von ChatGPT & Co.</div>
+                </div>
+            </div>
+
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+
+</body>
+</html>

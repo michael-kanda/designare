@@ -1,0 +1,1225 @@
+/* ============================================================
+   BLOG.CSS - TORINO STYLE
+   Fokussiert auf Lesbarkeit, Struktur und Performance
+   ============================================================ */
+
+/* ===================
+   1. BLOG MAIN LAYOUT
+   =================== */
+
+#blog-main {
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 120px 2rem 4rem;
+    min-height: 100vh;
+    position: relative;
+    z-index: 2; 
+}
+
+/* ===================
+   2. ARTICLE STRUCTURE
+   =================== */
+
+.blog-article {
+    line-height: 1.8;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ===================
+   3. ARTICLE HEADER & META
+   =================== */
+
+.article-header {
+    border-bottom: none; 
+    margin-bottom: 1rem; 
+    padding-bottom: 1rem;
+    position: relative;
+}
+
+.article-header h1 {
+    font-size: 2.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 0.8rem;
+    overflow: hidden;
+    animation: headerContentIn 0.5s 0.1s ease forwards;
+    opacity: 0;
+}
+
+/* Gold gradient underline */
+.article-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-color), rgba(196, 163, 90, 0.08));
+}
+
+/* Shimmer sweep across the underline */
+.article-header h1::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -40%;
+    width: 40%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: headerShimmer 2.8s 1s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes headerShimmer {
+    0% { left: -40%; }
+    100% { left: 100%; }
+}
+
+/* Staggered fade-in */
+.article-header .breadcrumb {
+    animation: headerContentIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+.article-header .article-meta {
+    animation: headerContentIn 0.5s 0.25s ease forwards;
+    opacity: 0;
+}
+
+@keyframes headerContentIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* breadcrumb ol: siehe Breadcrumb-Section unten */
+
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    opacity: 0.8;
+    align-items: center;
+}
+
+.article-meta time,
+.article-meta .reading-time {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-color-muted);
+}
+
+.article-meta .author {
+    font-style: normal;
+    color: var(--text-color-muted);
+}
+
+.article-meta a {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+.article-white {
+    color: var(--text-color) !important;
+    text-transform: none; /* Schaltet Groß-/Kleinschreibung-Zwang aus */
+}
+
+/* ===================
+   FEATURED IMAGE (Subtle)
+   =================== */
+
+.article-hero-wrapper {
+    display: flex;
+    justify-content: center; /* Zentriert das Bild horizontal */
+    margin: 2rem 0 0 0;      /* Abstand nach oben */
+    width: 100%;
+}
+
+.article-hero-wrapper img {
+    height: auto;
+    max-width: 100%;
+    opacity: 0.1;            /* Extrem wenig Opacity (10%) */
+    border-radius: 8px;      /* Optional: leicht abgerundete Ecken */
+    filter: grayscale(100%); /* Optional: macht es noch dezenter (schwarz-weiß) */
+    transition: opacity 0.5s ease;
+}
+
+/* Optional: Beim Drüberfahren etwas sichtbarer machen */
+.article-hero-wrapper img:hover {
+    opacity: 0.3;
+    filter: grayscale(0%);
+}
+
+/* ===================
+   4. CONTENT SECTIONS
+   =================== */
+
+
+.article-accent {
+    color: var(--accent-color) !important;
+    text-transform: none;
+}
+
+.blog-article section {
+    margin-bottom: 6rem;
+    position: relative;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color-subtle); 
+    scroll-margin-top: 100px;
+}
+
+.blog-article section::after {
+    content: "\f107";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: -0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bg-color); 
+    padding: 0 1rem;
+    font-size: 1.2rem;
+    opacity: 1; 
+    color: var(--accent-color); 
+    transition: transform 0.3s ease;
+}
+
+.blog-article section:hover::after {
+    transform: translateX(-50%) scale(1.2);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.blog-article h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    margin: 2.5rem 0 1.2rem;
+    padding-top: 40px;
+    color: var(--accent-color);
+    line-height: 1.3;
+    scroll-margin-top: 100px;
+}
+
+.blog-article h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    color: var(--text-color);
+}
+
+.blog-article p {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-weight: 300;
+    line-height: 1.8;
+}
+
+.blog-article code {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 0.2em 0.4em;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: var(--accent-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRE / CODE-OUTPUT BLOCKS
+   Mehrzeilige Code-Ausgaben (z.B. MCP Tool-Response, JSON-Beispiele).
+   Horizontal scrollbar auf schmalen Screens, kein Layout-Overflow.
+   Scroll-Schatten an den Rändern signalisieren "mehr Content seitlich".
+   =================================================================== */
+.blog-article pre {
+    overflow-x: auto;
+    max-width: 100%;
+    width: 100%;             /* NEU */
+    box-sizing: border-box;  /* NEU */
+    margin: 1.5rem 0;
+    padding: 1.2rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling auf iOS */
+    scrollbar-color: var(--accent-color) transparent;
+    scrollbar-width: thin;
+}
+
+/* Scrollbar-Styling (Webkit/Chrome/Safari) */
+.blog-article pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+.blog-article pre::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.blog-article pre::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 3px;
+    opacity: 0.6;
+}
+
+/* Code IM pre-Block: Inline-Code-Styles überschreiben */
+.blog-article pre code {
+    white-space: pre;
+    display: block;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--text-color);
+}
+
+/* Mobile: Kleinere Schrift, kompakterer Padding */
+@media (max-width: 768px) {
+    .blog-article pre {
+        font-size: 0.72rem;
+        padding: 0.9rem;
+        margin: 1rem 0; 
+        border-radius: 4px;
+    }
+}
+
+.blog-article ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    list-style-type: none;
+}
+
+.blog-article ul li::before {
+    content: "→";
+    color: var(--accent-color);
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.blog-article ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.blog-article li {
+    margin-bottom: 0.8rem;
+color: var(--text-color);
+    font-weight: 300;
+}
+
+.blog-article dl {
+    margin-bottom: 2rem;
+}
+
+.blog-article dt {
+    font-weight: 400;
+    color: var(--accent-color);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.blog-article dd {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+   color: var(--text-color);
+}
+
+/* ===================
+   6. CONTENT BOXES
+   =================== */
+
+/* Summary Box (Mobile First → Desktop via Media Query unten) */
+.summary-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    background-color: rgba(196, 163, 90, 0.05);
+    padding: 2rem;
+    margin: 2rem 0;
+    border-radius: 0;
+    border: 1px solid var(--border-color);
+}
+
+.summary-box h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.summary-box ul {
+    margin-bottom: 0;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+/* Info & Tech Box */
+.info-box,
+.tech-box {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.info-box i,
+.tech-box i {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.info-box strong,
+.tech-box strong {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+.info-box p,
+.tech-box p {
+    margin-bottom: 0;
+}
+.info-box,
+.tech-box,
+.expert-tip {
+    min-width: 0;
+}
+ 
+.info-box > div,
+.tech-box > div,
+.expert-tip > div {
+    min-width: 0;
+    flex: 1;
+}
+/* Expert Tip */
+.expert-tip {
+    background-color: rgba(196, 163, 90, 0.08);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.expert-tip i {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.expert-tip strong {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+/* Step Guide */
+.step-guide {
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+}
+
+.step-guide h3 {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+/* Feature List */
+.feature-list {
+    background-color: rgba(255, 255, 255, 0.02);
+    padding: 1.5rem;
+    border-radius: 0;
+    margin: 2rem 0;
+    border: 1px solid var(--border-color);
+}
+
+.feature-list dt {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+}
+
+.feature-list dt:first-child {
+    margin-top: 0;
+}
+
+.feature-list dd {
+    margin-left: 0;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--border-color);
+}
+
+/* Comparison Table */
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+}
+
+.comparison-table thead {
+    background-color: rgba(196, 163, 90, 0.08);
+}
+
+.comparison-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.th-wrong i { color: #ff6b6b; margin-left: 8px; }
+.th-correct i { color: #51cf66; margin-left: 8px; }
+
+.comparison-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    color: var(--text-color);
+}
+
+.comparison-table code {
+    white-space: nowrap;
+}
+
+/* FAQ Accordion */
+.faq-accordion {
+    margin: 2rem 0;
+}
+
+.faq-accordion details {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 0;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+}
+
+.faq-accordion details:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.faq-accordion summary {
+    padding: 1.2rem 1.5rem;
+    font-weight: 400;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    outline: none;
+    letter-spacing: 0.02em;
+}
+
+.faq-accordion summary::after {
+    content: '+';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: var(--text-color-muted);
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.faq-accordion details[open] summary::after {
+    content: '−';
+    transform: translateY(-50%) rotate(0deg);
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+.faq-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    color: var(--text-color);
+    line-height: 1.7;
+    border-top: none;
+    font-weight: 300;
+}
+
+.faq-content p { margin-bottom: 0; }
+.faq-content ol { margin-top: 1rem; margin-bottom: 0; padding-left: 1.2rem; }
+
+/* Key Points */
+.key-points {
+    background: rgba(196, 163, 90, 0.05);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 2.5rem 0;
+}
+
+.key-points h3 {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.key-points ul { list-style: none; padding-left: 0; }
+.key-points li { margin-bottom: 1rem; line-height: 1.7; }
+
+/* CTA Section */
+.cta-section {
+    background: rgba(196, 163, 90, 0.08);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 2.5rem;
+    margin: 3rem 0;
+    text-align: center;
+}
+
+.cta-section h2 {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.cta-section p { 
+    margin-bottom: 1.5rem; 
+    font-size: 1.05rem; 
+    color: var(--text-color-muted);
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--accent-color);
+    padding: 1rem 2rem;
+    border-radius: 0;
+    border: 1px solid var(--accent-color);
+    font-weight: 400;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Article Footer */
+.article-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.back-to-blog {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-muted);
+    opacity: 0.8;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+.back-to-blog:hover {
+    opacity: 1;
+    color: var(--accent-color);
+    transform: translateX(-5px);
+}
+
+/* ===================
+   7. RESPONSIVE DESIGN
+   =================== */
+
+@media (max-width: 768px) {
+    #blog-main {
+        padding: 85px 1.5rem 3rem;
+    }
+
+    .article-header h1 { font-size: 1.8rem; }
+    .article-meta { gap: 0.4rem 1rem; font-size: 0.82rem; }
+    .article-meta time,
+    .article-meta .reading-time,
+    .article-meta .author { white-space: nowrap; }
+    .blog-article h2 { font-size: 1.5rem; margin: 2rem 0 1rem; padding-top: 30px; }
+    .blog-article h3 { font-size: 1.2rem; }
+
+    .summary-box, .info-box, .tech-box, .expert-tip, .key-points, .cta-section {
+        padding: 1.2rem;
+    }
+
+    .info-box, .tech-box, .expert-tip {
+        flex-direction: row;  /* Bleibt nebeneinander */
+        gap: 0.8rem;
+    }
+    
+    .info-box i, .tech-box i, .expert-tip i {
+        flex-shrink: 0;
+        min-width: 1.5rem;
+    }
+
+    .comparison-table { font-size: 0.85rem; }
+    .comparison-table th, .comparison-table td { padding: 0.7rem; }
+    .comparison-table thead { display: none; }
+    
+    .comparison-table tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .comparison-table td {
+        display: block;
+        border: none;
+        padding: 1rem;
+        text-align: left;
+    }
+
+    .comparison-table td:first-child {
+        background-color: rgba(255, 107, 107, 0.1);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .comparison-table td:first-child::before { content: "Falsch: "; font-weight: 400; color: #ff6b6b; }
+    .comparison-table td:last-child::before { content: "Richtig: "; font-weight: 400; color: #51cf66; }
+
+    .comparison-table code {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* AI-Visibility Tool: Falsch/Richtig Override entfernen */
+    .ai-visibility-tool .comparison-table td:first-child {
+        background-color: transparent;
+    }
+    .ai-visibility-tool .comparison-table td:first-child::before,
+    .ai-visibility-tool .comparison-table td:last-child::before {
+        content: none;
+    }
+
+    .cta-section h2 { font-size: 1.3rem; }
+    .cta-button { display: block; width: 100%; padding: 0.9rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    #blog-main { padding: 75px 1rem 2rem; }
+    .article-header h1 { font-size: 1.5rem; }
+    .blog-article h2 { font-size: 1.3rem; }
+    .breadcrumb ol { font-size: 0.8rem; }
+}
+
+/* ===================
+   8. PRINT STYLES
+   =================== */
+
+@media print {
+    #blog-main { padding: 0; max-width: 100%; }
+    .breadcrumb, .cta-section, .article-footer, .related-articles, .faq-cards-section { display: none; }
+    .article-header { border-bottom: 2px solid #000; }
+    .blog-article h1, .blog-article h2, .blog-article h3 { color: #000; page-break-after: avoid; }
+    .blog-article section { page-break-inside: avoid; }
+    .blog-article a { color: #000; text-decoration: underline; }
+    .blog-article code { border: 1px solid #000; }
+}
+
+/* --- Summary Box: Bild-Styling --- */
+
+.summary-image img {
+    max-width: 100%;
+    height: auto; /* WICHTIG: Erlaubt dem Bild, sich proportional zu skalieren */
+    border-radius: 8px;
+    /* box-shadow: 0 4px 15px rgba(0,0,0,0.3);  */
+    display: block;
+}
+
+/* --- Desktop Ansicht (ab 992px) --- */
+@media screen and (min-width: 992px) {
+    .summary-box {
+        flex-direction: row; /* Nebeneinander */
+        align-items: center; /* Vertikal zentriert */
+        justify-content: space-between;
+    }
+
+    .summary-content {
+        flex: 0 0 62%; /* Text bekommt ca. 2/3 Platz */
+        max-width: 62%;
+    }
+
+    .summary-image {
+        flex: 0 0 33%; /* Bild bekommt ca. 1/3 Platz */
+        max-width: 33%;
+        display: flex;
+        justify-content: flex-end; /* Bild rechtsbündig im Container */
+    }
+}
+
+
+
+/* --- LOKALE BOX (Community Style) --- */
+.local-relevance-box {
+    background: rgba(196, 163, 90, 0.1);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 4px;
+    padding: 2rem;
+    margin: 3rem 0;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.local-box-icon i {
+    font-size: 2rem;
+    color: var(--accent-color);
+    margin-top: 5px;
+}
+
+.local-box-content h3 {
+    margin-top: 0;
+    color: #fff;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.local-box-content p {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.local-box-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- FRAG MICHAEL SECTION --- */
+.blog-cta-wrapper {
+    text-align: center;
+    background: var(--bg-color-secondary);
+    padding: 3rem 2rem;
+    border-radius: 8px;
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.blog-cta-wrapper h2 {
+    font-size: 1.6rem; /* Etwas kleiner als H1 */
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+.blog-cta-wrapper p {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    color: var(--text-color);
+}
+
+.cta-button-blog {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1rem; /* Etwas größer für "Klickbarkeit" */
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cta-button-blog:hover {
+    background: #d39a00;
+    transform: translateY(-2px);
+}
+
+/* Mobile Anpassung */
+@media (max-width: 768px) {
+    .local-relevance-box {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    
+    .local-box-icon {
+        margin-bottom: 10px;
+    }
+}
+
+
+/* ===================
+   BREADCRUMB
+   =================== */
+
+.breadcrumb {
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.breadcrumb li {
+    display: flex;
+    align-items: center;
+    color: var(--text-color-muted);
+    margin-bottom: 0;
+}
+
+.breadcrumb li::before {
+    content: none; /* Override blog-style.css arrow */
+}
+
+.breadcrumb li:not(:last-child)::after {
+    content: "/";
+    margin: 0 0.6rem;
+    color: var(--text-color-subtle);
+    font-weight: 300;
+}
+
+.breadcrumb a {
+    color: var(--text-color-muted);
+    transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--accent-color);
+}
+
+.breadcrumb li:last-child span {
+    color: var(--text-color);
+    font-weight: 400;
+}
+
+/* ===================
+   RELATED ARTICLES
+   =================== */
+
+.related-articles {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color-subtle);
+}
+
+.related-articles h2 {
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-color-muted);
+    margin-bottom: 1.5rem;
+    padding-top: 0;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.related-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.related-card:hover {
+    border-color: var(--accent-color);
+    background: rgba(196, 163, 90, 0.05);
+    transform: translateY(-2px);
+}
+
+.related-card i {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    opacity: 0.7;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    transition: opacity 0.2s ease;
+}
+
+.related-card:hover i {
+    opacity: 1;
+}
+
+.related-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.related-card-category {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-color);
+    margin-bottom: 0.3rem;
+    font-weight: 400;
+}
+
+.related-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 0.4rem 0;
+    line-height: 1.3;
+}
+
+.related-card p {
+    font-size: 0.85rem;
+    color: var(--text-color-muted);
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 300;
+}
+
+/* ===================
+   RESPONSIVE
+   =================== */
+
+@media (max-width: 992px) {
+    .related-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .breadcrumb ol {
+        font-size: 0.8rem;
+    }
+    
+    .related-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .related-card {
+        padding: 1rem;
+    }
+    
+    .related-card i {
+        font-size: 1.25rem;
+    }
+    
+    .related-card h3 {
+        font-size: 0.95rem;
+    }
+}
+
+/* ===================
+   PRINT
+   =================== */
+
+/* Print: see consolidated block above (line ~630) *//* ===================
+   BLOG OVERVIEW - FAQ CARDS
+   =================== */
+
+.blog-overview .blog-intro {
+    font-size: 1.1rem;
+    color: var(--text-color-muted, #aaa);
+    max-width: 700px;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+}
+
+.faq-cards-section {
+    margin-bottom: 3rem;
+}
+
+.faq-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+    .faq-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* FAQ Card */
+.faq-card {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--card-bg, rgba(255,255,255,0.02));
+    border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+}
+
+.faq-card:hover {
+    border-color: var(--accent-color, #c4a35a);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(196, 163, 90, 0.08);
+}
+
+.faq-card:hover .faq-card-link {
+    color: var(--accent-color, #c4a35a);
+}
+
+.faq-card:hover .faq-card-link i {
+    transform: translateX(4px);
+}
+
+.faq-card-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg-hover, rgba(255,255,255,0.05));
+    border-radius: 10px;
+    font-size: 1.3rem;
+    color: var(--accent-color, #c4a35a);
+}
+
+.faq-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.faq-card-category {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: var(--accent-color, #c4a35a);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    opacity: 0.8;
+}
+
+.faq-card h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-color, #fff);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.35;
+}
+
+.faq-card p {
+    font-size: 0.88rem;
+    color: var(--text-color-muted, #999);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.55;
+}
+
+.faq-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-color-subtle, #666);
+    transition: color 0.2s ease;
+}
+
+.faq-card-link i {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+}
+
+
+/* ===================
+   PRINT STYLES
+   =================== */
+
+/* Print: see consolidated block above (line ~630) */
+
+/* Positioniert den <pre>-Container relativ, damit der Button absolut darin platziert werden kann */
+pre {
+    position: relative;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Das Design des Kopieren-Buttons */
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 6px 12px;
+    background-color: #333333; /* Dunkles Grau passend zum Dark-Mode */
+    color: #ffffff;
+    border: 1px solid #555555;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: inherit; /* Übernimmt die Schriftart (Poppins) */
+    transition: all 0.3s ease;
+    z-index: 10; /* Stellt sicher, dass der Button über dem Text liegt */
+}
+
+/* Hover-Effekt, wenn man mit der Maus darüber fährt */
+.copy-button:hover {
+    background-color: #444444;
+}
+
+/* Klasse, die per JavaScript hinzugefügt wird, wenn erfolgreich kopiert wurde */
+.copy-button.copied {
+    background-color: #28a745; /* Ein positives Grün */
+    border-color: #28a745;
+}

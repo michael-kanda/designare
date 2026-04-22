@@ -1,0 +1,6 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M-200 1080 C 199 987, 398 771, 744 824 C 1090 877, 1262 1080, 1530 1080 C 1798 1080, 1920 968, 1920 968 V 1080 H -200 Z" fill="rgba(244, 244, 244, 0.5)"/>
+<path d="M-100 200 C 200 300, 500 250, 800 400 C 1100 550, 1400 300, 1700 400 S 2020 600, 2020 600" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round"/>
+<path d="M-100 350 C 200 450, 500 400, 800 550 C 1100 700, 1400 450, 1700 550 S 2020 750, 2020 750" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round"/>
+<path d="M-100 500 C 200 600, 500 550, 800 700 C 1100 850, 1400 600, 1700 700 S 2020 900, 2020 900" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round"/>
+</svg>

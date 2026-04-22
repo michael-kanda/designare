@@ -1,0 +1,62 @@
+<!-- ============================================================
+     BLOG-FEEDBACK.HTML
+     Bewertungs- und Social Share Komponente
+     Wird dynamisch in den #feedback-placeholder geladen
+     ============================================================ -->
+
+<aside class="feedback-section" aria-labelledby="feedback-heading">
+    <h2 id="feedback-heading" class="visually-hidden">Feedback geben</h2>
+    
+    <div class="feedback-container">
+        <p class="feedback-title">War dieser Artikel hilfreich?</p>
+        
+        <!-- Rating Buttons -->
+        <div class="rating-buttons">
+            <button class="rating-btn positive" data-vote="positive" type="button" aria-label="Sehr informativ">
+                <i class="fa-solid fa-thumbs-up"></i> Sehr informativ
+            </button>
+            <button class="rating-btn neutral" data-vote="neutral" type="button" aria-label="Neutral">
+                <i class="fa-solid fa-minus"></i> Neutral
+            </button>
+            <button class="rating-btn negative" data-vote="negative" type="button" aria-label="Unbrauchbar">
+                <i class="fa-solid fa-thumbs-down"></i> Unbrauchbar
+            </button>
+        </div>
+
+        <!-- Ratio Bar -->
+        <div class="rating-ratio-bar" role="progressbar" aria-label="Bewertungsverhältnis">
+            <div class="ratio-segment pos" style="width: 70%;"></div>
+            <div class="ratio-segment neu" style="width: 20%;"></div>
+            <div class="ratio-segment neg" style="width: 10%;"></div>
+        </div>
+        <div class="rating-labels">
+            <span>👍 Hilfreich</span>
+            <span>👎 Nicht hilfreich</span>
+        </div>
+    </div>
+
+    <!-- Share Buttons -->
+    <div class="share-container">
+        <span class="share-label">Teilen:</span>
+        
+        <a href="javascript:void(0);" class="share-icon" data-platform="whatsapp" aria-label="Auf WhatsApp teilen" title="Auf WhatsApp teilen">
+            <i class="fa-brands fa-whatsapp"></i>
+        </a>
+        
+        <a href="javascript:void(0);" class="share-icon" data-platform="linkedin" aria-label="Auf LinkedIn teilen" title="Auf LinkedIn teilen">
+            <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+        
+        <a href="javascript:void(0);" class="share-icon" data-platform="reddit" aria-label="Auf Reddit teilen" title="Auf Reddit teilen">
+            <i class="fa-brands fa-reddit-alien"></i>
+        </a>
+        
+        <a href="javascript:void(0);" class="share-icon" data-platform="twitter" aria-label="Auf X teilen" title="Auf X teilen">
+            <i class="fa-brands fa-x-twitter"></i>
+        </a>
+        
+        <a href="javascript:void(0);" class="share-icon" data-platform="copy" aria-label="Link kopieren" title="Link kopieren">
+            <i class="fa-solid fa-link"></i>
+        </a>
+    </div>
+</aside>

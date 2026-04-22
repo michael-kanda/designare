@@ -1,0 +1,391 @@
+/* ============================================================
+   KI-TRAFFIC-ANIM.CSS
+   Styles für KI-Traffic Monitor Widget, Case Study Stacks
+   und Vergleichs-Matrix
+   ============================================================ */
+
+/* ══ KI-TRAFFIC MONITOR (Summary Widget) ══ */
+
+.ki-monitor {
+    font-family: 'Courier New', monospace;
+    background: var(--card-bg, #131315);
+    border: 1px solid var(--border-color, #2a2a2e);
+    border-radius: 6px;
+    overflow: hidden;
+    max-width: 360px;
+    width: 100%;
+}
+
+.km-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border-color, #222);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-color-subtle, #555);
+}
+
+.km-live {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #4ade80;
+}
+
+.km-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: km-pulse 1.5s infinite;
+}
+
+@keyframes km-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.km-body {
+    padding: 0.8rem;
+}
+
+.km-section-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--text-color-subtle, #444);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.km-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color, #222);
+}
+
+.km-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.km-bar-name {
+    font-size: 0.62rem;
+    color: var(--text-color-muted, #949494);
+    min-width: 75px;
+    font-weight: 600;
+}
+
+.km-bar-track {
+    flex: 1;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.km-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0;
+}
+
+.km-bar-val {
+    font-size: 0.6rem;
+    color: var(--text-color, #e4e4e4);
+    min-width: 30px;
+    text-align: right;
+    font-weight: 700;
+}
+
+.km-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color, #222);
+}
+
+.km-stat {
+    text-align: center;
+    padding: 0.3rem;
+}
+
+.km-stat-val {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-color, #e4e4e4);
+    line-height: 1.2;
+}
+
+.km-stat-val.green  { color: #4ade80; }
+.km-stat-val.red    { color: #f87171; }
+.km-stat-val.gold   { color: var(--accent-color, #c4a35a); }
+
+.km-stat-label {
+    font-size: 0.5rem;
+    color: var(--text-color-subtle, #555);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.km-verdict {
+    text-align: center;
+    padding: 0.5rem 0.6rem 0;
+    font-size: 0.6rem;
+    color: var(--text-color-muted, #777);
+    line-height: 1.4;
+    font-style: italic;
+}
+
+/* Toggle Buttons */
+.km-toggle {
+    display: flex;
+    border-top: 1px solid var(--border-color, #222);
+}
+
+.km-toggle-btn {
+    flex: 1;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-color-subtle, #555);
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: inherit;
+}
+
+.km-toggle-btn:not(:last-child) {
+    border-right: 1px solid var(--border-color, #222);
+}
+
+.km-toggle-btn.is-active {
+    color: var(--accent-color, #c4a35a);
+    background: rgba(196, 163, 90, 0.06);
+}
+
+.km-toggle-btn:hover {
+    color: var(--text-color, #e4e4e4);
+}
+
+
+/* ══ CASE STUDY: Vorher/Nachher Stacks ══ */
+
+.cs-flow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cs-stack {
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+}
+
+.cs-stack-title {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.cs-stack-title.red   { color: #f87171; }
+.cs-stack-title.green { color: #4ade80; }
+
+.cs-layer {
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 3px;
+    border-radius: 3px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: cs-slide-in 0.5s ease forwards;
+    opacity: 0;
+}
+
+.cs-layer:nth-child(2) { animation-delay: 0.1s; }
+.cs-layer:nth-child(3) { animation-delay: 0.2s; }
+.cs-layer:nth-child(4) { animation-delay: 0.3s; }
+.cs-layer:nth-child(5) { animation-delay: 0.4s; }
+.cs-layer:nth-child(6) { animation-delay: 0.5s; }
+
+.cs-layer.bloat {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+    border-left: 2px solid #f87171;
+}
+
+.cs-layer.lean {
+    background: rgba(74, 222, 128, 0.1);
+    color: #86efac;
+    border-left: 2px solid #4ade80;
+}
+
+.cs-layer-val {
+    font-family: 'Courier New', monospace;
+    font-size: 0.58rem;
+    opacity: 0.7;
+}
+
+@keyframes cs-slide-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.cs-total {
+    text-align: center;
+    padding: 0.5rem;
+    margin-top: 0.3rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    letter-spacing: -0.02em;
+}
+
+.cs-total.red   { background: rgba(248, 113, 113, 0.1); color: #f87171; }
+.cs-total.green { background: rgba(74, 222, 128, 0.08); color: #4ade80; }
+
+.cs-vs {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-color-subtle, #444);
+    flex-shrink: 0;
+}
+
+
+/* ══ VERGLEICHS-MATRIX TABLE ══ */
+
+.vergleich-matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 2rem 0;
+}
+
+.vergleich-matrix th,
+.vergleich-matrix td {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-color, #222);
+    text-align: left;
+}
+
+.vergleich-matrix thead th {
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-muted, #949494);
+}
+
+.vergleich-matrix tbody td {
+    color: var(--text-color, #e4e4e4);
+    font-weight: 300;
+}
+
+.vergleich-matrix tbody td:first-child {
+    font-weight: 600;
+    color: var(--text-color-muted, #949494);
+    font-size: 0.8rem;
+}
+
+
+/* ══ RESPONSIVE ══ */
+
+@media (max-width: 768px) {
+    .cs-flow {
+        flex-direction: column;
+    }
+    .cs-stack {
+        max-width: 100%;
+    }
+    .cs-vs {
+        margin: 0.5rem 0;
+    }
+    .km-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .km-bar-name {
+        min-width: 60px;
+        font-size: 0.55rem;
+    }
+    .km-stat-val {
+        font-size: 0.85rem;
+    }
+}
+
+
+/* ══ LIGHT MODE ══ */
+
+body.light-mode .ki-monitor {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .km-header {
+    border-color: #e0e0e0;
+}
+
+body.light-mode .km-stat-val {
+    color: #1a1a1a;
+}
+
+body.light-mode .km-stat-val.green  { color: #16a34a; }
+body.light-mode .km-stat-val.red    { color: #dc2626; }
+
+body.light-mode .km-toggle {
+    border-color: #e0e0e0;
+}
+
+body.light-mode .km-toggle-btn:not(:last-child) {
+    border-color: #e0e0e0;
+}
+
+body.light-mode .cs-layer.bloat {
+    background: rgba(248, 113, 113, 0.08);
+}
+
+body.light-mode .cs-layer.lean {
+    background: rgba(74, 222, 128, 0.06);
+}
+
+body.light-mode .vergleich-matrix th,
+body.light-mode .vergleich-matrix td {
+    border-color: #e0e0e0;
+}
+
+body.light-mode .vergleich-matrix thead th {
+    background: #f5f5f5;
+}

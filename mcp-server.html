@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>MCP Server: Warum meine Website jetzt direkt mit KIs spricht | Michael Kanda</title>
+    <meta name="description" content="designare.at hat einen eigenen MCP Server. Statt auf Crawler zu hoffen, liefere ich Claude, ChatGPT & Co. meine Daten direkt – strukturiert, aktuell, kontrolliert.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+<link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+    
+    <link rel="canonical" href="https://designare.at/mcp-server" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://designare.at/mcp-server#article",
+      "headline": "MCP Server: Warum meine Website jetzt direkt mit KIs spricht",
+      "alternativeHeadline": "Wie designare.at über das Model Context Protocol zur Primärquelle für LLMs wird",
+      "name": "MCP Server Guide",
+      "description": "designare.at betreibt einen eigenen MCP Server. Statt auf Crawler zu hoffen, liefert die Website KI-Systemen ihre Daten direkt – strukturiert, aktuell und kontrolliert.",
+      "url": "https://designare.at/mcp-server",
+      "keywords": [
+        "MCP Server",
+        "Model Context Protocol",
+        "GEO",
+        "KI-Sichtbarkeit",
+        "RAG",
+        "LLM Integration",
+        "Streamable HTTP",
+        "Vercel Serverless"
+      ],
+      "proficiencyLevel": "Expert",
+      "datePublished": "2026-04-12",
+      "dateModified": "2026-04-18",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://designare.at/mcp-server"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Michael Kanda",
+        "url": "https://designare.at/#michael",
+        "jobTitle": "Web & KI Entwickler"
+      },
+      "publisher": {"@type": "Person","name": "Michael Kanda","image": {"@type": "ImageObject","url": "https://designare.at/images/michael-kanda.webp"}},
+      "hasPart": {
+        "@id": "https://designare.at/mcp-server#faq-heading"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://designare.at/mcp-server#faq-heading",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist ein MCP Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MCP (Model Context Protocol) ist ein offenes Protokoll von Anthropic, das standardisiert, wie KI-Systeme mit externen Datenquellen kommunizieren. Ein MCP Server stellt Tools und Daten bereit, die LLMs wie Claude oder ChatGPT zur Laufzeit abfragen können – statt sich auf ihren Trainings-Snapshot zu verlassen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Warum braucht eine Website einen MCP Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Weil Crawler unzuverlässig sind. Ein Crawler interpretiert HTML nach eigenem Ermessen, oft mit Wochen Verzögerung. Ein MCP Server liefert dem LLM strukturierte, aktuelle, kuratierte Daten – direkt aus der eigenen Knowledge Base. Das ist GEO auf dem nächsten Level: nicht hoffen, dass die KI dich findet, sondern ihr eine direkte Leitung geben."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kostet ein MCP Server auf Vercel etwas?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Praktisch nichts. Der Endpoint läuft als Vercel Serverless Function im bestehenden Plan. Jede Anfrage triggert ein Gemini Embedding und eine Upstash Vector Query – beides im Free Tier. Bei normalem Betrieb fallen null zusätzliche Kosten an."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Können Claude und ChatGPT den MCP Server automatisch finden?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja – die offizielle MCP Registry läuft seit September 2025 unter registry.modelcontextprotocol.io, getragen von Anthropic, GitHub, PulseMCP und Microsoft. Mein Server ist dort seit 18. April 2026 als at.designare/knowledge eingetragen – mit DNS-verifizierter Domain-Ownership. Der Eintrag fließt automatisch in Sub-Registries wie Smithery, Glama und MCPMarket. Die automatische LLM-Empfehlung auf Basis der Registry-Metadaten ist 2026 noch in Entwicklung, aber die Infrastruktur steht."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Welche Daten liefert der designare.at MCP Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Zwei Tools. 'search_knowledge' macht semantische Suche über die Knowledge Base – Gemini Embedding → Upstash Vector, exakt Evitas RAG-Pipeline. 'get_services' liefert ein statisches JSON-Objekt: 6 Services (Webdesign, SEO, GEO, KI-Sichtbarkeits-Check, Website-Roast, KI-Assistenten) plus 5 Spezialisierungen. Vector DB wird nächtlich um 3:30 per Cron neu indexiert."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+ <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>    
+</head>
+
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                                                <div id="breadcrumb-placeholder"></div>
+                <h1>MCP Server: <span class="article-white">Warum meine Website jetzt direkt mit KIs spricht</span></h1>
+                
+                <div class="article-meta">
+                   <time datetime="2026-04-12">12. April 2026</time>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+          <section class="article-summary" aria-labelledby="summary-heading">
+    <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+    
+    <div class="summary-box">
+        <div class="summary-content">
+            <h3>Das Wichtigste in Kürze:</h3>
+            <ul>
+                <li><strong>Direkte Leitung statt Crawler:</strong> designare.at hat einen eigenen MCP Server. KI-Systeme bekommen strukturierte Daten direkt aus der Knowledge Base &ndash; nicht aus veraltetem, gecrawltem HTML.</li>
+                <li><strong>Null neue Dependencies:</strong> Der Server nutzt die bestehende RAG-Pipeline (Upstash Vector + Gemini Embeddings), die auch Evita versorgt. Drei neue Dateien, null neue Packages.</li>
+                <li><strong>GEO auf dem n&auml;chsten Level:</strong> Statt zu hoffen, dass ein Crawler deine Seite richtig interpretiert, kontrollierst du selbst, was KIs &uuml;ber dich wissen.</li>
+                <li><strong>Gemessen schnell:</strong> Median 426&nbsp;ms End-to-End (Live-Messung, 10 Calls) &ndash; der MCP-Overhead selbst ist &lt;10&nbsp;ms, der Rest ist RAG-Pipeline. Crawler brauchen Wochen, MCP liefert in einer halben Sekunde.</li>
+                <li><strong>Offiziell verifiziert:</strong> Seit 18. April 2026 ist der Server in der offiziellen <a href="https://registry.modelcontextprotocol.io" target="_blank" rel="noopener">MCP Registry</a> als <code>at.designare/knowledge</code> eingetragen &ndash; mit DNS-verifizierter Domain-Ownership.</li>
+                <li><strong>Zukunftsinvestment:</strong> Wenn MCP-Discovery kommt (voraussichtlich 2027), sind Websites mit bestehendem Server sofort angebunden.</li>
+            </ul>
+        </div>
+<!-- ══════════════════════════════════════════ -->
+        <!-- MCP DATA FLOW ANIMATION                    -->
+        <!-- Zeigt Crawler vs. MCP Datenfluss            -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="summary-image">
+            <div class="mcp-flow-demo" id="mcp-flow-demo">
+                <!-- Crawler Path (alt) -->
+                <div class="mcp-path mcp-path-crawler" id="mcp-path-crawler">
+                    <div class="mcp-path-label">Ohne MCP</div>
+                    <div class="mcp-nodes-col">
+                        <div class="mcp-node"><i class="fa-solid fa-robot"></i><span>LLM</span></div>
+                        <div class="mcp-connector"></div>
+                        <div class="mcp-node"><i class="fa-solid fa-code"></i><span>HTML</span><span class="mcp-node-tag">Crawl</span></div>
+                    </div>
+                    <div class="mcp-result mcp-result-bad">
+                        <span class="mcp-result-icon">&#x26A0;</span>
+                        <span class="mcp-result-text">Veraltet, unstrukturiert, unkontrolliert</span>
+                    </div>
+                </div>
+                <!-- MCP Path (neu) -->
+                <div class="mcp-path mcp-path-mcp" id="mcp-path-mcp">
+                    <div class="mcp-path-label">Mit MCP</div>
+                    <div class="mcp-nodes-col">
+                        <div class="mcp-node"><i class="fa-solid fa-robot"></i><span>LLM</span></div>
+                        <div class="mcp-connector mcp-connector-accent"></div>
+                        <div class="mcp-node"><i class="fa-solid fa-plug"></i><span>Server</span><span class="mcp-node-tag">MCP</span></div>
+                        <div class="mcp-connector mcp-connector-accent"></div>
+                        <div class="mcp-node"><i class="fa-solid fa-database"></i><span>Vector DB</span><span class="mcp-node-tag">RAG</span></div>
+                    </div>
+                    <div class="mcp-result mcp-result-good">
+                        <span class="mcp-result-icon">&#x2713;</span>
+                        <span class="mcp-result-text">Aktuell, strukturiert, kontrolliert</span>
+                    </div>
+                </div>
+                <!-- Toggle -->
+                <div class="mcp-toggle">
+                    <button class="mcp-toggle-btn is-active" data-state="crawler" type="button">Ohne MCP</button>
+                    <button class="mcp-toggle-btn" data-state="mcp" type="button">Mit MCP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>Wenn du meinen Artikel &uuml;ber <a href="geo-seo" title="GEO vs. SEO: So landest du in der KI-Antwort">GEO</a> gelesen hast, kennst du das Problem: KI-Systeme entscheiden zunehmend, welche Unternehmen in ihren Antworten auftauchen. Aber bisher konntest du nur hoffen, dass der Crawler deine Seite findet, richtig interpretiert und nicht Wochen alte Daten ausliefert. Was w&auml;re, wenn du den KIs stattdessen eine direkte Leitung zu deiner Knowledge Base geben k&ouml;nntest?</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-plug"></i>
+                    <div>
+                        <strong>Was hier l&auml;uft:</strong>
+                        <p>designare.at betreibt seit heute einen eigenen MCP Server. Das Model Context Protocol (MCP) ist ein offenes Protokoll von Anthropic<sup><a href="#quelle-5">[5]</a></sup> &ndash; quasi USB f&uuml;r KI-Tools. Es standardisiert, wie LLMs mit externen Datenquellen kommunizieren. Mein Server gibt Claude, ChatGPT und anderen KIs direkten Zugriff auf die gleiche Knowledge Base, die auch <a href="evita-ki-assistentin" title="Meet Evita: KI-Assistentin mit Ged&auml;chtnis &amp; RAG">Evita</a> versorgt.</p>
+                    </div>
+                </div>
+
+                <p>Die Idee ist einfach: Warum soll ein LLM sich durch gecrawltes HTML w&uuml;hlen, wenn ich ihm die Antwort strukturiert auf dem Silbertablett servieren kann? Und das Beste: Die gesamte Infrastruktur existierte bereits. Evitas RAG-Pipeline &ndash; Upstash Vector, Gemini Embeddings, das n&auml;chtliche Section-Chunking &ndash; brauchte nur eine neue T&uuml;r nach au&szlig;en.</p>
+            </section>
+
+            <section aria-labelledby="problem-heading">
+                <h2 id="problem-heading">Das Problem: <span class="article-white">Crawler sind blind</span></h2>
+                
+                <p>Klassisches <a href="geo-seo" title="GEO ist das neue SEO">GEO</a> funktioniert so: Du optimierst deine Seite mit <a href="schema-org-meta-description" title="Schema.org: Strukturierte Daten f&uuml;r KI-Suche">Schema.org</a>, semantischem Markup und Fakten-basiertem Content. Dann hoffst du, dass ein Crawler vorbeikommt, deine Seite richtig versteht und die KI dich zitiert. Das funktioniert &ndash; aber es hat drei Schwachstellen:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-clock-rotate-left"></i> Verz&ouml;gerung</dt>
+                    <dd>Zwischen &Auml;nderung auf deiner Website und Aktualisierung im LLM-Trainings-Snapshot k&ouml;nnen Wochen oder Monate liegen. Dein neues Service, dein aktuellster Blogartikel &ndash; f&uuml;r die KI existieren sie noch nicht.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-shuffle"></i> Interpretation</dt>
+                    <dd>Der Crawler entscheidet, was relevant ist. Er extrahiert vielleicht den falschen Absatz, &uuml;bersieht den wichtigen, oder mischt Inhalte aus verschiedenen Seiten. Du hast keine Kontrolle &uuml;ber das Ergebnis.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-eye-slash"></i> Unsichtbarkeit</dt>
+                    <dd>Selbst wenn dein Content perfekt ist: Wenn der Crawler dich nicht indexiert, existierst du f&uuml;r die KI nicht. Neue Seiten, kleine Websites, Nischenthemen &ndash; sie fallen oft durchs Raster.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Die Erkenntnis:</strong>
+                        <p>All die <a href="geo-maschinenlesbarkeit-guide" title="Praxis-Guide: JSON-LD und Schema.org">GEO-Optimierungen</a> sind nach wie vor wichtig &ndash; sie sind die Basis. Aber sie arbeiten reaktiv: Du ver&auml;nderst deine Seite und wartest, dass die KI es merkt. MCP dreht das Verh&auml;ltnis um: Du lieferst proaktiv. Die KI muss nicht mehr raten &ndash; sie fragt dich direkt.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="solution-heading">
+                <h2 id="solution-heading">Die L&ouml;sung: <span class="article-white">Ein MCP Server f&uuml;r deine Knowledge Base</span></h2>
+                
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-server"></i>
+                    <div>
+                        <strong>Architektur:</strong>
+                        <p>Der MCP Server l&auml;uft als Vercel Serverless Function (<code>/api/mcp</code>) mit Streamable HTTP Transport &ndash; dem aktuellen Standard f&uuml;r Remote-MCP-Server.<sup><a href="#quelle-4">[4]</a></sup> Keine zus&auml;tzlichen npm-Packages, kein Next.js, reines JSON-RPC &uuml;ber HTTP.</p>
+                    </div>
+                </div>
+
+                <p>Der Server stellt zwei Tools bereit, die externe LLMs &uuml;ber das MCP-Protokoll aufrufen k&ouml;nnen:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-magnifying-glass"></i> search_knowledge</dt>
+                    <dd>Semantische Suche in der gesamten designare.at Knowledge Base. Ein LLM fragt zum Beispiel: &bdquo;Was bietet designare.at im Bereich GEO an?&ldquo; &ndash; und bekommt strukturierte, relevante Textbl&ouml;cke zur&uuml;ck, inklusive Quellenlinks. Unter der Haube l&auml;uft exakt die gleiche Pipeline, die auch <a href="evita-ki-assistentin" title="Evita: KI-Assistentin mit RAG">Evita</a> nutzt: Gemini Embedding &rarr; Upstash Vector Query &rarr; Top-5-Chunks.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-briefcase"></i> get_services</dt>
+                    <dd>Ein strukturierter JSON-&Uuml;berblick aller Dienstleistungen, Spezialisierungen und Kernkompetenzen. Kein Parsing n&ouml;tig, keine Interpretation &ndash; das LLM bekommt klar getrennte Felder mit Name, Beschreibung und Kontext. Konkret: sechs Services von Webdesign bis KI-Assistenten, f&uuml;nf technische Spezialisierungen und Evita als Kontext-Referenz.</dd>
+                </dl>
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- LIVE-BEISPIEL: Echter get_services Output   -->
+                <!-- Zeigt, welches JSON der Server wirklich      -->
+                <!-- zur&uuml;ckgibt &ndash; starkes GEO-Signal.  -->
+                <!-- ══════════════════════════════════════════ -->
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
+                    <div>
+                        <strong>Was <code>get_services</code> wirklich zur&uuml;ckgibt:</strong>
+                        <p>Das ist kein Marketing-Text. Das ist der tats&auml;chliche JSON-Output, den ein LLM bekommt, wenn es das Tool aufruft &ndash; gek&uuml;rzt zur besseren Lesbarkeit:</p>
+<pre><code>{
+  "name": "Michael Kanda",
+  "brand": "designare.at",
+  "role": "Komplize f&uuml;r Web &amp; KI aus Wien",
+  "location": "Wien, &Ouml;sterreich",
+  "services": [
+    { "name": "Webdesign &amp; Entwicklung",
+      "description": "Ma&szlig;geschneiderte Websites mit Fokus auf
+                      Performance, UX und Barrierefreiheit" },
+    { "name": "SEO (Search Engine Optimization)",
+      "description": "Klassische Suchmaschinenoptimierung f&uuml;r
+                      Google &amp; Bing &ndash; von Technical SEO bis
+                      Content-Strategie" },
+    { "name": "GEO (Generative Engine Optimization)",
+      "description": "Optimierung f&uuml;r KI-Suchmaschinen wie ChatGPT,
+                      Perplexity, Google AI Overviews und Gemini" },
+    { "name": "KI-Sichtbarkeits-Check",
+      "description": "Analyse wie sichtbar ein Unternehmen in
+                      KI-Antworten ist &ndash; mit konkreten
+                      Handlungsempfehlungen" },
+    { "name": "Website-Roast",
+      "description": "Quick-Check mit &ouml;sterreichischem
+                      Schulnoten-System (1-5) f&uuml;r SEO,
+                      Performance, Mobile &amp; Technik" },
+    { "name": "KI-Assistenten",
+      "description": "Entwicklung von KI-Chatbots und Assistenten
+                      wie Evita" }
+  ],
+  "specializations": [
+    "WordPress &amp; WooCommerce",
+    "Core Web Vitals &amp; PageSpeed",
+    "Schema Markup &amp; Structured Data",
+    "KI-Integration f&uuml;r Websites",
+    "Barrierefreies Webdesign"
+  ]
+}</code></pre>
+                        <p>Genau das landet strukturiert beim LLM &ndash; ohne dass ein Crawler HTML parsen, Kontext erraten oder Marketing-Fluff filtern muss. <strong>Das ist GEO auf Protokoll-Ebene.</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="how-heading">
+                <h2 id="how-heading">Unter der Haube: <span class="article-white">So funktioniert der Datenfluss</span></h2>
+                
+                <p>Der Weg von der LLM-Frage zur Antwort in vier Schritten &ndash; ohne Crawler, ohne Verz&ouml;gerung:</p>
+
+                <div class="step-guide">
+                    <h3>Schritt 1: <span class="article-white">JSON-RPC Handshake</span></h3>
+                    <p>Ein MCP-Client (z.B. Claude Desktop) verbindet sich mit <code>https://designare.at/api/mcp</code>. Per <code>initialize</code>-Call identifiziert sich der Client, und der Server antwortet mit seinen Capabilities und der Liste verf&uuml;gbarer Tools. Alles &uuml;ber Standard-HTTP, kein WebSocket, keine persistente Verbindung.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 2: <span class="article-white">Tool-Aufruf</span></h3>
+                    <p>Das LLM entscheidet, dass es Informationen &uuml;ber designare.at braucht und ruft <code>search_knowledge</code> mit einer nat&uuml;rlichsprachigen Query auf. Der MCP Server empf&auml;ngt den JSON-RPC-Call und leitet ihn an die RAG-Pipeline weiter.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 3: <span class="article-white">RAG-Pipeline</span></h3>
+                    <p>Dieselbe Magie, die auch <a href="evita-ki-assistentin" title="Evita: KI-Assistentin mit RAG &amp; Vektor-Suche">Evita</a> antreibt: Die Query wird &uuml;ber die Gemini Embedding API in einen Vektor umgewandelt, Upstash Vector findet die semantisch &auml;hnlichsten Content-Sektionen, und die Top-Treffer werden als strukturiertes JSON aufbereitet.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 4: <span class="article-white">Antwort mit Quellenangabe</span></h3>
+                    <p>Das LLM erh&auml;lt die Daten, formuliert seine Antwort und &ndash; das ist der entscheidende Punkt &ndash; <strong>zitiert designare.at als Quelle</strong>. Nicht weil ein Crawler das HTML richtig geraten hat, sondern weil die Daten direkt und verifiziert vom Server kamen.</p>
+                </div>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-rotate"></i>
+                    <div>
+                        <strong>Automatisch aktuell:</strong>
+                        <p>Die Upstash Vector DB wird jede Nacht um 3:30 Uhr via Cron-Job synchronisiert. &Auml;nderst du heute einen Blogartikel, liefert der MCP Server morgen fr&uuml;h die aktualisierte Information &ndash; ohne manuellen Eingriff.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- MCP LIVE DEMO: KI-Suche der Zukunft               -->
+            <!-- Zeigt den kompletten Flow: Frage → MCP → Antwort  -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <section aria-labelledby="demo-heading">
+                <h2 id="demo-heading">KI-Suche der Zukunft: <span class="article-white">So sieht das in der Praxis aus</span></h2>
+
+                <p>Theorie ist gut, Praxis ist besser. Die folgende Simulation zeigt, was passiert, wenn ein LLM den designare.at MCP Server nutzt &ndash; vom User-Prompt bis zur zitierten Antwort.</p>
+
+                <div class="mcp-live-demo" id="mcp-live-demo">
+                    <!-- Chat Area -->
+                    <div class="mcpd-chat">
+                        <div class="mcpd-chat-header">
+                            <span class="mcpd-chat-icon"><i class="fa-solid fa-robot"></i></span>
+                            <span class="mcpd-chat-name">KI-Assistent</span>
+                            <span class="mcpd-chat-badge">MCP aktiv</span>
+                        </div>
+                        <div class="mcpd-chat-body" id="mcpd-chat-body"></div>
+                    </div>
+                    <!-- Protocol Log -->
+                    <div class="mcpd-log">
+                        <div class="mcpd-log-header">
+                            <span class="mcpd-log-dot"></span>
+                            <span>Protokoll</span>
+                        </div>
+                        <div class="mcpd-log-body" id="mcpd-log-body"></div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-eye"></i>
+                    <div>
+                        <strong>Was du hier siehst:</strong>
+                        <p>Links die Chat-Ansicht, wie sie der Nutzer erlebt. Rechts das MCP-Protokoll, das im Hintergrund l&auml;uft &ndash; der JSON-RPC-Call an <code>/api/mcp</code>, die Vektor-Suche und die strukturierte Antwort. Der Nutzer sieht davon nichts &ndash; er bekommt einfach eine fundierte Antwort mit Quellenangabe.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- PERFORMANCE-SEKTION                                -->
+            <!-- Eigene Messwerte + Komponenten-Breakdown +         -->
+            <!-- Crawler-Vergleich. Harte Zahlen, keine Claims.     -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <section aria-labelledby="performance-heading">
+                <h2 id="performance-heading">Performance: <span class="article-white">Wie schnell ist das eigentlich?</span></h2>
+
+                <p>Theoretische Benchmarks gibt es einige &ndash; aber was z&auml;hlt, ist die reale Latenz. Ich habe meinen produktiv laufenden Server mit 10 aufeinanderfolgenden <code>search_knowledge</code>-Calls gemessen (nach einem Warm-up-Request, unterschiedliche Queries, um Caching auszuschlie&szlig;en). Das Ergebnis:</p>
+
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-stopwatch"></i>
+                    <div>
+                        <strong>Live-Messung designare.at/api/mcp (18. April 2026):</strong>
+<pre><code>Run#  Query                                     Latenz
+────  ────────────────────────────────────────  ──────
+1     Welche Services bietet designare.at?      (warm-up, nicht gez&auml;hlt)
+2     Wie funktioniert die KI-Assistentin Ev     443ms
+3     Was macht Michael Kanda?                   465ms
+4     Wie kontaktiere ich designare.at?          411ms
+5     Was ist GEO?                               400ms
+6     Welche Services bietet designare.at?       394ms
+7     Wie funktioniert die KI-Assistentin Ev     425ms
+8     Was macht Michael Kanda?                   414ms
+9     Wie kontaktiere ich designare.at?          428ms
+10    Was ist GEO?                               671ms  &larr; Cold-Start
+11    Was ist GEO?                               738ms  &larr; Cold-Start
+                                                 ─────
+                                                 Min    394ms
+                                                 Median 426ms
+                                                 Avg    478ms
+                                                 P95    738ms
+                                                 Max    738ms</code></pre>
+                        <p>Das ist <strong>End-to-End-Latenz</strong> &ndash; von HTTP-Request bis komplette JSON-Antwort, gemessen aus einem Codespace in Frankfurt gegen den Vercel Edge Node in Frankfurt.</p>
+                    </div>
+                </div>
+
+                <p>Die entscheidende Frage: <em>Wo geht die Zeit hin?</em> Der MCP-Protokoll-Overhead selbst ist minimal &ndash; unabh&auml;ngige Benchmarks zeigen f&uuml;r reine Protokoll-Operationen bei Java/Go-Implementierungen <strong>Sub-Millisekunden-Latenzen</strong>.<sup><a href="#quelle-11">[11]</a></sup> Die dominanten Faktoren liegen woanders:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-brain"></i> Gemini Embedding API (~200&ndash;400 ms)</dt>
+                    <dd>Der gr&ouml;&szlig;te Posten. Die Query wird in einen 768-dimensionalen Vektor umgewandelt &ndash; das passiert in den Google-Rechenzentren. Latenz entsteht durch das HTTP-Round-Trip und die Modellinferenz.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-database"></i> Upstash Vector Query (~30&ndash;100 ms)</dt>
+                    <dd>Die semantische Suche im Vektor-Index. Top-K=8, Ergebnisse mit Metadaten. Fast immer unter 100 ms &ndash; Upstash betreibt global verteilte Edge-Knoten.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-plug"></i> MCP-Protokoll-Overhead (&lt; 10 ms)</dt>
+                    <dd>JSON-Parsing, Validierung, Rate-Limit-Check, Response-Serialisierung. Im Verh&auml;ltnis zu den RAG-Komponenten vernachl&auml;ssigbar.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-snowflake"></i> Vercel Cold Start (optional, 50&ndash;500 ms)</dt>
+                    <dd>Wenn die Serverless Function seit mehreren Minuten nicht aufgerufen wurde, dauert der erste Request l&auml;nger. Siehe Call #10 und #11 in der Messung oben. Bei regelm&auml;&szlig;iger Nutzung praktisch nicht sp&uuml;rbar.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-network-wired"></i> Netzwerk &amp; Edge (20&ndash;80 ms)</dt>
+                    <dd>TCP-Handshake, TLS, Vercel Edge Routing, Response-Transport. Optimiert durch geografische N&auml;he &ndash; mein Server l&auml;uft im Frankfurter Vercel-Edge-Node.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Erkenntnis:</strong>
+                        <p>Der MCP-Protokoll-Overhead macht <strong>weniger als 5% der Gesamtlatenz</strong> aus. Wer die Performance optimieren will, optimiert die RAG-Pipeline (Embedding-Batch, Vector-Index-Tuning) &ndash; nicht das Protokoll. Das gilt genauso, wenn MCP nicht davor sitzt: Eine RAG-Anfrage ohne MCP w&auml;re kaum schneller.</p>
+                    </div>
+                </aside>
+
+                <h3>Im Vergleich: <span class="article-accent">Crawler vs. MCP</span></h3>
+                <p>Um die Zahlen einzuordnen &ndash; hier ein Vergleich, wie lange es dauert, bis ein LLM auf einen aktualisierten Inhalt reagieren kann:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-spider"></i> Crawler (klassisch)</dt>
+                    <dd><strong>Tage bis Wochen</strong> bis zur LLM-Antwort (Re-Crawl &rarr; Re-Index &rarr; Re-Training). Inhalte sind wenn sie ankommen bereits <em>veraltet</em>.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-arrows-spin"></i> RAG &uuml;ber Website-Scrape</dt>
+                    <dd><strong>5&ndash;30 Sekunden</strong> pro Anfrage (Fetch &rarr; Parse &rarr; Embed). Inhalte sind nur so gut wie das HTML &ndash; oft <em>fragmentiert</em>, weil Navigation, Sidebars und Widgets mit-extrahiert werden.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-rocket"></i> MCP Server (dieser hier)</dt>
+                    <dd><strong>~426&nbsp;ms Median</strong> gemessen an designare.at. Inhalte sind <em>tagesaktuell</em> durch n&auml;chtliche Vector-DB-Synchronisation.</dd>
+                </dl>
+
+                <p>Der Geschwindigkeitsunterschied ist nicht 2&times; oder 10&times; &ndash; er ist <strong>mehrere Gr&ouml;&szlig;enordnungen</strong>. Das ist auch der Grund, warum MCP nicht nur eine h&uuml;bsche Alternative zum Crawler ist, sondern strukturell etwas Neues: Ein LLM kann w&auml;hrend einer Antwort mehrere MCP-Calls machen und trotzdem innerhalb der Response-Zeit bleiben. Ein Crawler schafft das nicht.</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Einordnung fremder Benchmarks:</strong>
+                        <p>Die MCP-Community hat 2025/2026 mehrere gro&szlig; angelegte Performance-Studien ver&ouml;ffentlicht. Das TM Dev Lab Multi-Language-Benchmark<sup><a href="#quelle-11">[11]</a></sup> testete 15 Implementierungen mit 39,9 Millionen Requests &ndash; Rust-Server erreichten 4.845 RPS bei Sub-Millisekunden-Latenz. Stainless berichtet &uuml;ber dynamische Schema-Transformationen, die 10&ndash;20 % Latenz-Overhead hinzuf&uuml;gen k&ouml;nnen, bei guter Schema-Disziplin aber vermeidbar sind.<sup><a href="#quelle-12">[12]</a></sup> Meine Zahlen oben sind keine Lab-Werte, sondern Produktion &ndash; und passen gut ins Bild.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="implementation-heading">
+                <h2 id="implementation-heading">Die Umsetzung: <span class="article-white">Drei Dateien, null Dependencies</span></h2>
+                
+                <p>Das &Uuml;berraschende: Die gesamte MCP-Integration bestand aus drei neuen Dateien und einer dreizeiligen &Auml;nderung am bestehenden Rate Limiter. Kein Umbau, kein neues Framework, keine npm-Packages. Fairerweise: Das funktioniert so schlank, weil die RAG-Pipeline (Upstash Vector, Gemini Embeddings, n&auml;chtlicher Cron-Sync) bereits stand. Ohne diese Basis w&auml;re der erste Schritt nicht der MCP Server, sondern die Knowledge Base &ndash; ein eigenes Projekt.</p>
+
+                <dl class="feature-list">
+                    <dt><code>api/mcp.js</code> &ndash; Der Endpoint</dt>
+                    <dd>JSON-RPC 2.0 Handler f&uuml;r MCP Streamable HTTP Transport. Unterst&uuml;tzt <code>initialize</code>, <code>tools/list</code>, <code>tools/call</code> und <code>ping</code>. GET f&uuml;r Health-Check, POST f&uuml;r MCP-Kommunikation, DELETE f&uuml;r Session-Cleanup. Gleicher Pattern wie alle anderen Vercel Functions im Projekt.</dd>
+
+                    <dt><code>lib/mcp-config.js</code> &ndash; Konfiguration &amp; Tool-Logik</dt>
+                    <dd>Definiert die zwei Tools im MCP JSON Schema Format und die <code>executeToolCall()</code>-Funktion, die den Dispatch &uuml;bernimmt. Importiert <code>searchContext()</code> aus der bestehenden <code>rag-service.js</code> &ndash; die gesamte Vektor-Suche wird wiederverwendet, nicht dupliziert.</dd>
+
+                    <dt><code>.well-known/mcp.json</code> &ndash; Discovery</dt>
+                    <dd>Eine statische JSON-Datei im <code>public/</code>-Verzeichnis, die den Server f&uuml;r zuk&uuml;nftige MCP-Discovery-Systeme beschreibt. F&uuml;nf Zeilen JSON mit Server-URL, Transport-Typ und Tool-&Uuml;bersicht &ndash; das Pendant zu <code>robots.txt</code> f&uuml;r die KI-&Auml;ra.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
+                    <div>
+                        <strong>Entwickler-Tipp:</strong>
+                        <p>Viele MCP-Tutorials empfehlen den <code>@modelcontextprotocol/sdk</code> oder Vercels <code>mcp-handler</code> Package. F&uuml;r ein klassisches Vercel-Serverless-Projekt (ohne Next.js) ist reines JSON-RPC die schlankere L&ouml;sung: Kein zus&auml;tzliches Package, minimaler Cold Start, und die volle Kontrolle &uuml;ber das Protokoll-Handling in ~120 Zeilen Code.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="future-heading">
+                <h2 id="future-heading">Wo wir stehen: <span class="article-white">Ecosystem, Registry und was noch kommt</span></h2>
+                
+                <p>Seit MCP Ende 2024 ver&ouml;ffentlicht wurde, ist das &Ouml;kosystem explodiert. 2026 ist nicht mehr die Frage &bdquo;Wird MCP sich durchsetzen?&ldquo;, sondern &bdquo;Wie tief integrierst du es?&ldquo;. Hier ein ehrlicher Status-Check:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-circle-check"></i> MCP Registry &ndash; eingetragen seit 18. April 2026</dt>
+                    <dd>Unter <a href="https://registry.modelcontextprotocol.io" target="_blank" rel="noopener">registry.modelcontextprotocol.io</a> l&auml;uft die offizielle Registry seit September 2025 &ndash; community-getragen von Anthropic, GitHub, PulseMCP und Microsoft.<sup><a href="#quelle-7">[7]</a></sup> Mein Server ist dort seit <strong>18. April 2026 als <code>at.designare/knowledge</code></strong> gelistet &ndash; authentifiziert &uuml;ber DNS-Ownership via Ed25519-Signatur am Root-TXT-Record von designare.at. Der Eintrag fliesst automatisch in Sub-Registries wie Smithery, Glama und MCPMarket. Die automatische LLM-Empfehlung auf Basis dieser Metadaten ist noch in Entwicklung &ndash; aber das Fundament steht.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-sitemap"></i> Linux Foundation &ndash; MCP als echter Industriestandard</dt>
+                    <dd>Im Dezember 2025 spendete Anthropic MCP an die neu gegr&uuml;ndete <strong>Agentic AI Foundation</strong> unter der Linux Foundation.<sup><a href="#quelle-3">[3]</a></sup> Mitglieder: OpenAI, Block, AWS, Google, Microsoft, Cloudflare und Bloomberg. MCP ist jetzt vendor-neutral &ndash; kein Hersteller kann einseitig die Spielregeln &auml;ndern. F&uuml;r Website-Betreiber hei&szlig;t das: Die Investition in einen eigenen MCP Server ist auf Jahre hinaus zukunftssicher.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-code-branch"></i> Spec 2025-11-25 &ndash; async Tasks, neue OAuth, Extensions</dt>
+                    <dd>Zum ersten Geburtstag des Protokolls (25. November 2025) kam ein gro&szlig;es Spec-Update mit async Tasks, Client ID Metadata Documents, Enterprise-Managed Auth (SSO) und einem Extensions-Framework.<sup><a href="#quelle-8">[8]</a></sup> Alles abw&auml;rtskompatibel &ndash; mein Server l&auml;uft gerade auf <code>2025-03-26</code>/<code>2024-11-05</code> und wird schrittweise auf die neue Spec migriert.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-id-card"></i> MCP Server Cards &ndash; kommender Standard f&uuml;r <code>.well-known/mcp.json</code></dt>
+                    <dd>Die 2026-er Roadmap plant einen offiziellen Standard f&uuml;r Server-Metadaten via <code>.well-known</code>-URL.<sup><a href="#quelle-9">[9]</a></sup> Damit k&ouml;nnen Registries, Crawler und Browser die Capabilities eines Servers erkennen, ohne eine Verbindung aufzubauen. Mein <code>.well-known/mcp.json</code> liegt bereits am richtigen Pfad &ndash; das Format werde ich anpassen, sobald der Standard final ist.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-arrows-rotate"></i> Runtime statt Training</dt>
+                    <dd>Der Trend geht von &bdquo;alles aus dem Training wissen&ldquo; zu &bdquo;zur Laufzeit die beste Quelle anfragen&ldquo;. MCP ist die Infrastruktur f&uuml;r genau diesen Wandel. Mittelfristig wird ein MCP-Endpoint so selbstverst&auml;ndlich sein wie heute eine Sitemap.</dd>
+                </dl>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-coins"></i>
+                    <div>
+                        <strong>Kosten: Exakt null.</strong>
+                        <p>Der Server l&auml;uft als Vercel Serverless Function im bestehenden Pro-Plan. Gemini Embeddings und Upstash Vector Queries sind im Free Tier. Rate Limiting sch&uuml;tzt vor Missbrauch. Bis signifikanter Traffic entsteht, zahlt man keinen Cent extra.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">H&auml;ufig gestellte Fragen (FAQ)</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Was ist ein MCP Server?</summary>
+                        <div class="faq-content">
+                            <p>MCP (Model Context Protocol) ist ein offenes Protokoll von Anthropic, das standardisiert, wie KI-Systeme mit externen Datenquellen kommunizieren. Ein MCP Server stellt Tools und Daten bereit, die LLMs wie Claude oder ChatGPT zur Laufzeit abfragen k&ouml;nnen &ndash; statt sich auf ihren Trainings-Snapshot zu verlassen. Stell es dir wie USB f&uuml;r KI-Tools vor: Egal welches Ger&auml;t, der Stecker ist immer gleich.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Warum braucht eine Website einen MCP Server?</summary>
+                        <div class="faq-content">
+                            <p>Weil Crawler unzuverl&auml;ssig sind. Ein Crawler interpretiert HTML nach eigenem Ermessen, oft mit Wochen Verz&ouml;gerung. Ein MCP Server liefert dem LLM strukturierte, aktuelle, kuratierte Daten &ndash; direkt aus der eigenen Knowledge Base. Das ist <a href="geo-seo" title="GEO vs. SEO: Der Guide f&uuml;r das KI-Zeitalter">GEO</a> auf dem n&auml;chsten Level: nicht hoffen, dass die KI dich findet, sondern ihr eine direkte Leitung geben.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Kostet ein MCP Server auf Vercel etwas?</summary>
+                        <div class="faq-content">
+                            <p>Praktisch nichts. Der Endpoint l&auml;uft als Vercel Serverless Function im bestehenden Plan. Jede Anfrage triggert ein Gemini Embedding (~0.001 ct) und eine Upstash Vector Query (Free Tier: 500.000/Monat). Bei normalem Betrieb fallen null zus&auml;tzliche Kosten an. Rate Limiting sch&uuml;tzt vor Missbrauch.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>K&ouml;nnen Claude und ChatGPT den Server automatisch finden?</summary>
+                        <div class="faq-content">
+                            <p>Die offizielle <a href="https://registry.modelcontextprotocol.io" target="_blank" rel="noopener">MCP Registry</a> l&auml;uft seit September 2025 &ndash; getragen von Anthropic, GitHub, PulseMCP und Microsoft.<sup><a href="#quelle-7">[7]</a></sup> Mein Server ist dort seit <strong>18. April 2026 als <code>at.designare/knowledge</code></strong> eingetragen, authentifiziert &uuml;ber DNS-Ownership der Domain designare.at. Der Eintrag flie&szlig;t automatisch in Sub-Registries wie Smithery, Glama und MCPMarket. Die <em>automatische</em> LLM-Empfehlung auf Basis dieser Metadaten ist 2026 noch in Entwicklung &ndash; aber die Infrastruktur steht, und mein Server ist in der ersten Welle dabei.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie h&auml;ngt MCP mit GEO zusammen?</summary>
+                        <div class="faq-content">
+                            <p>GEO-Optimierungen (<a href="schema-org-meta-description" title="Schema.org f&uuml;r KI-Suche">Schema.org</a>, <a href="semantisches-markup" title="Semantisches HTML">semantisches Markup</a>, E-E-A-T) bleiben die Basis &ndash; sie sorgen daf&uuml;r, dass Crawler deine Inhalte verstehen. MCP geht einen Schritt weiter: Statt darauf zu warten, dass die KI deine optimierte Seite crawlt, gibst du ihr eine direkte, strukturierte Datenquelle. Die beiden Ans&auml;tze erg&auml;nzen sich perfekt.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Welche Daten liefert der designare.at MCP Server?</summary>
+                        <div class="faq-content">
+                            <p>Zwei Tools. <code>search_knowledge</code> macht semantische Suche &uuml;ber die Knowledge Base &ndash; Gemini Embedding &rarr; Upstash Vector, exakt <a href="evita-ki-assistentin" title="Evita: KI-Assistentin mit RAG">Evitas</a> RAG-Pipeline. <code>get_services</code> liefert ein statisches JSON-Objekt: <strong>6 Services</strong> (Webdesign, SEO, GEO, KI-Sichtbarkeits-Check, Website-Roast, KI-Assistenten) plus <strong>5 Spezialisierungen</strong>. Vector DB wird n&auml;chtlich um 3:30 per Cron neu indexiert.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Sei die Quelle, nicht das Suchergebnis</span></h2>
+                
+                <p>In meinem <a href="geo-seo" title="GEO vs. SEO: So landest du in der KI-Antwort">GEO-Artikel</a> habe ich geschrieben: Die neue W&auml;hrung ist nicht der Klick, sondern das Zitat. MCP macht daraus eine technische Realit&auml;t. Du lieferst nicht mehr passiv Content und hoffst auf Crawler &ndash; du gibst LLMs eine direkte, verifizierte Leitung zu deinem Wissen.</p>
+
+                <div class="key-points">
+                    <h3>Takeaway:</h3>
+                    <ul>
+                        <li><strong>GEO bleibt die Basis:</strong> <a href="schema-org-meta-description" title="Schema.org Guide">Strukturierte Daten</a>, <a href="semantisches-markup" title="Semantisches HTML">semantisches Markup</a> und E-E-A-T sind weiterhin Pflicht. MCP ersetzt GEO nicht &ndash; es erweitert es um eine proaktive Komponente.</li>
+                        <li><strong>Die Infrastruktur existiert:</strong> Wenn du bereits eine RAG-Pipeline betreibst (f&uuml;r einen Chatbot, ein FAQ-System, eine Wissensdatenbank), ist ein MCP Server ein Nachmittagsprojekt &ndash; nicht ein Quartals-Ticket.</li>
+                        <li><strong>Noch keine RAG-Pipeline?</strong> Dann ist der MCP Server das Ziel, nicht der erste Schritt. Fang mit einer Knowledge Base und Vektor-Suche an &ndash; der MCP-Endpoint kommt dann fast von allein.</li>
+                        <li><strong>Timing:</strong> 2026 ist MCP client-seitig bereits Standard (ChatGPT, Claude, Gemini, Cursor, VS Code, Copilot).<sup><a href="#quelle-1">[1]</a></sup> Die offizielle Registry l&auml;uft seit September 2025<sup><a href="#quelle-7">[7]</a></sup>, die Linux Foundation tr&auml;gt das Protokoll.<sup><a href="#quelle-3">[3]</a></sup> Mein Server ist seit 18. April 2026 eingetragen &ndash; in der ersten Welle der &ouml;sterreichischen MCP-Server. Wenn LLMs anfangen, Registry-Eintr&auml;ge automatisch zu ber&uuml;cksichtigen, ist designare.at von Anfang an dabei.</li>
+                    </ul>
+                     <p>Probier es aus: Wenn du Claude Desktop nutzt, kannst du den designare.at MCP Server schon heute einbinden und meine Knowledge Base direkt abfragen.</p>
+                </div>
+            </section>
+
+            <section aria-labelledby="sources-heading">
+                <h2 id="sources-heading">Quellen</h2>
+                
+                <ol class="source-list">
+                    <li id="quelle-1">Pento: <a href="https://www.pento.ai/blog/a-year-of-mcp-2025-review" target="_blank" rel="noopener">A Year of MCP: From Internal Experiment to Industry Standard</a> &ndash; &Uuml;berblick &uuml;ber die MCP-Adoption inkl. Client-Support in Claude, ChatGPT, Cursor, Gemini, Copilot und VS Code.</li>
+                    <li id="quelle-2">InfoQ: <a href="https://www.infoq.com/news/2025/10/chat-gpt-mcp/" target="_blank" rel="noopener">OpenAI Adds Full MCP Support to ChatGPT Developer Mode</a> (Oktober 2025) &ndash; OpenAIs MCP-Integration mit Lese- und Schreibzugriff auf externe Tools.</li>
+                    <li id="quelle-3">PulseMCP: <a href="https://www.pulsemcp.com/posts/openai-agent-skills-anthropic-donates-mcp-gpt-5-2-image-1-5" target="_blank" rel="noopener">Anthropic donates MCP to the Linux Foundation</a> (Dezember 2025) &ndash; Gr&uuml;ndung der Agentic AI Foundation mit OpenAI, Block, AWS, Google und Microsoft.</li>
+                    <li id="quelle-4">Vercel: <a href="https://vercel.com/blog/building-efficient-mcp-servers" target="_blank" rel="noopener">Building efficient MCP servers</a> &ndash; Streamable HTTP Transport als empfohlener Standard f&uuml;r Remote-MCP-Server.</li>
+                    <li id="quelle-5">Anthropic: <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">Model Context Protocol &ndash; Offizielle Spezifikation</a> (Spec 2025-03-26) &ndash; Das Protokoll, auf dem dieser Server basiert.</li>
+                    <li id="quelle-6">VentureBeat: <a href="https://venturebeat.com/programming-development/openai-updates-its-new-responses-api-rapidly-with-mcp-support-gpt-4o-native-image-gen-and-more-enterprise-features/" target="_blank" rel="noopener">OpenAI updates Responses API with MCP support</a> (Dezember 2025) &ndash; Integration von Remote-MCP-Servern in die OpenAI API.</li>
+                    <li id="quelle-7">Model Context Protocol Blog: <a href="https://blog.modelcontextprotocol.io/posts/2025-09-08-mcp-registry-preview/" target="_blank" rel="noopener">Introducing the MCP Registry</a> (September 2025) &ndash; Launch der offiziellen Registry unter registry.modelcontextprotocol.io, getragen von Anthropic, GitHub, PulseMCP und Microsoft.</li>
+                    <li id="quelle-8">Model Context Protocol: <a href="https://blog.modelcontextprotocol.io/posts/2025-11-25-first-mcp-anniversary/" target="_blank" rel="noopener">One Year of MCP &ndash; November 2025 Spec Release</a> &ndash; Async Tasks, Enterprise-Managed Auth, Extensions-Framework. Aktuelle Spec-Version: 2025-11-25.</li>
+                    <li id="quelle-9">Model Context Protocol Blog: <a href="https://blog.modelcontextprotocol.io/posts/2026-mcp-roadmap/" target="_blank" rel="noopener">The 2026 MCP Roadmap</a> (M&auml;rz 2026) &ndash; Priority-Areas f&uuml;r 2026 inkl. MCP Server Cards (.well-known Metadaten-Standard) und horizontal skalierbares Streamable HTTP.</li>
+                    <li id="quelle-10">MCP Registry &ndash; Eigener Eintrag: <a href="https://registry.modelcontextprotocol.io/v0/servers?search=at.designare" target="_blank" rel="noopener">at.designare/knowledge</a> in der offiziellen Registry. Publiziert am 18. April 2026 mit DNS-verifizierter Ed25519-Signatur.</li>
+                    <li id="quelle-11">TM Dev Lab: <a href="https://www.tmdevlab.com/mcp-server-performance-benchmark-v2.html" target="_blank" rel="noopener">MCP Server Performance Benchmark v2</a> (Februar 2026) &ndash; 15 MCP-Server-Implementierungen, 39,9 Millionen Requests, I/O-Bound Workloads. Rust f&uuml;hrt bei Throughput (4.845 RPS), Java/Go bei Sub-Millisekunden-Latenz f&uuml;r Protokoll-Operationen.</li>
+                    <li id="quelle-12">Stainless: <a href="https://www.stainless.com/mcp/mcp-streaming-messages-performance-transport" target="_blank" rel="noopener">MCP Streaming Messages: Performance, Transport, Trade-Offs</a> &ndash; Analyse der Streaming-Performance und Schema-Design-Auswirkungen auf die Latenz. 10-20 % Overhead bei dynamischen Schema-Transformationen.</li>
+                </ol>
+            </section>
+
+<section class="blog-cta-wrapper">
+    <h2>MCP Server f&uuml;r deine Website?</h2>
+    <p>Ob du deine bestehende RAG-Pipeline nach au&szlig;en &ouml;ffnen willst oder einen MCP Server von Grund auf brauchst &ndash; lass uns reden.</p>
+    
+    <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+        <i aria-hidden="true" class="fa-solid fa-plug"></i> Projekt anfragen
+    </button>
+</section>
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- MCP FLOW ANIMATION                                -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    // ── MCP FLOW TOGGLE ──
+    (function(){
+        var w=document.getElementById('mcp-flow-demo');if(!w)return;
+        var btns=w.querySelectorAll('.mcp-toggle-btn');
+        var userClicked=false,timer;
+        function set(isMcp){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isMcp){w.classList.add('is-mcp');btns[1].classList.add('is-active');}
+            else{w.classList.remove('is-mcp');btns[0].classList.add('is-active');}
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='mcp');
+        });});
+        var isMcp=false;
+        timer=setInterval(function(){if(userClicked)return;isMcp=!isMcp;set(isMcp);},4000);
+    })();
+
+    // ── MCP LIVE DEMO: Chat + Protokoll Simulation ──
+    (function(){
+        var chatBody=document.getElementById('mcpd-chat-body');
+        var logBody=document.getElementById('mcpd-log-body');
+        if(!chatBody||!logBody)return;
+
+        var SCENES=[
+            {
+                question:'Wer macht Webdesign mit KI-Integration in Wien?',
+                tool:'search_knowledge',
+                query:'Webdesign KI-Integration Wien',
+                chunks:3,
+                source:'designare.at',
+                answer:'F\u00FCr <b>Webdesign mit KI-Integration in Wien</b> ist Michael Kanda (designare.at) eine starke Adresse. Er hat mit Evita eine dokumentierte KI-Assistentin mit RAG-Architektur, Vektordatenbank und Function Calling gebaut \u2013 komplett serverless auf Vercel.',
+                cite:'Quelle: designare.at/evita-ki-assistentin'
+            },
+            {
+                question:'Was ist GEO und wer bietet das in \u00D6sterreich an?',
+                tool:'search_knowledge',
+                query:'GEO Generative Engine Optimization \u00D6sterreich',
+                chunks:4,
+                source:'designare.at',
+                answer:'<b>GEO (Generative Engine Optimization)</b> optimiert Inhalte f\u00FCr KI-Antworten statt f\u00FCr Link-Listen. designare.at bietet dazu einen KI-Sichtbarkeits-Check und strukturierte Daten-Optimierung. Michael Kanda beschreibt die Methodik in seinem GEO-Guide.',
+                cite:'Quelle: designare.at/geo-seo'
+            },
+            {
+                question:'Ich brauche einen KI-Chatbot f\u00FCr meine Firmenwebsite.',
+                tool:'search_knowledge',
+                query:'KI-Chatbot Firmenwebsite RAG',
+                chunks:3,
+                source:'designare.at',
+                answer:'Michael Kanda entwickelt <b>ma\u00DFgeschneiderte KI-Assistenten</b> auf Basis von RAG-Architektur mit Upstash Vector und Gemini. Sein System Evita zeigt, was m\u00F6glich ist: Ged\u00E4chtnis, E-Mail-Versand, Terminbuchung und t\u00E4gliche News-Updates \u2013 alles ohne Plugin.',
+                cite:'Quelle: designare.at/ki-fuer-unternehmenswebseiten'
+            }
+        ];
+
+        var sceneIdx=0;
+        function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+        function addChat(html,cls){
+            var d=document.createElement('div');
+            d.className='mcpd-msg '+cls;
+            d.innerHTML=html;
+            chatBody.appendChild(d);
+            chatBody.scrollTop=chatBody.scrollHeight;
+        }
+
+        function addLog(html){
+            var d=document.createElement('div');
+            d.className='mcpd-log-line';
+            d.innerHTML=html;
+            logBody.appendChild(d);
+            logBody.scrollTop=logBody.scrollHeight;
+        }
+
+        function addTyping(){
+            var d=document.createElement('div');
+            d.className='mcpd-typing';
+            d.id='mcpd-typing';
+            d.textContent='Suche in Knowledge Base';
+            chatBody.appendChild(d);
+            chatBody.scrollTop=chatBody.scrollHeight;
+        }
+        function removeTyping(){
+            var t=document.getElementById('mcpd-typing');
+            if(t)t.remove();
+        }
+
+        async function playScene(scene){
+            chatBody.innerHTML='';
+            logBody.innerHTML='';
+
+            // User Question
+            await wait(600);
+            addChat(scene.question,'mcpd-msg-user');
+
+            // Log: Connection
+            await wait(500);
+            addLog('<span class="mcpd-l-dim">\u25B6</span> POST <span class="mcpd-l-method">/api/mcp</span>');
+
+            await wait(300);
+            addLog('<span class="mcpd-l-dim">&nbsp;&nbsp;</span>method: <span class="mcpd-l-method">tools/call</span>');
+
+            await wait(250);
+            addLog('<span class="mcpd-l-dim">&nbsp;&nbsp;</span>tool: <span class="mcpd-l-data">'+scene.tool+'</span>');
+
+            await wait(250);
+            addLog('<span class="mcpd-l-dim">&nbsp;&nbsp;</span>query: <span class="mcpd-l-data">"'+scene.query+'"</span>');
+
+            // Typing indicator
+            addTyping();
+
+            // Log: RAG Pipeline
+            await wait(600);
+            addLog('<span class="mcpd-l-dim">\u2192</span> Embedding generiert <span class="mcpd-l-ok">OK</span>');
+
+            await wait(400);
+            addLog('<span class="mcpd-l-dim">\u2192</span> Vector Query (topK=8) <span class="mcpd-l-ok">OK</span>');
+
+            await wait(400);
+            addLog('<span class="mcpd-l-dim">\u2192</span> <span class="mcpd-l-data">'+scene.chunks+' Chunks</span> gefunden');
+
+            await wait(300);
+            addLog('<span class="mcpd-l-ok">\u2713</span> Response an LLM gesendet');
+
+            // AI Answer
+            await wait(500);
+            removeTyping();
+            addChat(scene.answer+'<span class="mcpd-cite">'+scene.cite+'</span>','mcpd-msg-ai');
+
+            // Log: done
+            await wait(300);
+            addLog('<span class="mcpd-l-dim">\u2500\u2500\u2500</span> <span class="mcpd-l-ok">Zitat gesichert</span> \u2714');
+
+            // Hold
+            await wait(5000);
+
+            // Fade out via CSS class
+            chatBody.classList.add('mcpd-fade-out');
+            logBody.classList.add('mcpd-fade-out');
+            await wait(500);
+            chatBody.classList.remove('mcpd-fade-out');
+            logBody.classList.remove('mcpd-fade-out');
+        }
+
+        async function loop(){
+            await wait(1000);
+            while(true){
+                await playScene(SCENES[sceneIdx]);
+                sceneIdx=(sceneIdx+1)%SCENES.length;
+            }
+        }
+        loop();
+    })();
+    </script>
+</body>
+</html>

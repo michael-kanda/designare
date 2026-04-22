@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>CSV Importer PRO | Schnelles & sauberes Content-Management | Michael Kanda</title>
+    <meta name="description" content="Das WP Plugin mit digitalen Superkräften, das deine Content-Tabellen in blitzschnelle Landingpages verwandelt.">
+    <meta name="robots" content="index, follow">
+    
+    <link rel="preload" href="Font/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/side-menu.css">
+    <link rel="stylesheet" href="css/ai-styles.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/blog-style.css">
+    <link rel="stylesheet" href="css/feedback-style.css">
+    <link rel="stylesheet" href="css/menu-interactive.css">
+    
+    <link rel="canonical" href="https://designare.at/CSV-Content-Importer.html" />
+
+    <style>
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .preview-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer; /* Zeigt Klickbarkeit an */
+        }
+
+        .preview-item:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            background: rgba(196, 163, 90, 0.05);
+        }
+
+        .preview-item img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .preview-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-color);
+        }
+
+        /* Lightbox Styles */
+        .preview-lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .preview-lightbox-overlay.visible {
+            display: flex;
+        }
+
+        .preview-lightbox-content {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh; /* Feste Höhe für bessere Darstellung */
+            background: #f0f0f1; /* Hintergrund passend zu den IFrames */
+            padding: 2rem;
+            border: 1px solid var(--accent-color);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+
+        .preview-lightbox-content .close-button {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            z-index: 10000;
+        }
+
+        .preview-lightbox-content .close-button:hover {
+            transform: scale(1.1);
+        }
+        
+        #preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "CSV Importer PRO",
+      "url": "https://designare.at/CSV-Importer-PRO",
+      "description": "Ein performantes Tool für den Import großer CSV-Datensätze in CMS-Systeme wie WordPress.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Michael Kanda",
+        "url": "https://designare.at/#person"
+      },
+      "featureList": "Bulk Import, WordPress Compatible, Data Mapping, High Performance",
+      "screenshot": "https://designare.at/images/csv-importer-interface.webp"
+    }
+    </script>
+</head>
+
+<body class="dark-mode page-loaded">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                <h1>CSV Importer PRO: Schnelles & sauberes Content-Management</h1>
+                
+                <div class="article-meta">
+                    <span class="reading-time"><i class="fa-solid fa-code"></i> WordPress Plugin</span>
+                    <address class="author">
+                        Entwickelt von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <section class="article-summary" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Überblick</h2>
+                <div class="summary-box">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <h3>Das Ende der manuellen Content-Qual</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
+                            <img src="images/CSV-Importer-PRO.webp" alt="CSV Importer PRO Interface" style="max-width: 250px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                            <div style="flex: 1; min-width: 280px;">
+                                <p>Schluss mit dem mühsamen manuellen Content-Import in WordPress! Die Lösung ist mein Duo SILAS und CSV Importer PRO. <a href="https://designare.at/CSV-Creator.html" style="color: var(--accent-color); font-weight: bold;">SILAS</a> erstellt hochwertige, SEO-optimierte Texte direkt als fertige CSV-Datei.</p>
+                                <p style="margin-bottom: 0;">Der CSV Importer PRO übernimmt dann nahtlos und verwandelt die Daten im Handumdrehen in makellose Landingpages, Blogs oder Produktseiten.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="process-heading">
+                <h2 id="process-heading">Das Herzstück des Imports: So geht’s</h2>
+                
+                <p>Schluss mit Chaos! Der Importer führt dich einfach und schnell durch den Prozess. Dank der "individuellen Spaltenzuordnung" weiß das System genau, welches CSV-Feld in welches WordPress-Feld gehört.</p>
+
+                <article class="step-guide">
+                    <h3>Flexible Quellen & Templates</h3>
+                    <ul>
+                        <li><strong>Dropbox & lokal:</strong> Hol deine CSV-Datei, egal wo sie liegt – ob im Dropbox-Cloud-Garten oder direkt auf deinem Server.</li>
+                        <li><strong>Templates:</strong> Verknüpfe deine CSV-Daten mit (d)einer vordefinierten WordPress-Vorlage. So sind deine Landingpages nicht nur schnell erstellt, sondern sehen auch noch verdammt gut aus.</li>
+                        <li><strong>Page Builder Support:</strong> Der Importer unterstützt die gängigsten Page Builder wie Gutenberg, Elementor oder Breakdance.</li>
+                    </ul>
+                </article>
+            </section>
+
+            <section aria-labelledby="features-heading">
+                <h2 id="features-heading">Digitale Superkräfte, die du lieben wirst</h2>
+                
+                <div class="tech-box">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <div>
+                        <strong>Evita & Michael approved:</strong>
+                        <p>Über 20 Jahre Online-Erfahrung stecken in diesem Tool, das aus Leidenschaft für Code und Effizienz entstanden ist – die Lösung, die ich mir selbst immer gewünscht habe.</p>
+                    </div>
+                </div>
+
+                <dl class="feature-list">
+                    <dt>Automatisierung</dt>
+                    <dd>Warum importieren, wenn du es automatisieren kannst? Der Scheduler erledigt deine Imports vollautomatisch – stündlich, täglich oder wöchentlich.</dd>
+                    
+                    <dt>SEO im Blick</dt>
+                    <dd>Das Tool arbeitet Hand in Hand mit den gängigen SEO-Plugins wie Yoast SEO oder Rank Math. Definiere Meta-Titles und Descriptions direkt im Import.</dd>
+                    
+                    <dt>Sicherheit & Backups</dt>
+                    <dd>Mit der Backup-Funktion kannst du jeden Import mit nur einem Klick rückgängig machen. So bist du immer auf der sicheren Seite – ganz ohne digitales Drama.</dd>
+                    
+                    <dt>Wiederverwendbare Profile</dt>
+                    <dd>Speichere deine Konfiguration als Profil. So musst du nie wieder alles neu einstellen, wenn du ähnliche Projekte hast.</dd>
+                    
+                    <dt>Erweiterte Kontrolle</dt>
+                    <dd>Von der Batch-Größe bis zur Fehlerbehandlung – du hast die volle Kontrolle über den Prozess.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="preview-heading">
+                <h2 id="preview-heading">Einblicke in das Tool</h2>
+                
+                <div class="preview-grid">
+                    <a href="#" class="preview-item" data-src="csv-import-settings.html">
+                        <img src="images/CSV-einstellungen.webp" alt="Vorschau CSV-Einstellungen">
+                        <span>Einstellungen</span>
+                    </a>
+                    <a href="#" class="preview-item" data-src="csv-import-scheduler.html">
+                        <img src="images/Automatisierung.webp" alt="Vorschau Automatisierung">
+                        <span>Automatisierung</span>
+                    </a>
+                    <a href="#" class="preview-item" data-src="csv-import-seo-preview.html">
+                        <img src="images/SEO-Vorschau.webp" alt="Vorschau SEO Vorschau">
+                        <span>SEO Vorschau</span>
+                    </a>
+                    <a href="#" class="preview-item" data-src="csv-import-dashboard.html">
+                        <img src="images/CSV-Import.webp" alt="Vorschau CSV-Import">
+                        <span>Import Dashboard</span>
+                    </a>
+                </div>
+            </section>
+
+            <section aria-labelledby="cta-heading" class="cta-section">
+                <h2 id="cta-heading">Interesse am CSV Importer PRO?</h2>
+                <p>Du hast eine ähnliche Herausforderung oder möchtest das Tool in Aktion sehen?</p>
+                <a href="mailto:michael@designare.at?subject=CSV-Importer%20PRO" class="cta-button">
+                    Schreib mir einfach <i class="fa-regular fa-paper-plane" style="margin-left: 8px;"></i>
+                </a>
+            </section>
+
+            <div id="feedback-placeholder"></div>
+
+            <footer class="article-footer">
+            </footer>
+
+        </article>
+
+    </main>
+
+    <div id="preview-lightbox" class="preview-lightbox-overlay">
+        <div class="preview-lightbox-content">
+            <button id="close-preview-lightbox" class="close-button">&times;</button>
+            <iframe id="preview-iframe" src="" title="Vorschau Fenster"></iframe>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/matrix-effect.js"></script>
+    <script src="js/feedback.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const previewItems = document.querySelectorAll('.preview-item');
+        const lightbox = document.getElementById('preview-lightbox');
+        const iframe = document.getElementById('preview-iframe');
+        const closeButton = document.getElementById('close-preview-lightbox');
+
+        const openLightbox = (src) => {
+            iframe.src = src;
+            lightbox.classList.add('visible');
+            document.body.style.overflow = 'hidden'; // Scrollen verhindern
+        };
+
+        const closeLightbox = () => {
+            lightbox.classList.remove('visible');
+            document.body.style.overflow = ''; // Scrollen wieder erlauben
+            setTimeout(() => {
+                iframe.src = '';
+            }, 300);
+        };
+
+        previewItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const src = this.getAttribute('data-src');
+                if(src) openLightbox(src);
+            });
+        });
+
+        closeButton.addEventListener('click', closeLightbox);
+
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox.classList.contains('visible')) {
+                closeLightbox();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

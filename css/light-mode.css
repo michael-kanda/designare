@@ -1,0 +1,134 @@
+/* ============================================================
+   LIGHT-MODE-FIXES.CSS (TOKEN GESTEUERT)
+   Überschreibungen für externe CSS-Module.
+   (Diese Datei kann gelöscht werden, sobald blog.css, 
+   booking.css etc. nativ mit CSS-Variablen arbeiten).
+   ============================================================ */
+
+body.light-mode {
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+}
+
+
+/* ===================
+   1. MENU-INTERACTIVE.CSS 
+   =================== */
+body.light-mode .side-menu-content { background-color: var(--bg-color); }
+body.light-mode #menu-topic-search { border-bottom-color: var(--accent-color) !important; color: var(--text-color); }
+body.light-mode .topic-btn { border-color: var(--border-color); color: var(--text-color); background: transparent; }
+body.light-mode .topic-btn:hover { border-color: var(--accent-color); color: var(--accent-color); background: var(--accent-surface); }
+body.light-mode .topic-btn.highlight-active { background: var(--accent-color) !important; color: #ffffff !important; }
+body.light-mode .menu-divider { background: var(--border-color); }
+
+/* ===================
+   2. HEADER-FOOTER.CSS 
+   =================== */
+body.light-mode .main-header.scrolled { background-color: rgba(255, 255, 255, 0.95); border-bottom-color: var(--border-color); }
+body.light-mode .header-right-controls button { color: var(--text-color); opacity: 0.8; }
+body.light-mode .header-right-controls button:hover { color: var(--accent-color) !important; opacity: 1; }
+body.light-mode footer { background-color: rgba(255, 255, 255, 0.95); border-color: var(--border-color); }
+body.light-mode #back-to-top { background-color: var(--accent-color); color: #ffffff; }
+
+
+/* ===================
+   3. AI-STYLES.CSS (EVITA CHATBOX LIGHT MODE)
+   =================== */
+
+body.light-mode #ai-chat-history { 
+    background-color: #f9fafb !important; 
+}
+
+body.light-mode .chat-message.ai { 
+    background-color: #ffffff !important; 
+    color: #1f2937 !important; /* Klares, dunkles Grau für perfekte Lesbarkeit */
+    border: 1px solid #e5e7eb !important; /* Hauchzarter Rahmen */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03) !important; /* Ganz leichte Tiefe */
+}
+
+body.light-mode .chat-message.user { 
+    background-color: var(--accent-color) !important; 
+    color: #ffffff !important; 
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(184, 134, 11, 0.15) !important;
+}
+
+body.light-mode #ai-chat-form { 
+    background-color: #ffffff !important; 
+    border-color: #e5e7eb !important; 
+}
+
+body.light-mode #ai-chat-form input[type="text"] {
+    background-color: #f3f4f6 !important; /* Modernes, helles Eingabefeld */
+    color: #111827 !important;
+    border: 1px solid transparent !important;
+    transition: all 0.3s ease;
+}
+
+body.light-mode #ai-chat-form input[type="text"]:focus {
+    background-color: #ffffff !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.1) !important;
+}
+
+body.light-mode .modal-footer { 
+    border-top-color: #e5e7eb !important; 
+}
+
+body.light-mode .typing-dots span {
+    background-color: var(--accent-color) !important;
+    opacity: 0.6;
+}
+
+/* ===================
+   4. BOOKING.CSS 
+   =================== */
+body.light-mode #booking-modal { background: var(--modal-overlay); }
+body.light-mode .booking-modal-content { background: var(--modal-bg); border-color: var(--border-color); }
+body.light-mode .booking-modal-header { border-bottom-color: var(--border-color); }
+body.light-mode .callback-slot-button { border-color: var(--border-color); color: var(--text-color); }
+body.light-mode .callback-slot-button:hover { border-color: var(--accent-color); background: var(--accent-surface); }
+body.light-mode .booking-form-group input, body.light-mode .booking-form-group textarea { background: var(--bg-color); border-color: var(--border-color); color: var(--text-color); }
+
+/* ===================
+   5. BLOG-STYLE.CSS 
+   =================== */
+body.light-mode .article-header h1, body.light-mode .blog-article h2 { color: var(--accent-color); }
+body.light-mode .blog-article code { background-color: var(--surface-medium); border-color: var(--border-color); color: var(--accent-color); }
+body.light-mode .summary-box { background-color: var(--accent-surface); border-left-color: var(--accent-color); }
+body.light-mode .info-box, body.light-mode .tech-box { background-color: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .expert-tip { background-color: var(--accent-surface); border-color: var(--accent-color); }
+body.light-mode .faq-accordion details { background-color: var(--surface-light); border-color: var(--border-color); }
+body.light-mode summary { font-weight: 400; -webkit-text-stroke: 0.3px; }
+body.light-mode .key-points { background: var(--accent-surface); border-color: var(--accent-color); }
+body.light-mode .cta-section { background: var(--accent-surface); border-color: var(--accent-color); }
+body.light-mode .related-card { background: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .related-card:hover { border-color: var(--accent-color); background: var(--accent-surface); }
+body.light-mode .faq-card { background: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .faq-card:hover { border-color: var(--accent-color); box-shadow: 0 5px 20px rgba(184, 134, 11, 0.1); }
+
+/* ===================
+   6. FEEDBACK & FLIP CARDS 
+   =================== */
+body.light-mode .feedback-section { background: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .rating-btn { border-color: var(--border-color); color: var(--text-color); }
+body.light-mode .facts-card { background: var(--surface-light); border-left-color: var(--accent-color); }
+body.light-mode details[name="expert-faq"] { border-bottom-color: var(--border-color); }
+
+/* ===================
+   7. SILAS & EXTRAS 
+   =================== */
+body.light-mode .silas-generator-section .ai-container { background: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .custom-select, body.light-mode .silas-input-container, body.light-mode #silas-form { background-color: var(--bg-color); border-color: var(--border-color); color: var(--text-color); }
+body.light-mode .keyword-list-container { background: var(--surface-light); border-color: var(--border-color); }
+body.light-mode .result-card { background-color: var(--bg-color); border-color: var(--border-color); border-left-color: var(--accent-color); }
+body.light-mode .legal-container h1 { border-bottom-color: var(--border-color); }
+body.light-mode .back-link { color: var(--accent-color); border-color: var(--accent-color); }
+body.light-mode .back-link:hover { background-color: var(--accent-color); color: #ffffff; }
+
+/* Scrollbars & Selection (Global) */
+body.light-mode ::-webkit-scrollbar-track { background: #e8e8e8; }
+body.light-mode ::-webkit-scrollbar-thumb { background: var(--border-color); }
+body.light-mode ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+body.light-mode ::selection { background-color: var(--accent-color); color: #ffffff; }
+body.light-mode :focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }

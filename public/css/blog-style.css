@@ -1,0 +1,620 @@
+/* ============================================================
+   BLOG.CSS - TORINO STYLE
+   Fokussiert auf Lesbarkeit, Struktur und Performance
+   ============================================================ */
+
+/* ===================
+   1. BLOG MAIN LAYOUT
+   =================== */
+
+#blog-main {
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 120px 2rem 4rem;
+    min-height: 100vh;
+    position: relative;
+    z-index: 2; 
+}
+
+/* ===================
+   2. ARTICLE STRUCTURE
+   =================== */
+
+.blog-article {
+    line-height: 1.8;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ===================
+   3. ARTICLE HEADER & META
+   =================== */
+
+.article-header {
+    border-bottom: none; 
+    margin-bottom: 1rem; 
+    padding-bottom: 1rem;
+}
+
+.article-header h1 {
+    font-size: 2.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+color: var(--accent-color);
+      text-transform: uppercase;
+}
+
+.breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    opacity: 0.8;
+    align-items: center;
+}
+
+.article-meta time,
+.article-meta .reading-time {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-color-muted);
+}
+
+.article-meta .author {
+    font-style: normal;
+    color: var(--text-color-muted);
+}
+
+.article-meta a {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+.article-white {
+    color: var(--text-color) !important;
+    text-transform: none; /* Schaltet Groß-/Kleinschreibung-Zwang aus */
+}
+
+/* ===================
+   FEATURED IMAGE (Subtle)
+   =================== */
+
+.article-hero-wrapper {
+    display: flex;
+    justify-content: center; /* Zentriert das Bild horizontal */
+    margin: 2rem 0 0 0;      /* Abstand nach oben */
+    width: 100%;
+}
+
+.article-hero-wrapper img {
+    height: auto;
+    max-width: 100%;
+    opacity: 0.1;            /* Extrem wenig Opacity (10%) */
+    border-radius: 8px;      /* Optional: leicht abgerundete Ecken */
+    filter: grayscale(100%); /* Optional: macht es noch dezenter (schwarz-weiß) */
+    transition: opacity 0.5s ease;
+}
+
+/* Optional: Beim Drüberfahren etwas sichtbarer machen */
+.article-hero-wrapper img:hover {
+    opacity: 0.3;
+    filter: grayscale(0%);
+}
+
+/* ===================
+   4. CONTENT SECTIONS
+   =================== */
+
+.blog-article section {
+    margin-bottom: 6rem;
+    position: relative;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color-subtle); 
+    scroll-margin-top: 100px;
+}
+
+.blog-article section::after {
+    content: "\f107";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: -0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bg-color); 
+    padding: 0 1rem;
+    font-size: 1.2rem;
+    opacity: 1; 
+    color: var(--accent-color); 
+    transition: transform 0.3s ease;
+}
+
+.blog-article section:hover::after {
+    transform: translateX(-50%) scale(1.2);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.blog-article h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin: 2.5rem 0 1.2rem;
+    padding-top: 40px;
+    color: var(--accent-color);
+    line-height: 1.3;
+    scroll-margin-top: 100px;
+}
+
+.blog-article h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--text-color);
+}
+
+.blog-article p {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-weight: 300;
+    line-height: 1.8;
+}
+
+.blog-article code {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 0.2em 0.4em;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: var(--accent-color);
+}
+
+.blog-article ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    list-style-type: none;
+}
+
+.blog-article ul li::before {
+    content: "→";
+    color: var(--accent-color);
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.blog-article ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.blog-article li {
+    margin-bottom: 0.8rem;
+color: var(--text-color);
+    font-weight: 300;
+}
+
+.blog-article dl {
+    margin-bottom: 2rem;
+}
+
+.blog-article dt {
+    font-weight: 400;
+    color: var(--accent-color);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.blog-article dd {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+   color: var(--text-color);
+}
+
+/* ===================
+   6. CONTENT BOXES
+   =================== */
+
+/* Summary Box */
+.summary-box {
+    background-color: rgba(196, 163, 90, 0.05);
+    border-left: 3px solid var(--accent-color);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0;
+}
+
+.summary-box h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.summary-box ul {
+    margin-bottom: 0;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+/* Info & Tech Box */
+.info-box,
+.tech-box {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.info-box i,
+.tech-box i {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
+.info-box strong,
+.tech-box strong {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+.info-box p,
+.tech-box p {
+    margin-bottom: 0;
+}
+
+/* Expert Tip */
+.expert-tip {
+    background-color: rgba(196, 163, 90, 0.08);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.expert-tip i {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.expert-tip strong {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+/* Step Guide */
+.step-guide {
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+}
+
+.step-guide h3 {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+/* Feature List */
+.feature-list {
+    background-color: rgba(255, 255, 255, 0.02);
+    padding: 1.5rem;
+    border-radius: 0;
+    margin: 2rem 0;
+    border: 1px solid var(--border-color);
+}
+
+.feature-list dt {
+    font-size: 1.1rem;
+    color: var(--accent-color);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+}
+
+.feature-list dt:first-child {
+    margin-top: 0;
+}
+
+.feature-list dd {
+    margin-left: 0;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--border-color);
+}
+
+/* Comparison Table */
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+}
+
+.comparison-table thead {
+    background-color: rgba(196, 163, 90, 0.08);
+}
+
+.comparison-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.th-wrong i { color: #ff6b6b; margin-left: 8px; }
+.th-correct i { color: #51cf66; margin-left: 8px; }
+
+.comparison-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    color: var(--text-color);
+}
+
+.comparison-table code {
+    white-space: nowrap;
+}
+
+/* FAQ Accordion */
+.faq-accordion {
+    margin: 2rem 0;
+}
+
+.faq-accordion details {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 0;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+}
+
+.faq-accordion details:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.faq-accordion summary {
+    padding: 1.2rem 1.5rem;
+    font-weight: 400;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    outline: none;
+    letter-spacing: 0.02em;
+}
+
+.faq-accordion summary::after {
+    content: '+';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: var(--text-color-muted);
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.faq-accordion details[open] summary::after {
+    content: '−';
+    transform: translateY(-50%) rotate(0deg);
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+.faq-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    color: var(--text-color);
+    line-height: 1.7;
+    border-top: 1px solid var(--border-color-subtle);
+    font-weight: 300;
+}
+
+.faq-content p { margin-bottom: 0; }
+.faq-content ol { margin-top: 1rem; margin-bottom: 0; padding-left: 1.2rem; }
+
+/* Key Points */
+.key-points {
+    background: rgba(196, 163, 90, 0.05);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 2.5rem 0;
+}
+
+.key-points h3 {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.key-points ul { list-style: none; padding-left: 0; }
+.key-points li { margin-bottom: 1rem; line-height: 1.7; }
+
+/* CTA Section */
+.cta-section {
+    background: rgba(196, 163, 90, 0.08);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    padding: 2.5rem;
+    margin: 3rem 0;
+    text-align: center;
+}
+
+.cta-section h2 {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.cta-section p { 
+    margin-bottom: 1.5rem; 
+    font-size: 1.05rem; 
+    color: var(--text-color-muted);
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--accent-color);
+    padding: 1rem 2rem;
+    border-radius: 0;
+    border: 1px solid var(--accent-color);
+    font-weight: 400;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Article Footer */
+.article-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.back-to-blog {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-muted);
+    opacity: 0.8;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+.back-to-blog:hover {
+    opacity: 1;
+    color: var(--accent-color);
+    transform: translateX(-5px);
+}
+
+/* ===================
+   7. RESPONSIVE DESIGN
+   =================== */
+
+@media (max-width: 768px) {
+    #blog-main {
+        padding: 85px 1.5rem 3rem;
+    }
+
+    .article-header h1 { font-size: 1.8rem; }
+    .article-meta { gap: 1rem; font-size: 0.85rem; }
+    .blog-article h2 { font-size: 1.5rem; margin: 2rem 0 1rem; padding-top: 30px; }
+    .blog-article h3 { font-size: 1.2rem; }
+
+    .summary-box, .info-box, .tech-box, .expert-tip, .key-points, .cta-section {
+        padding: 1.2rem;
+    }
+
+    .info-box, .tech-box, .expert-tip {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .comparison-table { font-size: 0.85rem; }
+    .comparison-table th, .comparison-table td { padding: 0.7rem; }
+    .comparison-table thead { display: none; }
+    
+    .comparison-table tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .comparison-table td {
+        display: block;
+        border: none;
+        padding: 1rem;
+        text-align: left;
+    }
+
+    .comparison-table td:first-child {
+        background-color: rgba(255, 107, 107, 0.1);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .comparison-table td:first-child::before { content: "Falsch: "; font-weight: 400; color: #ff6b6b; }
+    .comparison-table td:last-child::before { content: "Richtig: "; font-weight: 400; color: #51cf66; }
+
+    .cta-section h2 { font-size: 1.3rem; }
+    .cta-button { display: block; width: 100%; padding: 0.9rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    #blog-main { padding: 75px 1rem 2rem; }
+    .article-header h1 { font-size: 1.5rem; }
+    .blog-article h2 { font-size: 1.3rem; }
+    .breadcrumb ol { font-size: 0.8rem; }
+}
+
+/* ===================
+   8. PRINT STYLES
+   =================== */
+
+@media print {
+    #blog-main { padding: 0; max-width: 100%; }
+    .breadcrumb, .cta-section, .article-footer { display: none; }
+    .article-header { border-bottom: 2px solid #000; }
+    .blog-article h1, .blog-article h2, .blog-article h3 { color: #000; page-break-after: avoid; }
+    .blog-article section { page-break-inside: avoid; }
+    .blog-article a { color: #000; text-decoration: underline; }
+    .blog-article code { border: 1px solid #000; }
+}

@@ -1,0 +1,161 @@
+/* ============================================ */
+/* EVITA TOOLBAR – Fullscreen & Font-Size       */
+/* ============================================ */
+
+.evita-tb-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
+.evita-tb-avatar img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--accent-color);
+    box-shadow: 0 0 8px rgba(196, 163, 90, 0.2);
+}
+
+/* ── Custom Property Default ────────────────── */
+#ai-response-modal .modal-content {
+    --evita-chat-font-size: 14px;
+}
+
+/* ── Toolbar Container ──────────────────────── */
+.evita-toolbar {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ── Toolbar Button (Basis) ─────────────────── */
+.evita-tb-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-color, #333);
+    color: var(--text-color-muted, #949494);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.evita-tb-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.evita-tb-btn:hover {
+    border-color: var(--accent-color, #c4a35a);
+    color: var(--accent-color, #c4a35a);
+}
+
+.evita-tb-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    border-color: var(--border-color, #333);
+    color: var(--text-color-muted, #949494);
+}
+
+/* ── Font-Size Gruppe ───────────────────────── */
+.evita-tb-font-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+}
+
+.evita-tb-aa {
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-color-muted, #949494);
+    letter-spacing: 0.02em;
+    padding: 0 3px;
+    user-select: none;
+}
+
+.evita-tb-font-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 10px;
+    color: var(--text-color-subtle, #555);
+    min-width: 28px;
+    text-align: center;
+    user-select: none;
+}
+
+/* ── Font-Size auf Chat-Elemente anwenden ───── */
+#ai-response-modal .chat-message {
+    font-size: var(--evita-chat-font-size) !important;
+}
+
+#ai-response-modal .evita-followup-chip {
+    font-size: calc(var(--evita-chat-font-size) - 2px) !important;
+}
+
+#ai-response-modal .evita-email-confirm {
+    font-size: calc(var(--evita-chat-font-size) - 1px);
+}
+
+#ai-response-modal .evita-email-draft {
+    font-size: var(--evita-chat-font-size);
+}
+
+/* ── Fullscreen-Modus ───────────────────────── */
+#ai-response-modal .modal-content.evita-fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+}
+
+#ai-response-modal .modal-content.evita-fullscreen #ai-chat-history {
+    max-height: none !important;
+}
+
+/* ── Responsive: Mobile ─────────────────────── */
+@media (max-width: 768px) {
+    /* Fullscreen-Button verstecken (Modal ist dort schon Vollbild) */
+    .evita-tb-fullscreen {
+        display: none !important;
+    }
+
+    .evita-toolbar {
+        top: 12px;
+        left: 15px;
+    }
+
+    .evita-tb-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .evita-tb-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .evita-tb-avatar img {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+/* ── Accessibility ──────────────────────────── */
+.evita-tb-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}

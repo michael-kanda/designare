@@ -1,0 +1,81 @@
+/* ============================================================
+   HOMEPAGE-SCROLL-FIX.CSS
+   NUR für das Scroll-Problem - minimale Lösung
+   ============================================================ */
+
+/* ===================
+   EVITA (#view-third) SCROLL FIX
+   Das ist der kritische Fix!
+   =================== */
+
+/* Wenn Evita sichtbar ist, muss der Body scrollen können */
+#view-third[style*="flex"],
+#view-third[style*="block"] {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Body muss scrollen wenn Evita sichtbar */
+body:has(#view-third[style*="flex"]),
+body:has(#view-third[style*="block"]) {
+    overflow-y: auto !important;
+    height: auto !important;
+}
+
+/* Hero muss wachsen können wenn Evita sichtbar */
+body:has(#view-third[style*="flex"]) #hero,
+body:has(#view-third[style*="block"]) #hero {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* ===================
+   FLIP CARD SCROLL
+   =================== */
+
+/* Geflippt = Scroll erlauben */
+body:has(.flip-container.flipped) {
+    overflow-y: auto !important;
+    height: auto !important;
+}
+
+body:has(.flip-container.flipped) #hero {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* ===================
+   STARTSEITE (nicht geflippt, Evita nicht sichtbar)
+   =================== */
+
+/* Nur wenn WEDER geflippt NOCH Evita sichtbar */
+body:has(.flip-container):not(:has(.flip-container.flipped)):not(:has(#view-third[style*="flex"])):not(:has(#view-third[style*="block"])) {
+    overflow: hidden;
+    height: 100vh;
+}
+
+body:has(.flip-container):not(:has(.flip-container.flipped)):not(:has(#view-third[style*="flex"])):not(:has(#view-third[style*="block"])) #hero {
+    height: calc(100vh - var(--header-height-desktop));
+    max-height: calc(100vh - var(--header-height-desktop));
+    overflow: hidden;
+}
+
+/* ===================
+   MOBILE
+   =================== */
+
+@media (max-width: 768px) {
+    body:has(.flip-container):not(:has(.flip-container.flipped)):not(:has(#view-third[style*="flex"])):not(:has(#view-third[style*="block"])) {
+        height: 100dvh;
+    }
+    
+    body:has(.flip-container):not(:has(.flip-container.flipped)):not(:has(#view-third[style*="flex"])):not(:has(#view-third[style*="block"])) #hero {
+        height: calc(100dvh - var(--header-height-mobile));
+        max-height: calc(100dvh - var(--header-height-mobile));
+    }
+}

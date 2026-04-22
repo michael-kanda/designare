@@ -1,0 +1,37 @@
+<nav id="side-menu-panel" class="side-menu">
+    <button id="close-menu-button" class="close-button" aria-label="Menü schließen">
+        &times;
+    </button>
+    
+    <div class="side-menu-content">
+        <div class="menu-search-container">
+            <input type="text" id="menu-topic-search" placeholder="Thema suchen..." aria-label="Themen suchen">
+            </div>
+
+        <div class="menu-divider"></div>
+
+        <div class="topic-grid" id="menu-topic-grid">
+            <button class="topic-btn" 
+        data-keywords="michael kanda webdesign" 
+        onclick="location.href='index.html#michael'">
+    Michael
+</button>
+            <button class="topic-btn" 
+        data-keywords="evita hund ki assistent" 
+        onclick="location.href='index.html#evita'">
+    Evita
+</button>
+            <button class="topic-btn" data-keywords="silas ai creator" onclick="location.href='silas.html'">Silas</button>
+            <button class="topic-btn" data-keywords="seo geo ranking" onclick="location.href='geo-seo.html'">SEO & GEO</button>
+            <button class="topic-btn" data-keywords="markup semantik" onclick="location.href='semantisches-markup.html'">Markup</button>
+            <button class="topic-btn" data-keywords="csv importer pro" onclick="location.href='CSV-Importer-PRO.html'">CSV Pro</button>
+            <button class="topic-btn" data-keywords="KI-Integration" onclick="location.href='KI-Integration-auf-Webseiten.html'">KI-Integration</button>
+            <button class="topic-btn" data-keywords="KI für KMU-Webseiten" onclick="location.href='ki-fuer-unternehmenswebseiten.html'">KI für KMU-Webseiten</button>
+        </div>
+
+        <div id="dynamic-toc-container" class="toc-container hidden">
+            <div class="menu-divider"></div>
+            <p class="toc-title">Inhaltsverzeichnis</p> <div id="toc-list"></div>
+        </div>
+    </div>
+</nav>

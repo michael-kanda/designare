@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>Googles 2MB-Grenze: Was Googlebot 2026 wirklich von deiner Seite sieht | Michael Kanda</title>
+    <meta name="description" content="Googlebot liest nur die ersten 2MB deiner Seite. Was danach kommt, existiert für Google nicht. So sicherst du dir, dass dein wichtigster Content nicht im toten Winkel landet.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+<link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+    <link rel="stylesheet" href="css/crawl-anim.css">
+    
+    <link rel="canonical" href="https://designare.at/googlebot-crawling-2026" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "TechArticle",
+          "@id": "https://designare.at/googlebot-crawling-2026#article",
+          "headline": "Googles 2MB-Grenze: Was Googlebot 2026 wirklich von deiner Seite sieht",
+          "alternativeHeadline": "So verhinderst du, dass dein wichtigster Content im toten Winkel des Crawlers landet",
+          "name": "Googlebot Crawling Guide 2026",
+          "image": "https://designare.at/images/googlebot-crawling-2026.webp",
+          "description": "Googlebot liest nur die ersten 2MB deiner HTML-Seite. Alles danach wird ignoriert – nicht gecrawlt, nicht gerendert, nicht indexiert. Dieser Guide zeigt, wie du deinen Code so strukturierst, dass kein Byte verschwendet wird.",
+          "url": "https://designare.at/googlebot-crawling-2026",
+          "keywords": [
+            "Googlebot Crawling 2026",
+            "2MB Crawl Limit",
+            "Web Rendering Service",
+            "Crawl Budget",
+            "Indexierung",
+            "Technisches SEO",
+            "HTML Optimierung"
+          ],
+          "proficiencyLevel": "Expert",
+          "datePublished": "2026-04-02",
+          "dateModified": "2026-04-02",
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://designare.at/googlebot-crawling-2026"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Michael Kanda",
+            "url": "https://designare.at/#michael",
+            "jobTitle": "Web & KI Entwickler"
+          },
+         "publisher": {"@type": "Person","name": "Michael Kanda","image": {"@type": "ImageObject","url": "https://designare.at/images/michael-kanda.webp"}},
+          "hasPart": {
+            "@id": "https://designare.at/googlebot-crawling-2026#faq-heading"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://designare.at/googlebot-crawling-2026#faq-heading",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Wie viel einer Webseite crawlt Googlebot maximal?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Googlebot fetcht maximal die ersten 2 MB einer einzelnen URL (inklusive HTTP-Header). Bei PDF-Dateien liegt die Grenze bei 64 MB. Für Crawler ohne spezifisches Limit gilt ein Default von 15 MB. Alles jenseits dieser Grenze wird komplett ignoriert."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Was passiert mit Inhalten jenseits der 2MB-Grenze?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Diese Bytes werden weder gecrawlt, noch gerendert, noch indexiert. Google behandelt die abgeschnittene Version so, als wäre sie die vollständige Datei. Meta-Tags, Canonical-URLs oder Structured Data im unteren Bereich der Seite existieren für Google schlicht nicht."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Zählen externe CSS- und JavaScript-Dateien zum 2MB-Limit?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Nein. Jede referenzierte Ressource (CSS, JS, XHR-Requests) wird separat gecrawlt und hat ihren eigenen, unabhängigen Byte-Zähler. Sie zählen nicht zum 2MB-Limit des übergeordneten HTML-Dokuments. Das Limit gilt pro URL, nicht pro Seite."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Was ist der Web Rendering Service (WRS)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Der WRS ist Googles System zur Ausführung von JavaScript und CSS. Er funktioniert wie ein headless Chromium-Browser, verarbeitet clientseitigen Code und versteht so den finalen Zustand einer Seite – Text, Struktur, Layout. Bilder und Videos werden vom WRS nicht angefordert."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Wie kann ich prüfen, ob meine Seite zu groß für Googlebot ist?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Öffne den Quellcode deiner Seite im Browser und prüfe die Dateigröße des HTML-Dokuments. Über curl -sI URL | grep content-length erhältst du die Größe in Bytes. Alles unter 500 KB ist unkritisch, ab 1 MB solltest du optimieren, ab 2 MB wird aktiv abgeschnitten."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
+
+
+</head>
+
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                 <div id="breadcrumb-placeholder"></div>
+                <h1>Googles 2MB-Grenze: <span class="article-white">Was Googlebot 2026 wirklich von deiner Seite sieht.</span></h1>
+      
+                <div class="article-meta">
+                    <time datetime="2026-04-02">2. April 2026</time>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 8 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <section class="article-summary" aria-labelledby="summary-heading">
+    <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+    
+    <div class="summary-box">
+        <div class="summary-content">
+            <h3>Das Wichtigste in Kürze:</h3>
+            <ul>
+                <li><strong>2MB-Cutoff:</strong> Googlebot liest maximal die ersten 2 MB deines HTML-Dokuments. Alles danach existiert für Google nicht.</li>
+                <li><strong>Separate Budgets:</strong> Externe CSS-, JS- und XHR-Dateien haben jeweils eigene 2MB-Limits und zählen nicht zum Parent-Dokument.</li>
+                <li><strong>Rendering via WRS:</strong> Der Web Rendering Service führt JavaScript aus wie ein moderner Browser – aber fordert keine Bilder oder Videos an.</li>
+                <li><strong>Reihenfolge zählt:</strong> Meta-Tags, Canonicals und Structured Data müssen im oberen Bereich des HTML stehen, bevor der Cutoff zuschlägt.</li>
+            </ul>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- CRAWL BYTE METER: Lean vs. Bloated HTML    -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="summary-image">
+            <div class="cb-meter" id="cb-meter">
+                <div class="cb-header">
+                    <span class="cb-title">Googlebot Crawl Analyse</span>
+                    <span class="cb-live"><span class="cb-live-dot"></span> Live</span>
+                </div>
+                <div class="cb-body" id="cb-body"></div>
+                <div class="cb-toggle">
+                    <button class="cb-toggle-btn is-active" data-state="bloat" type="button">PageBuilder-Seite</button>
+                    <button class="cb-toggle-btn" data-state="clean" type="button">Clean Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>Google hat Ende März 2026 einen der wichtigsten technischen Blogposts der letzten Jahre veröffentlicht. Gary Illyes hat im Beitrag <em>„Inside Googlebot: demystifying crawling, fetching, and the bytes we process"</em> detailliert beschrieben, wie Googles Crawling-Ökosystem funktioniert – und vor allem: <strong>wo es aufhört zu lesen.</strong></p>
+
+                <p>Die zentrale Erkenntnis: Googlebot holt sich pro URL maximal <strong>2 Megabyte</strong>. Was danach kommt, wird nicht gecrawlt, nicht gerendert, nicht indexiert. Klingt harmlos? Für eine schlanke, sauber gecodete Seite: Ja. Für eine mit <a href="wordpress-pagebuilder-ressourcenverbrauch-2026.html" title="Warum PageBuilder deine Performance ruinieren">PageBuilder aufgeblähte WordPress-Installation</a>: ein echtes Problem.</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-scissors"></i>
+                    <div>
+                        <strong>Der harte Schnitt:</strong>
+                        <p>2 MB klingt nach viel? Eine einzelne Elementor-Seite kann locker 800 KB bis 1.5 MB reines HTML produzieren – <em>ohne</em> CSS und JS. Packe ein WooCommerce-Shop-Template mit 50 Produkten in eine Kategorie-Seite und du bist schneller an der Grenze als du denkst. Die 2 MB umfassen auch den HTTP-Header.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="crawler-heading">
+                <h2 id="crawler-heading">Nicht ein Bot: <span class="article-white">Ein ganzes Ökosystem</span></h2>
+                
+                <p>Erster Mythos, der stirbt: „Googlebot" ist kein einzelner Crawler. Google betreibt dutzende spezialisierter Crawler für unterschiedliche Zwecke – vom klassischen Webseiten-Crawler über den Bild-Crawler bis hin zu spezialisierten Fetchers für AdsBot, Feedfetcher und Storebot. Die vollständige Liste hat Google in seiner <a href="https://developers.google.com/crawling/docs/crawlers-fetchers/overview-google-crawlers" rel="noopener" target="_blank">Crawler-Dokumentation</a> veröffentlicht.</p>
+
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-robot"></i>
+                    <div>
+                        <strong>Crawler ≠ Crawler:</strong>
+                        <p>Jeder Crawler hat seine eigenen Byte-Limits. Googlebot für Webseiten: 2 MB. PDF-Crawler: 64 MB. Bild- und Video-Crawler: variable Schwellenwerte je nach Zielprodukt. Alle anderen Crawler ohne spezifisches Limit: 15 MB Default.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="limits-heading">
+                <h2 id="limits-heading">Die Byte-Limits: <span class="article-white">Was Google wirklich liest</span></h2>
+                
+                <p>Das Kernstück des Updates sind die exakten Byte-Grenzen, die Google jetzt offiziell dokumentiert hat. Hier die Übersicht:</p>
+
+                <div class="crawl-limits-table">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Ressource</th>
+                            <th scope="col">Crawl-Limit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>HTML-Seiten</strong> (Googlebot)</td>
+                            <td><strong>2 MB</strong> (inkl. HTTP-Header)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PDF-Dateien</strong></td>
+                            <td><strong>64 MB</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bilder &amp; Videos</strong></td>
+                            <td>Variable Schwellenwerte, produktabhängig</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Andere Crawler</strong> (ohne spezif. Limit)</td>
+                            <td><strong>15 MB</strong> Default</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Externe CSS/JS/XHR</strong></td>
+                            <td><strong>2 MB pro Datei</strong> (separater Zähler)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <p>Der entscheidende Punkt: Wenn dein HTML-Dokument größer als 2 MB ist, wird Googlebot es <strong>nicht ablehnen</strong> – er schneidet es exakt an der 2MB-Grenze ab. Die abgeschnittene Version wird dann so an die Indexierungs-Pipeline und den Web Rendering Service weitergegeben, <strong>als wäre sie die vollständige Datei</strong>.</p>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Michaels Realitäts-Check:</strong>
+                        <p>Ich habe dutzende WordPress-Seiten analysiert. Sauber gecodete Seiten mit <a href="semantisches-markup.html" title="Semantisches HTML für SEO & KI-Suche">semantischem Markup</a> liegen bei 30–120 KB HTML. PageBuilder-Seiten? Zwischen 400 KB und 2.5 MB für ein einziges Layout. Der Unterschied ist nicht marginal – er ist <strong>Faktor 20</strong>. Und das 2MB-Limit umfasst auch den HTTP-Response-Header, der bei manchen Hosting-Setups mit Cookies und Security-Headern leicht 5–10 KB fressen kann.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="flow-heading">
+                <h2 id="flow-heading">Der Crawl-Ablauf: <span class="article-white">Vom Fetch zum Index</span></h2>
+                
+                <p>Was passiert eigentlich, nachdem Googlebot deine URL abruft? Der Prozess läuft in klar definierten Schritten ab:</p>
+
+                <!-- ══════════════════════════════════════════ -->
+                <!-- CRAWL FLOW DIAGRAM                         -->
+                <!-- ══════════════════════════════════════════ -->
+                <div class="cf-flow">
+                    <div class="cf-step">
+                        <div class="cf-step-line"><div class="cf-step-dot"></div><div class="cf-step-connector"></div></div>
+                        <div class="cf-step-content">
+                            <div class="cf-step-title">1. Partial Fetching</div>
+                            <div class="cf-step-desc">Googlebot ruft deine URL ab und liest die <strong>ersten 2 MB</strong> (inkl. HTTP-Header). Der Fetch stoppt exakt an der Grenze. Die Seite wird nicht abgelehnt – nur abgeschnitten.</div>
+                        </div>
+                    </div>
+                    <div class="cf-step">
+                        <div class="cf-step-line"><div class="cf-step-dot"></div><div class="cf-step-connector"></div></div>
+                        <div class="cf-step-content">
+                            <div class="cf-step-title">2. Übergabe an WRS</div>
+                            <div class="cf-step-desc">Die abgeschnittene Version wird an den <strong>Web Rendering Service</strong> weitergereicht – als wäre sie das vollständige Dokument. Was jenseits der 2 MB liegt, existiert ab hier nicht mehr.</div>
+                        </div>
+                    </div>
+                    <div class="cf-step">
+                        <div class="cf-step-line"><div class="cf-step-dot"></div><div class="cf-step-connector"></div></div>
+                        <div class="cf-step-content">
+                            <div class="cf-step-title">3. JavaScript-Rendering</div>
+                            <div class="cf-step-desc">Der WRS führt JavaScript und CSS aus wie ein moderner Browser. Er verarbeitet clientseitigen Code, XHR-Requests und versteht den <strong>finalen visuellen und textuellen Zustand</strong> der Seite. Bilder und Videos werden dabei <em>nicht</em> angefordert.</div>
+                        </div>
+                    </div>
+                    <div class="cf-step">
+                        <div class="cf-step-line"><div class="cf-step-dot"></div><div class="cf-step-connector"></div></div>
+                        <div class="cf-step-content">
+                            <div class="cf-step-title">4. Ressourcen-Fetch</div>
+                            <div class="cf-step-desc">Jede im HTML referenzierte Ressource (CSS, JS, XHR) wird <strong>separat</strong> von Googlebot geholt – mit eigenem 2MB-Zähler. Medien, Fonts und exotische Dateiformate werden ausgenommen.</div>
+                        </div>
+                    </div>
+                    <div class="cf-step">
+                        <div class="cf-step-line"><div class="cf-step-dot"></div><div class="cf-step-connector"></div></div>
+                        <div class="cf-step-content">
+                            <div class="cf-step-title">5. Indexierung</div>
+                            <div class="cf-step-desc">Der gerenderte Zustand wird an die Indexierungs-Pipeline übergeben. Nur was innerhalb der Byte-Grenzen lag <em>und</em> gerendert werden konnte, fließt in den Google-Index ein.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-bolt"></i>
+                    <div>
+                        <strong>Separate Byte-Zähler:</strong>
+                        <p>Die gute Nachricht: Wenn du schweren CSS- und JavaScript-Code in <strong>externe Dateien</strong> auslagerst, zählen diese nicht zum 2MB-Limit deines HTML-Dokuments. Jede referenzierte Datei hat ihren eigenen, unabhängigen Zähler. Das ist der Schlüssel zur Optimierung.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="wrs-heading">
+                <h2 id="wrs-heading">Der WRS: <span class="article-white">Googles unsichtbarer Browser</span></h2>
+                
+                <p>Nachdem Googlebot die rohen Bytes geholt hat, übernimmt der <strong>Web Rendering Service</strong> (WRS). Der WRS ist im Grunde ein Headless-Chromium-Browser, der JavaScript ausführt und den finalen Zustand deiner Seite versteht – Text, Struktur, Layout.</p>
+
+                <dl class="feature-list">
+                    <dt>Was der WRS tut</dt>
+                    <dd>JavaScript und CSS ausführen, clientseitigen Code verarbeiten, XHR-Requests absetzen, den finalen textuellen und strukturellen Zustand der Seite erfassen. Für jede angeforderte Ressource gilt ebenfalls das 2MB-Limit.</dd>
+                    
+                    <dt>Was der WRS nicht tut</dt>
+                    <dd>Bilder und Videos anfordern. Das bedeutet: Googles Rendering sieht deine Seite im Klartext – ohne visuelle Medien. Was zählt, ist die <strong>textuelle und strukturelle Substanz</strong>, nicht das hübsche Hero-Image.</dd>
+                    
+                    <dt>Warum das für dich relevant ist</dt>
+                    <dd>Wenn dein Content erst durch JavaScript geladen wird (z.B. per AJAX oder SPA-Framework), muss das resultierende HTML immer noch innerhalb der 2MB-Grenze liegen, nachdem der WRS es gerendert hat. <a href="geo-maschinenlesbarkeit-guide.html" title="Maschinenlesbarkeit: Technischer Guide für KI-Sichtbarkeit">Maschinenlesbarkeit</a> fängt beim sauberen DOM an.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="optimize-heading">
+                <h2 id="optimize-heading">So optimierst du: <span class="article-white">Googles Best Practices + Praxis</span></h2>
+                
+                <p>Google hat drei offizielle Best Practices veröffentlicht. Ich ergänze sie um die Praxis-Perspektive, die im Original fehlt.</p>
+
+                <div class="step-guide">
+                    <h3>1. Keep your HTML lean <span class="article-white">– Schlankes HTML ist Pflicht</span></h3>
+                    <p>Lagere schweren CSS- und JavaScript-Code in externe Dateien aus. Das initiale HTML-Dokument hat ein 2MB-Limit, aber externe Scripts und Stylesheets werden separat gecrawlt (mit jeweils eigenen Limits). Die radikalste Optimierung: Weg vom <a href="wordpress-pagebuilder-ressourcenverbrauch-2026.html" title="Die 512MB-Falle: Warum PageBuilder killen">PageBuilder</a>, hin zum nativen Block-Editor oder Custom Theme Development. Was ein PageBuilder mit 200 verschachtelten <code>&lt;div&gt;</code>-Containern löst, schafft sauberer Code in 10 Zeilen. Wie du dein WordPress konkret abspeckst, steht im <a href="wordpress-diaet-guide.html" title="WordPress auf Diät: Plugin-Burnout vermeiden">WordPress-Diät-Guide</a>.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>2. Order matters <span class="article-white">– Reihenfolge entscheidet</span></h3>
+                    <p>Platziere deine kritischsten Elemente so weit oben im HTML wie möglich: <code>&lt;meta&gt;</code>-Tags, <code>&lt;title&gt;</code>, <code>&lt;link rel="canonical"&gt;</code>, strukturierte Daten (<a href="geo-maschinenlesbarkeit-guide.html" title="Praxis-Guide: JSON-LD und Schema.org">JSON-LD</a>) und essenzielle <code>&lt;link&gt;</code>-Elemente. Was im <code>&lt;head&gt;</code> steht, ist praktisch immer sicher. Das Problem beginnt im <code>&lt;body&gt;</code>, wenn PageBuilder den DOM mit tausenden Nodes aufblasen und dein wichtiges <a href="semantisches-markup.html" title="Semantisches HTML für SEO & KI-Suche">Structured Data</a> oder Canonical erst am Ende kommt.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>3. Monitor your server logs <span class="article-white">– Servergesundheit überwachen</span></h3>
+                    <p>Wenn dein Server unter Last gerät und Bytes langsam ausliefert, drosselt Googlebot automatisch seine Crawl-Frequenz, um deine Infrastruktur nicht zu überlasten. Das Ergebnis: Weniger Crawls, langsamere Indexierung, veraltete Inhalte im Index. Überwache deine Server-Antwortzeiten konsequent – insbesondere den TTFB. Eine <a href="wordpress-diaet-guide.html" title="WordPress Performance maximieren">schlanke WordPress-Installation</a> mit einem TTFB unter 0.5 Sekunden ist dein bester Verbündeter.</p>
+                </div>
+            </section>
+
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Jedes Byte muss verdient werden</span></h2>
+                
+                <p>Googles offizielle Dokumentation der Crawling-Limits ist ein Weckruf für jeden, der noch glaubt, dass HTML-Größe keine Rolle spielt. Die 2MB-Grenze ist kein theoretisches Szenario – sie ist die harte Realität, in der dein <code>&lt;meta&gt;</code>-Tag, dein Canonical oder dein <a href="geo-maschinenlesbarkeit-guide.html" title="Maschinenlesbarkeit für KI-Sichtbarkeit">JSON-LD-Schema</a> schlicht nicht existiert, wenn es zu weit unten im Quellcode steht.</p>
+
+                <div class="key-points">
+                    <h3>Die wichtigsten Punkte auf einen Blick:</h3>
+                    <ul>
+                        <li><strong>2 MB pro URL:</strong> Googlebot schneidet HTML-Dokumente nach 2 MB ab. Der abgeschnittene Teil wird als vollständiges Dokument behandelt. Punkt.</li>
+                        <li><strong>Externe Dateien = eigenes Budget:</strong> CSS, JS und XHR-Requests haben separate 2MB-Limits. Auslagerung ist die effektivste Optimierung.</li>
+                        <li><strong>Reihenfolge im Code:</strong> <code>&lt;head&gt;</code>-Elemente, Canonicals, Meta-Tags und Structured Data gehören so weit nach oben wie möglich.</li>
+                        <li><strong>Server-Speed = Crawl-Budget:</strong> Langsame Server führen zu gedrosseltem Crawling. TTFB unter 0.5s ist das Ziel.</li>
+                        <li><strong>WRS rendert ohne Medien:</strong> Der Web Rendering Service fordert keine Bilder oder Videos an – nur Text, Struktur und Code.</li>
+                    </ul>
+                </div>
+
+                <p>Die Konsequenz ist klar: <strong>Schluss mit Code-Bloat.</strong> Jedes überflüssige <code>&lt;div&gt;</code>, jeder Inline-Style, jeder PageBuilder-Shortcode frisst Bytes, die dein wichtiger Content braucht. Wer 2026 in Googles Index und in den <a href="geo-seo.html" title="GEO vs. SEO: Wie du in KI-Antworten landest">KI-Antworten</a> sichtbar sein will, muss seinen Code so behandeln wie Speicherplatz auf einer Raumstation: Jedes Gramm zählt, jedes Byte muss seinen Platz verdienen.</p>
+            </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Wie viel einer Webseite crawlt Googlebot maximal?</summary>
+                        <div class="faq-content">
+                            <p>Googlebot fetcht maximal die ersten 2 MB einer einzelnen URL (inklusive HTTP-Header). Bei PDF-Dateien liegt die Grenze bei 64 MB. Für Crawler ohne spezifisches Limit gilt ein Default von 15 MB. Alles jenseits dieser Grenze wird komplett ignoriert – nicht gecrawlt, nicht gerendert, nicht indexiert.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was passiert mit Inhalten jenseits der 2MB-Grenze?</summary>
+                        <div class="faq-content">
+                            <p>Diese Bytes werden weder gecrawlt, noch gerendert, noch indexiert. Google behandelt die abgeschnittene Version so, als wäre sie die vollständige Datei. Meta-Tags, Canonical-URLs oder <a href="geo-maschinenlesbarkeit-guide.html" title="Maschinenlesbarkeit-Guide">Structured Data</a> im unteren Bereich der Seite existieren für Google schlicht nicht.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Zählen externe CSS- und JavaScript-Dateien zum 2MB-Limit?</summary>
+                        <div class="faq-content">
+                            <p>Nein. Jede referenzierte Ressource (CSS, JS, XHR-Requests) wird separat gecrawlt und hat ihren eigenen, unabhängigen Byte-Zähler. Sie zählen nicht zum 2MB-Limit des übergeordneten HTML-Dokuments. Das ist der Grund, warum das Auslagern in externe Files die effektivste Maßnahme ist.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was ist der Web Rendering Service (WRS)?</summary>
+                        <div class="faq-content">
+                            <p>Der WRS ist Googles System zur Ausführung von JavaScript und CSS. Er funktioniert wie ein Headless-Chromium-Browser, verarbeitet clientseitigen Code und versteht den finalen Zustand einer Seite – Text, Struktur, Layout. Bilder und Videos werden vom WRS nicht angefordert. Auch für WRS-Ressourcen gilt das 2MB-Limit pro Datei.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie prüfe ich, ob meine Seite zu groß für Googlebot ist?</summary>
+                        <div class="faq-content">
+                            <p>Öffne den Quellcode deiner Seite im Browser und prüfe die Dateigröße des HTML-Dokuments. Über <code>curl -sI URL | grep content-length</code> erhältst du die Größe in Bytes. Alles unter 500 KB ist unkritisch, ab 1 MB solltest du optimieren, ab 2 MB wird aktiv abgeschnitten. Alternativ: Google Search Console → URL-Prüfung → „Gecrawlte Seite anzeigen" zeigt dir exakt, was Google gesehen hat.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Betrifft das 2MB-Limit auch Single-Page-Applications (SPAs)?</summary>
+                        <div class="faq-content">
+                            <p>Ja und nein. Das initiale HTML einer SPA ist meist klein. Aber der WRS rendert das JavaScript und erzeugt daraus den finalen DOM. Wenn das gerenderte Ergebnis mehr als 2 MB textuellen Inhalt enthält, greift das Limit erneut. SPAs sind zusätzlich gefährdet, weil essenzielle Inhalte oft erst durch asynchrone Calls nachgeladen werden – und wenn diese scheitern, sieht Google eine leere Seite.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+<section class="blog-cta-wrapper">
+    <h2>Dein Code unter der Lupe</h2>
+    <p>Wie viel Byte-Ballast schleppt deine Seite mit sich? Ich analysiere deinen Quellcode und zeige dir exakt, wo Googlebot aufhört zu lesen.</p>
+    
+    <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+        <i aria-hidden="true" class="fa-solid fa-magnifying-glass-chart"></i> Crawl-Analyse anfragen
+    </button>
+</section>
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- CRAWL BYTE METER – Inline JS                       -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var body=document.getElementById('cb-body');
+        var btns=document.querySelectorAll('.cb-toggle-btn');
+        if(!body||!btns.length)return;
+
+        var DATA={
+            bloat:{
+                url:'example.com/shop/kategorie/alle-produkte',
+                htmlSize:'1.9 MB',htmlPct:95,htmlColor:'red',
+                cutoffPos:'97%',
+                stats:[
+                    {label:'HTML-Größe',val:'1.9 MB',cls:'red'},
+                    {label:'DOM Nodes',val:'2.340',cls:'red'},
+                    {label:'Inline CSS',val:'420 KB',cls:'red'},
+                    {label:'Inline JS',val:'180 KB',cls:'amber'},
+                    {label:'Structured Data',val:'Position: Zeile 4.200',cls:'red'}
+                ],
+                verdict:{text:'⚠ Structured Data & Canonical könnten abgeschnitten werden',cls:'danger'}
+            },
+            clean:{
+                url:'example.com/shop/kategorie/alle-produkte',
+                htmlSize:'85 KB',htmlPct:4,htmlColor:'green',
+                cutoffPos:'97%',
+                stats:[
+                    {label:'HTML-Größe',val:'85 KB',cls:'green'},
+                    {label:'DOM Nodes',val:'142',cls:'green'},
+                    {label:'Inline CSS',val:'0 KB',cls:'green'},
+                    {label:'Inline JS',val:'0 KB',cls:'green'},
+                    {label:'Structured Data',val:'Position: Zeile 12 (Head)',cls:'green'}
+                ],
+                verdict:{text:'✓ Gesamtes Dokument wird vollständig gecrawlt',cls:'ok'}
+            }
+        };
+
+        function render(state){
+            var d=DATA[state];
+            var h='';
+            h+='<div class="cb-url-bar"><span class="cb-url-icon"><i class="fa-solid fa-globe"></i></span>'+d.url+'</div>';
+            h+='<div class="cb-section-title">HTML-Dokument vs. 2MB-Limit</div>';
+            h+='<div class="cb-bar-wrap">';
+            h+='<div class="cb-bar-fill '+d.htmlColor+'" data-pct="'+d.htmlPct+'">'+d.htmlSize+'</div>';
+            if(d.htmlPct>60) h+='<div class="cb-cutoff" style="left:'+d.cutoffPos+'"><span class="cb-cutoff-label">2 MB</span></div>';
+            h+='</div>';
+            h+='<div class="cb-bar-label"><span>0 MB</span><span>2 MB (Limit)</span></div>';
+            h+='<div class="cb-divider"></div>';
+            d.stats.forEach(function(s){
+                h+='<div class="cb-stat"><span class="cb-stat-label">'+s.label+'</span><span class="cb-stat-val '+s.cls+'">'+s.val+'</span></div>';
+            });
+            h+='<div class="cb-verdict '+d.verdict.cls+'">'+d.verdict.text+'</div>';
+            body.innerHTML=h;
+            setTimeout(function(){
+                body.querySelectorAll('.cb-bar-fill').forEach(function(el){
+                    el.style.width=el.dataset.pct+'%';
+                });
+            },50);
+        }
+
+        var userClicked=false,timer;
+        function set(state){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(state==='clean')btns[1].classList.add('is-active');
+            else btns[0].classList.add('is-active');
+            render(state);
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state);
+        });});
+        set('bloat');
+        var isBloat=true;
+        timer=setInterval(function(){if(userClicked)return;isBloat=!isBloat;set(isBloat?'bloat':'clean');},5000);
+    })();
+    </script>
+</body>
+</html>

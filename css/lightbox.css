@@ -1,0 +1,259 @@
+/* ============================================================
+   LIGHTBOX.CSS - TORINO STYLE (STABLE VERSION)
+   Pure CSS Lightbox via :target - Minimalistisch & Stabil
+   ============================================================ */
+
+/* ===================
+   1. SCREENSHOT GALLERY
+   =================== */
+
+.screenshot-gallery {
+    margin: 3rem 0;
+    padding: 2rem 0;
+}
+
+.screenshot-gallery > h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================
+   2. GALLERY ITEMS
+   =================== */
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.gallery-item:hover {
+    border-color: var(--accent-color);
+}
+
+.gallery-item figure {
+    margin: 0;
+    padding: 0;
+}
+
+.gallery-item .gallery-thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    cursor: pointer;
+}
+
+.gallery-item figcaption {
+    padding: 1rem 1.2rem;
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    border-top: 1px solid var(--border-color-subtle);
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.gallery-item figcaption i {
+    color: var(--accent-color);
+    font-size: 0.85rem;
+}
+
+/* ===================
+   3. CSS-ONLY LIGHTBOX (Target-Based)
+   =================== */
+
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.97);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    
+    /* Versteckt by default */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Lightbox aktiviert via :target */
+.lightbox:target {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Schließen-Link (gesamter Hintergrund) */
+.lightbox-close-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Content Container */
+.lightbox-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Lightbox Bild */
+.lightbox-inner img {
+    max-width: 100%;
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Lightbox Caption */
+.lightbox-caption {
+    margin-top: 1.2rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    text-align: center;
+    max-width: 600px;
+}
+
+.lightbox-caption strong {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+/* X-Button oben rechts */
+.lightbox-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color-muted);
+    font-size: 1.8rem;
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+.lightbox-close-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* ===================
+   4. RESPONSIVE
+   =================== */
+
+@media (max-width: 768px) {
+    .gallery-item .gallery-thumb {
+        height: 180px;
+    }
+
+    .lightbox {
+        padding: 1rem;
+    }
+
+    .lightbox-inner img {
+        max-height: 70vh;
+    }
+
+    .lightbox-caption {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .lightbox-close-btn {
+        top: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .screenshot-gallery {
+        margin: 2rem 0;
+        padding: 1rem 0;
+    }
+
+    .gallery-item figcaption {
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* ===================
+   5. PRINT STYLES
+   =================== */
+
+@media print {
+    .lightbox {
+        display: none !important;
+    }
+    
+    .screenshot-gallery {
+        page-break-inside: avoid;
+    }
+
+    .gallery-grid {
+        display: block;
+    }
+
+    .gallery-item {
+        margin-bottom: 1rem;
+        page-break-inside: avoid;
+    }
+
+    .gallery-item .gallery-thumb {
+        height: auto;
+        max-height: 300px;
+    }
+}

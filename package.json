@@ -1,0 +1,50 @@
+{
+  "name": "designare",
+  "version": "1.0.0",
+  "description": "Michael Kanda - Komplize für Web & KI aus Wien",
+  "main": "index.html",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@getbrevo/brevo": "^2.5.0",
+    "@google/generative-ai": "^0.12.0",
+    "@supabase/supabase-js": "^2.43.5",
+    "@upstash/redis": "^1.36.2",
+    "@upstash/vector": "^1.2.2",
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.3.1",
+    "googleapis": "^142.0.0",
+    "qrcode": "^1.5.3",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "gulp": "^5.0.1",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "generate-articles-db": "node js/generate-articles-db.js",
+    "generate-knowledge": "node js/generate-knowledge.js",
+    "inject-faq": "node js/inject-faq.js",
+    "generate-sitemap": "node generate-sitemap.js",
+    "inject:header": "node js/inject-header.js",
+    "inject:footer": "node js/inject-footer.js",
+    "inject:modals": "node js/inject-modals.js",
+    "inject:side-menu": "node js/inject-side-menu.js",
+    "inject:theme-init": "node js/inject-theme-init.js",
+    "inject-ratings": "node js/inject-ratings.js",
+    "inject-breadcrumb": "node js/inject-breadcrumb.js",
+    "inject-related": "node js/inject-related.js",
+    "inject-author": "node js/inject-author.js",
+    "inject-blog": "node js/inject-blog-articles.js",
+    "inject-lazy": "node js/inject-lazy-loading.js",
+    "inject-consent": "node js/inject-consent.js",
+    "log-build": "node js/log-build.js",
+    "bundle-css": "gulp",
+    "build": "node js/build-runner.js"
+  }
+}

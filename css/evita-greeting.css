@@ -1,0 +1,193 @@
+/* ============================================================
+   EVITA-GREETING.CSS
+   Greeting-Bubble die sich aus dem Header-Avatar entfaltet
+   Standalone – keine Abhängigkeiten zu anderen Modulen
+   ============================================================ */
+
+/* ===================
+   1. BACKDROP (subtiler Overlay)
+   =================== */
+
+.evita-greeting-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.evita-greeting-backdrop.visible {
+    opacity: 1;
+}
+
+/* ===================
+   2. BUBBLE CONTAINER
+   =================== */
+
+.evita-greeting-bubble {
+    position: fixed;
+    z-index: 10001;
+
+    /* Position: unterhalb des Header-Avatars, rechtsbündig */
+    top: 72px;
+    right: 68px;
+
+    max-width: 320px;
+    padding: 18px 22px;
+
+    /* Glassmorphism */
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid #C4A35A;
+    border-radius: 16px;
+    
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(196, 163, 90, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    cursor: pointer;
+
+    /* Initial: unsichtbar */
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+    transform-origin: top right;
+    pointer-events: none;
+
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Pfeil nach oben zum Avatar */
+.evita-greeting-bubble::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    right: 24px;
+    
+    width: 14px;
+    height: 14px;
+    background: rgba(15, 15, 15, 0.95);
+    border-top: 1px solid #C4A35A;
+    border-left: 1px solid #C4A35A;
+    
+    transform: rotate(45deg);
+}
+
+/* State: Sichtbar */
+.evita-greeting-bubble.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* State: Ausblenden */
+.evita-greeting-bubble.fade-out {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* ===================
+   3. TEXT CONTENT
+   =================== */
+
+.evita-greeting-text {
+    color: var(--text-color, #e4e4e4);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    min-height: 1.55em;
+}
+
+/* Blinkender Cursor während Typewriter */
+.evita-greeting-text.typing::after {
+    content: '▍';
+    color: var(--accent-color, #c4a35a);
+    font-weight: 300;
+    animation: evitaCursorBlink 0.8s step-end infinite;
+    margin-left: 1px;
+}
+
+@keyframes evitaCursorBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+/* Accent-farbiger Name im Text */
+.evita-greeting-text .evita-name {
+    color: var(--accent-color, #c4a35a);
+    font-weight: 600;
+}
+
+/* Subtiler Hinweis-Text */
+.evita-greeting-hint {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: var(--text-color-muted, #949494);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+}
+
+.evita-greeting-bubble.visible .evita-greeting-hint.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===================
+   4. LIGHT MODE
+   =================== */
+
+body.light-mode .evita-greeting-bubble {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: #C4A35A;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.12),
+        0 0 30px rgba(196, 163, 90, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+body.light-mode .evita-greeting-bubble::before {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: #C4A35A;
+}
+
+/* ===================
+   5. MOBILE
+   =================== */
+
+@media (max-width: 768px) {
+    .evita-greeting-bubble {
+        top: 62px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        padding: 15px 18px;
+        border-radius: 14px;
+    }
+
+    .evita-greeting-bubble::before {
+        right: 55px;
+    }
+
+    .evita-greeting-text {
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .evita-greeting-bubble {
+        padding: 12px 15px;
+    }
+
+    .evita-greeting-text {
+        font-size: 0.78rem;
+    }
+}

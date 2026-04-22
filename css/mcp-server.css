@@ -1,0 +1,450 @@
+/* ============================================================
+   MCP-SERVER.CSS - Styles für den MCP Server Blogartikel
+   Animation, Quellenverzeichnis, Flow-Demo
+   ============================================================ */
+
+/* ===================
+   QUELLENVERZEICHNIS
+   =================== */
+
+.source-list {
+    padding-left: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.source-list li {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-color-muted);
+}
+
+.source-list a {
+    color: var(--accent-color);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(196,163,90,0.3);
+    transition: border-color 0.2s ease;
+}
+
+.source-list a:hover {
+    border-color: var(--accent-color);
+}
+
+sup a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.75rem;
+}
+
+/* ===================
+   MCP DATA FLOW DEMO
+   1:1 aus Preview-HTML
+   =================== */
+
+.summary-box > .summary-image {
+    align-self: stretch;
+    width: 100%;
+}
+
+.mcp-flow-demo {
+    width: 100%;
+    background: rgba(15,15,15,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 1.2rem;
+    font-size: 13px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* --- Pfad-Umschaltung (Toggle-Animation) --- */
+.mcp-path {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.5s ease, transform 0.4s ease;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.mcp-path-crawler {
+    opacity: 1;
+}
+
+.mcp-path-mcp {
+    opacity: 0;
+    transform: translateY(8px);
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    right: 1.2rem;
+}
+
+.mcp-flow-demo.is-mcp .mcp-path-crawler {
+    opacity: 0;
+    transform: translateY(-8px);
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    right: 1.2rem;
+}
+
+.mcp-flow-demo.is-mcp .mcp-path-mcp {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Pfad-Label --- */
+.mcp-path-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+/* --- Node-Spalte --- */
+.mcp-nodes-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 100%;
+}
+
+/* --- Nodes --- */
+.mcp-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+}
+
+.mcp-node i {
+    color: #c4a35a;
+    font-size: 13px;
+}
+
+/* --- Inline-Tag (· MCP, · RAG, · Crawl) --- */
+.mcp-node-tag {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #c4a35a;
+    opacity: 0.55;
+    margin-left: 2px;
+    font-weight: 600;
+}
+
+.mcp-node-tag::before {
+    content: '\00B7\00A0';
+}
+
+/* --- Connector (gestrichelte Linie) --- */
+.mcp-connector {
+    width: 0;
+    height: 18px;
+    margin-left: 18px;
+    border-left: 1px dashed rgba(255,255,255,0.1);
+}
+
+.mcp-connector-accent {
+    border-left-color: rgba(196,163,90,0.25);
+}
+
+/* --- Ergebnis-Box --- */
+.mcp-result {
+    margin-top: 16px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.mcp-result-bad {
+    background: rgba(255,80,80,0.08);
+    border: 1px solid rgba(255,80,80,0.2);
+    color: #ff6b6b;
+}
+
+.mcp-result-good {
+    background: rgba(80,200,120,0.08);
+    border: 1px solid rgba(80,200,120,0.2);
+    color: #50c878;
+}
+
+.mcp-result-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.mcp-result-text {
+    min-width: 0;
+}
+
+/* --- Toggle --- */
+.mcp-toggle {
+    display: flex;
+    margin-top: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.mcp-toggle-btn {
+    flex: 1;
+    padding: 6px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 400;
+}
+
+.mcp-toggle-btn.is-active {
+    background: rgba(196,163,90,0.12);
+    color: #c4a35a;
+    font-weight: 600;
+}
+
+/* ===================
+   RESPONSIVE
+   =================== */
+
+@media (max-width: 480px) {
+    .mcp-flow-demo {
+        height: auto;
+    }
+}
+
+/* ===================
+   MCP LIVE DEMO
+   Chat + Protokoll Split
+   =================== */
+
+.mcp-live-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2rem 0;
+    min-height: 320px;
+    background: rgba(0,0,0,0.2);
+}
+
+.mcpd-chat {
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.mcpd-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0,0,0,0.15);
+    font-size: 0.8rem;
+}
+
+.mcpd-chat-icon {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+.mcpd-chat-name {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.mcpd-chat-badge {
+    margin-left: auto;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(80,200,120,0.12);
+    color: #50c878;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.mcpd-chat-body {
+    flex: 1;
+    padding: 0.8rem;
+    overflow-y: auto;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.mcpd-msg {
+    margin-bottom: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 6px;
+    max-width: 92%;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: mcpd-fadein 0.35s ease forwards;
+}
+
+.mcpd-msg-user {
+    background: rgba(196,163,90,0.12);
+    color: var(--text-color);
+    margin-left: auto;
+    text-align: right;
+    border-bottom-right-radius: 2px;
+}
+
+.mcpd-msg-ai {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-bottom-left-radius: 2px;
+}
+
+.mcpd-msg-ai .mcpd-cite {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.7rem;
+    color: var(--accent-color);
+    opacity: 0.8;
+}
+
+.mcpd-typing {
+    color: var(--text-color-muted);
+    font-style: italic;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+}
+
+.mcpd-typing::after {
+    content: '';
+    animation: mcpd-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes mcpd-dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+@keyframes mcpd-fadein {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mcpd-log {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0,0,0,0.1);
+}
+
+.mcpd-log-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0,0,0,0.15);
+    font-size: 0.75rem;
+    color: var(--text-color-muted);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.mcpd-log-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #50c878;
+    animation: mcpd-pulse 2s ease infinite;
+}
+
+@keyframes mcpd-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.mcpd-log-body {
+    flex: 1;
+    padding: 0.6rem 0.8rem;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.68rem;
+    line-height: 1.6;
+    color: var(--text-color-muted);
+}
+
+.mcpd-log-line {
+    margin-bottom: 0.25rem;
+    opacity: 0;
+    animation: mcpd-fadein 0.25s ease forwards;
+}
+
+.mcpd-log-line .mcpd-l-method {
+    color: var(--accent-color);
+}
+
+.mcpd-log-line .mcpd-l-ok {
+    color: #50c878;
+}
+
+.mcpd-log-line .mcpd-l-data {
+    color: #7eb8da;
+}
+
+.mcpd-log-line .mcpd-l-dim {
+    opacity: 0.5;
+}
+
+.mcpd-fade-out {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+@media (max-width: 700px) {
+    .mcp-live-demo {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    .mcpd-chat {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .mcpd-chat-body,
+    .mcpd-log-body {
+        min-height: 140px;
+    }
+}

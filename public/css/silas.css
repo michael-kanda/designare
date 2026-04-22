@@ -1,0 +1,559 @@
+/* ============================================================
+   SILAS.CSS - Dedizierte Styles für den Silas Content Generator
+   Ergänzt blog-style.css für das Tool-Interface
+   ============================================================ */
+
+/* ===================
+   1. SILAS GENERATOR SECTION
+   =================== */
+
+.silas-generator-section {
+    margin-bottom: 4rem;
+}
+
+.silas-generator-section .ai-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 2rem 0;
+    max-width: 100%;
+}
+
+/* ===================
+   2. INPUT GROUPS & LABELS
+   =================== */
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    color: var(--text-color);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+/* ===================
+   3. SELECT DROPDOWNS (Custom)
+   =================== */
+
+.custom-select {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c4a35a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+.custom-select:hover,
+.custom-select:focus {
+    border-color: var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    outline: none;
+}
+
+.custom-select option {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 10px;
+}
+
+/* ===================
+   4. TEXT INPUTS & CONTAINERS
+   =================== */
+
+.silas-input-container {
+    margin-bottom: 1rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    transition: border-color 0.3s ease;
+}
+
+.silas-input-container:hover,
+.silas-input-container:focus-within {
+    border-color: var(--accent-color);
+}
+
+.silas-extra-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.silas-extra-input::placeholder {
+    color: var(--text-color-muted);
+    opacity: 0.7;
+}
+
+/* Textarea specific */
+textarea.silas-extra-input {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+/* ===================
+   5. KEYWORD FORM
+   =================== */
+
+#silas-form {
+    display: flex;
+    gap: 0;
+    margin-top: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+#silas-form:focus-within {
+    border-color: var(--accent-color);
+}
+
+#silas-keyword-input {
+    flex-grow: 1;
+    padding: 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    outline: none;
+}
+
+#silas-keyword-input::placeholder {
+    color: var(--text-color-muted);
+    opacity: 0.7;
+}
+
+#add-keyword-btn {
+    padding: 15px 20px;
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--bg-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#add-keyword-btn:hover {
+    background-color: #d4a84a;
+}
+
+/* ===================
+   6. KEYWORD LIST
+   =================== */
+
+.keyword-list-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.keyword-list-container h3,
+.keyword-list-container h4 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
+}
+
+#keyword-display-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+    min-height: 50px;
+}
+
+#keyword-display-list:empty::after {
+    content: 'Noch keine Keywords hinzugefügt...';
+    color: var(--text-color-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+    display: block;
+    text-align: center;
+    padding: 1rem;
+}
+
+.keyword-list-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ===================
+   7. CTA BUTTONS (Silas specific)
+   =================== */
+
+.silas-generator-section .cta-button,
+.keyword-list-controls .cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background-color: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 0;
+}
+
+.silas-generator-section .cta-button:hover,
+.keyword-list-controls .cta-button:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.silas-generator-section .cta-button.secondary,
+.keyword-list-controls .cta-button.secondary {
+    border-color: var(--border-color);
+    color: var(--text-color-muted);
+}
+
+.silas-generator-section .cta-button.secondary:hover,
+.keyword-list-controls .cta-button.secondary:hover {
+    border-color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+}
+
+/* ===================
+   8. STATUS & RESPONSE
+   =================== */
+
+#silas-status {
+    text-align: center;
+    padding: 1rem;
+    color: var(--accent-color);
+    font-weight: 400;
+    font-size: 0.95rem;
+    min-height: 1.5rem;
+}
+
+#silas-response-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+#silas-response-container h3 {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* ===================
+   9. RESULT CARDS
+   =================== */
+
+.result-card {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid var(--accent-color);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.result-card:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.result-card h4 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0 0 0.8rem 0;
+}
+
+.result-card p {
+    color: var(--text-color-muted);
+    font-size: 0.9rem;
+    margin: 0.3rem 0;
+    line-height: 1.5;
+}
+
+.result-card-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.result-card-actions .cta-button {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+}
+
+/* ===================
+   10. MODALS (Auth & Preview)
+   =================== */
+
+/* Auth Modal specifics */
+#silas-auth-modal .modal-content {
+    max-width: 400px;
+    text-align: center;
+}
+
+#silas-auth-modal .modal-content h3 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+#silas-auth-modal .silas-input-container {
+    margin-bottom: 1.5rem;
+}
+
+#silas-auth-modal #master-pwd-input {
+    text-align: center;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+}
+
+#auth-error-msg {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+/* Preview Modal specifics */
+#silas-preview-modal .modal-content {
+    max-width: 1200px;
+    width: 95%;
+    height: 90vh;
+    max-height: 90vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#silas-preview-modal .close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#preview-content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: var(--bg-color);
+}
+
+/* Preview Scrollbar */
+#preview-content-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+#preview-content-area::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+#preview-content-area::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+/* ===================
+   11. INFO BOXES (Override for Silas)
+   =================== */
+
+.silas-generator-section .info-box,
+.silas-generator-section .tech-box {
+    margin: 1.5rem 0;
+}
+
+/* Master Mode Indicator */
+#master-mode-indicator {
+    background: rgba(40, 167, 69, 0.1) !important;
+    border: 1px solid #28a745 !important;
+}
+
+#master-mode-indicator i {
+    color: #28a745 !important;
+}
+
+/* Demo Status */
+#silas-demo-status .tech-box {
+    margin: 1.5rem 0;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* ===================
+   12. RESPONSIVE
+   =================== */
+
+@media (max-width: 768px) {
+    .silas-generator-section .ai-container {
+        padding: 1.5rem;
+    }
+
+    .keyword-list-container {
+        padding: 1rem;
+    }
+
+    .keyword-list-controls {
+        flex-direction: column;
+    }
+
+    .keyword-list-controls .cta-button {
+        width: 100%;
+    }
+
+    #silas-form {
+        flex-direction: column;
+    }
+
+    #add-keyword-btn {
+        padding: 12px;
+    }
+
+    .result-card-actions {
+        flex-direction: column;
+    }
+
+    .result-card-actions .cta-button {
+        width: 100%;
+    }
+
+    #silas-preview-modal .modal-content {
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    #preview-content-area {
+        padding: 1rem;
+    }
+}
+
+/* ===================
+   13. ANIMATIONS
+   =================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+#keyword-display-list li {
+    animation: fadeIn 0.2s ease forwards;
+}
+
+/* Modal animation override */
+.modal-overlay {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* ===================
+   14. CONFIGURATION GRID (New)
+   =================== */
+
+.silas-config-group {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 2rem;
+}
+
+.silas-config-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.silas-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.silas-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.silas-section-label {
+    display: block;
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+/* Fix für Mobile */
+@media (max-width: 768px) {
+    .silas-grid-2, 
+    .silas-grid-3 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* silas.css - Update für Container-Breite */
+.silas-generator-section .ai-container {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 2rem 0;
+    
+    /* FIX: Erzwinge volle Breite */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: block;
+}

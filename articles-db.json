@@ -1,0 +1,122 @@
+{
+  "articles": [
+    {
+      "slug": "wordpress-diaet-guide",
+      "title": "WordPress auf Diät",
+      "description": "Plugin-Burnout vermeiden & Performance maximieren",
+      "question": "Was ist die WordPress-Diät?",
+      "answer": "Die radikale Rückbesinnung auf Performance. Wir ersetzen 30+ Plugins durch native Funktionen, killen PageBuilder-Ballast und holen uns blitzschnelle Ladezeiten zurück. Schluss mit Plugin-Burnout.",
+      "category": "WordPress",
+      "icon": "fa-solid fa-weight-scale",
+      "tags": ["wordpress", "performance", "plugins", "gutenberg"]
+    },
+    {
+      "slug": "wordpress-pagebuilder-ressourcenverbrauch-2026",
+      "title": "Die 512MB-Völlerei",
+      "description": "Warum PageBuilder dein WordPress killen",
+      "question": "Warum killen PageBuilder meine WordPress-Performance?",
+      "answer": "Weil sie eine fatale 'Div-Suppe' kochen. Was in sauberem HTML drei Zeilen braucht, wird zu zehn verschachtelten Containern. 2026 sprengt das jedes PHP-Memory-Limit. Clean Code ist die einzige Diät, die wirkt.",
+      "category": "WordPress",
+      "icon": "fa-solid fa-memory",
+      "tags": ["wordpress", "pagebuilder", "performance", "php"]
+    },
+    {
+      "slug": "semantisches-markup",
+      "title": "Semantisches Markup",
+      "description": "Sauberer Code für SEO und KI-Suche",
+      "question": "Warum ist semantisches Markup Pflicht für KIs?",
+      "answer": "Weil LLMs keine Pixel sehen, sondern Code parsen. Tags wie ‹article› oder ‹nav› liefern den Kontext, den KI-Crawler brauchen. Ohne Semantik ist dein Content nur unstrukturierter Datenmüll – egal wie gut der Text ist.",
+      "category": "Webentwicklung",
+      "icon": "fa-solid fa-code",
+      "tags": ["html", "seo", "geo", "semantik"]
+    },
+    {
+      "slug": "geo-seo",
+      "title": "SEO vs. GEO",
+      "description": "Klassische Suche trifft KI-Optimierung",
+      "question": "SEO vs. GEO: Wo liegt der Unterschied?",
+      "answer": "SEO kämpft um die 10 blauen Links bei Google. GEO (Generative Engine Optimization) sorgt dafür, dass KI-Modelle wie ChatGPT deine Inhalte direkt zitieren. Die neue Währung ist nicht der Klick, sondern das Zitat.",
+      "category": "SEO",
+      "icon": "fa-solid fa-magnifying-glass-chart",
+      "tags": ["seo", "geo", "ki", "suche"]
+    },
+    {
+      "slug": "KI-Integration-auf-Webseiten",
+      "title": "KI-Integration",
+      "description": "Serverless vs. Plugin im Vergleich",
+      "question": "KI-Integration auf Webseiten: Serverless oder Plugin?",
+      "answer": "Ganz klar: Serverless gewinnt. Während WordPress-Plugins bei jedem Request den ganzen CMS-Ballast mitschleppen, feuert eine Serverless-Architektur deine KI-Antworten isoliert und ohne Overhead raus.",
+      "category": "KI",
+      "icon": "fa-solid fa-robot",
+      "tags": ["ki", "serverless", "api", "performance"]
+    },
+    {
+      "slug": "geo-maschinenlesbarkeit-guide",
+      "title": "Maschinenlesbarkeit",
+      "description": "Webseiten für KIs optimieren",
+      "question": "Was ist Maschinenlesbarkeit für KI-Suche?",
+      "answer": "Maschinenlesbarkeit bedeutet, dass dein Content nicht nur für Menschen, sondern auch für LLMs strukturiert ist. Ohne Schema.org und semantisches HTML bist du für KI-Crawler unsichtbar.",
+      "category": "GEO",
+      "icon": "fa-solid fa-microchip",
+      "tags": ["geo", "ki", "schema", "llm"]
+    },
+    {
+      "slug": "ki-fuer-unternehmenswebseiten",
+      "title": "KI für Unternehmen",
+      "description": "Welche Features sich wirklich lohnen",
+      "question": "Welche KI-Features lohnen sich für Webseiten?",
+      "answer": "Vergiss den Hype. Echter Mehrwert entsteht durch smarte Service-Chatbots (die wirklich Probleme lösen) und Personalisierung. Alles andere ist Spielerei. Dein KI-Bot muss liefern, nicht nur plaudern.",
+      "category": "KI",
+      "icon": "fa-solid fa-building",
+      "tags": ["ki", "chatbot", "unternehmen", "strategie"]
+    },
+    {
+      "slug": "seo-wunderkiste",
+      "title": "SEO Wunderkiste",
+      "description": "Das All-in-One WordPress Plugin",
+      "question": "Können WordPress Plugins reduziert werden?",
+      "answer": "Ja, oft können 10 Einzel-Plugins durch eine modulare Lösung ersetzt werden. Die SEO Wunderkiste vereint Funktionen wie Schema.org, Bildoptimierung und Security in einem schlanken Tool.",
+      "category": "Tools",
+      "icon": "fa-solid fa-toolbox",
+      "tags": ["wordpress", "plugin", "seo", "performance"]
+    },
+    {
+      "slug": "silas",
+      "title": "Silas",
+      "description": "50 SEO-Texte auf einmal generieren",
+      "question": "Kann man viele SEO-Texte auf einmal generieren?",
+      "answer": "Ja, mit dem KI-Tool Silas kannst du 50 SEO-Texte auf einmal generieren – inklusive CSV-Export für den direkten Import in WordPress. Schluss mit Copy & Paste aus ChatGPT.",
+      "category": "Tools",
+      "icon": "fa-solid fa-wand-magic-sparkles",
+      "tags": ["ki", "seo", "texte", "automation"]
+    },
+    {
+      "slug": "data-peak-dashboard",
+      "title": "DataPeak",
+      "description": "Dashboard für SEO-Insights",
+      "question": "Wie vereint man SEO-Daten in einem Dashboard?",
+      "answer": "Zehn offene Tabs sind kein Workflow, das ist Chaos. DataPeak vereint Search Console, Analytics und Trends in einem puristischen Interface – und nutzt KI, um aus Rohdaten direkt optimierte Landingpages zu generieren.",
+      "category": "Tools",
+      "icon": "fa-solid fa-chart-line",
+      "tags": ["seo", "analytics", "dashboard", "daten"]
+    },
+    {
+      "slug": "CSV-Importer-PRO",
+      "title": "CSV Importer PRO",
+      "description": "Landingpages aus Excel erstellen",
+      "question": "Kann man Landingpages aus Excel erstellen?",
+      "answer": "Ja, der CSV Importer PRO ermöglicht es, vollständige Landingpages direkt aus Excel-Listen oder CSV-Dateien programmatisch zu erstellen. Das Ende der manuellen Content-Qual.",
+      "category": "Tools",
+      "icon": "fa-solid fa-file-csv",
+      "tags": ["wordpress", "import", "automation", "landingpages"]
+    }
+  ],
+  "categories": {
+    "WordPress": "fa-brands fa-wordpress",
+    "Webentwicklung": "fa-solid fa-code",
+    "SEO": "fa-solid fa-magnifying-glass",
+    "GEO": "fa-solid fa-brain",
+    "KI": "fa-solid fa-robot",
+    "Tools": "fa-solid fa-toolbox"
+  }
+}

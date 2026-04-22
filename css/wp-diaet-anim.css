@@ -1,0 +1,352 @@
+/* ============================================ */
+/* WP DIÄT – Plugin-Waage + Case Study Stack     */
+/* Prefix: pw- (Waage), wds- (Stack)             */
+/* ============================================ */
+
+/* ============================================ */
+/* KONZEPT A: PLUGIN-WAAGE                        */
+/* ============================================ */
+.wp-plugin-waage {
+    width: 100%;
+    max-width: 340px;
+}
+
+.pw-frame {
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+    padding: 16px;
+    min-height: 280px;
+    position: relative;
+}
+
+/* ── Waage Visual ── */
+.pw-scale {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    height: 160px;
+    position: relative;
+}
+
+/* Fulcrum (Dreieck) */
+.pw-fulcrum {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 14px solid var(--border-color, #222);
+}
+
+/* Beam */
+.pw-beam {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    width: 80%;
+    height: 2px;
+    background: var(--border-color, #222);
+    transform: translateX(-50%) rotate(0deg);
+    transform-origin: center center;
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pw-frame.is-bloat .pw-beam { transform: translateX(-50%) rotate(8deg); }
+.pw-frame.is-diet .pw-beam  { transform: translateX(-50%) rotate(0deg); }
+
+/* Pans (Schalen) */
+.pw-pan {
+    position: absolute;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pw-pan-left  { left: 8%; }
+.pw-pan-right { right: 8%; }
+
+.pw-frame.is-bloat .pw-pan-left  { transform: translateY(20px); }
+.pw-frame.is-bloat .pw-pan-right { transform: translateY(-10px); }
+.pw-frame.is-diet .pw-pan-left   { transform: translateY(0); }
+.pw-frame.is-diet .pw-pan-right  { transform: translateY(0); }
+
+/* Plugin-Pillen */
+.pw-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    max-width: 120px;
+    transition: opacity 0.6s, transform 0.6s;
+}
+
+.pw-pill {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    transition: background 0.4s, opacity 0.4s;
+}
+
+.pw-pill.active { background: #f87171; opacity: 0.7; }
+.pw-pill.clean  { background: #4ade80; opacity: 0.9; }
+.pw-pill.gone   { background: transparent; border: 1px dashed rgba(255,255,255,0.08); opacity: 0.3; }
+
+.pw-pan-label {
+    font-size: 9px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.pw-pan-left .pw-pan-label  { color: #f87171; }
+.pw-pan-right .pw-pan-label { color: #4ade80; }
+
+.pw-frame.is-diet .pw-pan-left .pw-pan-label { color: #4ade80; }
+
+.pw-pan-count {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Courier New', 'Consolas', monospace;
+    line-height: 1;
+}
+
+.pw-pan-left .pw-pan-count  { color: #f87171; }
+.pw-pan-right .pw-pan-count { color: var(--text-color-muted, #949494); }
+
+.pw-frame.is-diet .pw-pan-left .pw-pan-count { color: #4ade80; }
+
+/* ── Stats Bar ── */
+.pw-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color, #222);
+}
+
+.pw-stat {
+    text-align: center;
+    flex: 1;
+}
+
+.pw-stat-val {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Courier New', 'Consolas', monospace;
+    display: block;
+    transition: color 0.4s;
+}
+
+.pw-stat-val.red   { color: #f87171; }
+.pw-stat-val.green { color: #4ade80; }
+
+.pw-stat-label {
+    font-size: 8px;
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+    margin-top: 2px;
+    display: block;
+}
+
+/* ── Toggle ── */
+.pw-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 10px;
+}
+
+.pw-toggle-btn {
+    padding: 8px 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.pw-toggle-btn:first-child { border-radius: 2px 0 0 2px; border-right: none; }
+.pw-toggle-btn:last-child  { border-radius: 0 2px 2px 0; }
+.pw-toggle-btn.is-active   { background: var(--accent-color, #c4a35a); color: #fff; border-color: var(--accent-color, #c4a35a); }
+
+.pw-toggle-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.wp-plugin-waage) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.wp-plugin-waage) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ============================================ */
+/* CASE STUDY: designare.at Stack-Vergleich      */
+/* Prefix: wds-                                  */
+/* ============================================ */
+
+/* ── Stack Flow (horizontal, below text) ── */
+.wds-flow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border-color, #222);
+    width: 100%;
+}
+
+/* ── Stack Column ── */
+.wds-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex: 1;
+    max-width: 200px;
+}
+
+.wds-stack-title {
+    font-size: 9px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+.wds-stack-title.red   { color: #f87171; }
+.wds-stack-title.green { color: #4ade80; }
+
+.wds-layer {
+    width: 100%;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 2px;
+    transition: opacity 0.3s;
+}
+
+.wds-layer.bloat {
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    color: #f87171;
+}
+
+.wds-layer.lean {
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    color: #4ade80;
+}
+
+.wds-layer-time {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    margin-left: 4px;
+}
+
+/* ── VS Divider ── */
+.wds-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-color-subtle, #555);
+    align-self: center;
+    flex-shrink: 0;
+    padding-top: 24px;
+}
+
+/* ── Total Bar ── */
+.wds-total {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 10px;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+.wds-total.red {
+    background: rgba(248,113,113,0.06);
+    border-top: 2px solid #f87171;
+    color: #f87171;
+}
+
+.wds-total.green {
+    background: rgba(74,222,128,0.06);
+    border-top: 2px solid #4ade80;
+    color: #4ade80;
+}
+
+/* ============================================ */
+/* LIGHT MODE                                    */
+/* ============================================ */
+body.light-mode .pw-frame {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .pw-fulcrum { border-bottom-color: #ddd; }
+body.light-mode .pw-beam { background: #ddd; }
+body.light-mode .pw-stats { border-top-color: #e0e0e0; }
+body.light-mode .pw-toggle-btn { border-color: #ddd; color: #888; }
+body.light-mode .pw-toggle-btn.is-active { border-color: var(--accent-color, #c4a35a); }
+
+body.light-mode .wds-flow { border-top-color: #e0e0e0; }
+body.light-mode .wds-layer.bloat { background: rgba(248,113,113,0.06); }
+body.light-mode .wds-layer.lean  { background: rgba(74,222,128,0.06); }
+
+/* ============================================ */
+/* RESPONSIVE                                    */
+/* ============================================ */
+@media (max-width: 991px) {
+    .wp-plugin-waage { max-width: 100%; }
+}
+
+@media (max-width: 600px) {
+    .wds-flow {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .wds-stack { max-width: 260px; }
+
+    .wds-vs { padding-top: 0; }
+}
+
+@media (max-width: 480px) {
+    .pw-pan-count { font-size: 16px; }
+    .pw-stat-val  { font-size: 12px; }
+    .pw-toggle-btn { padding: 7px 14px; font-size: 9px; }
+}

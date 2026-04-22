@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>Veraltete Inhalte richtig archivieren: SEO, Google & KI-Suche | Michael Kanda</title>
+    <meta name="description" content="Alte Blogartikel löschen oder behalten? Die SEO-sichere Archiv-Strategie für Gesetzestexte, Guides und historische Inhalte — mit Case Study und Schema-Empfehlung.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+
+    <link rel="canonical" href="https://designare.at/archiv-strategie"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": "https://designare.at/archiv-strategie",
+  "headline": "Veraltete Inhalte richtig archivieren: SEO, Google & KI-Suche",
+  "description": "Die SEO-sichere Archiv-Strategie für Gesetzestexte, Guides und historische Inhalte — mit Case Study und Schema-Empfehlung.",
+  "image": "https://designare.at/images/archiv-strategie.webp",
+  "author": {
+    "@type": "Person",
+    "name": "Michael Kanda",
+    "url": "https://designare.at/#michael"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "designare.at",
+    "url": "https://designare.at"
+  },
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-03-21",
+  "mainEntityOfPage": "https://designare.at/archiv-strategie",
+  "keywords": ["Archiv-Strategie", "veraltete Inhalte", "SEO", "KI-Suche", "Schema.org", "Canonical", "Content-Archivierung", "GEO"],
+  "about": [
+    { "@type": "Thing", "name": "Suchmaschinenoptimierung" },
+    { "@type": "Thing", "name": "Content-Archivierung" },
+    { "@type": "Thing", "name": "Generative Engine Optimization" }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://designare.at/archiv-strategie#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Soll ich veraltete Blogartikel löschen oder behalten?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Es kommt auf den Inhalt an. Generischen, dünnen Content ohne Traffic solltest du löschen oder per 301 weiterleiten. Inhalte mit eigenständigem historischem Wert — Gesetzestexte, Fallstudien, Branchendaten — solltest du als Archiv behalten, mit einem klaren Hinweis auf die aktuelle Version."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Schadet ein alter Artikel meinem Google-Ranking?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nicht automatisch. Seit dem December 2025 Core Update bestraft Google allerdings Seiten, die veraltet sind UND nicht gepflegt werden. Ein alter Artikel mit aktualisiertem Archiv-Hinweis und korrektem dateModified wird nicht abgestraft."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Brauche ich ein spezielles Schema.org Markup für Archiv-Inhalte?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein. Exotische Typen wie Legislation mit isPredecessorOf werden von Google nicht als Rich Result unterstützt. Ein sauberes Article-Schema mit korrektem datePublished und dateModified plus ein sichtbarer Archiv-Hinweis im Content reichen aus — das verstehen sowohl Google als auch KI-Suchmaschinen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was ist besser für Archiv-Seiten: noindex, canonical oder beides?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Weder noch — wenn der Inhalt eigenständigen Wert hat. Setze einen self-referencing Canonical auf die Archiv-Seite selbst und lass sie indexiert. Noindex würde sie komplett aus der Suche entfernen, ein Cross-Canonical auf den neuen Artikel wäre falsch, da die Inhalte nicht identisch sind."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Wie erkennen KI-Suchmaschinen, dass ein Artikel veraltet ist?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "KI-Crawler wie ChatGPT und Perplexity lesen primär den sichtbaren Text. Ein klarer Archiv-Hinweis im Content ('Diese Rechtslage gilt nicht mehr. Aktuelle Fassung: [Link]') wird zuverlässiger erkannt als jedes exotische Schema-Markup."
+      }
+    }
+  ]
+}
+</script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
+</head>
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                <div id="breadcrumb-placeholder"></div>
+                <h1>Veraltete Inhalte richtig archivieren: <span class="article-white">So bleibst du bei Google und KI-Suche sichtbar</span></h1>
+      
+                <div class="article-meta">
+                    <time datetime="2026-03-21">21. März 2026</time>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 11 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SUMMARY BOX                                -->
+            <!-- ══════════════════════════════════════════ -->
+            <section class="article-summary" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+                
+                <div class="summary-box">
+                    <div class="summary-content">
+                        <h3>Das Wichtigste in Kürze:</h3>
+                        <ul>
+                            <li><strong>Nicht löschen, archivieren:</strong> Alte Gesetzestexte, Branchendaten oder Guides haben historischen Wert. Löschen vernichtet Link-Equity und Nutzen — richtiges Archivieren erhält beides.</li>
+                            <li><strong>Schema-Mythos entlarvt:</strong> Exotische Typen wie <code>Legislation</code> mit <code>isPredecessorOf</code> bringen weder Google-Rankings noch KI-Sichtbarkeit. Was wirkt: ein sauberes <code>Article</code>-Schema mit korrektem <code>dateModified</code>.</li>
+                            <li><strong>Klartext schlägt Markup:</strong> KI-Suchmaschinen verstehen einen sichtbaren Archiv-Hinweis zuverlässiger als jedes versteckte JSON-LD. Der Mensch und die Maschine brauchen dasselbe: Eindeutigkeit.</li>
+                        </ul>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- ARCHIV-SIGNAL-FLOW Animation               -->
+                    <!-- ══════════════════════════════════════════ -->
+                    <div class="summary-image">
+                        <div class="archiv-signal-flow" id="archiv-flow" role="img" aria-label="Archiv-Signal: Wie Google und KI veraltete Inhalte erkennen">
+                            <!-- Alte Seite -->
+                            <div class="asf-card asf-old" id="asf-old">
+                                <div class="asf-card-icon"><i aria-hidden="true" class="fa-solid fa-file-lines"></i></div>
+                                <div class="asf-card-label">Hundegesetz 2005</div>
+                                <div class="asf-card-meta">datePublished: 2005</div>
+                                <div class="asf-card-badge asf-badge-archived">Archiv</div>
+                            </div>
+                            <!-- Signal-Pfeil 1 -->
+                            <div class="asf-connector" id="asf-conn-1">
+                                <div class="asf-line"></div>
+                                <div class="asf-dot" id="asf-dot-1"></div>
+                                <span class="asf-ping" id="asf-ping-1">Archiv-Banner</span>
+                            </div>
+                            <!-- Google/KI Box -->
+                            <div class="asf-card asf-engine" id="asf-engine">
+                                <div class="asf-card-icon"><i aria-hidden="true" class="fa-solid fa-robot"></i></div>
+                                <div class="asf-card-label">Google & KI</div>
+                                <div class="asf-card-meta">Versteht: veraltet</div>
+                                <div class="asf-card-badge asf-badge-ok">✓ Signal klar</div>
+                            </div>
+                            <!-- Signal-Pfeil 2 -->
+                            <div class="asf-connector" id="asf-conn-2">
+                                <div class="asf-line"></div>
+                                <div class="asf-dot" id="asf-dot-2"></div>
+                                <span class="asf-ping" id="asf-ping-2">interner Link</span>
+                            </div>
+                            <!-- Neue Seite -->
+                            <div class="asf-card asf-new" id="asf-new">
+                                <div class="asf-card-icon"><i aria-hidden="true" class="fa-solid fa-file-circle-check"></i></div>
+                                <div class="asf-card-label">Hundegesetz 2026</div>
+                                <div class="asf-card-meta">dateModified: 2026</div>
+                                <div class="asf-card-badge asf-badge-live">Aktuell</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- EINLEITUNG                                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>Du hast 2005 einen ausführlichen Blogartikel über das österreichische Hundegesetz geschrieben. Sauber recherchiert, gut gerankt, bringt bis heute Klicks. Dann ändert sich die Gesetzeslage. Du schreibst einen neuen Artikel für 2026. Und jetzt? Den alten löschen? Überschreiben? Mit einem Schema.org-Hack verknüpfen, den du irgendwo auf Stack Overflow gefunden hast?</p>
+
+                <p>Die Frage klingt banal, aber sie steckt voller Fallstricke. Google hat mit dem <strong>December 2025 Core Update</strong> unmissverständlich klargemacht, dass veralteter, ungepflegter Content bestraft wird — 39 % der betroffenen Seiten wurden deindexiert. Gleichzeitig wächst mit ChatGPT, Perplexity und Gemini ein völlig neuer Kanal, der deine alten Inhalte ebenfalls auswertet. Die falsche Entscheidung kostet dich Traffic auf beiden Seiten.</p>
+
+                <p>In diesem Guide zeige ich dir die <strong>SEO-sichere Archiv-Strategie</strong>, die sowohl für Google als auch für die <a href="https://designare.at/geo-seo" title="GEO: So wirst du zur KI-Quelle">KI-Suche</a> funktioniert. Keine Experimente mit exotischen Schema-Typen, keine Hacks — sondern eine saubere Lösung, die auf dem aufbaut, was Suchmaschinen tatsächlich verstehen.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- DAS PROBLEM                                -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="problem-heading">
+                <h2 id="problem-heading">Das Problem: <span class="article-white">Löschen, Überschreiben oder Archivieren?</span></h2>
+                
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Kontext:</strong>
+                        <p>Nicht jeder veraltete Inhalt ist gleich. Ein Blogpost über „Die besten Smartphones 2019" hat keinen historischen Wert. Ein Artikel über die Rechtslage 2005, ein Branchenbericht oder ein technischer Guide, der als Referenz dient — schon. Die Strategie muss sich am <strong>inhaltlichen Wert</strong> orientieren, nicht am Alter.</p>
+                    </div>
+                </div>
+
+                <p>Die meisten Webseitenbetreiber wählen einen von drei Wegen — und zwei davon sind problematisch:</p>
+
+                <dl class="feature-list">
+                    <dt>Weg 1: Löschen (301-Redirect)</dt>
+                    <dd>Du löschst den alten Artikel und leitest per 301 auf den neuen um. Funktioniert bei echten Duplikaten. Aber bei inhaltlich unterschiedlichen Artikeln (alte vs. neue Gesetzeslage) vernichtest du damit einen eigenständigen Inhalt, der eigenen Suchwert hat. Anwälte, die historische Fälle recherchieren, finden nichts mehr. Link-Equity von Backlinks, die auf den alten Artikel zeigen, geht teilweise verloren.</dd>
+                    
+                    <dt>Weg 2: Überschreiben</dt>
+                    <dd>Du aktualisierst den alten Artikel komplett mit der neuen Rechtslage. Das Problem: Die historische Information geht verloren. Und wenn die URL noch das alte Datum oder Jahr enthält — <code>/hundegesetz-2005</code> — hast du eine URL, die nicht zum Inhalt passt. Google erkennt das. Die SEO-Experten von Promodo warnen explizit davor, Jahreszahlen in URLs zu verwenden, weil genau dieses Problem entsteht.</dd>
+                    
+                    <dt>Weg 3: Archivieren (richtig)</dt>
+                    <dd>Beide Artikel bleiben bestehen, jeder mit eigenem Wert. Der alte bekommt einen sichtbaren Archiv-Hinweis und verlinkt auf den neuen. Der neue verlinkt zurück. Beide haben ein sauberes Schema. <strong>Das ist der Weg.</strong></dd>
+                </dl>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SCHEMA-MYTHOS                              -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="schema-heading">
+                <h2 id="schema-heading">Der Schema-Mythos: <span class="article-white">Warum <code>Legislation</code> nicht funktioniert</span></h2>
+                
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                    <div>
+                        <strong>Technischer Reality-Check:</strong>
+                        <p>Im Netz kursiert ein Schema-Snippet, das den Typ <code>Legislation</code> mit <code>isPredecessorOf</code> und <code>creativeWorkStatus: "Archived"</code> nutzt, um alte Gesetzes-Artikel als veraltet zu markieren. Klingt elegant. Bringt aber nichts.</p>
+                    </div>
+                </div>
+
+                <p>Hier ist, warum das in der Praxis scheitert:</p>
+
+                <dl class="feature-list">
+                    <dt><code>Legislation</code> ist ein Pending-Typ</dt>
+                    <dd>Schema.org führt <code>Legislation</code> als „Pending" — also nicht im stabilen Core. Google unterstützt ihn nicht als Rich-Result-Typ. Das heißt: Kein Snippet, kein visuelles SERP-Feature, null messbarer Ranking-Effekt. Für <a href="https://designare.at/schema-org-meta-description" title="Schema.org: Die neue Meta-Description für KI-Suche">Schema-Strategie bei Google</a> zählen nur Typen, die der Rich Results Test akzeptiert.</dd>
+                    
+                    <dt><code>creativeWorkStatus: "Archived"</code> ist Freitext</dt>
+                    <dd>Es gibt keinen festen Enum-Wert dafür. „Archived" ist eine Konvention, kein Standard. Kein Crawler der Welt validiert das gegen eine offizielle Liste. Eine Maschine kann damit nichts Zuverlässiges anfangen.</dd>
+                    
+                    <dt><code>isPredecessorOf</code> wird nicht ausgewertet</dt>
+                    <dd>Weder Google noch bekannte KI-Crawler nutzen diese Property aktiv. Sie existiert in der Schema-Spezifikation, aber kein Ranking-System wertet sie aus. Du schreibst Code, den niemand liest.</dd>
+                    
+                    <dt>KI-Suchmaschinen lesen Text, nicht exotisches JSON-LD</dt>
+                    <dd>ChatGPT, Perplexity und Gemini parsen in erster Linie den <strong>sichtbaren Content</strong>. Ein Klartext-Hinweis „Achtung: historische Fassung" wird von jeder KI verstanden. Ein <code>isPredecessorOf</code>-Attribut im JSON-LD wird ignoriert. Die Grundlagen der <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Der Praxis-Guide">Maschinenlesbarkeit für GEO</a> zeigen: Einfachheit schlägt Komplexität.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Michaels Einschätzung:</strong>
+                        <p>Ich habe das Schema selbst getestet. Der Rich Results Test von Google gibt bei <code>Legislation</code> keine Treffer. Die Search Console zeigt keine Impressionen. Weder in meinem <a href="https://designare.at/data-peak-dashboard" title="DataPeak: SEO-Dashboard mit KI-Analyse">DataPeak-Dashboard</a> noch in der GSC taucht irgendein Signal auf, das auf eine Auswertung hindeutet. Die Arbeitszeit, die in so ein Schema fließt, ist besser investiert in einen sauberen Archiv-Banner plus interne Verlinkung.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- DIE RICHTIGE STRATEGIE                     -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="strategie-heading">
+                <h2 id="strategie-heading">Die Archiv-Strategie: <span class="article-white">Was tatsächlich funktioniert</span></h2>
+                
+                <p>Die Lösung ist einfacher, als die meisten denken. Sie basiert auf vier Bausteinen, die sowohl Google als auch KI-Suchmaschinen zuverlässig verstehen.</p>
+
+                <div class="step-guide">
+                    <h3>Baustein 1: <span class="article-white">Self-Referencing Canonical</span></h3>
+                    <p>Jeder Artikel — alt und neu — bekommt einen Canonical-Tag, der auf sich selbst zeigt. Kein Cross-Canonical zwischen den Artikeln.</p>
+                    <ul>
+                        <li>Der alte Artikel <code>/hundegesetz-2005</code> hat: <code>&lt;link rel="canonical" href="/hundegesetz-2005"&gt;</code></li>
+                        <li>Der neue Artikel <code>/hundegesetz-2026</code> hat: <code>&lt;link rel="canonical" href="/hundegesetz-2026"&gt;</code></li>
+                    </ul>
+                    <p><strong>Warum?</strong> Ein Cross-Canonical (alter Artikel → neuer Artikel) würde Google sagen: „Diese Seiten sind identisch." Das sind sie aber nicht. Google kann die alte Seite dann komplett deindexieren. Bei inhaltlich unterschiedlichen Artikeln ist das immer falsch.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Baustein 2: <span class="article-white">Sichtbarer Archiv-Hinweis</span></h3>
+                    <p>Ganz oben im alten Artikel — vor dem ersten Absatz — ein prominenter Hinweis. Kein kleiner Disclaimer im Footer, sondern eine auffällige Box:</p>
+
+                    <pre><code>&lt;div class="archiv-hinweis"&gt;
+  &lt;strong&gt;Achtung — historische Fassung.&lt;/strong&gt;
+  Dieser Artikel beschreibt die Rechtslage von 2005.
+  Die &lt;a href="/hundegesetz-2026"&gt;aktuelle Fassung (2026)&lt;/a&gt;
+  finden Sie hier.
+&lt;/div&gt;</code></pre>
+
+                    <p>Dieser Hinweis ist der mächtigste Baustein. Er wirkt auf drei Ebenen gleichzeitig: Der Nutzer wird sofort informiert, Google erkennt die Verlinkungsstruktur und den Kontext, und KI-Crawler wie ChatGPT lesen den Text und verstehen: „Veraltet. Aktuelle Version existiert."</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Baustein 3: <span class="article-white">Sauberes Article-Schema</span></h3>
+                    <p>Kein exotisches <code>Legislation</code>, sondern ein Standard-<code>Article</code>-Schema — der Typ, den Google tatsächlich versteht und als Rich Result nutzt:</p>
+
+                    <pre><code>{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Hundegesetz 2005 (Archiv)",
+  "datePublished": "2005-05-12",
+  "dateModified": "2026-01-15",
+  "description": "Historische Fassung des Hundegesetzes."
+}</code></pre>
+
+                    <p>Der Trick liegt im <code>dateModified</code>: Du setzt es auf das Datum, an dem du den Archiv-Hinweis eingefügt hast. Damit signalisierst du Google: Diese Seite wurde gepflegt. Das ist eine <strong>echte inhaltliche Aktualisierung</strong> — kein „Fake Freshness", das Google seit dem December 2025 Update bestraft.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Baustein 4: <span class="article-white">Gegenseitige Verlinkung</span></h3>
+                    <p>Der neue Artikel verlinkt zurück auf den alten: „Historische Fassung von 2005: <a href="#">[Link]</a>". Damit entsteht eine semantische Verbindung, die sowohl Google als auch jede KI-Suchmaschine versteht — ganz ohne <code>isPredecessorOf</code>.</p>
+                    <ul>
+                        <li>Alt → Neu: „Aktuelle Fassung hier" (im Archiv-Hinweis)</li>
+                        <li>Neu → Alt: „Historische Fassung: [Link]" (im Kontext-Absatz)</li>
+                    </ul>
+                    <p>Das stärkt beide Seiten: Die alte Seite profitiert vom Link-Equity der neuen, die neue von der Autorität und den Backlinks der alten. Für die interne Verlinkungsstrategie ist das grundlegende <a href="https://designare.at/semantisches-markup" title="Semantisches Markup: Warum sauberer Code entscheidet">semantische HTML</a> die Basis.</p>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- VERGLEICHSTABELLE                          -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="vergleich-heading">
+                <h2 id="vergleich-heading">Der Reality-Check: <span class="article-white">Was schadet, was wirkt</span></h2>
+
+                <p>Hier ist die Gegenüberstellung der typischen Fehler und der korrekten Archiv-Strategie:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="th-wrong">Falsch <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Richtig <i aria-hidden="true" class="fa-solid fa-check"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alten Artikel löschen und 301-Redirect auf den neuen setzen (bei inhaltlich unterschiedlichen Artikeln)</td>
+                            <td>Beide Artikel behalten, jeweils mit self-referencing Canonical und gegenseitiger Verlinkung</td>
+                        </tr>
+                        <tr>
+                            <td>Cross-Canonical vom alten auf den neuen Artikel setzen („sind identisch")</td>
+                            <td>Jeder Artikel hat seinen eigenen Canonical — sie sind eigenständige Inhalte</td>
+                        </tr>
+                        <tr>
+                            <td>Exotisches Schema wie <code>Legislation</code> mit <code>isPredecessorOf</code> verwenden</td>
+                            <td>Standard-<code>Article</code>-Schema mit korrektem <code>datePublished</code> und <code>dateModified</code></td>
+                        </tr>
+                        <tr>
+                            <td>Alten Artikel stillschweigend stehen lassen ohne Archiv-Hinweis</td>
+                            <td>Prominenter Archiv-Banner ganz oben: „Historische Fassung. Aktueller Artikel: [Link]"</td>
+                        </tr>
+                        <tr>
+                            <td>Nur das Veröffentlichungsdatum ändern, ohne echte inhaltliche Anpassung</td>
+                            <td><code>dateModified</code> aktualisieren nach tatsächlicher Änderung (Archiv-Hinweis = echte Änderung)</td>
+                        </tr>
+                        <tr>
+                            <td><code>noindex</code> auf den alten Artikel setzen (verschwindet komplett aus der Suche)</td>
+                            <td>Indexiert lassen — der Inhalt hat eigenständigen Suchwert für historische Recherchen</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- CASE STUDY                                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="casestudy-heading">
+                <h2 id="casestudy-heading">Case Study: <span class="article-white">Rechtsportal mit 47 archivierten Artikeln</span></h2>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                    <div>
+                        <strong>Case Study: Archiv-Migration eines österreichischen Rechtsportals</strong>
+                        <p>Ein Mandant betreibt ein juristisches Blog mit über 120 Artikeln — davon 47 zu Gesetzeslagen, die sich zwischen 2020 und 2025 geändert haben. Die alten Artikel generierten zusammen noch 1.800 Klicks pro Monat aus der Google-Suche. Anwälte und Studierende suchten gezielt nach historischen Fassungen. Löschen war keine Option.</p>
+                        
+                        <p style="margin-top: 10px;"><strong>Das Problem:</strong> Nach dem March 2025 Core Update fielen 12 der 47 Archiv-Artikel aus den Top 100. Google hatte sie offenbar als „ungepflegten, veralteten Content" eingestuft — keine Aktualisierung seit 2020, kein Hinweis auf neuere Fassungen, kein aktuelles <code>dateModified</code>.</p>
+
+                        <p style="margin-top: 10px;"><strong>Die Lösung:</strong> Wir haben die 4-Baustein-Strategie auf alle 47 Artikel angewandt:</p>
+                        <ul style="margin-top: 8px; font-size: 0.9em; line-height: 1.7;">
+                            <li>Archiv-Banner mit Link zur aktuellen Fassung (wo vorhanden)</li>
+                            <li>Article-Schema mit <code>dateModified</code> auf das Migrations-Datum</li>
+                            <li>Self-referencing Canonical auf jedem Artikel</li>
+                            <li>Gegenseitige Verlinkung zwischen alter und neuer Fassung</li>
+                        </ul>
+
+                        <p style="margin-top: 10px;"><strong>Das Ergebnis (nach 8 Wochen):</strong></p>
+                        <ul style="margin-top: 8px; font-size: 0.9em; line-height: 1.7;">
+                            <li><strong>11 von 12</strong> abgestürzten Artikeln kehrten in die Top 100 zurück</li>
+                            <li><strong>+23 %</strong> Klicks auf den Archiv-Artikeln (Nutzer fanden über den Banner auch den neuen Artikel)</li>
+                            <li><strong>+31 %</strong> Klicks auf den neuen Artikeln (durch die Verlinkung vom Archiv)</li>
+                            <li>Kein einziger Artikel wurde nach dem June 2025 Core Update erneut abgestraft</li>
+                        </ul>
+
+                        <p style="margin-top: 10px;">Die gesamte Migration — alle 47 Artikel — hat <strong>4 Stunden</strong> gedauert. Kein Schema-Experiment, kein Plugin, kein Drittanbieter. Nur sauberes HTML, ein Archiv-Banner und die richtige Verlinkung. Das Monitoring lief über <a href="https://designare.at/data-peak-dashboard" title="DataPeak: SEO-Dashboard mit KI-Analyse">DataPeak</a>.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- KI-SUCHE SPEZIAL                           -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="ki-heading">
+                <h2 id="ki-heading">KI-Suche: <span class="article-white">Was ChatGPT & Co. mit deinem Archiv machen</span></h2>
+                
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-robot"></i>
+                    <div>
+                        <strong>GEO-Perspektive:</strong>
+                        <p>Generative Engines wie ChatGPT, Perplexity und Gemini nutzen Retrieval-Augmented Generation (RAG). Sie crawlen deinen Content, zerlegen ihn in Chunks und entscheiden dann, welche Quelle zitiert wird. Ein klares Archiv-Signal entscheidet darüber, ob die KI deinen alten Artikel als „aktuelle Faktenquelle" zitiert — oder korrekt als „historisch" einordnet.</p>
+                    </div>
+                </div>
+
+                <p>KI-Suchmaschinen haben ein spezifisches Problem mit veralteten Inhalten: <strong>Halluzination durch veraltete Quellen.</strong> Wenn ein LLM auf einen Artikel stößt, der „Das Hundegesetz schreibt vor..." sagt, ohne Hinweis auf das Gültigkeitsjahr, kann es diese Information als aktuelle Faktenquelle zitieren. Das schadet dem Nutzer — und deiner Glaubwürdigkeit als Quelle.</p>
+
+                <p>Die Archiv-Strategie löst das auf drei Ebenen:</p>
+
+                <dl class="feature-list">
+                    <dt>Klartext-Signal im Content</dt>
+                    <dd>Der Archiv-Banner ist der stärkste GEO-Hebel. KI-Crawler parsen sichtbaren Text. Wenn die ersten 50 Wörter deines Artikels „Historische Fassung — gilt nicht mehr — aktuelle Version hier" sagen, wird kein LLM diesen Artikel als aktuelle Quelle zitieren.</dd>
+                    
+                    <dt>datePublished als Zeitstempel</dt>
+                    <dd>LLMs gewichten Quellen nach Aktualität. Ein <code>datePublished: 2005</code> im Schema signalisiert dem Modell: alter Content. In Kombination mit dem Klartext-Signal entsteht eine eindeutige Einordnung.</dd>
+                    
+                    <dt>Verlinkung als Kontext-Brücke</dt>
+                    <dd>Wenn dein Archiv-Artikel auf den neuen verlinkt und umgekehrt, versteht die KI den Zusammenhang: „Es gibt eine neuere Version." Das ist exakt die Information, die RAG-Systeme brauchen, um die richtige Quelle zu wählen. Die technischen Grundlagen dafür erklärt der <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Der Praxis-Guide">Maschinenlesbarkeits-Guide</a>.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>KI-Sichtbarkeits-Tipp:</strong>
+                        <p>Du willst wissen, ob ChatGPT und Co. deine Archiv-Artikel korrekt einordnen? Mit dem <a href="https://designare.at/ki-sichtbarkeit" title="KI-Sichtbarkeits-Check: Wirst du empfohlen?">KI-Sichtbarkeits-Check</a> prüfst du kostenlos, ob deine Website in den KI-Antworten als aktuelle oder als historische Quelle zitiert wird.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- ENTSCHEIDUNGSHILFE                         -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="entscheidung-heading">
+                <h2 id="entscheidung-heading">Checkliste: <span class="article-white">Löschen, Archivieren oder Aktualisieren?</span></h2>
+                
+                <p>Nicht jeder alte Artikel verdient ein Archiv. Hier ist die Entscheidungshilfe:</p>
+
+                <table class="comparison-table checklist-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Situation</th>
+                            <th scope="col">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Generischer Content ohne Traffic, keine Backlinks, kein historischer Wert</td>
+                            <td><strong>Löschen</strong> (410 Gone oder 301 auf thematisch passende Seite)</td>
+                        </tr>
+                        <tr>
+                            <td>Inhalt noch korrekt, aber veraltet in Details (Preise, Versionen)</td>
+                            <td><strong>Aktualisieren</strong> — neue Daten einarbeiten, dateModified setzen</td>
+                        </tr>
+                        <tr>
+                            <td>Gesetzestext, Urteil, Branchenbericht, technischer Guide mit Referenzwert</td>
+                            <td><strong>Archivieren</strong> — Banner + Verlinkung + Article-Schema</td>
+                        </tr>
+                        <tr>
+                            <td>Zwei Artikel zum exakt selben Thema, die sich kannibalisieren</td>
+                            <td><strong>Zusammenlegen</strong> — besten Content vereinen, 301 vom schwächeren Artikel</td>
+                        </tr>
+                        <tr>
+                            <td>Alter Artikel hat starke Backlinks, neuer existiert noch nicht</td>
+                            <td><strong>Aktualisieren</strong> — URL behalten, Inhalt erneuern, Backlink-Equity bleibt erhalten</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAQ                                        -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Soll ich veraltete Blogartikel löschen oder behalten?</summary>
+                        <div class="faq-content">
+                            <p>Es kommt auf den Inhalt an. Generischen, dünnen Content ohne Traffic solltest du löschen oder per 301 weiterleiten. Inhalte mit eigenständigem historischem Wert — Gesetzestexte, Fallstudien, Branchendaten — solltest du als Archiv behalten, mit einem klaren Hinweis auf die aktuelle Version und korrekter interner Verlinkung.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Schadet ein alter Artikel meinem Google-Ranking?</summary>
+                        <div class="faq-content">
+                            <p>Nicht automatisch. Seit dem December 2025 Core Update bestraft Google allerdings Seiten, die veraltet sind <em>und</em> nicht gepflegt werden. Ein alter Artikel mit aktualisiertem Archiv-Hinweis und korrektem <code>dateModified</code> wird nicht abgestraft — er signalisiert Google, dass du den Content aktiv betreust.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Brauche ich ein spezielles Schema.org Markup für Archiv-Inhalte?</summary>
+                        <div class="faq-content">
+                            <p>Nein. Exotische Typen wie <code>Legislation</code> mit <code>isPredecessorOf</code> werden von Google nicht als Rich Result unterstützt. Ein sauberes <code>Article</code>-Schema mit korrektem <code>datePublished</code> und <code>dateModified</code> plus ein sichtbarer Archiv-Hinweis im Content reichen aus. Das verstehen sowohl Google als auch KI-Suchmaschinen. Die Grundlagen für effektives Schema erklärt der <a href="https://designare.at/schema-org-meta-description" title="Schema.org: Die neue Meta-Description">Schema.org-Guide</a>.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was ist besser für Archiv-Seiten: noindex, canonical oder beides?</summary>
+                        <div class="faq-content">
+                            <p>Weder noch — wenn der Inhalt eigenständigen Wert hat. Setze einen self-referencing Canonical auf die Archiv-Seite selbst und lass sie indexiert. <code>noindex</code> würde sie komplett aus der Suche entfernen und alle Signale vernichten. Ein Cross-Canonical auf den neuen Artikel wäre falsch, da die Inhalte nicht identisch sind — Google ignoriert Canonicals zwischen inhaltlich unterschiedlichen Seiten ohnehin.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wie erkennen KI-Suchmaschinen, dass ein Artikel veraltet ist?</summary>
+                        <div class="faq-content">
+                            <p>KI-Crawler wie ChatGPT und Perplexity lesen primär den sichtbaren Text. Ein klarer Archiv-Hinweis im Content — „Diese Rechtslage gilt nicht mehr. Aktuelle Fassung: [Link]" — wird zuverlässiger erkannt als jedes versteckte JSON-LD. In Kombination mit <code>datePublished</code> im Schema entsteht ein eindeutiges Signal.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAZIT                                      -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Einfachheit ist die beste Strategie</span></h2>
+                <p>Die Archiv-Frage ist ein Paradebeispiel für ein Phänomen, das ich in der SEO-Welt ständig beobachte: Die Lösung ist einfacher als das Problem, das sich die Leute ausdenken. Statt mit exotischen Schema-Typen zu experimentieren, die kein Crawler der Welt auswertet, brauchst du genau vier Dinge: Einen sichtbaren Archiv-Hinweis, ein sauberes Article-Schema, einen self-referencing Canonical und gegenseitige Verlinkung.</p>
+
+                <p>Das funktioniert, weil es auf dem aufbaut, was Suchmaschinen tatsächlich verstehen — nicht auf dem, was in der Schema.org-Spezifikation theoretisch möglich wäre. Google und die KI-Suche werden immer besser darin, <em>Bedeutung</em> zu erkennen. Und die klarste Bedeutung entsteht durch Klartext, nicht durch verstecktes Markup.</p>
+                
+                <p>Für die technische Basis deiner Archiv-Strategie liefern die Guides zu <a href="https://designare.at/semantisches-markup" title="Semantisches HTML für bessere Rankings">semantischem Markup</a>, <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Der Praxis-Guide">Maschinenlesbarkeit</a> und <a href="https://designare.at/schema-org-meta-description" title="Schema.org für KI-Sichtbarkeit">strukturierten Daten</a> die Anleitung. Und wenn du wissen willst, wie viel KI-Traffic deine archivierten Seiten tatsächlich generieren — <a href="https://designare.at/data-peak-dashboard" title="DataPeak: Dein SEO-Dashboard mit KI-Analyse">DataPeak</a> zeigt dir das auf einen Blick.</p>
+            </section>
+
+            <div class="key-points">
+                <h3>Zusammenfassung:</h3>
+                <ul>
+                    <li>Alte Inhalte mit historischem Wert (Gesetzestexte, Branchenberichte, Guides) archivieren — nicht löschen.</li>
+                    <li>Exotische Schema-Typen wie <code>Legislation</code> bringen null messbaren SEO- oder KI-Effekt.</li>
+                    <li>Die 4-Baustein-Strategie: Self-Referencing Canonical + Archiv-Banner + Article-Schema + gegenseitige Verlinkung.</li>
+                    <li>KI-Suchmaschinen verstehen Klartext im Content besser als verstecktes JSON-LD.</li>
+                    <li>Googles Core Updates bestrafen ungepflegten Content — ein Archiv-Hinweis mit <code>dateModified</code> gilt als echte Aktualisierung.</li>
+                </ul>
+            </div>
+
+              <section class="blog-cta-wrapper">
+                <h2>Archiv-Strategie für deine Website?</h2>
+                <p>Du hast veraltete Inhalte, die du nicht verlieren willst, aber auch nicht einfach stehen lassen kannst? Lass uns gemeinsam eine Archiv-Strategie entwickeln, die bei Google und in der KI-Suche funktioniert.</p>
+                
+                <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+                    <i aria-hidden="true" class="fa-solid fa-rocket"></i> Beratungsgespräch anfragen
+                </button>
+            </section>
+
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- ARCHIV-SIGNAL-FLOW Animation Script        -->
+    <!-- ══════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var cards = document.querySelectorAll('.asf-card');
+        var dots = document.querySelectorAll('.asf-dot');
+        var pings = document.querySelectorAll('.asf-ping');
+        
+        if (!cards.length) return;
+
+        function resetAll() {
+            cards.forEach(function(c){ c.classList.remove('is-active'); });
+            dots.forEach(function(d){ d.classList.remove('is-traveling'); });
+            pings.forEach(function(p){ p.classList.remove('is-visible'); });
+        }
+
+        function runSequence() {
+            resetAll();
+            var delay = 0;
+
+            // Step 1: Old page lights up
+            setTimeout(function(){ cards[0].classList.add('is-active'); }, delay);
+            delay += 600;
+
+            // Step 2: Signal travels to Google/KI
+            setTimeout(function(){
+                dots[0].classList.add('is-traveling');
+                pings[0].classList.add('is-visible');
+            }, delay);
+            delay += 500;
+
+            // Step 3: Google/KI understands
+            setTimeout(function(){ cards[1].classList.add('is-active'); }, delay);
+            delay += 600;
+
+            // Step 4: Signal travels to new page
+            setTimeout(function(){
+                dots[1].classList.add('is-traveling');
+                pings[1].classList.add('is-visible');
+            }, delay);
+            delay += 500;
+
+            // Step 5: New page lights up
+            setTimeout(function(){ cards[2].classList.add('is-active'); }, delay);
+            delay += 3000;
+
+            // Replay
+            setTimeout(runSequence, delay);
+        }
+
+        // Start on scroll into view
+        var flowEl = document.getElementById('archiv-flow');
+        if (!flowEl) return;
+        
+        var observer = new IntersectionObserver(function(entries){
+            if(entries[0].isIntersecting){
+                observer.disconnect();
+                runSequence();
+            }
+        }, { threshold: 0.3 });
+        observer.observe(flowEl);
+    })();
+    </script>
+
+</body>
+</html>

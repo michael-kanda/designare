@@ -1,0 +1,341 @@
+/* ============================================ */
+/* WP KI CORE – Plugin Chaos → Core Morph        */
+/* Prefix: wpc-                                   */
+/* ============================================ */
+
+.wp-chaos-core {
+    width: 100%;
+    max-width: 340px;
+}
+
+.wpc-frame {
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.4s;
+}
+
+.wpc-frame.is-after {
+    border-color: rgba(56,88,233,0.35);
+}
+
+/* ── Topbar ── */
+.wpc-topbar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color, #222);
+    background: rgba(255,255,255,0.015);
+}
+
+.wpc-dot { width: 7px; height: 7px; border-radius: 50%; }
+.wpc-dot.r { background: #f87171; }
+.wpc-dot.y { background: #fbbf24; }
+.wpc-dot.g { background: #4ade80; }
+
+.wpc-url {
+    margin-left: 8px;
+    font-size: 9px;
+    color: var(--text-color-subtle, #555);
+    font-family: 'Courier New', 'Consolas', monospace;
+    letter-spacing: 0.02em;
+}
+
+/* ── Body ── */
+.wpc-body {
+    padding: 14px;
+    min-height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── State Transitions ── */
+.wpc-before,
+.wpc-after {
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.wpc-before { opacity: 1; }
+
+.wpc-after {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.wpc-frame.is-after .wpc-before { opacity: 0; transform: translateY(-8px); }
+.wpc-frame.is-after .wpc-after  { opacity: 1; transform: translateY(0); }
+
+/* ── BEFORE: Plugin-Chaos ── */
+.wpc-plugins {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.wpc-pill {
+    padding: 5px 10px;
+    font-size: 8.5px;
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    color: var(--text-color-muted, #949494);
+    background: rgba(255,255,255,0.02);
+    font-family: 'Poppins', sans-serif;
+}
+
+.wpc-pill.warn {
+    border-color: #f87171;
+    color: #f87171;
+}
+
+.wpc-status {
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.wpc-status .red { color: #f87171; font-weight: 600; }
+
+.wpc-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+
+.wpc-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+}
+
+.wpc-bar-fill.red    { background: #f87171; width: 87%; }
+.wpc-bar-fill.orange { background: #fb923c; width: 65%; }
+
+.wpc-bar-label {
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    margin-bottom: 10px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.wpc-before-label {
+    font-size: 8px;
+    color: var(--text-color-subtle, #555);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── AFTER: Clean Core ── */
+.wpc-core-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.wpc-wp-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #3858e9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(56,88,233,0.25);
+}
+
+.wpc-core-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+}
+
+.wpc-core-sub {
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+}
+
+.wpc-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    margin-bottom: 5px;
+    font-size: 10px;
+}
+
+.wpc-setting-label {
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+}
+
+.wpc-setting-val {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 10px;
+    color: #4ade80;
+}
+
+.wpc-abilities-title {
+    margin: 10px 0 6px;
+    font-size: 9px;
+    color: var(--text-color-muted, #949494);
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+}
+
+.wpc-ability {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-left: 2px solid var(--accent-color, #c4a35a);
+    background: rgba(196,163,90,0.08);
+    margin-bottom: 4px;
+    border-radius: 0 2px 2px 0;
+}
+
+.wpc-ability-name {
+    font-size: 9px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    color: var(--accent-color, #c4a35a);
+}
+
+.wpc-ability-desc {
+    font-size: 8px;
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── Toggle ── */
+.wpc-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-top: 10px;
+}
+
+.wpc-toggle-btn {
+    padding: 8px 18px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color, #222);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-color-muted, #949494);
+}
+
+.wpc-toggle-btn:first-child {
+    border-radius: 2px 0 0 2px;
+    border-right: none;
+}
+
+.wpc-toggle-btn:last-child {
+    border-radius: 0 2px 2px 0;
+}
+
+.wpc-toggle-btn.is-active {
+    background: #3858e9;
+    color: #fff;
+    border-color: #3858e9;
+}
+
+.wpc-toggle-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.wp-chaos-core) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.wp-chaos-core) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Light Mode ── */
+body.light-mode .wpc-frame {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .wpc-frame.is-after {
+    border-color: rgba(56,88,233,0.3);
+}
+
+body.light-mode .wpc-topbar {
+    border-bottom-color: #e0e0e0;
+    background: rgba(0,0,0,0.02);
+}
+
+body.light-mode .wpc-pill { color: #777; border-color: #ddd; }
+body.light-mode .wpc-pill.warn { color: #f87171; border-color: #f87171; }
+body.light-mode .wpc-status { color: #666; }
+body.light-mode .wpc-core-title { color: #222; }
+body.light-mode .wpc-setting { border-color: #e0e0e0; }
+body.light-mode .wpc-setting-label { color: #666; }
+body.light-mode .wpc-ability { background: rgba(196,163,90,0.1); }
+
+body.light-mode .wpc-toggle-btn {
+    border-color: #ddd;
+    color: #888;
+}
+
+body.light-mode .wpc-toggle-btn.is-active {
+    border-color: #3858e9;
+}
+
+/* ── WPKI-VS: Mobile Label Override ── */
+@media (max-width: 991px) {
+    .wpki-vs td:first-child::before {
+        content: "WP 6.8: " !important;
+        color: #ff6b6b !important;
+    }
+
+    .wpki-vs td:last-child::before {
+        content: "WP 7.0: " !important;
+        color: #51cf66 !important;
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .wp-chaos-core {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .wpc-pill { font-size: 7.5px; padding: 4px 8px; }
+    .wpc-status { font-size: 8.5px; }
+    .wpc-setting { font-size: 9px; }
+
+    .wpc-toggle-btn {
+        padding: 7px 14px;
+        font-size: 9px;
+    }
+}

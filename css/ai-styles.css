@@ -1,0 +1,735 @@
+/* ==============
+   AI-STYLES.CSS 
+   Für Evita KI (Hauptseite) - Chat Modal & Formular
+   ============== */
+
+/* ======================================== */
+/* EVITA KI - HAUPTSEITEN-FORMULAR         */
+/* ======================================== */
+
+#ai-chat-form button .fa-paper-plane {
+    color: var(--bg-color) !important;
+    font-size: 16px;
+}
+
+#ai-question::placeholder {
+    color: var(--text-color-muted);
+    opacity: 0.7;
+    font-style: italic;
+    transition: opacity 0.6s ease-in-out;
+}
+
+#ai-question.placeholder-fade::placeholder {
+    opacity: 0;
+}
+
+/* ======================================== */
+/* MODAL GRUNDLAGEN - EVITA CHAT           */
+/* ======================================== */
+
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 9999 !important;
+    background-color: rgba(10, 10, 10, 0.95) !important;
+    
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+}
+
+.modal-overlay.visible {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.modal-overlay[style*="display: flex"] {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.modal-overlay.show,
+.modal-overlay.open {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* ======================================== */
+/* AI-RESPONSE-MODAL SPEZIFISCH            */
+/* ======================================== */
+
+#ai-response-modal .modal-content {
+    background-color: var(--modal-bg) !important;
+    color: var(--text-color) !important;
+    /* border: 1px solid var(--border-color) !important; */
+    border-radius: 0 !important;
+    width: 90vw !important;
+    height: 80vh !important;
+    max-width: 800px !important;
+    max-height: 600px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transform: scale(0.95) !important;
+    transition: transform 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+.modal-overlay.visible #ai-response-modal .modal-content,
+.modal-overlay[style*="display: flex"] #ai-response-modal .modal-content {
+    transform: scale(1) !important;
+}
+
+/* CLOSE BUTTON */
+.close-button {
+    position: absolute !important;
+    top: 15px !important;
+    right: 20px !important;
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color-muted) !important;
+    border-radius: 0 !important;
+    width: 35px !important;
+    height: 35px !important;
+    cursor: pointer !important;
+    font-size: 1.2rem !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+.close-button:hover {
+    background: transparent !important;
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    transform: none !important;
+}
+
+/* ======================================== */
+/* AI-CHAT-HISTORY - CHAT-VERLAUF          */
+/* ======================================== */
+
+#ai-chat-history {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 60px 20px 20px 20px !important;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    border-radius: 0 !important;
+    margin-bottom: 15px !important;
+    min-height: 200px !important;
+    max-height: 400px !important;
+}
+
+/* CHAT-NACHRICHTEN */
+.chat-message {
+    padding: 12px 16px !important;
+    border-radius: 0 !important;
+    margin-bottom: 12px !important;
+    max-width: 85% !important;
+    line-height: 1.5 !important;
+    word-wrap: break-word !important;
+    position: relative !important;
+    clear: both !important;
+    animation: fadeIn 0.3s ease !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message.user {
+    background-color: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    border-radius: 0 !important;
+    float: right !important;
+}
+
+.chat-message.ai {
+    color: var(--text-color) !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    border-radius: 0 !important;
+    float: left !important;
+}
+
+/* ======================================== */
+/* AI-CHAT-FORM - MODAL FORMULAR           */
+/* ======================================== */
+
+#ai-chat-form {
+    flex-shrink: 0 !important;
+    background-color: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+    margin-bottom: 15px !important;
+}
+
+#ai-chat-form:focus-within {
+    border-color: var(--accent-color) !important;
+}
+
+#ai-chat-form input[type="text"] {
+    flex: 1 1 auto !important;
+    background: none !important;
+    border: none !important;
+    color: var(--text-color) !important;
+    font-size: 1rem !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.02em !important;
+    outline: none !important;
+    padding: 12px 15px !important;
+    box-sizing: border-box !important;
+}
+
+#ai-chat-form input[type="text"]::placeholder {
+    color: var(--text-color-muted) !important;
+    font-style: italic !important;
+    opacity: 0.7 !important;
+    transition: opacity 0.6s ease-in-out !important;
+}
+
+#ai-chat-form input[type="text"].placeholder-fade::placeholder {
+    opacity: 0 !important;
+}
+
+/* BUTTON STYLES - DESKTOP & MOBILE */
+#ai-chat-form button,
+#ai-response-modal #ai-chat-form button {
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border: none !important;
+    border-left: 1px solid var(--border-color) !important;
+    padding: 12px 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s ease, opacity 0.3s ease !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    opacity: 1 !important;
+}
+
+#ai-chat-form button:hover,
+#ai-response-modal #ai-chat-form button:hover {
+    background: var(--accent-color) !important; /* Gleiche Farbe wie normal */
+    opacity: 0.9; /* Nur leichte Transparenz für Feedback */
+}
+
+/* DISABLED STATE - Behält Farbe, nur leicht transparent */
+#ai-chat-form button:disabled,
+#ai-response-modal #ai-chat-form button:disabled {
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* ======================================== */
+/* MODAL FOOTER                             */
+/* ======================================== */
+
+.modal-footer {
+    flex-shrink: 0 !important;
+    text-align: center !important;
+    padding: 15px 20px !important;
+    border-top: 1px solid var(--border-color) !important;
+    background-color: transparent !important;
+}
+
+.modal-footer .button {
+    background-color: transparent !important;
+    color: var(--accent-color) !important;
+    cursor: pointer !important;
+    padding: 0.75rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid var(--accent-color) !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+}
+
+.modal-footer .button:hover {
+    background-color: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    transform: none !important;
+}
+
+/* ======================================== */
+/* TYPING INDICATOR                        */
+/* ======================================== */
+
+.typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 0;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #888;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing-bounce {
+    0%, 80%, 100% { 
+        transform: scale(0);
+        opacity: 0.3;
+    } 
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ======================================== */
+/* BOOKING MODAL STYLES                    */
+/* ======================================== */
+
+#booking-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 10000 !important;
+    background-color: rgba(10, 10, 10, 0.95) !important;
+    
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+}
+
+#booking-modal[style*="display: flex"] {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+#booking-modal .modal-content {
+    background-color: var(--modal-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    width: 90vw !important;
+    max-width: 600px !important;
+    max-height: 80vh !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    position: relative !important;
+    padding: 30px !important;
+    overflow-y: auto !important;
+}
+
+.booking-step {
+    display: none !important;
+}
+
+.booking-step.active {
+    display: block !important;
+}
+
+.day-selection-container {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+    gap: 15px !important;
+    margin: 20px 0 !important;
+}
+
+.day-button {
+    background: transparent !important;
+    color: var(--accent-color) !important;
+    border: 1px solid var(--accent-color) !important;
+    padding: 15px 20px !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s ease !important;
+}
+
+.day-button:hover {
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#slots-container {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 10px !important;
+    margin: 20px 0 !important;
+}
+
+.slot-button {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 12px 16px !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.slot-button:hover {
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border-color: var(--accent-color) !important;
+}
+
+.form-group {
+    margin-bottom: 20px !important;
+}
+
+.form-group label {
+    display: block !important;
+    color: var(--text-color-muted) !important;
+    margin-bottom: 8px !important;
+    font-weight: 400 !important;
+}
+
+.form-group input {
+    width: 100% !important;
+    background: var(--bg-color-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0 !important;
+    padding: 12px 15px !important;
+    color: var(--text-color) !important;
+    font-size: 1rem !important;
+    box-sizing: border-box !important;
+}
+
+.form-group input:focus {
+    outline: none !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: none !important;
+}
+
+.back-button {
+    background: transparent !important;
+    color: var(--text-color-muted) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 10px 15px !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 20px !important;
+    transition: all 0.3s ease !important;
+}
+
+.back-button:hover {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    background: transparent !important;
+}
+
+#submit-booking-button {
+    width: 100% !important;
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border: 1px solid var(--accent-color) !important;
+    padding: 15px 20px !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 1.1rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s ease !important;
+}
+
+#submit-booking-button:hover {
+    background: var(--accent-color-hover) !important;
+    border-color: var(--accent-color-hover) !important;
+    transform: none !important;
+}
+
+#submit-booking-button:disabled {
+    background: var(--border-color) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color-subtle) !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.loader {
+    border: 3px solid rgba(196, 163, 90, 0.3) !important;
+    border-top: 3px solid var(--accent-color) !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    animation: spin 1s linear infinite !important;
+    margin: 20px auto !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: rgba(255, 107, 107, 0.1) !important;
+    border: 1px solid #ff6b6b !important;
+    color: #ff6b6b !important;
+    padding: 15px !important;
+    border-radius: 0 !important;
+    margin: 15px 0 !important;
+    text-align: center !important;
+}
+
+#step-confirmation {
+    text-align: center !important;
+}
+
+#step-confirmation h2 {
+    color: var(--accent-color) !important;
+    margin-bottom: 20px !important;
+    font-weight: 400 !important;
+}
+
+#close-confirmation-button {
+    background: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border: 1px solid var(--accent-color) !important;
+    padding: 12px 25px !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    margin-top: 20px !important;
+}
+
+#close-booking-modal {
+    position: absolute !important;
+    top: 15px !important;
+    right: 20px !important;
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color-muted) !important;
+    border-radius: 0 !important;
+    width: 35px !important;
+    height: 35px !important;
+    cursor: pointer !important;
+    font-size: 1.2rem !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
+
+#close-booking-modal:hover {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    background: transparent !important;
+}
+
+/* ======================================== */
+/* RESPONSIVE DESIGN - MOBILE              */
+/* ======================================== */
+
+@media (max-width: 768px) {
+    /* AI Modal Responsive */
+    #ai-response-modal .modal-content {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background-color: var(--modal-bg) !important;
+    }
+    
+    #ai-chat-history {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        min-height: unset !important;
+        max-height: none !important;
+        height: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+        padding: 50px 15px 15px 15px !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    
+    /* CHAT FORM - MOBILE MIT SICHTBAREM BUTTON */
+    #ai-chat-form {
+        flex: 0 0 auto !important;
+        margin: 10px 15px !important;
+        margin-bottom: env(safe-area-inset-bottom, 20px) !important;
+        min-height: 50px !important;
+        border-radius: 0 !important;
+        border: 1px solid var(--border-color) !important;
+        background-color: var(--card-bg) !important;
+        display: flex !important;
+        flex-direction: row !important;
+    }
+    
+    #ai-chat-form input[type="text"] {
+        flex: 1 1 auto !important;
+        font-size: 16px !important;
+        padding: 15px !important;
+        line-height: 1.4 !important;
+        -webkit-appearance: none !important;
+        color: var(--text-color) !important;
+        min-width: 0 !important;
+    }
+    
+    /* BUTTON BLEIBT SICHTBAR AUF MOBILE */
+    #ai-chat-form button,
+    #ai-response-modal #ai-chat-form button {
+        display: flex !important;
+        min-width: 50px !important;
+        min-height: 50px !important;
+        padding: 15px !important;
+        background: var(--accent-color) !important;
+        color: var(--bg-color) !important;
+        opacity: 1 !important;
+        flex: 0 0 auto !important;
+    }
+    
+    /* Disabled State auf Mobile */
+    #ai-chat-form button:disabled,
+    #ai-response-modal #ai-chat-form button:disabled {
+        display: flex !important;
+        background: var(--accent-color) !important;
+        color: var(--bg-color) !important;
+        opacity: 0.6 !important;
+    }
+    
+    #ai-response-modal .modal-footer {
+        display: none !important;
+    }
+    
+    #ai-response-modal .close-button {
+        position: fixed !important;
+        top: 10px !important;
+        right: 15px !important;
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.2rem !important;
+        z-index: 1001 !important;
+        border-radius: 0 !important;
+    }
+    
+    .chat-message {
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+        max-width: 85% !important;
+        margin-bottom: 12px !important;
+        padding: 10px 12px !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        border-radius: 0 !important;
+    }
+    
+    #ai-chat-history::-webkit-scrollbar {
+        width: 4px !important;
+    }
+    
+    #ai-chat-history::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    
+    #ai-chat-history::-webkit-scrollbar-thumb {
+        background: var(--accent-color-rgba) !important;
+        border-radius: 0 !important;
+    }
+}
+
+.evita-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--accent-color, #6c5ce7);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid currentColor;
+  transition: opacity 0.2s;
+}
+.evita-link:hover {
+  opacity: 0.8;
+}
+
+/* iOS Safari Fixes */
+@supports (-webkit-touch-callout: none) {
+    #ai-response-modal .modal-content {
+        height: 100vh !important;
+    }
+    
+    #ai-chat-history {
+        flex: 1 1 auto !important;
+    }
+}
+
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        #ai-chat-form {
+            margin-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+            padding-bottom: env(safe-area-inset-bottom) !important;
+        }
+    }
+}

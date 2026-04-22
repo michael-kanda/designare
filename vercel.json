@@ -1,0 +1,25 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "crons": [
+    {
+      "path": "/api/cron-rebuild",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/regenerate-knowledge",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-news",
+      "schedule": "0 5,17 * * *"
+    },
+    {
+      "path": "/api/cron/health-check",
+       "schedule": "0 * * * *"
+    }
+  ]
+}

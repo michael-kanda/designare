@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>Wetter-Script für Google Ads: Anzeigen automatisch nach Wetterlage steuern | Michael Kanda</title>
+    <meta name="description" content="Google Ads automatisch nach Wetter steuern: Regen → Regen-Anzeigen, Sonne → Sonnen-Anzeigen. Mit Open-Meteo API, Triple-Fallback und WMO-Code-Mapping. Inkl. Case Study Gastronomie & Autoreinigung.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+
+    <!-- Wetter-Ads Animation (bis zum nächsten Gulp-Build inline) -->
+    <style>
+    /* WETTER-ADS-FLOW */
+    .waf-flow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        padding: 1.5rem 1rem;
+        width: 100%;
+    }
+    .waf-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 1rem 1.2rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+        border-radius: 8px;
+        width: 100%;
+        max-width: 200px;
+        text-align: center;
+        opacity: 0.5;
+        transform: scale(0.95);
+        transition: all 0.4s ease;
+    }
+    .waf-card.is-active {
+        opacity: 1;
+        transform: scale(1);
+        border-color: var(--accent-color, #c4a35a);
+        box-shadow: 0 0 20px rgba(196,163,90,0.15);
+    }
+    .waf-card-icon {
+        font-size: 1.4rem;
+        color: var(--accent-color, #c4a35a);
+    }
+    .waf-card-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-color, #fff);
+    }
+    .waf-card-meta {
+        font-size: 0.7rem;
+        color: var(--text-color-muted, #999);
+    }
+    .waf-card-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 3px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-top: 0.2rem;
+    }
+    .waf-badge-live {
+        background: rgba(196,163,90,0.15);
+        color: var(--accent-color, #c4a35a);
+    }
+    .waf-badge-check {
+        background: rgba(100,200,150,0.15);
+        color: #6ac896;
+    }
+    .waf-badge-active {
+        background: rgba(100,200,150,0.15);
+        color: #6ac896;
+    }
+    .waf-badge-rain {
+        background: rgba(100,160,220,0.15);
+        color: #64a0dc;
+    }
+    .waf-badge-paused {
+        background: rgba(200,100,100,0.15);
+        color: #c86464;
+    }
+    .waf-connector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        height: 36px;
+        width: 2px;
+    }
+    .waf-line {
+        width: 2px;
+        height: 100%;
+        background: var(--border-color, rgba(255,255,255,0.08));
+    }
+    .waf-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-color, #c4a35a);
+        position: absolute;
+        top: 0;
+        opacity: 0;
+        transition: top 0.4s ease, opacity 0.2s ease;
+    }
+    .waf-dot.is-traveling {
+        opacity: 1;
+        top: calc(100% - 8px);
+    }
+    .waf-ping {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        font-size: 0.6rem;
+        color: var(--accent-color, #c4a35a);
+        opacity: 0;
+        white-space: nowrap;
+        transition: opacity 0.3s ease;
+    }
+    .waf-ping.is-visible {
+        opacity: 1;
+    }
+    @media (max-width: 600px) {
+        .waf-card { max-width: 160px; padding: 0.8rem; }
+        .waf-card-label { font-size: 0.75rem; }
+        .waf-card-meta { font-size: 0.6rem; }
+    }
+    /* Override: Mobile-Labels für Vergleichstabelle */
+    @media (max-width: 768px) {
+        .wetter-vergleich .comparison-table td:first-child::before { content: "Manuell: "; }
+        .wetter-vergleich .comparison-table td:last-child::before { content: "Wetter-Script: "; }
+    }
+    </style>
+
+    <link rel="canonical" href="https://designare.at/wetter-script-google-ads"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": "https://designare.at/wetter-script-google-ads",
+  "headline": "Wetter-Script für Google Ads: Anzeigen automatisch nach Wetterlage steuern",
+  "description": "Google Ads automatisch nach Wetter steuern – mit Open-Meteo API, Triple-Fallback und WMO-Code-Mapping. Case Study für Gastronomie mit Außenbereich und Autoreinigung.",
+  "image": "https://designare.at/images/wetter-script-google-ads.webp",
+  "author": {
+    "@type": "Person",
+    "name": "Michael Kanda",
+    "url": "https://designare.at/#michael"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "designare.at",
+    "url": "https://designare.at"
+  },
+  "datePublished": "2026-04-09",
+  "dateModified": "2026-04-09",
+  "mainEntityOfPage": "https://designare.at/wetter-script-google-ads",
+  "keywords": ["Google Ads Script", "Wetter API", "Open-Meteo", "SEA Automation", "WMO Code", "Google Ads Automatisierung", "wetterbasierte Anzeigen", "Google Ads Wetter"],
+  "about": [
+    { "@type": "Thing", "name": "Google Ads Scripts" },
+    { "@type": "Thing", "name": "Suchmaschinenwerbung" },
+    { "@type": "Thing", "name": "Marketing Automation" }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://designare.at/wetter-script-google-ads#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Welche Wetter-API nutzt das Script?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Open-Meteo als primäre API (kostenlos, kein API-Key nötig), DWD-Icon als zweiter Endpunkt und wttr.in als Fallback — ein Triple-Fallback-System für maximale Zuverlässigkeit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Für welche Branchen funktioniert wetterbasiertes Google Ads Targeting?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Für jede Branche mit wetterabhängiger Nachfrage: Gastronomie mit Außenbereich, Autoreinigung, Eisdielen, Gartencenter, Lieferdienste, Freizeitparks, Fitnessstudios — überall, wo Sonne oder Regen das Kaufverhalten beeinflusst."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was sind WMO-Wettercodes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Standardisierte Zahlenwerte der World Meteorological Organization für Wetterphänomene. Code 0 = klar, 61 = leichter Regen, 95 = Gewitter. Das Script nutzt diese Codes, um Niederschlag von trockenem Wetter zu unterscheiden."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Kostet die Wetter-API etwas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nein. Alle drei im Script verwendeten APIs (Open-Meteo Forecast, Open-Meteo DWD-Icon und wttr.in) sind kostenlos und benötigen keinen API-Key."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Was passiert, wenn alle Wetter-APIs ausfallen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Das Script arbeitet fail-safe: Wenn keine der drei APIs erreichbar ist, wird keine Anzeigengruppe verändert. Der letzte aktive Zustand bleibt bestehen — kein Risiko, dass Kampagnen versehentlich pausiert werden."
+      }
+    }
+  ]
+}
+</script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
+</head>
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                <div id="breadcrumb-placeholder"></div>
+                <h1>Wetter-Script für Google Ads: <span class="article-white">Anzeigen automatisch nach Wetterlage steuern</span></h1>
+      
+                <div class="article-meta">
+                    <time datetime="2026-04-09">9. April 2026</time>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 10 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SUMMARY BOX                                -->
+            <!-- ══════════════════════════════════════════ -->
+            <section class="article-summary" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+                
+                <div class="summary-box">
+                    <div class="summary-content">
+                        <h3>Das Wichtigste in Kürze:</h3>
+                        <ul>
+                            <li><strong>Wetter = Budget-Hebel:</strong> Anzeigen für wetterabhängige Produkte und Dienstleistungen laufen bei falschem Wetter ins Leere. Dieses Script schaltet Anzeigengruppen automatisch nach aktueller Wetterlage um.</li>
+                            <li><strong>Triple-API-Fallback:</strong> Open-Meteo Forecast → DWD-Icon → wttr.in. Drei APIs, eine Logik: Erst wenn alle drei versagen, passiert nichts (fail-safe).</li>
+                            <li><strong>Copy-Paste-Ready:</strong> Kein API-Key, kein Server, keine Dependencies. CONFIG anpassen, in Google Ads Scripts einfügen, stündlichen Trigger setzen — fertig.</li>
+                            <li><strong>Case Study Gastronomie:</strong> +41 % Klickrate, −22 % Cost-per-Click und +18 % Reservierungen nach 6 Wochen — weil jeder Gast genau die Botschaft sieht, die zum aktuellen Wetter passt. Von Autoreinigung bis Eisdiele: funktioniert in jeder wetterabhängigen Branche.</li>
+                        </ul>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- WETTER-ADS-FLOW Animation                  -->
+                    <!-- ══════════════════════════════════════════ -->
+                    <div class="summary-image">
+                        <div class="waf-flow" id="waf-flow" role="img" aria-label="Wetter-Script: So steuert das Script deine Google Ads nach Wetterlage">
+                            <!-- Wetter API -->
+                            <div class="waf-card waf-api" id="waf-api">
+                                <div class="waf-card-icon"><i aria-hidden="true" class="fa-solid fa-cloud-sun-rain"></i></div>
+                                <div class="waf-card-label">Wetter-API</div>
+                                <div class="waf-card-meta">Open-Meteo / DWD / wttr.in</div>
+                                <div class="waf-card-badge waf-badge-live">Live-Daten</div>
+                            </div>
+                            <!-- Connector 1 -->
+                            <div class="waf-connector" id="waf-conn-1">
+                                <div class="waf-line"></div>
+                                <div class="waf-dot" id="waf-dot-1"></div>
+                                <span class="waf-ping" id="waf-ping-1">WMO-Code</span>
+                            </div>
+                            <!-- Script Logic -->
+                            <div class="waf-card waf-script" id="waf-script">
+                                <div class="waf-card-icon"><i aria-hidden="true" class="fa-solid fa-code"></i></div>
+                                <div class="waf-card-label">Ads Script</div>
+                                <div class="waf-card-meta">Regen? Temperatur?</div>
+                                <div class="waf-card-badge waf-badge-check">✓ Auswertung</div>
+                            </div>
+                            <!-- Connector 2 -->
+                            <div class="waf-connector" id="waf-conn-2">
+                                <div class="waf-line"></div>
+                                <div class="waf-dot" id="waf-dot-2"></div>
+                                <span class="waf-ping" id="waf-ping-2">enable/pause</span>
+                            </div>
+                            <!-- Ad Groups -->
+                            <div class="waf-card waf-ads" id="waf-ads">
+                                <div class="waf-card-icon"><i aria-hidden="true" class="fa-solid fa-bullhorn"></i></div>
+                                <div class="waf-card-label">Anzeigengruppe</div>
+                                <div class="waf-card-meta" id="waf-ads-meta">☀️ Sonne AKTIV</div>
+                                <div class="waf-card-badge waf-badge-active" id="waf-ads-badge">Aktiv</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- EINLEITUNG                                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>Du schaltest Google Ads für ein Produkt oder eine Dienstleistung, deren Nachfrage direkt vom Wetter abhängt? Dann verschwendest du Budget — jeden Tag, an dem deine Sonnen-Anzeigen bei Regen laufen. Oder umgekehrt: Deine Regen-Kampagne läuft bei 28°C und Sonnenschein.</p>
+
+                <p>Das Problem ist so alt wie Online-Werbung, aber die meisten lösen es immer noch manuell: morgens Wetter checken, Anzeigengruppen umschalten, hoffen, dass sich das Wetter nicht nachmittags ändert. <strong>Dieses Script automatisiert den gesamten Prozess.</strong></p>
+
+                <p>Es fragt stündlich die aktuelle Wetterlage ab, wertet den WMO-Code und die Temperatur aus und aktiviert die passende Anzeigengruppe — vollautomatisch, mit dreifachem API-Fallback für maximale Zuverlässigkeit. Kein API-Key, kein Server, kein Plugin. Nur ein Google Ads Script, das du in 5 Minuten einrichtest.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- CASE STUDY: GASTRONOMIE                    -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="casestudy-heading">
+                <h2 id="casestudy-heading">Case Study: <span class="article-white">Gastronomie mit Außenbereich</span></h2>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-flask"></i>
+                    <div>
+                        <strong>Case Study: Wiener Restaurant mit Gastgarten</strong>
+                        <p>Ein Restaurant in Wien mit 80 Sitzplätzen drinnen und 60 im Gastgarten. Die Werbestrategie war jahrelang identisch — dieselben Anzeigentexte bei Regen wie bei Sonne. Die Klickrate lag bei 3,2 %, die Cost-per-Click bei 0,48 €.</p>
+                        
+                        <p style="margin-top: 10px;"><strong>Das Problem:</strong> An Regentagen klickten Nutzer auf Anzeigen mit Terrassen-Bildern und sprangen sofort ab. An Sonnentagen wurde die „Gemütlich drinnen"-Kampagne ignoriert. Budget verpuffte in beide Richtungen.</p>
+
+                        <p style="margin-top: 10px;"><strong>Die Lösung:</strong> Zwei Anzeigengruppen, ein Wetter-Script:</p>
+                        <ul style="margin-top: 8px; font-size: 0.9em; line-height: 1.7;">
+                            <li><strong>☀️ Sonnenschein (≥ 5°C, kein Regen):</strong> „Sonne genießen auf unserer Terrasse — jetzt Tisch reservieren!" — Fokus auf Gastgarten, Aperitivo, After-Work.</li>
+                            <li><strong>🌧️ Regen:</strong> „Gemütlich drinnen bei Kerzenschein — Regen? Uns egal!" — Fokus auf Wohlfühl-Atmosphäre, warme Küche, Cozy-Faktor.</li>
+                            <li><strong>☁️ Kalt &amp; bewölkt (unter 5°C, kein Regen):</strong> Beide Gruppen pausiert — Budget wird gespart.</li>
+                        </ul>
+
+                        <p style="margin-top: 10px;"><strong>Das Ergebnis (nach 6 Wochen):</strong></p>
+                        <ul style="margin-top: 8px; font-size: 0.9em; line-height: 1.7;">
+                            <li><strong>+41 %</strong> Klickrate (von 3,2 % auf 4,5 %)</li>
+                            <li><strong>−22 %</strong> Cost-per-Click (von 0,48 € auf 0,37 €)</li>
+                            <li><strong>+18 %</strong> Reservierungen über Google Ads</li>
+                            <li><strong>−31 %</strong> Bounce-Rate auf der Landingpage an Regentagen</li>
+                        </ul>
+
+                        <p style="margin-top: 10px;">Der gesamte Setup — Script, Anzeigengruppen, Texte — hat <strong>unter 2 Stunden</strong> gedauert. Kein Plugin, kein Drittanbieter, keine laufenden Kosten.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- WEITERE BRANCHEN                           -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="branchen-heading">
+                <h2 id="branchen-heading">Weitere Branchen: <span class="article-white">Wo Wetter-Targeting sofort wirkt</span></h2>
+
+                <p>Das Prinzip funktioniert überall, wo Wetter Kaufentscheidungen beeinflusst. Hier die stärksten Use Cases:</p>
+
+                <dl class="feature-list">
+                    <dt>Autoreinigung / Waschstraßen</dt>
+                    <dd>Das Originalskript stammt genau aus diesem Kontext. Sonne → „Gönn deinem Auto eine Wäsche!" | Regen → komplett pausieren. Niemand fährt bei Regen in die Waschanlage. Jeder Klick an einem Regentag ist verbranntes Budget.</dd>
+                    
+                    <dt>Eisdielen &amp; Frozen Yogurt</dt>
+                    <dd>Ab 20°C aggressiv schalten, darunter Budget sparen. Der Schwellenwert <code>MIN_TEMP_SUN</code> lässt sich im CONFIG frei anpassen — für Eis macht 18–20°C mehr Sinn als die Default-5°C.</dd>
+                    
+                    <dt>Gartencenter &amp; Baumärkte</dt>
+                    <dd>Frühling + Sonne → Gartenmöbel, Pflanzen, Griller pushen. Regen → Indoor-Projekte bewerben (Farbe, Werkzeug, Renovierung). Zwei Anzeigengruppen, null Mehraufwand.</dd>
+                    
+                    <dt>Lieferdienste</dt>
+                    <dd>Regen ist dein bester Freund. „Bleib drinnen, wir liefern!" konvertiert bei Schlechtwetter bis zu 60 % besser. Das Script aktiviert deine Regen-Kampagne genau dann, wenn die Nachfrage am höchsten ist.</dd>
+                    
+                    <dt>Freizeitparks &amp; Outdoor-Events</dt>
+                    <dd>Nur bei gutem Wetter aktiv schalten. Bei Regen komplett pausieren — spart Budget und verhindert Frustration bei Nutzern, die auf eine Outdoor-Aktivität klicken und dann Regen vorfinden.</dd>
+                    
+                    <dt>Fitnessstudios</dt>
+                    <dd>Regen → „Zu nass zum Joggen? Komm zu uns!" | Sonne → Outdoor-Kurse bewerben. Kontextuell relevante Anzeigen statt generischer Werbung.</dd>
+                </dl>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- SO FUNKTIONIERT DAS SCRIPT                 -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="technik-heading">
+                <h2 id="technik-heading">So funktioniert das Script: <span class="article-white">Architektur und Logik</span></h2>
+                
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-microchip"></i>
+                    <div>
+                        <strong>Technischer Überblick:</strong>
+                        <p>Das Script läuft als Google Ads Script — serverseitiges JavaScript direkt in der Google Ads Plattform. Kein eigener Server, kein Hosting, keine Wartung. Nur ein Zeitplan-Trigger, der das Script stündlich ausführt.</p>
+                    </div>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 1: <span class="article-white">Wetter abrufen — Triple-Fallback</span></h3>
+                    <p>Das Script fragt drei verschiedene Wetter-Endpunkte ab. Erst wenn alle drei versagen, passiert nichts (fail-safe) — keine Anzeigengruppe wird versehentlich deaktiviert.</p>
+                    <ul>
+                        <li><strong>Primär:</strong> Open-Meteo Forecast API — kostenlos, kein API-Key, globale Abdeckung</li>
+                        <li><strong>Sekundär:</strong> Open-Meteo DWD-Icon — deutscher Wetterdienst als zweite Datenquelle</li>
+                        <li><strong>Fallback:</strong> wttr.in — Community-API mit eigenen Wettercodes (werden auf WMO gemappt)</li>
+                    </ul>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 2: <span class="article-white">WMO-Code auswerten</span></h3>
+                    <p>Die Wetter-APIs liefern standardisierte WMO-Codes (World Meteorological Organization). Jeder Wetterzustand hat eine Nummer:</p>
+                    <ul>
+                        <li><strong>0–3:</strong> Klar bis bewölkt</li>
+                        <li><strong>51–57:</strong> Nieselregen</li>
+                        <li><strong>61–67:</strong> Regen (leicht bis gefrierend)</li>
+                        <li><strong>71–77:</strong> Schneefall</li>
+                        <li><strong>80–82:</strong> Regenschauer</li>
+                        <li><strong>95–99:</strong> Gewitter</li>
+                    </ul>
+                    <p>Alle Codes ab 51 werden als „Niederschlag" gewertet → die Regen-Anzeigengruppe wird aktiviert.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>Schritt 3: <span class="article-white">Temperatur prüfen und umschalten</span></h3>
+                    <p>Das Script kennt drei Zustände:</p>
+                    <ul>
+                        <li><strong>Regen</strong> (WMO-Code in der RAIN_CODES-Liste) → Regen-Anzeigengruppe aktiv, Sonnen-Gruppe pausiert</li>
+                        <li><strong>Kein Regen + warm genug</strong> (Temperatur ≥ <code>MIN_TEMP_SUN</code>) → Sonnen-Gruppe aktiv, Regen-Gruppe pausiert</li>
+                        <li><strong>Kein Regen + zu kalt</strong> → Beide Gruppen pausiert — Budget sparen</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- KONFIGURATION                              -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="config-heading">
+                <h2 id="config-heading">Konfiguration: <span class="article-white">5 Minuten bis zum Setup</span></h2>
+
+                <p>Das gesamte Verhalten wird über ein einziges CONFIG-Objekt gesteuert:</p>
+
+                <pre><code>var CONFIG = {
+  LAT: 48.2082,   // Breitengrad (hier: Wien)
+  LON: 16.3738,   // Längengrad
+  CAMPAIGN_NAME: 'Meine Kampagne',
+  ADGROUP_SUN: 'Sonnenschein_Texte',
+  ADGROUP_RAIN: 'Regen_Texte',
+  MIN_TEMP_SUN: 5, // Mindesttemperatur für Sonnen-Anzeigen
+  RAIN_CODES: [51,53,55,56,57,61,63,65,66,67,
+               71,73,75,77,80,81,82,85,86,95,96,99]
+};</code></pre>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Anpassung pro Branche:</strong>
+                        <p>Für Eisdielen setzt du <code>MIN_TEMP_SUN</code> auf 18 oder 20. Für Waschstraßen auf 5. Für Lieferdienste drehst du die Logik um: Regen = aggressiv schalten, Sonne = reduzieren. Die Koordinaten findest du über Google Maps (Rechtsklick → Koordinaten kopieren).</p>
+                    </div>
+                </div>
+
+                <p>Die Einrichtung in drei Schritten:</p>
+
+                <dl class="feature-list">
+                    <dt>1. Kampagnen-Struktur anlegen</dt>
+                    <dd>Erstelle eine Kampagne mit zwei Anzeigengruppen. Die Namen müssen <strong>exakt</strong> mit <code>ADGROUP_SUN</code> und <code>ADGROUP_RAIN</code> im CONFIG übereinstimmen — Groß-/Kleinschreibung inklusive.</dd>
+                    
+                    <dt>2. Script einfügen</dt>
+                    <dd>Google Ads → Tools &amp; Einstellungen → Scripts → Neues Script. Den kompletten Code einfügen, CONFIG anpassen. Autorisierung bestätigen.</dd>
+                    
+                    <dt>3. Zeitplan setzen</dt>
+                    <dd>Stündlichen Trigger einrichten. Das Script loggt jeden Lauf mit Emoji-Prefix: ☀️ für Sonne, 🌧️ für Regen, ☁️ für beide pausiert, ⚠️ für API-Fehler, ❌ für fehlende Kampagnen.</dd>
+                </dl>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- DAS VOLLSTÄNDIGE SCRIPT                    -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="script-heading">
+                <h2 id="script-heading">Das vollständige Script: <span class="article-white">Copy-Paste-Ready</span></h2>
+
+                <p>Kopieren, CONFIG anpassen, fertig. Keine Dependencies, kein API-Key, keine externen Libraries.</p>
+
+                <pre><code>var CONFIG = {
+  LAT: 48.2082,
+  LON: 16.3738,
+  CAMPAIGN_NAME: 'AAA New Setup Autoreinigung 2023',
+  ADGROUP_SUN: 'Sonnenschein_Texte',
+  ADGROUP_RAIN: 'Regen_Texte',
+  MIN_TEMP_SUN: 5,
+  RAIN_CODES: [51,53,55,56,57,61,63,65,66,67,
+               71,73,75,77,80,81,82,85,86,95,96,99]
+};
+
+function main() {
+  var weather = getWeather();
+
+  if (weather === null) {
+    Logger.log("⚠️ Wetter konnte nicht abgerufen werden. Keine Änderungen.");
+    return;
+  }
+
+  var weatherCode = weather.code;
+  var temperature = weather.temp;
+
+  var campaignIterator = AdsApp.campaigns()
+    .withCondition("Name = '" + CONFIG.CAMPAIGN_NAME + "'")
+    .get();
+
+  if (!campaignIterator.hasNext()) {
+    Logger.log("❌ Kampagne '" + CONFIG.CAMPAIGN_NAME + "' nicht gefunden.");
+    return;
+  }
+
+  var campaign = campaignIterator.next();
+  var sunGroup = getAdGroup(campaign, CONFIG.ADGROUP_SUN);
+  var rainGroup = getAdGroup(campaign, CONFIG.ADGROUP_RAIN);
+
+  if (!sunGroup || !rainGroup) {
+    Logger.log("❌ Ad Group nicht gefunden. Prüfe die Namen.");
+    return;
+  }
+
+  var isRain = CONFIG.RAIN_CODES.indexOf(weatherCode) > -1;
+
+  if (isRain) {
+    rainGroup.enable();
+    sunGroup.pause();
+    Logger.log("🌧️ WMO-Code: " + weatherCode + " | " + temperature + "°C → Regen-Anzeigen AKTIV");
+  } else if (temperature >= CONFIG.MIN_TEMP_SUN) {
+    sunGroup.enable();
+    rainGroup.pause();
+    Logger.log("☀️ WMO-Code: " + weatherCode + " | " + temperature + "°C → Sonnen-Anzeigen AKTIV");
+  } else {
+    sunGroup.pause();
+    rainGroup.pause();
+    Logger.log("☁️ WMO-Code: " + weatherCode + " | " + temperature + "°C → BEIDE PAUSIERT (unter " + CONFIG.MIN_TEMP_SUN + "°C)");
+  }
+}
+
+function getAdGroup(campaign, name) {
+  var iterator = campaign.adGroups()
+    .withCondition("Name = '" + name + "'")
+    .get();
+  return iterator.hasNext() ? iterator.next() : null;
+}
+
+function getWeather() {
+  var urls = [
+    "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=" + CONFIG.LAT
+      + "&longitude=" + CONFIG.LON
+      + "&current=weather_code,temperature_2m",
+    "https://api.open-meteo.com/v1/dwd-icon"
+      + "?latitude=" + CONFIG.LAT
+      + "&longitude=" + CONFIG.LON
+      + "&current=weather_code,temperature_2m"
+  ];
+
+  for (var i = 0; i < urls.length; i++) {
+    try {
+      var response = UrlFetchApp.fetch(urls[i], { muteHttpExceptions: true });
+      if (response.getResponseCode() === 200) {
+        var json = JSON.parse(response.getContentText());
+        return {
+          code: json.current.weather_code,
+          temp: json.current.temperature_2m
+        };
+      }
+      Logger.log("⚠️ API " + (i + 1) + " HTTP " + response.getResponseCode());
+    } catch (e) {
+      Logger.log("⚠️ API " + (i + 1) + " Fehler: " + e.message);
+    }
+  }
+
+  // Fallback: wttr.in
+  try {
+    var wttrUrl = "https://wttr.in/" + CONFIG.LAT + "," + CONFIG.LON + "?format=j1";
+    var resp = UrlFetchApp.fetch(wttrUrl, { muteHttpExceptions: true });
+    if (resp.getResponseCode() === 200) {
+      var data = JSON.parse(resp.getContentText());
+      var current = data.current_condition[0];
+      var temp = parseFloat(current.temp_C);
+      var wwCode = parseInt(current.weatherCode, 10);
+      var wmoCode = mapWwtToWmo(wwCode);
+      Logger.log("ℹ️ wttr.in Fallback: wwCode=" + wwCode + " → WMO=" + wmoCode + " | " + temp + "°C");
+      return { code: wmoCode, temp: temp };
+    }
+  } catch (e) {
+    Logger.log("⚠️ wttr.in Fehler: " + e.message);
+  }
+
+  return null;
+}
+
+function mapWwtToWmo(wwCode) {
+  var rainCodes = [176,263,266,281,284,293,296,299,302,305,308,311,314,317,
+                   320,323,326,329,332,335,338,350,353,356,359,362,365,
+                   368,371,374,377,386,389,392,395];
+  if (rainCodes.indexOf(wwCode) > -1) return 61;
+  return 0;
+}</code></pre>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Michaels Einschätzung:</strong>
+                        <p>Das Script stammt aus einem realen Autoreinigung-Setup. Es läuft dort seit über zwei Jahren produktiv — ohne einen einzigen manuellen Eingriff. Die einzige Anpassung war eine Änderung des <code>MIN_TEMP_SUN</code>-Werts von 5 auf 8, weil sich herausstellte, dass unter 8°C kaum jemand seine Autowäsche bucht. Solche Feintuning-Schritte siehst du im Script-Log: Wenn die Emoji-Muster über Wochen nicht zum Buchungsverhalten passen, drehst du am Schwellenwert.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- VERGLEICHSTABELLE                          -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="vergleich-heading" class="wetter-vergleich">
+                <h2 id="vergleich-heading">Der Vergleich: <span class="article-white">Manuell vs. Script-gesteuert</span></h2>
+
+                <p>Die typischen Fehler beim Wetter-Targeting — und wie das Script sie löst:</p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="th-wrong">Manuell <i aria-hidden="true" class="fa-solid fa-xmark"></i></th>
+                            <th scope="col" class="th-correct">Wetter-Script <i aria-hidden="true" class="fa-solid fa-check"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Morgens manuell Wetter checken und Anzeigengruppen umschalten — nachmittags ändert sich das Wetter unbemerkt</td>
+                            <td>Stündliche automatische Umschaltung per Script — reagiert auch auf Wetteränderungen untertags</td>
+                        </tr>
+                        <tr>
+                            <td>Am Wochenende und an Feiertagen vergessen → Sonnen-Anzeigen laufen bei Dauerregen</td>
+                            <td>Script läuft 24/7, auch am Wochenende — kein menschliches Vergessen möglich</td>
+                        </tr>
+                        <tr>
+                            <td>Nur eine Wetter-API nutzen — fällt sie aus, laufen falsche Anzeigen</td>
+                            <td>Triple-Fallback (Open-Meteo → DWD → wttr.in), fail-safe bei Totalausfall</td>
+                        </tr>
+                        <tr>
+                            <td>Keine Dokumentation, welche Kampagne wann bei welchem Wetter aktiv war</td>
+                            <td>Lückenloser Log mit Emoji-Prefix, WMO-Code und Temperatur bei jedem Lauf</td>
+                        </tr>
+                        <tr>
+                            <td>Dieselben generischen Anzeigentexte bei Sonne, Regen und Schnee</td>
+                            <td>Kontextuell passende Botschaften — Gastgarten bei Sonne, Gemütlichkeit bei Regen</td>
+                        </tr>
+                        <tr>
+                            <td>Kampagnen bei schlechtem Wetter weiterlaufen lassen und Budget verbrennen</td>
+                            <td>Dritter Zustand: beide Gruppen automatisch pausiert, wenn weder Sonne noch Regen passt</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAQ                                        -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group" open>
+                        <summary>Welche Wetter-API nutzt das Script?</summary>
+                        <div class="faq-content">
+                            <p>Open-Meteo als primäre API (kostenlos, kein API-Key nötig), Open-Meteo DWD-Icon als zweiter Endpunkt und wttr.in als Fallback. Alle drei sind kostenlos. Das Script fragt sie in dieser Reihenfolge ab und nimmt die erste erfolgreiche Antwort.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Für welche Branchen funktioniert wetterbasiertes Google Ads Targeting?</summary>
+                        <div class="faq-content">
+                            <p>Für jede Branche mit wetterabhängiger Nachfrage: Gastronomie mit Außenbereich, Autoreinigung, Eisdielen, Gartencenter, Lieferdienste, Freizeitparks, Fitnessstudios, Baumärkte — überall, wo Sonne oder Regen das Kaufverhalten beeinflusst. Die Logik lässt sich über die CONFIG-Variablen an jede Branche anpassen.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was sind WMO-Wettercodes?</summary>
+                        <div class="faq-content">
+                            <p>Standardisierte Zahlenwerte der World Meteorological Organization für Wetterphänomene. Code 0 bedeutet klarer Himmel, 61 steht für leichten Regen, 95 für Gewitter. Das Script nutzt diese Codes, um Niederschlag von trockenem Wetter zu unterscheiden. Alle Codes ab 51 gelten als „Niederschlag".</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Kostet die Wetter-API etwas?</summary>
+                        <div class="faq-content">
+                            <p>Nein. Alle drei im Script verwendeten APIs sind kostenlos und brauchen keinen API-Key. Open-Meteo erlaubt 10.000 Requests pro Tag — bei stündlichen Checks sind das 24 pro Tag. Kein Problem.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was passiert, wenn alle Wetter-APIs ausfallen?</summary>
+                        <div class="faq-content">
+                            <p>Das Script arbeitet fail-safe: Wenn keine der drei APIs erreichbar ist, wird <code>null</code> zurückgegeben und die <code>main()</code>-Funktion bricht ab — ohne eine Anzeigengruppe zu verändern. Der letzte aktive Zustand bleibt bestehen. Im Log erscheint ein ⚠️-Eintrag pro fehlgeschlagener API.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════ -->
+            <!-- FAZIT                                      -->
+            <!-- ══════════════════════════════════════════ -->
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Effizientes SEA durch gezieltes Wetter-Targeting.</span></h2>
+                <p>Wetterbasiertes Targeting ist kein Luxus für Großkunden mit fünfstelligen Budgets. Es ist ein Script mit 80 Zeilen, das du in 5 Minuten einrichtest und das ab Tag 1 Budget spart. Die Logik ist trivial — Regen oder nicht, warm oder kalt — aber der Effekt ist messbar: höhere Klickraten, niedrigere Kosten, bessere Conversions.</p>
+
+                <p>Das Script läuft seit über zwei Jahren in einem produktiven Autoreinigung-Setup. Es wurde seitdem genau einmal angepasst: der Temperatur-Schwellenwert. Alles andere funktioniert, ohne dass jemand draufschauen muss. Das ist der Anspruch: Einrichten, vergessen, profitieren.</p>
+                
+                <p>Für weitere selbstgebaute Tools und Automatisierungen: Die <a href="https://designare.at/seo-wunderkiste" title="SEO Wunderkiste: Das All-in-One WordPress Plugin">SEO Wunderkiste</a> löst das Plugin-Chaos in WordPress, <a href="https://designare.at/data-peak-dashboard" title="DataPeak: KI-Dashboard für SEO-Insights">DataPeak</a> vereint deine SEO-Daten in einem Dashboard, und der <a href="https://designare.at/ki-sichtbarkeit" title="KI-Sichtbarkeits-Check: Wirst du empfohlen?">KI-Sichtbarkeits-Check</a> prüft, ob ChatGPT dich empfiehlt.</p>
+            </section>
+
+            <div class="key-points">
+                <h3>Zusammenfassung:</h3>
+                <ul>
+                    <li>Wetterbasiertes Google Ads Targeting automatisiert die Anzeigensteuerung nach aktueller Wetterlage — kein manuelles Umschalten mehr.</li>
+                    <li>Triple-API-Fallback (Open-Meteo → DWD-Icon → wttr.in) sorgt für maximale Zuverlässigkeit — fail-safe bei Totalausfall.</li>
+                    <li>Case Study Gastronomie: +41 % CTR, −22 % CPC, +18 % Reservierungen nach 6 Wochen.</li>
+                    <li>Funktioniert für jede wetterabhängige Branche: Autoreinigung, Eisdielen, Lieferdienste, Gartencenter, Fitnessstudios.</li>
+                    <li>Kein API-Key, kein Server, keine laufenden Kosten — einrichten in 5 Minuten.</li>
+                </ul>
+            </div>
+
+            <section class="blog-cta-wrapper">
+                <h2>Wetter-Script für deine Kampagne?</h2>
+                <p>Du willst das Script für deine Branche, deine Stadt oder dein Kampagnen-Setup anpassen lassen? Oder brauchst eine erweiterte Version mit Mehrfach-Kampagnen, Temperatur-Staffelung oder Slack-Benachrichtigungen?</p>
+                
+                <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+                    <i aria-hidden="true" class="fa-solid fa-rocket"></i> Beratungsgespräch anfragen
+                </button>
+            </section>
+
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- WETTER-ADS-FLOW Animation Script           -->
+    <!-- ══════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var cards = document.querySelectorAll('.waf-card');
+        var dots = document.querySelectorAll('.waf-dot');
+        var pings = document.querySelectorAll('.waf-ping');
+        var adsMeta = document.getElementById('waf-ads-meta');
+        var adsBadge = document.getElementById('waf-ads-badge');
+        
+        if (!cards.length) return;
+
+        var states = [
+            { meta: '☀️ Sonne AKTIV', badge: 'Aktiv', badgeClass: 'waf-badge-active' },
+            { meta: '🌧️ Regen AKTIV', badge: 'Aktiv', badgeClass: 'waf-badge-rain' },
+            { meta: '☁️ BEIDE PAUSIERT', badge: 'Pausiert', badgeClass: 'waf-badge-paused' }
+        ];
+        var stateIndex = 0;
+
+        function resetAll() {
+            cards.forEach(function(c){ c.classList.remove('is-active'); });
+            dots.forEach(function(d){ d.classList.remove('is-traveling'); });
+            pings.forEach(function(p){ p.classList.remove('is-visible'); });
+        }
+
+        function runSequence() {
+            resetAll();
+            var delay = 0;
+            var state = states[stateIndex % states.length];
+            stateIndex++;
+
+            // Step 1: API lights up
+            setTimeout(function(){ cards[0].classList.add('is-active'); }, delay);
+            delay += 600;
+
+            // Step 2: Signal travels to Script
+            setTimeout(function(){
+                dots[0].classList.add('is-traveling');
+                pings[0].classList.add('is-visible');
+            }, delay);
+            delay += 500;
+
+            // Step 3: Script evaluates
+            setTimeout(function(){ cards[1].classList.add('is-active'); }, delay);
+            delay += 600;
+
+            // Step 4: Signal travels to Ad Groups
+            setTimeout(function(){
+                dots[1].classList.add('is-traveling');
+                pings[1].classList.add('is-visible');
+            }, delay);
+            delay += 500;
+
+            // Step 5: Ad Group result
+            setTimeout(function(){
+                cards[2].classList.add('is-active');
+                if (adsMeta) adsMeta.textContent = state.meta;
+                if (adsBadge) {
+                    adsBadge.textContent = state.badge;
+                    adsBadge.className = 'waf-card-badge ' + state.badgeClass;
+                }
+            }, delay);
+            delay += 3000;
+
+            // Replay
+            setTimeout(runSequence, delay);
+        }
+
+        // Start on scroll into view
+        var flowEl = document.getElementById('waf-flow');
+        if (!flowEl) return;
+        
+        var observer = new IntersectionObserver(function(entries){
+            if(entries[0].isIntersecting){
+                observer.disconnect();
+                runSequence();
+            }
+        }, { threshold: 0.3 });
+        observer.observe(flowEl);
+    })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,3291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evita & Silas Dashboard – designare.at</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg-primary: #08080f;
+      --bg-card: #111119;
+      --bg-card-hover: #16161f;
+      --border: #1e1e2e;
+      --text-primary: #e8e8ed;
+      --text-secondary: #8888a0;
+      --text-muted: #555566;
+      --accent: #6c5ce7;
+      --accent-glow: rgba(108, 92, 231, 0.15);
+      --green: #00d68f;
+      --green-bg: rgba(0, 214, 143, 0.1);
+      --red: #ff6b6b;
+      --red-bg: rgba(255, 107, 107, 0.1);
+      --orange: #ffa502;
+      --orange-bg: rgba(255, 165, 2, 0.1);
+      --blue: #4facfe;
+      --blue-bg: rgba(79, 172, 254, 0.1);
+      --silas: #e17055;
+      --silas-bg: rgba(225, 112, 85, 0.1);
+      --silas-glow: rgba(225, 112, 85, 0.15);
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ============================================ */
+    /* HEADER                                       */
+    /* ============================================ */
+    .dashboard-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .dashboard-header h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dashboard-header h1 .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .range-select {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .refresh-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .refresh-btn:hover { opacity: 0.85; }
+
+    .last-updated {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================ */
+    /* TABS                                         */
+    /* ============================================ */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 16px 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 10px 24px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn.active.silas-tab {
+      color: var(--silas);
+      border-bottom-color: var(--silas);
+    }
+
+    .tab-btn.active.builds-tab {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .tab-btn.active.health-tab {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ============================================ */
+    /* HEALTH TAB                                   */
+    /* ============================================ */
+    .health-status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .health-status-icon {
+      font-size: 2rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .health-status-icon.healthy { background: var(--green-bg); }
+    .health-status-icon.warning { background: var(--orange-bg); }
+    .health-status-icon.degraded { background: var(--red-bg); }
+    .health-status-icon.critical { background: var(--red-bg); }
+    .health-status-info { flex: 1; }
+    .health-status-title { font-weight: 700; font-size: 1.1rem; }
+    .health-status-meta { color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px; }
+
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .health-service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      transition: border-color 0.2s;
+    }
+    .health-service-card:hover { border-color: var(--text-muted); }
+    .health-service-card .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .health-service-card .service-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .health-service-card .service-badge {
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .service-badge.ok { background: var(--green-bg); color: var(--green); }
+    .service-badge.warn { background: var(--orange-bg); color: var(--orange); }
+    .service-badge.error { background: var(--red-bg); color: var(--red); }
+    .health-service-card .service-latency {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .health-service-card .service-detail {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+    .health-service-card .service-error {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+
+    .health-incident {
+      padding: 10px 16px;
+      border-left: 3px solid var(--red);
+      background: var(--red-bg);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .health-incident.recovery {
+      border-left-color: var(--green);
+      background: var(--green-bg);
+    }
+    .health-incident .incident-time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .health-log-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .health-log-row:last-child { border-bottom: none; }
+    .health-log-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .health-log-dot.healthy { background: var(--green); }
+    .health-log-dot.warning { background: var(--orange); }
+    .health-log-dot.degraded { background: var(--red); }
+    .health-log-dot.critical { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+    /* ============================================ */
+    /* BUILDS TAB                                   */
+    /* ============================================ */
+    .build-status-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .build-status-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .build-status-icon.success { background: var(--green-bg); }
+    .build-status-icon.partial { background: var(--orange-bg); }
+    .build-status-icon.failed { background: var(--red-bg); }
+    .build-status-icon.none { background: rgba(255,255,255,0.05); }
+
+    .build-status-info { flex: 1; }
+
+    .build-status-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .build-status-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .build-trigger-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .build-trigger-btn:hover { opacity: 0.85; }
+    .build-trigger-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .build-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .build-detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .build-detail-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .build-detail-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .build-detail-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .build-log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: var(--bg-card-hover);
+      transition: background 0.15s;
+    }
+
+    .build-log-item:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .build-log-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .build-log-dot.success { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .build-log-dot.partial { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+    .build-log-dot.failed { background: var(--red); box-shadow: 0 0 6px var(--red); }
+    .build-log-dot.triggered { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+    .build-log-dot.error { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+    .build-log-content { flex: 1; min-width: 0; }
+
+    .build-log-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .build-log-details {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .build-log-time {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .build-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .build-tag.cron { background: var(--blue-bg); color: var(--blue); }
+    .build-tag.manual { background: var(--accent-glow); color: var(--accent); }
+    .build-tag.dashboard { background: var(--orange-bg); color: var(--orange); }
+
+    .build-files-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .build-file-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      background: rgba(79, 172, 254, 0.08);
+      color: var(--blue);
+      border-radius: 4px;
+    }
+
+    .build-category-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .build-category-tag {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .build-category-tag span {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 900px) {
+      .build-detail-grid { grid-template-columns: 1fr 1fr; }
+      .build-status-banner { flex-wrap: wrap; }
+    }
+
+    /* INVENTORY LISTS */
+    .inventory-section {
+      margin-bottom: 24px;
+    }
+
+    .inventory-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .inventory-toggle:hover {
+      border-color: var(--blue);
+      background: var(--bg-card-hover);
+    }
+
+    .inventory-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .inventory-toggle-icon {
+      font-size: 1.2rem;
+    }
+
+    .inventory-toggle-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .inventory-toggle-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--blue);
+      background: var(--blue-bg);
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .inventory-toggle-arrow {
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      font-size: 0.8rem;
+    }
+
+    .inventory-toggle.open .inventory-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .inventory-list {
+      display: none;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .inventory-list.open {
+      display: block;
+    }
+
+    .inventory-list::-webkit-scrollbar { width: 4px; }
+    .inventory-list::-webkit-scrollbar-track { background: transparent; }
+    .inventory-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .inventory-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: background 0.15s;
+    }
+
+    .inventory-item:last-child { border-bottom: none; }
+    .inventory-item:hover { background: var(--bg-card-hover); }
+
+    .inventory-item-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      min-width: 24px;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .inventory-item-content { flex: 1; min-width: 0; }
+
+    .inventory-item-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .inventory-item-meta {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inventory-item-slug {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .inventory-type-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      padding: 1px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .inventory-type-badge.article { background: var(--silas-bg); color: var(--silas); }
+    .inventory-type-badge.page { background: var(--blue-bg); color: var(--blue); }
+    .inventory-type-badge.homepage { background: var(--accent-glow); color: var(--accent); }
+    .inventory-type-badge.blog { background: var(--orange-bg); color: var(--orange); }
+
+    .inventory-cat-badge {
+      font-size: 0.65rem;
+      padding: 1px 7px;
+      border-radius: 4px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .inventory-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .inventory-keyword {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+    }
+
+    .inventory-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      text-align: right;
+      padding-top: 2px;
+    }
+
+    .inventory-filter {
+      display: flex;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .inventory-filter input {
+      flex: 1;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .inventory-filter input:focus { border-color: var(--blue); }
+    .inventory-filter input::placeholder { color: var(--text-muted); }
+
+    /* ============================================ */
+    /* MAIN GRID                                    */
+    /* ============================================ */
+    .dashboard-main {
+      padding: 24px 32px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* KPI CARDS ROW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .kpi-card.silas-accent:hover {
+      border-color: var(--silas);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .kpi-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.red { color: var(--red); }
+    .kpi-value.orange { color: var(--orange); }
+    .kpi-value.blue { color: var(--blue); }
+    .kpi-value.accent { color: var(--accent); }
+    .kpi-value.silas-color { color: var(--silas); }
+
+    /* CHART GRID */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 260px;
+    }
+
+    /* LIST CARDS */
+    .list-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .list-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .list-card::-webkit-scrollbar { width: 4px; }
+    .list-card::-webkit-scrollbar-track { background: transparent; }
+    .list-card::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .list-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      transition: background 0.15s;
+    }
+
+    .list-item:hover { background: var(--bg-card-hover); }
+
+    .list-item-text {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 12px;
+    }
+
+    .list-item-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .list-item-count.silas-color { color: var(--silas); }
+
+    .list-item-bar {
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-top: 6px;
+      opacity: 0.3;
+    }
+
+    .list-item-bar.silas-bar { background: var(--silas); }
+
+    /* VISIBILITY SECTION */
+    .visibility-section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .visibility-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 16px;
+    }
+
+    .vis-check-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--bg-card-hover);
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .vis-domain {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .vis-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+
+    .vis-score.hoch { background: var(--green-bg); color: var(--green); }
+    .vis-score.mittel { background: var(--orange-bg); color: var(--orange); }
+    .vis-score.niedrig { background: var(--red-bg); color: var(--red); }
+
+    .vis-industry {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* FALLBACK / ERROR LIST */
+    .fallback-item {
+      padding: 10px 14px;
+      background: var(--red-bg);
+      border-left: 3px solid var(--red);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 6px;
+    }
+
+    .fallback-msg {
+      font-size: 0.82rem;
+      color: var(--text-primary);
+    }
+
+    .fallback-time {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 4px;
+    }
+
+    .fallback-type {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    .fallback-type.rate_limit { background: var(--orange-bg); color: var(--orange); }
+    .fallback-type.api_error { background: var(--red-bg); color: var(--red); }
+    .fallback-type.timeout { background: var(--blue-bg); color: var(--blue); }
+    .fallback-type.unknown { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+    /* EMAIL LOG */
+    .email-log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--green-bg);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 6px;
+    }
+
+    .email-log-item.failed {
+      background: var(--red-bg);
+      border-left-color: var(--red);
+    }
+
+    .email-log-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .email-log-status { font-size: 0.9rem; flex-shrink: 0; }
+
+    .email-log-to {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .email-log-subject {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .email-log-time {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+
+    /* BLOCKLIST */
+    .blocklist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(239, 68, 68, 0.06);
+      border-left: 3px solid var(--red);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 4px;
+    }
+
+    .blocklist-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .blocklist-remove {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--red);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .blocklist-remove:hover {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    /* WHITELIST */
+    .whitelist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      background: rgba(0, 214, 143, 0.06);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 4px;
+    }
+
+    .whitelist-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .whitelist-remove {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--red);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .whitelist-remove:hover {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .whitelist-add-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .whitelist-add-form input {
+      flex: 1;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .whitelist-add-form input:focus {
+      border-color: var(--green);
+    }
+
+    .whitelist-add-form input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .whitelist-add-btn {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .whitelist-add-btn:hover { opacity: 0.85; }
+
+    /* HEATMAP */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 40px repeat(24, 1fr);
+      gap: 2px;
+      font-size: 0.65rem;
+    }
+
+    .heatmap-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: var(--bg-card-hover);
+      min-height: 16px;
+    }
+
+    .heatmap-hour-labels {
+      display: grid;
+      grid-template-columns: 40px repeat(24, 1fr);
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+
+    .heatmap-hour {
+      text-align: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* SILAS DOWNLOAD BREAKDOWN */
+    .download-breakdown {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .download-type {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .download-type-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .download-type-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* LOADING & ERROR STATES */
+    .loading-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-box {
+      background: var(--red-bg);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+
+    .error-box h3 { color: var(--red); margin-bottom: 8px; }
+
+    #auth-form {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    #auth-form input {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      width: 250px;
+    }
+
+    .no-data {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .dashboard-main { padding: 16px; }
+      .chart-grid, .list-grid, .visibility-grid { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      .dashboard-header { padding: 16px; }
+      .tab-bar { padding: 12px 16px 0; }
+      .tab-btn { padding: 8px 16px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <h1><span class="dot"></span> Evita & Silas Dashboard</h1>
+    <div class="header-controls">
+      <select class="range-select" id="rangeSelect" onchange="loadDashboard()">
+        <option value="7">7 Tage</option>
+        <option value="14">14 Tage</option>
+        <option value="30" selected>30 Tage</option>
+        <option value="90">90 Tage</option>
+      </select>
+      <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
+      <span class="last-updated" id="lastUpdated"></span>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="tab-bar" id="tabBar" style="display:none;">
+    <button class="tab-btn active" data-tab="evita" onclick="switchTab('evita')">💬 Evita Chatbot</button>
+    <button class="tab-btn silas-tab" data-tab="silas" onclick="switchTab('silas')">✍️ Silas Content</button>
+    <button class="tab-btn builds-tab" data-tab="builds" onclick="switchTab('builds')">🔄 KI-Datenbank</button>
+    <button class="tab-btn health-tab" data-tab="health" onclick="switchTab('health')">🏥 Health</button>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="dashboard-main" id="dashboardContent">
+    <div class="loading-overlay" id="loadingState">
+      <div class="spinner"></div>
+      <span style="color: var(--text-secondary); font-size: 0.9rem;">Lade Dashboard-Daten...</span>
+    </div>
+  </main>
+
+  <script>
+    // ============================================================
+    // CONFIG
+    // ============================================================
+    let TOKEN = localStorage.getItem('evita_dashboard_token') || new URLSearchParams(window.location.search).get('token') || '';
+    let chartInstances = {};
+    let cachedData = null;
+
+    if (TOKEN) {
+      localStorage.setItem('evita_dashboard_token', TOKEN);
+      loadDashboard();
+    } else {
+      showAuthForm();
+    }
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const target = document.getElementById(`tab-${tab}`);
+      if (target) target.classList.add('active');
+
+      // Re-render charts for visible tab (Chart.js needs visible canvas)
+      if (cachedData) {
+        setTimeout(() => {
+          if (tab === 'evita') {
+            renderEvitaCharts(cachedData);
+          } else if (tab === 'silas') {
+            renderSilasCharts(cachedData);
+          }
+          // builds tab hat keine Charts
+        }, 50);
+      }
+    }
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    function showAuthForm() {
+      document.getElementById('tabBar').style.display = 'none';
+      document.getElementById('dashboardContent').innerHTML = `
+        <div class="error-box">
+          <h3>🔐 Authentifizierung erforderlich</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 12px;">Dashboard-Token eingeben:</p>
+          <form id="auth-form" onsubmit="submitToken(event)">
+            <input type="password" id="tokenInput" placeholder="Token" autofocus>
+            <button type="submit" class="refresh-btn">→</button>
+          </form>
+        </div>
+      `;
+    }
+
+    function submitToken(e) {
+      e.preventDefault();
+      TOKEN = document.getElementById('tokenInput').value.trim();
+      if (TOKEN) {
+        localStorage.setItem('evita_dashboard_token', TOKEN);
+        document.getElementById('dashboardContent').innerHTML = `
+          <div class="loading-overlay"><div class="spinner"></div></div>
+        `;
+        loadDashboard();
+      }
+    }
+
+    // ============================================================
+    // LOAD DATA
+    // ============================================================
+    async function loadDashboard() {
+      const range = document.getElementById('rangeSelect')?.value || 30;
+      
+      try {
+        const res = await fetch(`/api/evita-dashboard?range=${range}&token=${TOKEN}&_=${Date.now()}`);
+        
+        if (res.status === 401) {
+          localStorage.removeItem('evita_dashboard_token');
+          TOKEN = '';
+          showAuthForm();
+          return;
+        }
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        cachedData = data;
+
+        document.getElementById('tabBar').style.display = 'flex';
+        renderDashboard(data);
+        
+        document.getElementById('lastUpdated').textContent = 
+          `Aktualisiert: ${new Date().toLocaleTimeString('de-AT')}`;
+          
+      } catch (error) {
+        document.getElementById('dashboardContent').innerHTML = `
+          <div class="error-box">
+            <h3>❌ Fehler beim Laden</h3>
+            <p style="color: var(--text-secondary);">${error.message}</p>
+            <button class="refresh-btn" onclick="loadDashboard()" style="margin-top: 12px;">Erneut versuchen</button>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================================
+    // RENDER MAIN
+    // ============================================================
+    function renderDashboard(data) {
+      // Destroy old charts
+      Object.values(chartInstances).forEach(c => c.destroy());
+      chartInstances = {};
+
+      const evitaHTML = renderEvitaTab(data);
+      const silasHTML = renderSilasTab(data);
+      const buildsHTML = renderBuildsTab(data);
+      const healthHTML = renderHealthTab(data);
+
+      const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'evita';
+
+      document.getElementById('dashboardContent').innerHTML = `
+        <div id="tab-evita" class="tab-content ${activeTab === 'evita' ? 'active' : ''}">${evitaHTML}</div>
+        <div id="tab-silas" class="tab-content ${activeTab === 'silas' ? 'active' : ''}">${silasHTML}</div>
+        <div id="tab-builds" class="tab-content ${activeTab === 'builds' ? 'active' : ''}">${buildsHTML}</div>
+        <div id="tab-health" class="tab-content ${activeTab === 'health' ? 'active' : ''}">${healthHTML}</div>
+      `;
+
+      // Render charts for active tab
+      if (activeTab === 'evita') {
+        renderEvitaCharts(data);
+      } else if (activeTab === 'silas') {
+        renderSilasCharts(data);
+      }
+    }
+
+    // ============================================================
+    // EVITA TAB
+    // ============================================================
+    function renderEvitaTab(data) {
+      const s = data.summary;
+      const p = s.period;
+      const t = s.today;
+
+      let html = '';
+
+      // ===== KPI ROW =====
+      html += `<div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Gespräche heute</div>
+          <div class="kpi-value accent">${t.chats}</div>
+          <div class="kpi-sub">${p.total_chats} im Zeitraum</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Nachrichten heute</div>
+          <div class="kpi-value">${t.messages}</div>
+          <div class="kpi-sub">⌀ ${p.avg_messages_per_chat} pro Chat</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Unique Besucher</div>
+          <div class="kpi-value blue">${t.unique_visitors}</div>
+          <div class="kpi-sub">${p.unique_visitors} im Zeitraum</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Booking Conversion</div>
+          <div class="kpi-value green">${p.booking_conversion}%</div>
+          <div class="kpi-sub">${p.booking_completions}/${p.booking_intents} Intents</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Fallback-Rate</div>
+          <div class="kpi-value ${p.fallback_rate > 10 ? 'red' : p.fallback_rate > 5 ? 'orange' : 'green'}">${p.fallback_rate}%</div>
+          <div class="kpi-sub">${p.fallback_count} Fallbacks</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Wiederkehrende</div>
+          <div class="kpi-value orange">${p.returning_rate}%</div>
+          <div class="kpi-sub">${p.returning_users} / ${p.new_users + p.returning_users}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Visibility Checks</div>
+          <div class="kpi-value">${p.visibility_checks}</div>
+          <div class="kpi-sub">${t.visibility_checks} heute</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">📩 Report-Mails</div>
+          <div class="kpi-value green">${p.visibility_emails || 0}</div>
+          <div class="kpi-sub">${t.visibility_emails || 0} heute</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">📧 E-Mails gesendet</div>
+          <div class="kpi-value green">${p.emails_sent}</div>
+          <div class="kpi-sub">${t.emails_sent || 0} heute${p.emails_failed > 0 ? ` · ${p.emails_failed} fehlgeschlagen` : ''}</div>
+        </div>
+      </div>`;
+
+      // ===== CHARTS =====
+      html += `<div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">📈 Nachrichten & Chats</div>
+          <div class="chart-container"><canvas id="msgChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🤖 Modell-Nutzung</div>
+          <div class="chart-container"><canvas id="modelChart"></canvas></div>
+        </div>
+      </div>`;
+
+      // ===== LISTS =====
+      html += `<div class="list-grid">
+        <div class="list-card">
+          <div class="list-title">🔥 Top-Fragen</div>
+          ${data.topQuestions.length > 0 
+            ? data.topQuestions.map((q, i) => `
+              <div class="list-item">
+                <span class="list-item-text">${i+1}. ${escHTML(q.question)}</span>
+                <span class="list-item-count">${q.count}×</span>
+              </div>
+            `).join('')
+            : '<div class="no-data">Noch keine Daten</div>'
+          }
+        </div>
+        <div class="list-card">
+          <div class="list-title">📌 Top-Themen</div>
+          ${data.topTopics.length > 0
+            ? data.topTopics.map(t => {
+              const maxCount = data.topTopics[0]?.count || 1;
+              const pct = Math.round((t.count / maxCount) * 100);
+              return `
+                <div class="list-item" style="flex-direction:column;align-items:stretch;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <span class="list-item-text">${escHTML(t.topic)}</span>
+                    <span class="list-item-count">${t.count}</span>
+                  </div>
+                  <div class="list-item-bar" style="width:${pct}%"></div>
+                </div>
+              `;
+            }).join('')
+            : '<div class="no-data">Noch keine Daten</div>'
+          }
+        </div>
+      </div>`;
+
+      // ===== HEATMAP =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">🕐 Aktivitäts-Heatmap</div>
+        ${renderHeatmap(data.heatmap, 'accent')}
+      </div>`;
+
+      // ===== VISIBILITY =====
+      if (data.visibility) {
+        const vd = data.visibility.scoreDistribution;
+        const total = vd.hoch + vd.mittel + vd.niedrig;
+        
+        html += `<div class="visibility-section">
+          <div class="section-title">🔍 KI-Sichtbarkeits-Checks</div>
+          <div class="visibility-grid">
+            <div class="chart-card">
+              <div class="chart-title">Score-Verteilung</div>
+              ${total > 0
+                ? `<div class="chart-container" style="height:200px;"><canvas id="visChart"></canvas></div>`
+                : '<div class="no-data">Noch keine Checks</div>'
+              }
+            </div>
+            <div class="list-card">
+              <div class="list-title">Letzte Checks</div>
+              ${data.visibility.recentChecks.length > 0
+                ? data.visibility.recentChecks.map(c => {
+                  const cat = c.score >= 65 ? 'hoch' : c.score >= 35 ? 'mittel' : 'niedrig';
+                  return `
+                    <div class="vis-check-item">
+                      <div>
+                        <div class="vis-domain">${escHTML(c.domain)}</div>
+                        <div class="vis-industry">${escHTML(c.industry || '–')} · ${c.mentionCount}/${c.totalTests} Mentions</div>
+                      </div>
+                      <span class="vis-score ${cat}">${c.score}/100</span>
+                    </div>
+                  `;
+                }).join('')
+                : '<div class="no-data">Noch keine Checks</div>'
+              }
+            </div>
+          </div>
+        </div>`;
+      }
+
+      // ===== VISIBILITY REPORT EMAILS =====
+      if (data.visibilityEmails && data.visibilityEmails.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">📩 Letzte Report-Mails (KI-Sichtbarkeit)</div>
+          ${data.visibilityEmails.map(e => `
+            <div class="vis-check-item">
+              <div>
+                <div class="vis-domain">${escHTML(e.domain)}</div>
+                <div class="vis-industry">${escHTML(e.email)} · ${escHTML(e.industry || '–')}${e.timestamp ? ` · ${new Date(e.timestamp).toLocaleString('de-AT')}` : ''}</div>
+              </div>
+              <span class="vis-score ${e.score >= 65 ? 'hoch' : e.score >= 35 ? 'mittel' : 'niedrig'}">${e.score}/100</span>
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
+      // ===== EMAIL LOG =====
+      if (data.recentEmails && data.recentEmails.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">📧 Letzte E-Mails via Evita</div>
+          ${data.recentEmails.map(e => `
+            <div class="email-log-item ${e.success ? '' : 'failed'}">
+              <div class="email-log-main">
+                <span class="email-log-status">${e.success ? '✅' : '❌'}</span>
+                <span class="email-log-to">${escHTML(e.to)}</span>
+                <span class="email-log-subject">${escHTML(e.subject)}</span>
+              </div>
+              ${e.timestamp ? `<div class="email-log-time">${new Date(e.timestamp).toLocaleString('de-AT')}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
+      // ===== EMAIL WHITELIST (Erlaubte Empfänger) =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">✅ E-Mail Whitelist <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${(data.emailWhitelist || []).length} erlaubt)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">Evita darf nur an diese Adressen E-Mails versenden. Ist die Liste leer, ist der Versand komplett gesperrt.</div>
+        <div class="whitelist-add-form">
+          <input type="email" id="whitelistInput" placeholder="neue@email.at eingeben …" onkeydown="if(event.key==='Enter'){event.preventDefault();addToWhitelist();}">
+          <button class="whitelist-add-btn" onclick="addToWhitelist()">+ Hinzufügen</button>
+        </div>
+        ${(data.emailWhitelist || []).length > 0
+          ? data.emailWhitelist.map(email => `
+            <div class="whitelist-item">
+              <span class="whitelist-email">${escHTML(email)}</span>
+              <button class="whitelist-remove" onclick="removeFromWhitelist('${escHTML(email)}')" title="Entfernen">✕</button>
+            </div>
+          `).join('')
+          : '<div class="no-data">Noch keine Empfänger freigeschaltet – Evita kann keine E-Mails senden.</div>'
+        }
+      </div>`;
+
+      // ===== EMAIL BLOCKLIST =====
+      if (data.emailBlocklist && data.emailBlocklist.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">🚫 E-Mail Blocklist <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${data.emailBlocklist.length} blockiert)</span></div>
+          ${data.emailBlocklist.map(email => `
+            <div class="blocklist-item">
+              <span class="blocklist-email">${escHTML(email)}</span>
+              <button class="blocklist-remove" onclick="removeFromBlocklist('${escHTML(email)}')" title="Entsperren">✕</button>
+            </div>
+          `).join('')}
+        </div>`;
+      }
+
+      // ===== FALLBACKS =====
+      html += `<div class="chart-card full-width">
+        <div class="chart-title">⚠️ Letzte Fallbacks <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Wo Evita nicht weiter wusste)</span></div>
+        ${data.recentFallbacks.length > 0
+          ? data.recentFallbacks.map(f => `
+            <div class="fallback-item">
+              <div class="fallback-msg">"${escHTML(f.message)}"</div>
+              ${f.timestamp ? `<div class="fallback-time">${new Date(f.timestamp).toLocaleString('de-AT')}</div>` : ''}
+            </div>
+          `).join('')
+          : '<div class="no-data">Keine Fallbacks – Evita läuft perfekt 🎉</div>'
+        }
+      </div>`;
+
+      // ===== WEBSITE ROAST =====
+      const roast = data.roast;
+      if (roast && (roast.today?.total > 0 || roast.recentChecks?.length > 0)) {
+        const rt = roast.today || {};
+        const gradeColor = (note) => note <= 2 ? 'var(--green)' : note <= 3 ? 'var(--orange)' : 'var(--red)';
+
+        html += `<div class="section-title" style="margin-top:32px;">🔥 Website-Roast</div>
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-label">Roasts heute</div>
+              <div class="kpi-value accent">${rt.total || 0}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 1-2</div>
+              <div class="kpi-value green">${(rt.note_1 || 0) + (rt.note_2 || 0)}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 3</div>
+              <div class="kpi-value orange">${rt.note_3 || 0}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Note 4-5</div>
+              <div class="kpi-value red">${(rt.note_4 || 0) + (rt.note_5 || 0)}</div>
+            </div>
+          </div>`;
+
+        if (roast.recentChecks && roast.recentChecks.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-top:16px;">
+            <div class="chart-title">Letzte Roasts</div>
+            ${roast.recentChecks.slice(0, 15).map(r => {
+              const color = gradeColor(r.note);
+              const time = new Date(r.timestamp).toLocaleString('de-AT', {
+                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+              });
+              return `<div class="list-item">
+                <span class="list-item-text" style="flex:1">
+                  <span style="color:${color};font-weight:700;font-family:'JetBrains Mono',monospace;margin-right:10px;">Note ${r.note}</span>
+                  <span style="color:var(--text-secondary)">${escHTML(r.url)}</span>
+                  ${r.label ? `<span style="color:var(--text-muted);font-size:0.75rem;margin-left:8px">(${escHTML(r.label)}, ${r.score}%)</span>` : ''}
+                </span>
+                <span class="list-item-count" style="font-size:0.75rem;color:var(--text-muted)">${time}</span>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }
+      }
+
+      return html;
+    }
+
+    function renderEvitaCharts(data) {
+      renderMessageChart(data.daily);
+      renderModelChart(data.modelUsage);
+      
+      if (data.visibility) {
+        const vd = data.visibility.scoreDistribution;
+        if (vd.hoch + vd.mittel + vd.niedrig > 0) {
+          renderVisibilityChart(vd);
+        }
+      }
+    }
+
+    // ============================================================
+    // SILAS TAB
+    // ============================================================
+    function renderSilasTab(data) {
+      const si = data.silas;
+      if (!si) return '<div class="no-data" style="padding:60px 0;">Keine Silas-Daten verfügbar. Tracking noch nicht aktiv?</div>';
+
+      const st = si.summary.today;
+      const sp = si.summary.period;
+
+      let html = '';
+
+      // ===== KPI ROW =====
+      html += `<div class="kpi-row">
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Generierungen heute</div>
+          <div class="kpi-value silas-color">${st.generations}</div>
+          <div class="kpi-sub">${sp.total_generations} im Zeitraum</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Keywords heute</div>
+          <div class="kpi-value">${st.keywords}</div>
+          <div class="kpi-sub">⌀ ${sp.avg_keywords_per_generation} pro Run</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Erfolgsrate</div>
+          <div class="kpi-value ${sp.success_rate >= 90 ? 'green' : sp.success_rate >= 70 ? 'orange' : 'red'}">${sp.success_rate}%</div>
+          <div class="kpi-sub">${sp.successful} ✓ / ${sp.failed} ✗</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Unique User</div>
+          <div class="kpi-value blue">${st.unique_users}</div>
+          <div class="kpi-sub">${sp.unique_users} im Zeitraum</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Downloads</div>
+          <div class="kpi-value green">${sp.total_downloads}</div>
+          <div class="kpi-sub">${st.downloads} heute</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Rate-Limit Hits</div>
+          <div class="kpi-value ${sp.rate_limit_hits > 10 ? 'red' : sp.rate_limit_hits > 0 ? 'orange' : 'green'}">${sp.rate_limit_hits}</div>
+          <div class="kpi-sub">${st.rate_limit_hits} heute</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Master Mode</div>
+          <div class="kpi-value orange">${sp.master_mode_rate}%</div>
+          <div class="kpi-sub">${sp.master_mode_uses} von ${sp.total_generations}</div>
+        </div>
+        <div class="kpi-card silas-accent">
+          <div class="kpi-label">Heruntergeladene Items</div>
+          <div class="kpi-value">${sp.downloaded_items}</div>
+          <div class="kpi-sub">
+            CSV ${sp.downloads_csv} · TXT ${sp.downloads_txt} · HTML ${sp.downloads_html}
+          </div>
+        </div>
+      </div>`;
+
+      // ===== CHARTS: Generierungen Trend + Intent-Verteilung =====
+      html += `<div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">📈 Generierungen & Keywords</div>
+          <div class="chart-container"><canvas id="silasGenChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🎯 Intent-Verteilung</div>
+          <div class="chart-container"><canvas id="silasIntentChart"></canvas></div>
+        </div>
+      </div>`;
+
+      // ===== LISTS: Top-Keywords + Templates =====
+      html += `<div class="list-grid">
+        <div class="list-card">
+          <div class="list-title">🔑 Top-Keywords</div>
+          ${si.topKeywords && si.topKeywords.length > 0 
+            ? si.topKeywords.map((k, i) => {
+              const maxCount = si.topKeywords[0]?.count || 1;
+              const pct = Math.round((k.count / maxCount) * 100);
+              return `
+                <div class="list-item" style="flex-direction:column;align-items:stretch;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <span class="list-item-text">${i+1}. ${escHTML(k.keyword)}</span>
+                    <span class="list-item-count silas-color">${k.count}×</span>
+                  </div>
+                  <div class="list-item-bar silas-bar" style="width:${pct}%"></div>
+                </div>
+              `;
+            }).join('')
+            : '<div class="no-data">Noch keine Keywords</div>'
+          }
+        </div>
+        <div class="list-card">
+          <div class="list-title">📝 Templates & Modelle</div>
+          ${si.templates && si.templates.length > 0 
+            ? `<div style="margin-bottom:16px;">
+                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Template-Nutzung</div>
+                ${si.templates.map(t => `
+                  <div class="list-item">
+                    <span class="list-item-text">${escHTML(t.template)}</span>
+                    <span class="list-item-count silas-color">${t.count}×</span>
+                  </div>
+                `).join('')}
+              </div>`
+            : ''
+          }
+          ${si.modelUsage && Object.keys(si.modelUsage).length > 0
+            ? `<div>
+                <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Modell-Nutzung</div>
+                ${Object.entries(si.modelUsage).sort((a,b) => b[1] - a[1]).map(([model, count]) => `
+                  <div class="list-item">
+                    <span class="list-item-text">${escHTML(model.replace('gemini-', '').replace('-preview', ' ⚡'))}</span>
+                    <span class="list-item-count">${count}×</span>
+                  </div>
+                `).join('')}
+              </div>`
+            : '<div class="no-data">Noch keine Modell-Daten</div>'
+          }
+        </div>
+      </div>`;
+
+      // ===== HEATMAP =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">🕐 Silas Aktivitäts-Heatmap</div>
+        ${renderHeatmap(si.heatmap, 'silas')}
+      </div>`;
+
+      // ===== FEHLER-LOG =====
+      html += `<div class="chart-card full-width">
+        <div class="chart-title">⚠️ Letzte Fehler <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Fehlgeschlagene Generierungen)</span></div>
+        ${si.recentErrors && si.recentErrors.length > 0
+          ? si.recentErrors.map(e => `
+            <div class="fallback-item">
+              <div class="fallback-msg">
+                <strong>${escHTML(e.keyword)}</strong>: ${escHTML(e.error)}
+                ${e.type ? `<span class="fallback-type ${e.type}">${e.type}</span>` : ''}
+              </div>
+              ${e.timestamp ? `<div class="fallback-time">${new Date(e.timestamp).toLocaleString('de-AT')}</div>` : ''}
+            </div>
+          `).join('')
+          : '<div class="no-data">Keine Fehler – Silas läuft perfekt 🎉</div>'
+        }
+      </div>`;
+
+      return html;
+    }
+
+    function renderSilasCharts(data) {
+      if (!data.silas) return;
+      renderSilasGenChart(data.silas.daily);
+      renderSilasIntentChart(data.silas.intentDistribution);
+    }
+
+    // ============================================================
+    // EVITA CHARTS
+    // ============================================================
+    const chartDefaults = {
+      color: '#8888a0',
+      borderColor: '#1e1e2e',
+      font: { family: "'JetBrains Mono', monospace", size: 11 }
+    };
+
+    Chart.defaults.color = chartDefaults.color;
+    Chart.defaults.borderColor = chartDefaults.borderColor;
+    Chart.defaults.font = chartDefaults.font;
+
+    function renderMessageChart(daily) {
+      const ctx = document.getElementById('msgChart');
+      if (!ctx) return;
+
+      chartInstances.msg = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: daily.map(d => fmtDate(d.date)),
+          datasets: [
+            {
+              label: 'Nachrichten',
+              data: daily.map(d => d.total_messages),
+              borderColor: '#6c5ce7',
+              backgroundColor: 'rgba(108, 92, 231, 0.1)',
+              fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5
+            },
+            {
+              label: 'Chats',
+              data: daily.map(d => d.total_chats),
+              borderColor: '#4facfe',
+              backgroundColor: 'rgba(79, 172, 254, 0.05)',
+              fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5
+            },
+            {
+              label: 'E-Mails',
+              data: daily.map(d => d.emails_sent || 0),
+              borderColor: '#00d68f',
+              backgroundColor: 'rgba(0, 214, 143, 0.05)',
+              fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 6, borderDash: [4, 4]
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' } }
+          }
+        }
+      });
+    }
+
+    function renderModelChart(modelUsage) {
+      const ctx = document.getElementById('modelChart');
+      if (!ctx) return;
+
+      const labels = Object.keys(modelUsage);
+      const values = Object.values(modelUsage).map(Number);
+
+      if (labels.length === 0) {
+        ctx.parentElement.innerHTML = '<div class="no-data">Noch keine Daten</div>';
+        return;
+      }
+
+      const colors = ['#6c5ce7', '#4facfe', '#00d68f', '#ffa502', '#ff6b6b'];
+
+      chartInstances.model = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.map(l => l.replace('gemini-', '').replace('-preview', ' ⚡')),
+          datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 0, hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '65%',
+          plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } } }
+        }
+      });
+    }
+
+    function renderVisibilityChart(scoreDistribution) {
+      const ctx = document.getElementById('visChart');
+      if (!ctx) return;
+
+      chartInstances.vis = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Gut sichtbar (65+)', 'Ausbaufähig (35-64)', 'Kaum sichtbar (<35)'],
+          datasets: [{
+            data: [scoreDistribution.hoch, scoreDistribution.mittel, scoreDistribution.niedrig],
+            backgroundColor: ['#00d68f', '#ffa502', '#ff6b6b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '60%',
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } }
+        }
+      });
+    }
+
+    // ============================================================
+    // SILAS CHARTS
+    // ============================================================
+    function renderSilasGenChart(daily) {
+      const ctx = document.getElementById('silasGenChart');
+      if (!ctx) return;
+      if (chartInstances.silasGen) { chartInstances.silasGen.destroy(); }
+
+      chartInstances.silasGen = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: daily.map(d => fmtDate(d.date)),
+          datasets: [
+            {
+              label: 'Keywords',
+              data: daily.map(d => d.total_keywords),
+              borderColor: '#e17055',
+              backgroundColor: 'rgba(225, 112, 85, 0.1)',
+              fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5
+            },
+            {
+              label: 'Generierungen',
+              data: daily.map(d => d.total_generations),
+              borderColor: '#fdcb6e',
+              backgroundColor: 'rgba(253, 203, 110, 0.05)',
+              fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5
+            },
+            {
+              label: 'Erfolgreich',
+              data: daily.map(d => d.successful),
+              borderColor: '#00d68f',
+              backgroundColor: 'rgba(0, 214, 143, 0.05)',
+              fill: false, tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderDash: [4, 4]
+            },
+            {
+              label: 'Rate Limits',
+              data: daily.map(d => d.rate_limit_hits),
+              borderColor: '#ff6b6b',
+              backgroundColor: 'rgba(255, 107, 107, 0.05)',
+              fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 6, borderDash: [2, 2]
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 12 } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' } }
+          }
+        }
+      });
+    }
+
+    function renderSilasIntentChart(intentDistribution) {
+      const ctx = document.getElementById('silasIntentChart');
+      if (!ctx) return;
+      if (chartInstances.silasIntent) { chartInstances.silasIntent.destroy(); }
+
+      const labels = Object.keys(intentDistribution || {});
+      const values = Object.values(intentDistribution || {}).map(Number);
+
+      if (labels.length === 0) {
+        ctx.parentElement.innerHTML = '<div class="no-data">Noch keine Intent-Daten</div>';
+        return;
+      }
+
+      const intentColors = {
+        'informational': '#4facfe',
+        'commercial': '#00d68f',
+        'transactional': '#e17055',
+        'navigational': '#fdcb6e'
+      };
+
+      chartInstances.silasIntent = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+          datasets: [{
+            data: values,
+            backgroundColor: labels.map(l => intentColors[l] || '#6c5ce7'),
+            borderWidth: 0, hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '65%',
+          plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 12 } } }
+        }
+      });
+    }
+
+    // ============================================================
+    // BUILDS TAB
+    // ============================================================
+    function renderBuildsTab(data) {
+      const bl = data.buildLog;
+      if (!bl) return '<div class="no-data" style="padding:60px 0;">Noch keine Build-Daten vorhanden.<br>Nach dem ersten Deploy mit dem neuen Build-Script werden hier Daten erscheinen.</div>';
+
+      const latest = bl.latest;
+      let html = '';
+
+      // ===== STATUS BANNER =====
+      if (latest) {
+        const statusIcon = latest.status === 'success' ? '✅' : latest.status === 'partial' ? '⚠️' : '❌';
+        const statusClass = latest.status || 'none';
+        const dt = latest.timestamp ? new Date(latest.timestamp) : null;
+        const timeAgo = dt ? getTimeAgo(dt) : '–';
+        const dateStr = dt ? dt.toLocaleString('de-AT') : '–';
+
+        html += `<div class="build-status-banner">
+          <div class="build-status-icon ${statusClass}">${statusIcon}</div>
+          <div class="build-status-info">
+            <div class="build-status-title">Letzter Build: ${latest.status === 'success' ? 'Erfolgreich' : latest.status === 'partial' ? 'Teilweise erfolgreich' : 'Fehlgeschlagen'}</div>
+            <div class="build-status-meta">${dateStr} · ${timeAgo}</div>
+          </div>
+          <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+          <button class="build-trigger-btn" id="vectorBtn" onclick="triggerVectorRebuild()" style="background:var(--accent);margin-left:8px;">🧠 Vektor-DB aktualisieren</button>
+        </div>`;
+      } else {
+        html += `<div class="build-status-banner">
+          <div class="build-status-icon none">📦</div>
+          <div class="build-status-info">
+            <div class="build-status-title">Noch kein Build geloggt</div>
+            <div class="build-status-meta">Der erste Build mit dem neuen Script wird hier erscheinen</div>
+          </div>
+          <button class="build-trigger-btn" id="rebuildBtn" onclick="triggerRebuild()">🔄 Jetzt neu bauen</button>
+          <button class="build-trigger-btn" id="vectorBtn" onclick="triggerVectorRebuild()" style="background:var(--accent);margin-left:8px;">🧠 Vektor-DB aktualisieren</button>
+        </div>`;
+      }
+
+      // ===== DETAIL CARDS =====
+      if (latest) {
+        html += `<div class="build-detail-grid">
+          <div class="build-detail-card">
+            <div class="build-detail-label">Blog-Artikel</div>
+            <div class="build-detail-value blue">${latest.articles?.count || 0}</div>
+            <div class="build-detail-sub">in articles-db.json</div>
+          </div>
+          <div class="build-detail-card">
+            <div class="build-detail-label">Knowledge-Seiten</div>
+            <div class="build-detail-value green">${latest.knowledge?.pages || 0}</div>
+            <div class="build-detail-sub">${latest.knowledge?.keywords || 0} Keywords · ${latest.knowledge?.sections || 0} Sektionen</div>
+          </div>
+          <div class="build-detail-card">
+            <div class="build-detail-label">HTML-Seiten</div>
+            <div class="build-detail-value">${latest.html_pages || '–'}</div>
+            <div class="build-detail-sub">in public/</div>
+          </div>
+        </div>`;
+
+        // Kategorien-Übersicht
+        if (latest.articles?.categories && Object.keys(latest.articles.categories).length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">📂 Artikel nach Kategorie</div>
+            <div class="build-category-bar">
+              ${Object.entries(latest.articles.categories).map(([cat, count]) => 
+                `<div class="build-category-tag">${escHTML(cat)}: <span>${count}</span></div>`
+              ).join(' · ')}
+            </div>
+          </div>`;
+        }
+
+        // Generierte Dateien
+        if (latest.files_generated && latest.files_generated.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">📄 Generierte Dateien</div>
+            <div class="build-files-list">
+              ${latest.files_generated.map(f => `<span class="build-file-tag">${escHTML(f)}</span>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        // Fehler im letzten Build
+        if (latest.errors && latest.errors.length > 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="chart-title">⚠️ Fehler im letzten Build</div>
+            ${latest.errors.map(err => `
+              <div class="fallback-item">
+                <div class="fallback-msg">${escHTML(err)}</div>
+              </div>
+            `).join('')}
+          </div>`;
+        }
+      }
+
+      // ===== VEKTOR-INVENTAR: Was hat Evita wirklich? =====
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;" id="vector-inventory-card">
+        <div class="chart-title">🔎 Evitas aktives Wissen <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(Live aus Vector-DB)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:16px;">
+          Zeigt alle Vektoren die Evita gerade tatsächlich zum Antworten nutzen kann.
+        </div>
+        <div id="vector-inventory-content">
+          <button onclick="loadVectorInventory()" id="vector-inventory-btn" class="build-trigger-btn" style="background:var(--accent);width:100%;">
+            🔎 Vektor-Inventar laden
+          </button>
+        </div>
+      </div>`;
+
+      // ===== INVENTORY: Detaillierte Seitenlisten =====
+      const inv = bl.inventory;
+      if (inv) {
+        // ── Blog-Artikel Liste ──
+        const articles = inv.articles || [];
+        if (articles.length > 0) {
+          html += `<div class="inventory-section">
+            <div class="inventory-toggle" onclick="toggleInventory('articles')">
+              <div class="inventory-toggle-left">
+                <span class="inventory-toggle-icon">📝</span>
+                <span class="inventory-toggle-title">Blog-Artikel in der KI-Datenbank</span>
+                <span class="inventory-toggle-count">${articles.length}</span>
+              </div>
+              <span class="inventory-toggle-arrow" id="articles-arrow">▼</span>
+            </div>
+            <div class="inventory-filter" id="articles-filter" style="display:none;">
+              <input type="text" placeholder="Artikel suchen…" oninput="filterInventory('articles', this.value)">
+            </div>
+            <div class="inventory-list" id="articles-list">
+              ${articles.map((a, i) => `
+                <div class="inventory-item" data-search="${escHTML((a.title + ' ' + a.slug + ' ' + a.category + ' ' + (a.tags || []).join(' ')).toLowerCase())}">
+                  <span class="inventory-item-num">${i + 1}</span>
+                  <div class="inventory-item-content">
+                    <div class="inventory-item-title">${escHTML(a.title)}</div>
+                    <div class="inventory-item-meta">
+                      <span class="inventory-item-slug">/${escHTML(a.slug)}</span>
+                      <span class="inventory-cat-badge">${escHTML(a.category)}</span>
+                    </div>
+                    ${a.tags && a.tags.length > 0 ? `
+                      <div class="inventory-keywords">
+                        ${a.tags.map(t => `<span class="inventory-keyword">${escHTML(t)}</span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        }
+
+        // ── Knowledge-Seiten Liste ──
+        const pages = inv.knowledge || [];
+        if (pages.length > 0) {
+          html += `<div class="inventory-section">
+            <div class="inventory-toggle" onclick="toggleInventory('knowledge')">
+              <div class="inventory-toggle-left">
+                <span class="inventory-toggle-icon">🧠</span>
+                <span class="inventory-toggle-title">Knowledge-Seiten für die KI</span>
+                <span class="inventory-toggle-count">${pages.length}</span>
+              </div>
+              <span class="inventory-toggle-arrow" id="knowledge-arrow">▼</span>
+            </div>
+            <div class="inventory-filter" id="knowledge-filter" style="display:none;">
+              <input type="text" placeholder="Seite suchen…" oninput="filterInventory('knowledge', this.value)">
+            </div>
+            <div class="inventory-list" id="knowledge-list">
+              ${pages.map((p, i) => `
+                <div class="inventory-item" data-search="${escHTML((p.title + ' ' + p.slug + ' ' + p.type + ' ' + (p.keywords || []).join(' ')).toLowerCase())}">
+                  <span class="inventory-item-num">${i + 1}</span>
+                  <div class="inventory-item-content">
+                    <div class="inventory-item-title">${escHTML(p.title)}</div>
+                    <div class="inventory-item-meta">
+                      <span class="inventory-item-slug">${escHTML(p.url || '/' + p.slug)}</span>
+                      <span class="inventory-type-badge ${p.type || 'page'}">${p.type || 'page'}</span>
+                      <span style="color:var(--text-muted);">${p.sections_count || 0} Sektionen · ${p.text_length ? Math.round(p.text_length / 1000) + 'k' : '–'} Zeichen</span>
+                    </div>
+                    ${p.keywords && p.keywords.length > 0 ? `
+                      <div class="inventory-keywords">
+                        ${p.keywords.map(k => `<span class="inventory-keyword">${escHTML(k)}</span>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (articles.length === 0 && pages.length === 0) {
+          html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+            <div class="no-data">Die Seiteninventar-Daten sind noch leer. Nach dem nächsten Build mit dem aktualisierten Script erscheinen hier alle indexierten Seiten.</div>
+          </div>`;
+        }
+      }
+
+      // ===== KNOWLEDGE-BASE EDITOR =====
+      const kbChunks = data.knowledgeChunks || [];
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">📚 Evitas Wissens-Datenbank <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${kbChunks.length} Chunks)</span></div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:16px;">
+          Eigenes Wissen für Evita hinterlegen – ohne Blog oder Landingpage. Nach Änderungen wird die Vektor-DB automatisch synchronisiert.
+        </div>
+
+        <div id="kb-editor" style="display:none; background:var(--bg-card-hover); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px;">
+          <input type="hidden" id="kb-edit-original-slug" value="">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Titel</label>
+              <input type="text" id="kb-title" placeholder="z.B. Michaels CV"
+                style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:10px 14px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none;"
+                oninput="autoGenerateSlug()">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Slug (auto-generiert)</label>
+              <input type="text" id="kb-slug" placeholder="michaels-cv"
+                style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-muted); padding:10px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;">
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Tags <span style="text-transform:none;">(kommagetrennt)</span></label>
+            <input type="text" id="kb-tags" placeholder="michael, erfahrung, cv, wordpress"
+              style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:10px 14px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Inhalt</label>
+            <textarea id="kb-content" rows="10" placeholder="Hier das Wissen reinschreiben, das Evita kennen soll..."
+              style="width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:12px 14px; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; resize:vertical; line-height:1.6;"></textarea>
+            <div style="display:flex; justify-content:space-between; margin-top:4px;">
+              <span id="kb-char-count" style="font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">0 / 4.000 Zeichen</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button onclick="cancelKnowledgeEdit()" style="background:transparent; border:1px solid var(--border); color:var(--text-secondary); padding:8px 20px; border-radius:8px; font-size:0.85rem; cursor:pointer; font-family:'DM Sans',sans-serif;">Abbrechen</button>
+            <button onclick="saveKnowledgeChunk()" style="background:var(--green); color:#fff; border:none; padding:8px 24px; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif;">Speichern</button>
+          </div>
+        </div>
+
+        <button onclick="showKnowledgeEditor()" id="kb-add-btn" style="display:flex; align-items:center; gap:8px; background:var(--bg-card-hover); border:1px dashed var(--border); color:var(--text-secondary); padding:12px 20px; border-radius:var(--radius); font-size:0.85rem; cursor:pointer; font-family:'DM Sans',sans-serif; width:100%; justify-content:center; margin-bottom:16px; transition:border-color 0.2s, color 0.2s;"
+          onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"
+        >+ Neuen Knowledge-Chunk anlegen</button>
+
+        ${kbChunks.length > 0 ? kbChunks.map(chunk => `
+          <div class="kb-chunk-item" style="background:var(--bg-card-hover); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:8px; transition:border-color 0.2s;"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:0.95rem; font-weight:700; margin-bottom:4px;">${escHTML(chunk.title)}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-muted);">kb:${escHTML(chunk.slug)}</span>
+                  ${(chunk.tags || []).map(tag => `<span style="font-size:0.65rem; padding:1px 7px; border-radius:4px; background:var(--accent-glow); color:var(--accent); font-family:'JetBrains Mono',monospace;">${escHTML(tag)}</span>`).join('')}
+                </div>
+              </div>
+              <div style="display:flex; gap:6px; flex-shrink:0; margin-left:12px;">
+                <button onclick="editKnowledgeChunk('${escHTML(chunk.slug)}')" style="background:none; border:1px solid var(--border); color:var(--text-secondary); width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" title="Bearbeiten"
+                  onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+                  onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'"
+                >✏️</button>
+                <button onclick="deleteKnowledgeChunk('${escHTML(chunk.slug)}','${escHTML(chunk.title)}')" style="background:none; border:1px solid rgba(239,68,68,0.3); color:var(--red); width:30px; height:30px; border-radius:6px; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" title="Löschen"
+                  onmouseover="this.style.background='var(--red)';this.style.color='#fff'"
+                  onmouseout="this.style.background='none';this.style.color='var(--red)'"
+                >✕</button>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.5; max-height:80px; overflow:hidden; position:relative;">
+              ${escHTML(chunk.content.substring(0, 250))}${chunk.content.length > 250 ? '<span style="color:var(--text-muted);">…</span>' : ''}
+            </div>
+            <div style="display:flex; gap:12px; margin-top:8px; font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
+              <span${chunk.content.length > 4000 ? ' style="color:var(--red);"' : ''}>${chunk.content.length.toLocaleString('de-AT')} / 4.000 Zeichen${chunk.content.length > 4000 ? ' ⚠️ wird abgeschnitten!' : ''}</span>
+              ${chunk.updated_at ? `<span>Aktualisiert: ${new Date(chunk.updated_at).toLocaleString('de-AT')}</span>` : ''}
+            </div>
+          </div>
+        `).join('') : '<div class="no-data">Noch kein eigenes Wissen hinterlegt. Lege den ersten Chunk an!</div>'}
+      </div>`;
+
+      // ===== KI-AUSSCHLUSS MANAGEMENT =====
+      const excluded = bl.excludedUrls || [];
+      html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+        <div class="chart-title">🚫 Seiten von KI-Suche ausschließen</div>
+        <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:12px;">
+          Diese Seiten werden beim nächsten Build nicht in Evitas Wissensdatenbank aufgenommen. Nach dem Ändern → „🧠 Vektor-DB aktualisieren" klicken.
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input type="text" id="excludeUrlInput" placeholder="z.B. meine-seite oder /meine-seite.html"
+            style="flex:1; background:var(--bg-card-hover); border:1px solid var(--border); color:var(--text-primary); padding:8px 12px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; outline:none;"
+            onkeydown="if(event.key==='Enter')addExcludeUrl()">
+          <button onclick="addExcludeUrl()" style="background:var(--red); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;">+ Ausschließen</button>
+        </div>
+        ${excluded.length > 0 ? `
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${excluded.map(url => `
+              <div style="display:inline-flex; align-items:center; gap:6px; background:var(--red-bg); padding:5px 12px; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.75rem;">
+                <span style="color:var(--red);">/${escHTML(url)}</span>
+                <span onclick="removeExcludeUrl('${escHTML(url)}')" style="color:var(--text-muted); cursor:pointer; font-size:0.85rem; margin-left:2px;" title="Ausschluss aufheben">✕</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<div style="font-size:0.78rem; color:var(--text-muted);">Keine Seiten ausgeschlossen – alle Seiten werden indexiert.</div>'}
+      </div>`;
+
+      // ===== BUILD HISTORY (Triggers + Results merged and sorted) =====
+      const allEvents = [];
+
+      // Trigger-Events
+      (bl.triggers || []).forEach(t => {
+        allEvents.push({
+          type: 'trigger',
+          timestamp: t.timestamp,
+          status: t.status || 'triggered',
+          trigger: t.trigger || '?',
+          deployment_id: t.deployment_id,
+          error: t.error
+        });
+      });
+
+      // Build-Result-Events
+      (bl.results || []).forEach(r => {
+        allEvents.push({
+          type: 'result',
+          timestamp: r.timestamp,
+          status: r.status || 'unknown',
+          articles: r.articles?.count || 0,
+          pages: r.knowledge?.pages || 0,
+          keywords: r.knowledge?.keywords || 0,
+          duration_ms: r.duration_ms,
+          errors: r.errors || [],
+          files: r.files_generated || []
+        });
+      });
+
+      // Sortieren nach Timestamp (neueste zuerst)
+      allEvents.sort((a, b) => {
+        const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        return tb - ta;
+      });
+
+      if (allEvents.length > 0) {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Build-Historie <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(${allEvents.length} Events)</span></div>
+          <div class="list-card" style="background:transparent;border:none;padding:0;max-height:500px;">
+            ${allEvents.slice(0, 30).map(event => {
+              const dt = event.timestamp ? new Date(event.timestamp) : null;
+              const timeStr = dt ? dt.toLocaleString('de-AT') : '–';
+              const timeAgoStr = dt ? getTimeAgo(dt) : '';
+
+              if (event.type === 'trigger') {
+                const triggerLabel = event.trigger === 'cron' ? 'Automatisch (Cron)' 
+                  : event.trigger === 'dashboard' ? 'Manuell (Dashboard)' 
+                  : event.trigger === 'dashboard-vector' ? 'Vektor-Sync (Dashboard)'
+                  : event.trigger === 'auto-after-kb-change' ? 'Auto-Sync (KB geändert)'
+                  : event.trigger === 'verification-warning' ? 'Verification-Warnung'
+                  : event.trigger === 'manual' ? 'Manuell (API)'
+                  : 'Unbekannt';
+                const tagClass = event.trigger === 'cron' ? 'cron' 
+                  : event.trigger === 'dashboard' ? 'dashboard' 
+                  : event.trigger === 'auto-after-kb-change' ? 'cron'
+                  : event.trigger === 'dashboard-vector' ? 'dashboard'
+                  : event.trigger === 'verification-warning' ? 'manual'
+                  : 'manual';
+                const dotClass = event.status === 'error' ? 'error' 
+                  : event.status === 'warning' ? 'partial'
+                  : event.trigger === 'verification-warning' ? 'partial'
+                  : 'triggered';
+
+                const titleIcon = event.trigger === 'verification-warning' ? '🚨 KB-Chunks fehlen!'
+                  : event.trigger === 'auto-after-kb-change' ? '🧠 Auto-Sync'
+                  : event.trigger === 'dashboard-vector' ? '🧠 Vektor-Sync'
+                  : event.status === 'error' ? '❌ Trigger fehlgeschlagen' 
+                  : '🚀 Deploy getriggert';
+
+                const extraDetails = event.message ? ` · ${escHTML(event.message)}` : '';
+                const statsDetails = event.stats ? ` · ${event.stats.vector_chunks ?? '?'} Chunks, ${event.stats.kb_chunks ?? '?'} KB` : '';
+
+                return `<div class="build-log-item"${event.trigger === 'verification-warning' ? ' style="background:var(--red-bg);border-left:3px solid var(--red);"' : ''}>
+                  <div class="build-log-dot ${dotClass}"></div>
+                  <div class="build-log-content">
+                    <div class="build-log-title">
+                      ${titleIcon}
+                      <span class="build-tag ${tagClass}">${event.trigger}</span>
+                    </div>
+                    <div class="build-log-details">
+                      ${triggerLabel}${event.error ? ` · ${escHTML(event.error)}` : ''}${event.deployment_id ? ` · ID: ${escHTML(event.deployment_id)}` : ''}${extraDetails}${statsDetails}
+                    </div>
+                  </div>
+                  <div class="build-log-time">${timeStr}<br>${timeAgoStr}</div>
+                </div>`;
+              }
+
+              // type === 'result'
+              const dotClass = event.status === 'success' ? 'success' : event.status === 'partial' ? 'partial' : 'failed';
+              const statusLabel = event.status === 'success' ? '✅ Build erfolgreich' : event.status === 'partial' ? '⚠️ Teilweise erfolgreich' : '❌ Build fehlgeschlagen';
+
+              return `<div class="build-log-item">
+                <div class="build-log-dot ${dotClass}"></div>
+                <div class="build-log-content">
+                  <div class="build-log-title">${statusLabel}</div>
+                  <div class="build-log-details">
+                    ${event.articles} Artikel · ${event.pages} Seiten · ${event.keywords} Keywords${event.duration_ms ? ` · ${event.duration_ms}ms` : ''}${event.errors.length > 0 ? ` · ${event.errors.length} Fehler` : ''}
+                  </div>
+                  ${event.files.length > 0 ? `<div class="build-files-list" style="margin-top:6px;">${event.files.map(f => `<span class="build-file-tag">${escHTML(f)}</span>`).join('')}</div>` : ''}
+                </div>
+                <div class="build-log-time">${timeStr}<br>${timeAgoStr}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Build-Historie</div>
+          <div class="no-data">Noch keine Build-Events vorhanden. Nach dem ersten Build mit dem neuen System werden hier Einträge erscheinen.</div>
+        </div>`;
+      }
+
+      return html;
+    }
+
+    // ============================================================
+    // HEALTH TAB
+    // ============================================================
+    function renderHealthTab(data) {
+      const h = data.health;
+      if (!h || !h.latest) {
+        return `<div class="no-data" style="padding:60px 0;">
+          Noch keine Health-Daten vorhanden.<br>
+          <button class="build-trigger-btn" id="healthCheckBtn" onclick="triggerHealthCheck()" style="margin-top:16px;">🏥 Jetzt Health-Check ausführen</button>
+        </div>`;
+      }
+
+      const latest = h.latest;
+      let html = '';
+
+      // ===== STATUS BANNER =====
+      const statusMap = {
+        healthy: { icon: '✅', label: 'Alle Systeme operational', cls: 'healthy' },
+        warning: { icon: '⚠️', label: 'Warnungen vorhanden', cls: 'warning' },
+        degraded: { icon: '🔻', label: 'Eingeschränkte Funktionalität', cls: 'degraded' },
+        critical: { icon: '🔥', label: 'Kritische Ausfälle', cls: 'critical' }
+      };
+      const st = statusMap[latest.status] || statusMap.degraded;
+      const checkTime = latest.timestamp ? new Date(latest.timestamp) : null;
+      const checkAgo = checkTime ? getTimeAgo(checkTime) : '–';
+      const checkDate = checkTime ? checkTime.toLocaleString('de-AT') : '–';
+
+      html += `<div class="health-status-banner">
+        <div class="health-status-icon ${st.cls}">${st.icon}</div>
+        <div class="health-status-info">
+          <div class="health-status-title">${st.label}</div>
+          <div class="health-status-meta">${checkDate} · ${checkAgo} · ${latest.total_latency_ms || 0}ms</div>
+        </div>
+        <button class="build-trigger-btn" id="healthCheckBtn" onclick="triggerHealthCheck()" style="background:var(--green);">🏥 Jetzt prüfen</button>
+      </div>`;
+
+      // ===== SERVICE CARDS =====
+      if (latest.checks) {
+        const serviceNames = {
+          redis: { label: 'Redis (Upstash)', icon: '🗄️' },
+          vector_db: { label: 'Vector-DB', icon: '🧠' },
+          gemini: { label: 'Gemini API', icon: '🤖' },
+          brevo: { label: 'Brevo (E-Mail)', icon: '📧' },
+          website: { label: 'Website', icon: '🌐' },
+          news_briefing: { label: 'News-Briefing', icon: '📰' },
+          cron_jobs: { label: 'Cron-Jobs', icon: '⏰' }
+        };
+
+        html += '<div class="health-grid">';
+        for (const [key, check] of Object.entries(latest.checks)) {
+          const svc = serviceNames[key] || { label: key, icon: '⚙️' };
+          const badgeCls = check.status;
+
+          let detailHtml = '';
+          if (check.error) {
+            detailHtml = `<div class="service-error">${escHTML(check.error)}</div>`;
+          }
+          if (check.details) {
+            const details = [];
+            if (check.details.vectorCount !== undefined) details.push(`${check.details.vectorCount.toLocaleString('de-AT')} Vektoren`);
+            if (check.details.dimension) details.push(`${check.details.dimension}D`);
+            if (check.details.plan) details.push(`Plan: ${check.details.plan}`);
+            if (check.details.credits !== undefined) details.push(`${check.details.credits} Credits`);
+            if (check.details.age_hours !== undefined) details.push(`${check.details.age_hours}h alt`);
+            if (check.details.sources !== undefined) details.push(`${check.details.sources} Quellen`);
+            if (check.details.knowledge_sync) {
+              const ks = check.details.knowledge_sync;
+              if (ks.last_run) details.push(`Letzter Sync: ${getTimeAgo(new Date(ks.last_run))}`);
+              else details.push('Noch nie gelaufen');
+            }
+            if (details.length > 0) {
+              detailHtml += `<div class="service-detail">${details.join(' · ')}</div>`;
+            }
+          }
+
+          html += `<div class="health-service-card">
+            <div class="service-header">
+              <span class="service-name">${svc.icon} ${svc.label}</span>
+              <span class="service-badge ${badgeCls}">${check.status}</span>
+            </div>
+            <div class="service-latency">${check.latency_ms}ms</div>
+            ${detailHtml}
+          </div>`;
+        }
+        html += '</div>';
+      }
+
+      // ===== INCIDENTS =====
+      const incidents = h.incidents || [];
+      if (incidents.length > 0) {
+        html += `<div class="chart-card full-width" style="margin-bottom:24px;">
+          <div class="chart-title">🚨 Incidents (letzte 50)</div>`;
+        const recentIncidents = incidents.slice(0, 20);
+        recentIncidents.forEach(inc => {
+          const cls = inc.type === 'recovery' ? 'recovery' : '';
+          const icon = inc.type === 'recovery' ? '✅' : '🔴';
+          const dt = inc.started_at ? new Date(inc.started_at).toLocaleString('de-AT') : '–';
+          html += `<div class="health-incident ${cls}">
+            ${icon} <strong>${escHTML(inc.service || '')}</strong>: ${escHTML(inc.message || '')}
+            <div class="incident-time">${dt}</div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+
+      // ===== HEALTH LOG =====
+      const log = h.log || [];
+      if (log.length > 0) {
+        html += `<div class="chart-card full-width">
+          <div class="chart-title">📋 Health-Log (letzte ${log.length} Checks)</div>`;
+
+        // Uptime-Berechnung
+        const totalChecks = log.length;
+        const healthyChecks = log.filter(l => l.status === 'healthy').length;
+        const uptimePct = totalChecks > 0 ? Math.round((healthyChecks / totalChecks) * 1000) / 10 : 0;
+
+        html += `<div style="margin-bottom:16px; color:var(--text-secondary); font-size:0.85rem;">
+          Uptime: <strong style="color:${uptimePct >= 99 ? 'var(--green)' : uptimePct >= 95 ? 'var(--orange)' : 'var(--red)'}">${uptimePct}%</strong>
+          (${healthyChecks}/${totalChecks} Checks healthy) · Zeitraum: letzte ~${Math.round(totalChecks * 15 / 60)} Stunden
+        </div>`;
+
+        // Timeline-Dots (kompakte Darstellung)
+        html += '<div style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:16px;">';
+        log.slice(0, 96).reverse().forEach(entry => {
+          const dotColor = entry.status === 'healthy' ? 'var(--green)'
+            : entry.status === 'warning' ? 'var(--orange)'
+            : 'var(--red)';
+          const dt = entry.timestamp ? new Date(entry.timestamp).toLocaleString('de-AT') : '';
+          html += `<div title="${dt}: ${entry.status} (${entry.latency_ms}ms)" style="width:8px;height:20px;border-radius:2px;background:${dotColor};opacity:0.8;"></div>`;
+        });
+        html += '</div>';
+
+        // Detail-Log (letzte 15)
+        log.slice(0, 15).forEach(entry => {
+          const dt = entry.timestamp ? new Date(entry.timestamp) : null;
+          const timeStr = dt ? dt.toLocaleTimeString('de-AT') : '–';
+          const dateStr = dt ? dt.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' }) : '';
+
+          let serviceInfo = '';
+          if (entry.services) {
+            const failing = Object.entries(entry.services)
+              .filter(([, v]) => v.s !== 'ok')
+              .map(([k, v]) => `${k}: ${v.s}`);
+            if (failing.length > 0) {
+              serviceInfo = `<span style="color:var(--red); margin-left:8px;">${failing.join(', ')}</span>`;
+            }
+          }
+
+          html += `<div class="health-log-row">
+            <div class="health-log-dot ${entry.status}"></div>
+            <span style="color:var(--text-muted); font-family:'JetBrains Mono',monospace; min-width:100px;">${dateStr} ${timeStr}</span>
+            <span style="color:var(--text-secondary);">${entry.status}</span>
+            <span style="color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${entry.latency_ms}ms</span>
+            ${serviceInfo}
+          </div>`;
+        });
+
+        html += '</div>';
+      }
+
+      return html;
+    }
+
+    // Zeitdifferenz als lesbarer Text
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diff = now - date;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'gerade eben';
+      if (minutes < 60) return `vor ${minutes} Min.`;
+      if (hours < 24) return `vor ${hours} Std.`;
+      if (days === 1) return 'gestern';
+      return `vor ${days} Tagen`;
+    }
+
+    // Manuellen Rebuild auslösen
+    async function triggerRebuild() {
+      const btn = document.getElementById('rebuildBtn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Wird ausgelöst...';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_rebuild' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          btn.textContent = '✅ Deploy gestartet!';
+          btn.style.background = 'var(--green)';
+          setTimeout(() => {
+            btn.textContent = '🔄 Jetzt neu bauen';
+            btn.style.background = '';
+            btn.disabled = false;
+            loadDashboard(); // Refresh um neuen Trigger-Eintrag zu sehen
+          }, 3000);
+        } else {
+          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🔄 Jetzt neu bauen';
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 4000);
+        }
+      } catch (e) {
+        btn.textContent = '❌ ' + e.message;
+        btn.style.background = 'var(--red)';
+        setTimeout(() => {
+          btn.textContent = '🔄 Jetzt neu bauen';
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 4000);
+      }
+    }
+
+    async function triggerVectorRebuild() {
+      const btn = document.getElementById('vectorBtn');
+      if (!btn) return;
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Crawling & Embedding...';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_vector_rebuild' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          btn.textContent = '✅ ' + (data.message || 'Fertig!');
+          btn.style.background = 'var(--green)';
+          setTimeout(() => {
+            btn.textContent = '🧠 Vektor-DB aktualisieren';
+            btn.style.background = 'var(--accent)';
+            btn.disabled = false;
+            loadDashboard();
+          }, 5000);
+        } else {
+          btn.textContent = '❌ ' + (data.error || 'Fehler');
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🧠 Vektor-DB aktualisieren';
+            btn.style.background = 'var(--accent)';
+            btn.disabled = false;
+          }, 5000);
+        }
+      } catch (e) {
+        btn.textContent = '❌ ' + e.message;
+        btn.style.background = 'var(--red)';
+        setTimeout(() => {
+          btn.textContent = '🧠 Vektor-DB aktualisieren';
+          btn.style.background = 'var(--accent)';
+          btn.disabled = false;
+        }, 5000);
+      }
+    }
+
+    // Health-Check manuell auslösen
+    async function triggerHealthCheck() {
+      const btn = document.getElementById('healthCheckBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Prüfe Services...';
+      }
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'trigger_health_check' })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          if (btn) btn.textContent = '✅ Check abgeschlossen';
+          setTimeout(async () => {
+            await loadDashboard();
+            switchTab('health');
+          }, 1000);
+        } else {
+          if (btn) {
+            btn.textContent = '❌ ' + (data.error || 'Fehler');
+            btn.style.background = 'var(--red)';
+            setTimeout(() => {
+              btn.textContent = '🏥 Jetzt prüfen';
+              btn.style.background = 'var(--green)';
+              btn.disabled = false;
+            }, 4000);
+          } else {
+            alert('Health-Check Fehler: ' + (data.error || 'Unbekannt'));
+          }
+        }
+      } catch (e) {
+        if (btn) {
+          btn.textContent = '❌ ' + e.message;
+          btn.style.background = 'var(--red)';
+          setTimeout(() => {
+            btn.textContent = '🏥 Jetzt prüfen';
+            btn.style.background = 'var(--green)';
+            btn.disabled = false;
+          }, 4000);
+        } else {
+          alert('Health-Check Fehler: ' + e.message);
+        }
+      }
+    }
+
+    // Inventar-Liste auf-/zuklappen
+    function toggleInventory(id) {
+      const list = document.getElementById(`${id}-list`);
+      const filter = document.getElementById(`${id}-filter`);
+      const toggle = list?.previousElementSibling?.previousElementSibling || 
+                     filter?.previousElementSibling;
+      
+      if (list?.classList.contains('open')) {
+        list.classList.remove('open');
+        if (filter) filter.style.display = 'none';
+        if (toggle) toggle.classList.remove('open');
+      } else {
+        list?.classList.add('open');
+        if (filter) {
+          filter.style.display = 'flex';
+          filter.querySelector('input')?.focus();
+        }
+        if (toggle) toggle.classList.add('open');
+      }
+    }
+
+    // Inventar-Liste filtern
+    function filterInventory(id, query) {
+      const list = document.getElementById(`${id}-list`);
+      if (!list) return;
+      const q = query.toLowerCase().trim();
+      const items = list.querySelectorAll('.inventory-item');
+      items.forEach(item => {
+        const searchText = item.getAttribute('data-search') || '';
+        item.style.display = (!q || searchText.includes(q)) ? '' : 'none';
+      });
+    }
+
+    // ============================================================
+    // HEATMAP (shared, mit Farbvariante)
+    // ============================================================
+    function renderHeatmap(heatmapData, theme) {
+      const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+      const colorBase = theme === 'silas' 
+        ? { r: 225, g: 112, b: 85 }   // --silas
+        : { r: 108, g: 92, b: 231 };   // --accent
+
+      let maxVal = 0;
+      Object.values(heatmapData || {}).forEach(v => {
+        const n = parseInt(v);
+        if (n > maxVal) maxVal = n;
+      });
+
+      if (maxVal === 0) return '<div class="no-data">Noch keine Aktivitätsdaten</div>';
+
+      let html = '<div class="heatmap-hour-labels"><div></div>';
+      for (let h = 0; h < 24; h++) {
+        html += `<div class="heatmap-hour">${h}</div>`;
+      }
+      html += '</div>';
+
+      html += '<div class="heatmap-grid">';
+      for (let day = 0; day < 7; day++) {
+        html += `<div class="heatmap-label">${dayNames[day]}</div>`;
+        for (let hour = 0; hour < 24; hour++) {
+          const key = `${day}-${hour}`;
+          const val = parseInt(heatmapData[key] || 0);
+          const intensity = maxVal > 0 ? val / maxVal : 0;
+          const bg = intensity === 0 
+            ? 'var(--bg-card-hover)' 
+            : `rgba(${colorBase.r}, ${colorBase.g}, ${colorBase.b}, ${0.15 + intensity * 0.85})`;
+          const label = theme === 'silas' ? 'Generierungen' : 'Nachrichten';
+          html += `<div class="heatmap-cell" style="background:${bg}" title="${dayNames[day]} ${hour}:00 – ${val} ${label}"></div>`;
+        }
+      }
+      html += '</div>';
+      return html;
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    async function removeFromBlocklist(email) {
+      if (!confirm(`"${email}" wirklich entsperren?`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_blocklist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDashboard(); // Refresh
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function addToWhitelist() {
+      const input = document.getElementById('whitelistInput');
+      const email = (input?.value || '').trim().toLowerCase();
+      if (!email) return;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Bitte gib eine gültige E-Mail-Adresse ein.');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_whitelist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          input.value = '';
+          loadDashboard();
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function removeFromWhitelist(email) {
+      if (!confirm(`"${email}" wirklich von der Whitelist entfernen? Evita kann dann nicht mehr an diese Adresse senden.`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_whitelist', email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDashboard();
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function addExcludeUrl() {
+      const input = document.getElementById('excludeUrlInput');
+      let url = (input?.value || '').trim().toLowerCase();
+      if (!url) return;
+      // Normalisiere: kein führender Slash, kein .html, keine Domain
+      url = url.replace(/^https?:\/\/[^/]+\/?/, '').replace(/^\//, '').replace(/\.html$/, '');
+      if (!url || url.length < 2) {
+        alert('Bitte gib einen gültigen Seitennamen ein.');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_exclude_url', url })
+        });
+        const data = await res.json();
+        if (data.success) {
+          input.value = '';
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function removeExcludeUrl(url) {
+      if (!confirm(`"/${url}" wieder für die KI-Suche freigeben?`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_exclude_url', url })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    // ============================================================
+    // KNOWLEDGE-BASE EDITOR
+    // ============================================================
+    function showKnowledgeEditor(prefill = null) {
+      const editor = document.getElementById('kb-editor');
+      const addBtn = document.getElementById('kb-add-btn');
+      if (!editor) return;
+
+      editor.style.display = 'block';
+      if (addBtn) addBtn.style.display = 'none';
+
+      if (prefill) {
+        document.getElementById('kb-title').value = prefill.title || '';
+        document.getElementById('kb-slug').value = prefill.slug || '';
+        document.getElementById('kb-tags').value = (prefill.tags || []).join(', ');
+        document.getElementById('kb-content').value = prefill.content || '';
+        document.getElementById('kb-edit-original-slug').value = prefill.slug || '';
+      } else {
+        document.getElementById('kb-title').value = '';
+        document.getElementById('kb-slug').value = '';
+        document.getElementById('kb-tags').value = '';
+        document.getElementById('kb-content').value = '';
+        document.getElementById('kb-edit-original-slug').value = '';
+      }
+      updateCharCount();
+      document.getElementById('kb-title').focus();
+    }
+
+    function cancelKnowledgeEdit() {
+      const editor = document.getElementById('kb-editor');
+      const addBtn = document.getElementById('kb-add-btn');
+      if (editor) editor.style.display = 'none';
+      if (addBtn) addBtn.style.display = 'flex';
+    }
+
+    function autoGenerateSlug() {
+      const title = document.getElementById('kb-title')?.value || '';
+      const originalSlug = document.getElementById('kb-edit-original-slug')?.value;
+      if (!originalSlug) {
+        const slug = title.toLowerCase()
+          .replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss')
+          .replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        document.getElementById('kb-slug').value = slug;
+      }
+    }
+
+    function updateCharCount() {
+      const content = document.getElementById('kb-content')?.value || '';
+      const counter = document.getElementById('kb-char-count');
+      if (!counter) return;
+      const len = content.length;
+      const limit = 4000;
+      counter.textContent = `${len.toLocaleString('de-AT')} / ${limit.toLocaleString('de-AT')} Zeichen`;
+      if (len > limit) {
+        counter.style.color = 'var(--red)';
+        counter.textContent += ` – ${(len - limit).toLocaleString('de-AT')} zu viel! Wird beim Embedding abgeschnitten.`;
+      } else if (len > 3500) {
+        counter.style.color = 'var(--orange)';
+        counter.textContent += ' – knapp am Limit';
+      } else {
+        counter.style.color = 'var(--text-muted)';
+      }
+    }
+
+    document.addEventListener('input', (e) => {
+      if (e.target.id === 'kb-content') updateCharCount();
+    });
+
+    function editKnowledgeChunk(slug) {
+      const chunk = (cachedData?.knowledgeChunks || []).find(c => c.slug === slug);
+      if (!chunk) { alert('Chunk nicht gefunden'); return; }
+      showKnowledgeEditor(chunk);
+      document.getElementById('kb-editor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function saveKnowledgeChunk() {
+      const title = (document.getElementById('kb-title')?.value || '').trim();
+      const slug = (document.getElementById('kb-slug')?.value || '').trim();
+      const tags = (document.getElementById('kb-tags')?.value || '').trim();
+      const content = (document.getElementById('kb-content')?.value || '').trim();
+      const originalSlug = (document.getElementById('kb-edit-original-slug')?.value || '').trim();
+
+      if (!title) { alert('Bitte Titel eingeben.'); return; }
+      if (!content) { alert('Bitte Inhalt eingeben.'); return; }
+
+      if (originalSlug && originalSlug !== slug) {
+        try {
+          await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_knowledge', slug: originalSlug })
+          });
+        } catch (e) { /* neuer wird trotzdem gespeichert */ }
+      }
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save_knowledge', slug, title, tags, content })
+        });
+        const data = await res.json();
+        if (data.success) {
+          cancelKnowledgeEdit();
+          // Hinweis auf Auto-Sync anzeigen
+          if (data.vectorSyncTriggered) {
+            const syncHint = document.createElement('div');
+            syncHint.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111119;border:1px solid #1e1e2e;color:#00d68f;padding:14px 20px;border-radius:10px;font-size:0.85rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            syncHint.innerHTML = '🧠 Gespeichert! Vektor-DB wird automatisch synchronisiert …';
+            document.body.appendChild(syncHint);
+            setTimeout(() => syncHint.remove(), 5000);
+          }
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    async function deleteKnowledgeChunk(slug, title) {
+      if (!confirm(`"${title}" wirklich löschen? Das Wissen ist dann weg.`)) return;
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'remove_knowledge', slug })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Hinweis auf Auto-Sync anzeigen
+          if (data.vectorSyncTriggered) {
+            const syncHint = document.createElement('div');
+            syncHint.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#111119;border:1px solid #1e1e2e;color:#ff6b6b;padding:14px 20px;border-radius:10px;font-size:0.85rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+            syncHint.innerHTML = '🗑️ Gelöscht! Vektor-DB wird automatisch bereinigt …';
+            document.body.appendChild(syncHint);
+            setTimeout(() => syncHint.remove(), 5000);
+          }
+          await loadDashboard();
+          switchTab('builds');
+        } else {
+          alert('Fehler: ' + (data.error || 'Unbekannt'));
+        }
+      } catch (e) {
+        alert('Fehler: ' + e.message);
+      }
+    }
+
+    // ============================================================
+    // VEKTOR-INVENTAR
+    // ============================================================
+    async function loadVectorInventory() {
+      const container = document.getElementById('vector-inventory-content');
+      const btn = document.getElementById('vector-inventory-btn');
+      if (!container) return;
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Lade Vektoren aus Upstash…';
+
+      try {
+        const res = await fetch(`/api/evita-dashboard?token=${TOKEN}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_vector_inventory' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Unbekannter Fehler');
+
+        let html = '';
+
+        // Zusammenfassung
+        html += `<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:20px;">
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--accent);">${data.total}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Vektoren gesamt</div>
+          </div>
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--green);">${data.breakdown.knowledgeBase}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Wissensbank</div>
+          </div>
+          <div style="background:var(--bg-card-hover); border-radius:10px; padding:14px 18px; text-align:center;">
+            <div style="font-size:1.4rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--blue);">${data.breakdown.articles + data.breakdown.pages}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Webseiten</div>
+          </div>
+        </div>`;
+
+        // Wissensbank-Chunks
+        const kb = data.knowledgeBase || [];
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-kb')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">📚</span>
+              <span class="inventory-toggle-title">Wissensbank-Chunks in Vector-DB</span>
+              <span class="inventory-toggle-count">${kb.length}</span>
+              ${kb.length === 0 ? '<span style="color:var(--red);font-size:0.75rem;margin-left:8px;">⚠️ Keine KB-Chunks gefunden!</span>' : '<span style="color:var(--green);font-size:0.75rem;margin-left:8px;">✓ aktiv</span>'}
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-kb-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-kb-list">
+            ${kb.length > 0 ? kb.map((v, i) => `
+              <div class="inventory-item">
+                <span class="inventory-item-num">${i + 1}</span>
+                <div class="inventory-item-content">
+                  <div class="inventory-item-title">${escHTML(v.title)}</div>
+                  <div class="inventory-item-meta">
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-muted);">${escHTML(v.id)}</span>
+                    <span style="color:var(--text-muted);">· ${v.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                </div>
+              </div>
+            `).join('') : '<div class="no-data" style="padding:20px;">Keine Wissensbank-Chunks in der Vector-DB. Erstelle einen KB-Chunk und synchronisiere.</div>'}
+          </div>
+        </div>`;
+
+        // Blog-Artikel (gruppiert nach Seite)
+        const articleGroups = data.articleGroups || [];
+        const articleSections = articleGroups.reduce((sum, g) => sum + g.sections.length, 0);
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-articles')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">📝</span>
+              <span class="inventory-toggle-title">Blog-Artikel Sektionen</span>
+              <span class="inventory-toggle-count">${articleSections} Sektionen · ${articleGroups.length} Artikel</span>
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-articles-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-articles-list">
+            ${articleGroups.map(group => `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:0.85rem; font-weight:600; padding:6px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${escHTML(group.title)}</span>
+                  <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${group.sections.length} Sektionen${group.url ? ' · ' + escHTML(group.url) : ''}</span>
+                </div>
+                ${group.sections.map(s => `
+                  <div style="display:flex; align-items:center; gap:8px; padding:4px 0 4px 16px; font-size:0.78rem; color:var(--text-secondary);">
+                    <span style="color:var(--text-muted);">§</span>
+                    <span>${escHTML(s.heading || 'Ganzer Text')}</span>
+                    <span style="color:var(--text-muted); font-size:0.68rem; font-family:'JetBrains Mono',monospace; margin-left:auto;">${s.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+
+        // Weitere Seiten (gruppiert nach Seite)
+        const pageGroups = data.pageGroups || [];
+        const pageSections = pageGroups.reduce((sum, g) => sum + g.sections.length, 0);
+        html += `<div class="inventory-section">
+          <div class="inventory-toggle" onclick="toggleInventory('vinv-pages')">
+            <div class="inventory-toggle-left">
+              <span class="inventory-toggle-icon">🌐</span>
+              <span class="inventory-toggle-title">Webseiten Sektionen</span>
+              <span class="inventory-toggle-count">${pageSections} Sektionen · ${pageGroups.length} Seiten</span>
+            </div>
+            <span class="inventory-toggle-arrow" id="vinv-pages-arrow">▼</span>
+          </div>
+          <div class="inventory-list" id="vinv-pages-list">
+            ${pageGroups.map(group => `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:0.85rem; font-weight:600; padding:6px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                  <span>${escHTML(group.title)}</span>
+                  <span style="font-size:0.7rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">${group.sections.length} Sektionen${group.url ? ' · ' + escHTML(group.url) : ''}</span>
+                </div>
+                ${group.sections.map(s => `
+                  <div style="display:flex; align-items:center; gap:8px; padding:4px 0 4px 16px; font-size:0.78rem; color:var(--text-secondary);">
+                    <span style="color:var(--text-muted);">§</span>
+                    <span>${escHTML(s.heading || 'Ganzer Text')}</span>
+                    <span style="color:var(--text-muted); font-size:0.68rem; font-family:'JetBrains Mono',monospace; margin-left:auto;">${s.contentLength.toLocaleString('de-AT')} Zeichen</span>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+
+        // Timestamp
+        html += `<div style="text-align:right; font-size:0.68rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-top:12px;">
+          Stand: ${new Date(data.timestamp).toLocaleString('de-AT')} · <a href="#" onclick="loadVectorInventory();return false;" style="color:var(--accent);text-decoration:none;">↻ Aktualisieren</a>
+        </div>`;
+
+        container.innerHTML = html;
+
+      } catch (e) {
+        container.innerHTML = `<div style="color:var(--red);font-size:0.85rem;padding:16px;">❌ Fehler: ${escHTML(e.message)}</div>
+          <button onclick="loadVectorInventory()" class="build-trigger-btn" style="background:var(--accent);width:100%;margin-top:8px;">🔄 Nochmal versuchen</button>`;
+      }
+    }
+
+    function escHTML(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function fmtDate(dateStr) {
+      const dt = new Date(dateStr + 'T00:00:00');
+      return dt.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' });
+    }
+
+    // Auto-Refresh alle 5 Minuten
+    setInterval(() => {
+      if (TOKEN) loadDashboard();
+    }, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

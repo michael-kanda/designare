@@ -1,0 +1,141 @@
+/* ============================================================
+   WETTER-ADS-FLOW Animation
+   Für: wetter-script-google-ads.html
+   ============================================================ */
+
+.waf-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 1.5rem 1rem;
+    width: 100%;
+}
+
+.waf-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 1.2rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+    border-radius: 8px;
+    width: 100%;
+    max-width: 200px;
+    text-align: center;
+    opacity: 0.5;
+    transform: scale(0.95);
+    transition: all 0.4s ease;
+}
+
+.waf-card.is-active {
+    opacity: 1;
+    transform: scale(1);
+    border-color: var(--accent-color, #c4a35a);
+    box-shadow: 0 0 20px rgba(196,163,90,0.15);
+}
+
+.waf-card-icon {
+    font-size: 1.4rem;
+    color: var(--accent-color, #c4a35a);
+}
+
+.waf-card-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-color, #fff);
+}
+
+.waf-card-meta {
+    font-size: 0.7rem;
+    color: var(--text-color-muted, #999);
+}
+
+.waf-card-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 0.2rem;
+}
+
+.waf-badge-live {
+    background: rgba(196,163,90,0.15);
+    color: var(--accent-color, #c4a35a);
+}
+
+.waf-badge-check {
+    background: rgba(100,200,150,0.15);
+    color: #6ac896;
+}
+
+.waf-badge-active {
+    background: rgba(100,200,150,0.15);
+    color: #6ac896;
+}
+
+.waf-badge-rain {
+    background: rgba(100,160,220,0.15);
+    color: #64a0dc;
+}
+
+.waf-badge-paused {
+    background: rgba(200,100,100,0.15);
+    color: #c86464;
+}
+
+.waf-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    height: 36px;
+    width: 2px;
+}
+
+.waf-line {
+    width: 2px;
+    height: 100%;
+    background: var(--border-color, rgba(255,255,255,0.08));
+}
+
+.waf-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-color, #c4a35a);
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    transition: top 0.4s ease, opacity 0.2s ease;
+}
+
+.waf-dot.is-traveling {
+    opacity: 1;
+    top: calc(100% - 8px);
+}
+
+.waf-ping {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    font-size: 0.6rem;
+    color: var(--accent-color, #c4a35a);
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.waf-ping.is-visible {
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .waf-card { max-width: 160px; padding: 0.8rem; }
+    .waf-card-label { font-size: 0.75rem; }
+    .waf-card-meta { font-size: 0.6rem; }
+}

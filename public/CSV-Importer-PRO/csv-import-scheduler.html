@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Import Pro - Automatisierung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f0f0f1;
+            padding: 20px;
+            color: #3c434a;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .csv-dashboard-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        
+        .csv-dashboard-header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #1d2327;
+        }
+        
+        .csv-dashboard-header p {
+            color: #646970;
+            font-size: 14px;
+        }
+        
+        .csv-import-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .csv-import-box {
+            background: #fff;
+            border: 1px solid #c3c4c7;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+            transition: box-shadow 0.2s ease;
+            position: relative;
+        }
+        
+        .csv-import-box:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .csv-import-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #23282d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            background: #2271b1;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .step-number.completed {
+            background: #00a32a;
+        }
+        
+        .step-icon {
+            font-size: 24px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #00a32a;
+            border: 1px solid #00a32a;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f6f7f7;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            color: #2c3338;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .button:hover {
+            background: #f0f0f1;
+            border-color: #8c8f94;
+        }
+        
+        .button-primary {
+            background: #2271b1;
+            border-color: #2271b1;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #135e96;
+            border-color: #135e96;
+        }
+        
+        .button-large {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .button-secondary {
+            background: white;
+            border-color: #787c82;
+            color: #2c3338;
+        }
+        
+        .status-list {
+            list-style: none;
+            margin: 15px 0;
+            padding: 0;
+        }
+        
+        .status-list li {
+            margin: 8px 0;
+            font-size: 13px;
+        }
+        
+        .form-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .form-table th {
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 10px 10px 0;
+            width: 120px;
+            vertical-align: top;
+        }
+        
+        .form-table td {
+            padding: 10px 0;
+        }
+        
+        .form-table input[type="text"],
+        .form-table select,
+        .form-table textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 5px 8px;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .form-table select {
+            height: 32px;
+        }
+        
+        .form-table textarea {
+            resize: vertical;
+        }
+        
+        .form-table .description {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #646970;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .sample-data-container {
+            max-height: 300px;
+            overflow: auto;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            background: white;
+        }
+        
+        .sample-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .sample-data-table th {
+            background: #f6f7f7;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #e1e1e1;
+            position: sticky;
+            top: 0;
+        }
+        
+        .sample-data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .next-import-timer {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2271b1;
+            margin: 15px 0;
+            padding: 10px;
+            text-align: center;
+            background: #f0f6fc;
+            border-radius: 4px;
+        }
+        
+        .scheduler-active-box {
+            border-left: 4px solid #00a32a !important;
+        }
+        
+        .info-message {
+            background: #f0f6fc;
+            border-left: 4px solid #72aee6;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 3px 3px 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="csv-dashboard-header">
+            <h1>⏰ CSV Import Automatisierung</h1>
+            <p>Konfigurieren und überwachen Sie automatische, zeitgesteuerte CSV-Imports.</p>
+        </div>
+
+        <div class="csv-import-dashboard">
+            <!-- Scheduler Status Box -->
+            <div class="csv-import-box scheduler-active-box" style="grid-column: 1 / -1;">
+                <h3>
+                    <span class="step-icon">✅</span>
+                    Scheduler-Status: Aktiviert
+                </h3>
+                <p>Die Automatisierung ist aktiv. Geplante Imports werden automatisch ausgeführt.</p>
+                <div class="action-buttons">
+                    <button type="button" class="button button-secondary">
+                        Scheduler jetzt deaktivieren
+                    </button>
+                </div>
+            </div>
+
+            <!-- Box 1: Aktiver Zeitplan -->
+            <div class="csv-import-box">
+                <h3>
+                    <span class="step-number completed">1</span>
+                    <span class="step-icon">✅</span>
+                    Aktiver Zeitplan
+                </h3>
+                <span class="status-indicator status-success">Aktiv</span>
+                <ul class="status-list">
+                    <li><strong>Quelle:</strong> Dropbox</li>
+                    <li><strong>Frequenz:</strong> Täglich</li>
+                </ul>
+                <form method="post">
+                    <div class="action-buttons">
+                        <button type="submit" class="button button-secondary">
+                            ⏹️ Scheduling deaktivieren
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Box 2: Benachrichtigungen -->
+            <div class="csv-import-box">
+                <h3>
+                    <span class="step-number">2</span>
+                    <span class="step-icon">⚙️</span>
+                    Benachrichtigungen
+                </h3>
+                <p>Legen Sie fest, wer per E-Mail über automatische Imports informiert wird.</p>
+                <form method="post">
+                    <table class="form-table compact-form">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Bei Erfolg</th>
+                                <td><label><input type="checkbox"> E-Mail senden</label></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Bei Fehlern</th>
+                                <td><label><input type="checkbox" checked> E-Mail senden</label></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Empfänger</label></th>
+                                <td>
+                                    <textarea rows="2">admin@example.com
+marketing@example.com</textarea>
+                                    <p class="description">Eine E-Mail-Adresse pro Zeile.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="action-buttons">
+                        <button type="submit" class="button">Benachrichtigungen speichern</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Box 3: Scheduling-Historie -->
+            <div class="csv-import-box">
+                <h3>
+                    <span class="step-number">3</span>
+                    <span class="step-icon">📊</span>
+                    Scheduling-Historie
+                </h3>
+                <p>Die letzten Aktionen des Schedulers.</p>
+                <div class="sample-data-container">
+                    <table class="sample-data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 160px;">Zeitpunkt</th>
+                                <th style="width: 100px;">Status</th>
+                                <th>Nachricht</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>23.08.2025 14:00:00</td>
+                                <td><span class="status-indicator status-success" style="padding: 3px 6px;">Erfolg</span></td>
+                                <td>Geplanter Import erfolgreich: 247 Einträge verarbeitet</td>
+                            </tr>
+                            <tr>
+                                <td>22.08.2025 14:00:00</td>
+                                <td><span class="status-indicator status-success" style="padding: 3px 6px;">Erfolg</span></td>
+                                <td>Geplanter Import erfolgreich: 189 Einträge verarbeitet</td>
+                            </tr>
+                            <tr>
+                                <td>21.08.2025 14:00:00</td>
+                                <td><span class="status-indicator status-success" style="padding: 3px 6px;">Erfolg</span></td>
+                                <td>Geplanter Import erfolgreich: 312 Einträge verarbeitet</td>
+                            </tr>
+                            <tr>
+                                <td>20.08.2025 14:00:00</td>
+                                <td><span class="status-indicator" style="background: #fff3cd; color: #856404; border: 1px solid #ffc107; padding: 3px 6px;">Warnung</span></td>
+                                <td>Import abgeschlossen mit Warnungen: 5 Duplikate übersprungen</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Box 4: Nächster Import -->
+            <div class="csv-import-box">
+                <h3>
+                    <span class="step-number">4</span>
+                    <span class="step-icon">🗓️</span>
+                    Nächster geplanter Import
+                </h3>
+                <span class="status-indicator status-success">✅ Geplant</span>
+                <p>Der nächste automatische Import wird ausgeführt in:</p>
+                <div class="next-import-timer">
+                    23 Stunden 47 Minuten
+                </div>
+                <p class="description" style="text-align: center;">
+                    Genauer Zeitpunkt: 24.08.2025 14:00:00
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

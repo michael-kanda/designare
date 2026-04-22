@@ -1,0 +1,460 @@
+/* ============================================ */
+/* KI-INTEGRATION – Race Track Animation          */
+/* Prefix: rt-                                    */
+/* ============================================ */
+
+.ki-race-track {
+    width: 100%;
+    max-width: 340px;
+    background: var(--card-bg, #0f0f0f);
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* ── Header ── */
+.rt-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #222);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rt-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+}
+
+.rt-status {
+    font-size: 9px;
+    color: var(--accent-color, #c4a35a);
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── Body ── */
+.rt-body {
+    padding: 16px;
+}
+
+/* ── Lane ── */
+.rt-lane {
+    margin-bottom: 16px;
+}
+
+.rt-lane:last-of-type {
+    margin-bottom: 0;
+}
+
+.rt-lane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.rt-lane-name {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+}
+
+.rt-lane-name.fast { color: #4ade80; }
+.rt-lane-name.slow { color: #f87171; }
+
+.rt-lane-time {
+    font-size: 10px;
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+.rt-lane-time.fast { color: #4ade80; }
+.rt-lane-time.slow { color: #f87171; }
+
+/* ── Track ── */
+.rt-track {
+    position: relative;
+    height: 28px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.rt-car {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 18px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 8px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    transition: left 0.05s linear;
+    font-family: 'Poppins', sans-serif;
+}
+
+.rt-car.fast {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    box-shadow: 0 0 10px rgba(74,222,128,0.3);
+}
+
+.rt-car.slow {
+    background: linear-gradient(90deg, #dc2626, #f87171);
+    box-shadow: 0 0 10px rgba(248,113,113,0.2);
+}
+
+.rt-car-icon {
+    margin-right: 4px;
+}
+
+/* ── Checkpoints ── */
+.rt-checkpoints {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    font-size: 7px;
+    color: var(--text-color-subtle, #555);
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+/* ── Detail Boxes ── */
+.rt-detail {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 2px;
+    font-size: 9px;
+    line-height: 1.6;
+    font-family: 'Poppins', sans-serif;
+    display: none;
+}
+
+.rt-detail.is-visible {
+    display: block;
+}
+
+.rt-detail.fast-detail {
+    background: rgba(74,222,128,0.06);
+    border-left: 2px solid #4ade80;
+    color: var(--text-color-muted, #949494);
+}
+
+.rt-detail.slow-detail {
+    background: rgba(248,113,113,0.06);
+    border-left: 2px solid #f87171;
+    color: var(--text-color-muted, #949494);
+}
+
+.rt-detail b {
+    color: var(--text-color, #e4e4e4);
+}
+
+/* ── Replay Button ── */
+.rt-replay {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.rt-replay-btn {
+    padding: 7px 20px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--accent-color, #c4a35a);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--accent-color, #c4a35a);
+    border-radius: 2px;
+}
+
+.rt-replay-btn:hover {
+    background: var(--accent-color, #c4a35a);
+    color: #fff;
+}
+
+.rt-replay-btn:focus-visible {
+    outline: 2px solid var(--accent-color, #c4a35a);
+    outline-offset: 2px;
+}
+
+/* ── Mobile fix für summary-image ── */
+.summary-image:has(.ki-race-track) {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 992px) {
+    .summary-image:has(.ki-race-track) {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Light Mode ── */
+body.light-mode .ki-race-track {
+    background: #fafafa;
+    border-color: #e0e0e0;
+}
+
+body.light-mode .rt-header {
+    border-bottom-color: #e0e0e0;
+}
+
+body.light-mode .rt-track {
+    background: rgba(0,0,0,0.03);
+}
+
+body.light-mode .rt-detail.fast-detail {
+    background: rgba(74,222,128,0.08);
+}
+
+body.light-mode .rt-detail.slow-detail {
+    background: rgba(248,113,113,0.08);
+}
+
+body.light-mode .rt-detail b { color: #333; }
+
+body.light-mode .rt-replay-btn {
+    border-color: var(--accent-color, #c4a35a);
+    color: var(--accent-color, #c4a35a);
+}
+
+/* ── KI-Int-VS: Mobile Label Override ── */
+@media (max-width: 991px) {
+    .ki-int-vs td:first-child::before {
+        content: "Plugin: " !important;
+        color: #ff6b6b !important;
+    }
+
+    .ki-int-vs td:last-child::before {
+        content: "Serverless: " !important;
+        color: #51cf66 !important;
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .ki-race-track {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .rt-lane-name { font-size: 9px; }
+    .rt-lane-time { font-size: 9px; }
+    .rt-car { font-size: 7px; padding: 0 6px; }
+    .rt-checkpoints { font-size: 6.5px; }
+    .rt-detail { font-size: 8.5px; }
+
+    .rt-replay-btn {
+        padding: 6px 16px;
+        font-size: 9px;
+    }
+}
+
+/* ============================================ */
+/* CASE STUDY: Evita Architektur-Flow            */
+/* Prefix: cs-                                   */
+/* ============================================ */
+
+/* ── Box: Standard expert-tip, no override needed ── */
+
+/* ── Flow Widget (horizontal, below text) ── */
+.cs-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    margin-top: 1.2rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid var(--border-color, #222);
+    width: 100%;
+}
+
+/* ── Nodes ── */
+.cs-flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 10px;
+    border: 1px solid var(--border-color, #222);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.02);
+    width: 84px;
+    height: 78px;
+    text-align: center;
+    transition: border-color 0.4s, box-shadow 0.4s;
+    flex-shrink: 0;
+}
+
+.cs-flow-node.is-active {
+    border-color: var(--accent-color, #c4a35a);
+    box-shadow: 0 0 14px rgba(196,163,90,0.12);
+}
+
+.cs-flow-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+    color: var(--text-color-muted, #949494);
+}
+
+.cs-flow-node.is-active .cs-flow-icon {
+    color: var(--accent-color, #c4a35a);
+}
+
+.cs-flow-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-color, #e4e4e4);
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.2;
+}
+
+.cs-flow-sub {
+    font-size: 8.5px;
+    color: var(--text-color-muted, #949494);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Node accent colors on active */
+.cs-node-edge.is-active    { border-color: #4ade80; box-shadow: 0 0 14px rgba(74,222,128,0.15); }
+.cs-node-edge.is-active .cs-flow-icon { color: #4ade80; }
+.cs-node-redis.is-active   { border-color: var(--accent-color, #c4a35a); }
+.cs-node-redis.is-active .cs-flow-icon { color: var(--accent-color, #c4a35a); }
+.cs-node-gemini.is-active  { border-color: #60a5fa; box-shadow: 0 0 14px rgba(96,165,250,0.15); }
+.cs-node-gemini.is-active .cs-flow-icon { color: #60a5fa; }
+.cs-node-response.is-active{ border-color: #4ade80; box-shadow: 0 0 14px rgba(74,222,128,0.2); }
+.cs-node-response.is-active .cs-flow-icon { color: #4ade80; }
+
+/* ── Connectors (horizontal) ── */
+.cs-flow-connector {
+    position: relative;
+    height: 2px;
+    flex: 1;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-flow-line {
+    width: 100%;
+    height: 1px;
+    background: rgba(196,163,90,0.15);
+}
+
+.cs-flow-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-color, #c4a35a);
+    box-shadow: 0 0 8px rgba(196,163,90,0.4);
+    opacity: 0;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.cs-flow-dot.is-traveling {
+    opacity: 1;
+    animation: csDotH 0.3s ease forwards;
+}
+
+@keyframes csDotH {
+    from { left: 0; }
+    to   { left: calc(100% - 6px); }
+}
+
+/* ── Ping Labels (above connector) ── */
+.cs-flow-ping {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-weight: 700;
+    color: var(--accent-color, #c4a35a);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.cs-flow-ping.is-visible {
+    opacity: 1;
+}
+
+/* ── Light Mode ── */
+body.light-mode .cs-flow {
+    border-top-color: #e0e0e0;
+}
+
+body.light-mode .cs-flow-node {
+    background: rgba(0,0,0,0.02);
+    border-color: #e0e0e0;
+}
+
+/* ── Responsive: Vertical on mobile ── */
+@media (max-width: 991px) {
+    .cs-flow {
+        flex-direction: column;
+        align-items: center;
+        padding-top: 1.2rem;
+    }
+
+    .cs-flow-node {
+        width: 160px;
+        height: auto;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .cs-flow-icon { margin-bottom: 0; }
+
+    .cs-flow-connector {
+        flex: 0 0 auto;
+        width: 2px;
+        height: 24px;
+        min-width: auto;
+    }
+
+    .cs-flow-line {
+        width: 1px;
+        height: 100%;
+    }
+
+    .cs-flow-dot.is-traveling {
+        animation: csDotV 0.3s ease forwards;
+    }
+
+    .cs-flow-ping {
+        top: 50%;
+        left: auto;
+        right: -56px;
+        transform: translateY(-50%);
+    }
+}
+
+@keyframes csDotV {
+    from { left: 50%; top: 0; transform: translateX(-50%); }
+    to   { left: 50%; top: calc(100% - 6px); transform: translateX(-50%); }
+}
+
+@media (max-width: 480px) {
+    .cs-flow-node { width: 150px; }
+    .cs-flow-label { font-size: 10px; }
+    .cs-flow-ping { font-size: 10px; right: -50px; }
+}

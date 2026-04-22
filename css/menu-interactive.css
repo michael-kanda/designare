@@ -1,0 +1,130 @@
+/* --- SIDE MENU PURISM --- */
+
+.side-menu-content {
+    /* 1. DYNAMISCHES PADDING */
+    /* Auf Desktop ca. 60px, auf Mobile passt es sich der Notch an (mindestens 20px) */
+    padding-top: max(20px, env(safe-area-inset-top) + 20px) !important;
+    padding-right: 24px !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom) + 20px) !important; /* Auch unten dynamisch! */
+    padding-left: 24px !important;
+
+    display: flex;
+    flex-direction: column;
+
+    /* 2. FIX FÜR ABGESCHNITTENEN INHALT */
+    height: 100%;            /* Füllt den Eltern-Container komplett */
+    max-height: 100dvh;      /* Dynamic Viewport Height (verhindert Probleme mit mobilen Browser-Leisten) */
+    overflow-y: auto;        /* Aktiviert Scrollen, wenn der Inhalt zu lang ist */
+    overflow-x: hidden;      /* Verhindert seitliches Wackeln */
+    box-sizing: border-box;  /* Wichtig: Padding wird in die Höhe eingerechnet */
+}
+
+/* Trenner passend zur globalen Border-Farbe */
+.menu-divider {
+    height: 1px;
+    background: var(--border-color-subtle); 
+    margin: 20px 0;
+    width: 100%;
+}
+
+/* Suchfeld im Menü */
+#menu-topic-search {
+    width: 100%;
+    padding: 10px 0;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--accent-color) !important;
+    border-radius: 0 !important;
+    color: var(--text-color);
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+#menu-topic-search:focus {
+    outline: none;
+    border-bottom-color: var(--accent-color) !important;
+}
+
+/* ===================
+   TOPIC GRID LAYOUT
+   =================== */
+.topic-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Horizontaler UND vertikaler Abstand */
+}
+
+/* Buttons als dezente Outlines/Flächen */
+.topic-btn {
+    background: transparent;
+    border: 1px solid var(--border-color); 
+    color: var(--text-color-muted);
+    padding: 6px 14px;
+    border-radius: 0; 
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.topic-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(196, 163, 90, 0.05); 
+}
+
+/* Aktiver Status */
+.topic-btn.highlight-active {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    box-shadow: none !important;
+}
+
+/* ===================
+   TOC (Inhaltsverzeichnis) LAYOUT
+   =================== */
+/* === TOC AUSKOMMENTIERT ===
+.toc-container {
+    width: 100%;
+}
+
+.toc-container.hidden {
+    display: none;
+}
+
+.toc-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-color-subtle);
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+#toc-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+}
+
+.toc-mini {
+    padding: 4px 10px;
+    font-size: 14px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+=== ENDE TOC AUSKOMMENTIERT ===*/
+
+/* ============================
+   LIGHT MODE SPECIFICS (MENU)
+   ============================ */
+body.light-mode .topic-btn.highlight-active {
+    color: #ffffff !important; 
+    font-weight: 600;
+}
+
+body.light-mode .topic-btn:hover {
+    background: rgba(211, 154, 0, 0.1); 
+}

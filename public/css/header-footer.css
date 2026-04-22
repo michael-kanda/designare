@@ -1,0 +1,296 @@
+/* ============================================================
+   HEADER-FOOTER.CSS
+   Globale Styles für Navigation, Footer und Glassmorphism
+   ============================================================ */
+
+/* ===================
+   1. GLOBAL VARIABLES
+   =================== */
+
+:root {
+    --header-height-desktop: 80px;
+    --header-height-mobile: 60px;
+}
+
+/* ===================
+   2. HEADER (SMART HIDE & GLASS)
+   =================== */
+
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height-desktop);
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    
+    z-index: 1001; 
+    
+    /* Standard-Zustand: Transparent */
+    background-color: transparent;
+    
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                background-color 0.4s ease, 
+                height 0.4s ease;
+}
+
+/* Zustand: Gescrollt (Dunkel & Blur) - DARK MODE DEFAULT */
+.main-header.scrolled {
+    background-color: rgba(10, 10, 10, 0.95);
+    border-bottom: 1px solid var(--border-color-subtle);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(12px);
+    height: 70px;
+}
+
+.header-right-controls button {
+    border-radius: 0 !important; 
+    color: var(--text-color-muted);
+}
+
+.header-right-controls button:hover {
+    background-color: transparent !important;
+    color: var(--accent-color) !important;
+    transform: none !important;
+}
+
+/* Zustand: Versteckt (Nach oben geschoben) */
+.main-header.hide-up {
+    transform: translateY(-100%);
+}
+
+/* ===================
+   3. LOGO
+   =================== */
+
+#top-left-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    width: 40px;
+    opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#top-left-logo-link:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+#top-left-logo-img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* ===================
+   4. HEADER CONTROLS (ICONS)
+   =================== */
+
+.header-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-right-controls button {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-color);
+    cursor: pointer;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    height: 40px;
+    width: 40px;
+    font-size: 1.2rem;
+    
+    padding: 0;
+    margin: 0;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.header-right-controls button:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* ===================
+   5. FOOTER (SMART GLASS CAPSULE)
+   =================== */
+
+footer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001; 
+    
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 15px; 
+    
+    /* Glassmorphism Design - DARK MODE DEFAULT */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    border: 1px solid var(--border-color-subtle);
+    border-radius: 0 !important; 
+    background-color: rgba(10, 10, 10, 0.9);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                opacity 0.4s ease;
+    
+    transform-origin: bottom right;
+}
+
+footer.hide-down {
+    transform: translateY(200%); 
+    opacity: 0;
+    pointer-events: none; 
+}
+
+/* Links im Footer styling */
+footer a:not(.footer-btn) { 
+    color: var(--text-color);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    padding: 5px 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+footer a:not(.footer-btn):hover {
+    opacity: 1;
+    color: var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.05); /* Heller Hover für Dark Mode */
+}
+
+/* Back-to-Top Button */
+#back-to-top {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    
+    background-color: var(--accent-color);
+    color: #1a1a1a;
+    font-size: 1rem;
+    
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(252, 181, 0, 0.4);
+    margin-left: 8px;
+}
+
+#back-to-top:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 0 20px rgba(252, 181, 0, 0.6);
+    background-color: #fff; 
+    cursor: pointer;
+}
+
+/* ============================
+   LIGHT MODE SPECIFICS (HEADER/FOOTER)
+   ============================ */
+
+body.light-mode .main-header.scrolled {
+    /* Weißer transparenter Hintergrund statt Schwarz */
+    background-color: rgba(255, 255, 255, 0.9); 
+    border-bottom-color: var(--border-color);
+}
+
+body.light-mode footer {
+    /* Weißer Kapsel-Hintergrund */
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: var(--border-color);
+    /* Weicherer Schatten für hellen Hintergrund */
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1); 
+}
+
+body.light-mode footer a:not(.footer-btn):hover {
+    /* Dunklerer Hover-Hintergrund, da Footer jetzt weiß ist */
+    background-color: rgba(0, 0, 0, 0.05); 
+}
+
+body.light-mode #back-to-top {
+    /* Text im Button darf im Light Mode nicht zu dunkel sein auf Gold */
+    color: #fff; 
+    box-shadow: 0 0 15px rgba(211, 154, 0, 0.4);
+}
+
+body.light-mode #back-to-top:hover {
+    /* Im Light Mode: Dunkles Grau beim Hover für Kontrast, statt Weiß auf Weiß */
+    background-color: #333; 
+    color: #fff;
+}
+
+/* ===================
+   6. MOBILE RESPONSIVE
+   =================== */
+
+@media (max-width: 768px) {
+    .main-header {
+        height: var(--header-height-mobile);
+        padding: 0 15px;
+    }
+    
+    .main-header.scrolled {
+        height: 60px;
+        padding: 0 15px;
+    }
+
+    #top-left-logo-link {
+        height: 32px;
+        width: 32px;
+    }
+
+    .header-right-controls {
+        gap: 8px;
+    }
+
+    .header-right-controls button {
+        font-size: 1rem;
+        height: 35px;
+        width: 35px;
+    }
+
+    footer {
+        bottom: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        transform: scale(0.9); 
+    }
+    
+    footer.hide-down {
+        transform: translateY(200%) scale(0.9);
+    }
+    
+    footer a:not(.footer-btn) {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+    }
+    
+    #back-to-top {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+

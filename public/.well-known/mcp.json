@@ -1,0 +1,21 @@
+{
+  "name": "designare-knowledge",
+  "version": "1.0.0",
+  "description": "Knowledge Base von designare.at – Michael Kanda, Komplize für Web & KI aus Wien. Semantische Suche über Webdesign, SEO, GEO, KI-Sichtbarkeit und mehr.",
+  "url": "https://designare.at/api/mcp",
+  "transport": "streamable-http",
+  "tools": [
+    {
+      "name": "search_knowledge",
+      "description": "Semantische Suche in der designare.at Knowledge Base über Web, SEO, GEO und KI-Themen."
+    },
+    {
+      "name": "get_services",
+      "description": "Überblick über alle Dienstleistungen von Michael Kanda / designare.at."
+    }
+  ],
+  "contact": {
+    "website": "https://designare.at",
+    "name": "Michael Kanda"
+  }
+}

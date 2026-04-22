@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>KI-Sichtbarkeits-Check: Wirst du von ChatGPT & Gemini empfohlen? | Michael Kanda</title>
+    <meta name="description" content="Prüfe kostenlos, ob deine Website in KI-Antworten vorkommt. Dualer Live-Test mit Google Gemini und OpenAI ChatGPT. Mit Score & Empfehlungen.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+<link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" defer></script>
+    
+    <link rel="canonical" href="https://designare.at/ki-sichtbarkeit"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://designare.at/ki-sichtbarkeit#app",
+      "name": "KI-Sichtbarkeits-Check",
+      "description": "Kostenloses Tool zur Analyse der Sichtbarkeit einer Website in KI-gestützten Suchsystemen wie ChatGPT, Gemini und Perplexity.",
+      "url": "https://designare.at/ki-sichtbarkeit",
+      "applicationCategory": "SearchEngineOptimizationApplication",
+      "operatingSystem": "Web Browser",
+      "image": "https://designare.at/images/ki-sichtbarkeits-check.webp",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "author": {
+        "@id": "https://designare.at/#person"
+      }
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://designare.at/ki-sichtbarkeit#article",
+      "headline": "KI-Sichtbarkeits-Check: Wirst du von ChatGPT & Gemini empfohlen?",
+      "description": "Prüfe kostenlos, ob deine Website in KI-Antworten vorkommt. Dualer Live-Test mit Gemini und ChatGPT.",
+      "url": "https://designare.at/ki-sichtbarkeit",
+      "image": "https://designare.at/images/ki-sichtbarkeits-check.webp",
+      "datePublished": "2026-01-17",
+      "dateModified": "2026-04-09",
+      "about": { "@id": "https://designare.at/ki-sichtbarkeit#app" },
+      "author": {
+        "@type": "Person",
+        "@id": "https://designare.at/#person",
+        "name": "Michael Kanda",
+        "url": "https://designare.at",
+        "jobTitle": "Web & KI Entwickler",
+        "sameAs": [
+          "https://github.com/michaelkanda", 
+          "https://linkedin.com/in/michaelkanda"
+        ]
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://designare.at/ki-sichtbarkeit#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was misst der KI-Sichtbarkeits-Check?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Das Tool führt einen Dual-Check durch: Es fragt live sowohl Google Gemini als auch ChatGPT (OpenAI) ab. So siehst du sofort, ob du nur in einer oder in beiden KI-Welten als Marke wahrgenommen wirst. Du bist sichtbar? Dann ist der nächste Schritt, den <a href=\"https://designare.at/ki-traffic-messen\">KI-Traffic in GA4 zu messen</a>."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist der Test kostenlos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Die API-Kosten für Google und OpenAI werden übernommen. Es gibt ein faires Limit von 3 Abfragen pro Tag pro Nutzer."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Warum variieren die Ergebnisse?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Das liegt an der Natur der KIs. Gemini nutzt oft Live-Daten über Google Grounding, während ChatGPT das Web über eigene Suchfunktionen durchsucht. Beide Systeme können unterschiedliche Quellen finden und unterschiedlich gewichten. Unser Tool zeigt dir genau diese Diskrepanz auf. Hinweis: Um Server-Ressourcen zu schonen, speichern wir das Analyse-Ergebnis einer Domain für 24 Stunden zwischen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Warum kennt Gemini mich, aber ChatGPT nicht (oder umgekehrt)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gemini durchsucht das Web live über Google Grounding – es findet dich, sobald du im Google-Index existierst. ChatGPT durchsucht das Web über eigene Suchfunktionen und greift zusätzlich auf Trainingswissen zurück. Beide Systeme nutzen unterschiedliche Quellen und Algorithmen, weshalb die Ergebnisse voneinander abweichen können."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was bedeuten die E-E-A-T-Signale im Ergebnis?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "E-E-A-T steht für Experience, Expertise, Authoritativeness und Trustworthiness – die Kriterien, nach denen Google und KI-Systeme Vertrauenswürdigkeit bewerten. Unser Tool prüft drei konkrete Signale: Existiert eine Über-uns-Seite? Gibt es ein Impressum oder eine Kontaktseite? Sind Autoren-Informationen hinterlegt? Jedes fehlende Signal kostet dich Punkte – und Sichtbarkeit."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/ai-visibility.js" defer></script>
+    <script src="js/ai-hero-eyes.js" defer></script>
+    <script src="js/analytics-proxy.js" async></script>    
+</head>
+
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+   <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Analysiere KI-Sichtbarkeit...</h3>
+            <p>Live-Abfragen an Gemini & ChatGPT werden ausgeführt.<br>Das kann bis zu 30 Sekunden dauern.</p>
+            <div class="loading-status" style="margin-top: 15px; font-weight: 500; color: var(--accent-color); transition: opacity 0.3s ease;"></div>
+        </div>
+    </div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                <div id="breadcrumb-placeholder"></div>
+                <h1>KI-Sichtbarkeits-Check: <span class="article-white">Wirst du von ChatGPT & Gemini empfohlen?</span></h1>
+                
+                <div class="article-meta">
+                   <time datetime="2026-01-17">17. Januar 2026</time>
+                    <span class="reading-time"><i class="fa-solid fa-robot"></i> Interaktives Tool</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <!-- Hero: Dual AI Eye Animation -->
+            <section class="ai-hero" id="aiHero" aria-label="KI-Sichtbarkeits-Animation">
+                <div class="eyes-container">
+
+                    <!-- Gemini Eye -->
+                    <div class="ai-eye eye-gemini" id="eyeGemini">
+                        <div class="eye-glow"></div>
+                        <svg class="eye-svg" viewBox="0 0 160 160">
+                            <defs>
+                                <radialGradient id="irisGemini" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#6ab1ff" />
+                                    <stop offset="100%" stop-color="#1a5ecf" />
+                                </radialGradient>
+                                <clipPath id="lidClipGemini">
+                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                </clipPath>
+                            </defs>
+                            <g clip-path="url(#lidClipGemini)">
+                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                <g class="iris" id="irisGemini">
+                                    <circle cx="80" cy="80" r="28" fill="url(#irisGemini)" />
+                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                    <circle class="pupil" cx="80" cy="80" r="11" />
+                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                </g>
+                            </g>
+                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                        </svg>
+                        <span class="eye-label">Gemini</span>
+                    </div>
+
+                    <!-- Connector -->
+                    <div class="eye-connector">
+                        <div class="connector-line"></div>
+                        <div class="connector-dot"></div>
+                    </div>
+
+                    <!-- ChatGPT Eye -->
+                    <div class="ai-eye eye-chatgpt" id="eyeChatgpt">
+                        <div class="eye-glow"></div>
+                        <svg class="eye-svg" viewBox="0 0 160 160">
+                            <defs>
+                                <radialGradient id="irisChatgpt" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#34d399" />
+                                    <stop offset="100%" stop-color="#047857" />
+                                </radialGradient>
+                                <clipPath id="lidClipChatgpt">
+                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                </clipPath>
+                            </defs>
+                            <g clip-path="url(#lidClipChatgpt)">
+                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                <g class="iris" id="irisChatgpt">
+                                    <circle cx="80" cy="80" r="28" fill="url(#irisChatgpt)" />
+                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                    <circle class="pupil" cx="80" cy="80" r="11" />
+                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                </g>
+                            </g>
+                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                        </svg>
+                        <span class="eye-label">ChatGPT</span>
+                    </div>
+                </div>
+
+                <div class="hero-text">
+                    <p class="hero-tagline"><span id="typewriter"></span><span class="typewriter-cursor">|</span></p>
+                    <p class="hero-cta-hint" id="ctaHint">Jetzt prüfen <span class="arrow">↓</span></p>
+                </div>
+            </section>
+
+                        <section aria-labelledby="tool-heading" class="ai-visibility-tool">
+                <h2 id="tool-heading"><i class="fa-solid fa-robot"></i> KI-Sichtbarkeits-Check</h2>
+                <p class="tool-intro">Gib deine Domain oder deinen Firmen-/Personennamen ein und erfahre, wie sichtbar du für KI-Assistenten bist.</p>
+
+                <form id="visibility-form" class="visibility-form">
+                    <div class="form-group">
+                        <label for="domain-input">
+                            <i class="fa-solid fa-globe"></i> Domain (optional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="domain-input" 
+                            class="form-input"
+                            placeholder="beispiel.at oder https://beispiel.at"
+                        >
+                        <span class="form-hint">Ohne https:// möglich – oder nur Firmenname unten eingeben</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brand-input">
+                            <i class="fa-solid fa-tag"></i> Firmenname / Person (optional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="brand-input" 
+                            class="form-input"
+                            placeholder="z.B. Dr. Müller, RA Hofer, Designare..."
+                        >
+                        <span class="form-hint">Hilft bei Personen oder Marken, die nicht im Domainnamen stecken</span>
+                    </div>
+
+                    <div class="form-group" id="location-group" style="display:none;">
+                        <label for="location-input">
+                            <i class="fa-solid fa-location-dot"></i> Standort (optional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="location-input" 
+                            class="form-input"
+                            placeholder="z.B. Wien, Graz, Salzburg..."
+                        >
+                        <span class="form-hint">Hilft bei lokalen Unternehmen oder regionalen Suchanfragen</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="industry-input">
+                            <i class="fa-solid fa-briefcase"></i> Branche (optional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="industry-input" 
+                            class="form-input"
+                            placeholder="z.B. Webentwicklung, Rechtsanwalt, Restaurant..."
+                        >
+                        
+                        <div class="industry-select">
+                            <span class="industry-label">Schnellauswahl:</span>
+                            <div class="industry-buttons">
+                                <button type="button" class="industry-btn" data-industry="Webentwicklung">Webentwicklung</button>
+                                <button type="button" class="industry-btn" data-industry="SEO Agentur">SEO Agentur</button>
+                                <button type="button" class="industry-btn" data-industry="Rechtsanwalt">Rechtsanwalt</button>
+                                <button type="button" class="industry-btn" data-industry="Restaurant">Restaurant</button>
+                                <button type="button" class="industry-btn" data-industry="Online Shop">Online Shop</button>
+                                <button type="button" class="industry-btn" data-industry="Arzt">Arzt</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="submit-btn">
+                        <i class="fa-solid fa-robot"></i> KI-Sichtbarkeit prüfen
+                    </button>
+                </form>
+
+                <div id="results-container" class="results-container"></div>
+            </section>
+            
+            <section aria-labelledby="howitworks-heading">
+                <h2 id="howitworks-heading">So funktioniert der <span class="article-white">KI-Sichtbarkeits-Check</span></h2>
+                
+                <p>Dieses Tool kombiniert zwei Analyse-Methoden, um ein vollständiges Bild deiner KI-Präsenz zu liefern:</p>
+
+                <dl class="feature-list">
+                    <dt>1. Dualer Live-Test (Google & OpenAI)</dt>
+                    <dd>Wir stellen sowohl Gemini (Google) als auch ChatGPT (OpenAI) gezielte Fragen zu deiner Domain – jeweils drei Tests zu Bekanntheit, Bewertungen und externen Erwähnungen. So siehst du, wie beide KI-Systeme dich wahrnehmen.</dd>
+                    
+                    <dt>2. Technische Domain-Analyse</dt>
+                    <dd>Parallel crawlen wir deine Website und prüfen auf <a href="https://designare.at/schema-org-meta-description" title="Schema.org & Meta Description: Strukturierte Daten richtig einsetzen">Schema.org JSON-LD</a>, E-E-A-T Signale (Über-uns, Kontakt, Autoren) und andere <a href="https://designare.at/geo-maschinenlesbarkeit-guide" title="Maschinenlesbarkeit: Technischer Guide für KI-Sichtbarkeit">Faktoren, die KIs bei der Bewertung nutzen</a>.</dd>
+                    
+                    <dt>3. Score & Empfehlungen</dt>
+                    <dd>Aus beiden Analysen berechnen wir einen Visibility-Score (0-100) und geben dir konkrete Handlungsempfehlungen, wie du deine KI-Sichtbarkeit verbessern kannst.</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Wichtig zu wissen:</strong>
+                        <p>KI-Antworten sind nicht deterministisch – sie variieren bei jeder Anfrage leicht. Dieser Test ist eine <strong>Momentaufnahme</strong>. Für ein aussagekräftiges Bild empfehle ich, den Check mehrfach über einen Zeitraum durchzuführen. Die Branche-Eingabe hilft der KI, relevante Empfehlungsfragen zu stellen.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="score-heading">
+                <h2 id="score-heading">So wird dein <span class="article-white">Score berechnet</span></h2>
+                
+                <p>Dein Visibility-Score setzt sich aus vier Kategorien zusammen, die unterschiedlich gewichtet sind:</p>
+
+                <dl class="feature-list">
+                    <dt>Gemini-Sichtbarkeit (max. 35 Punkte)</dt>
+                    <dd>Wir stellen Google Gemini drei gezielte Fragen: Kennt es dein Unternehmen? Findet es Bewertungen? Gibt es externe Erwähnungen auf anderen Websites? Gemini durchsucht dabei das Web live (Google Grounding). Die Bekanntheit zählt am stärksten (60%), externe Erwähnungen (25%) und Reputation (15%) sind Bonuspunkte.</dd>
+                    
+                    <dt>ChatGPT-Sichtbarkeit (max. 35 Punkte)</dt>
+                    <dd>ChatGPT durchsucht das Web über eigene Suchfunktionen und beantwortet dieselben drei Fragen: Bekanntheit, Bewertungen und externe Erwähnungen. Auch hier zählt die Bekanntheit am stärksten. Wer in beiden KI-Systemen auftaucht, ist breit aufgestellt.</dd>
+                    
+                    <dt>Technische Authority (max. 15 Punkte)</dt>
+                    <dd>Wir crawlen deine Startseite und prüfen: Ist <a href="https://designare.at/schema-org-meta-description" title="Schema.org: Strukturierte Daten für KI-Suche">Schema.org (JSON-LD)</a> vorhanden? Gibt es mindestens drei verschiedene Schema-Typen? Existieren E-E-A-T-Signale – also eine Über-uns-Seite, ein Impressum/Kontakt und Autoren-Informationen? Jedes Signal zählt, weil es KI-Systemen hilft, dein Unternehmen als vertrauenswürdig einzustufen.</dd>
+                    
+                    <dt>Online-Reputation (max. 15 Punkte)</dt>
+                    <dd>Wie sprechen die KIs über dich? Wir analysieren das Sentiment jeder KI-Antwort per LLM: Positiv (substantielle Beschreibung, gute Bewertungen), neutral (erwähnt, aber ohne Wertung), negativ (explizite Kritik) oder fehlend (nicht gefunden). Positive Erwähnungen bringen volle Punkte, fehlende null.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="methodik-heading">
+                <h2 id="methodik-heading">Die Methodik <span class="article-white">im Detail</span></h2>
+                
+                <p>Hinter dem Check steckt keine Simulation – es sind echte API-Calls an echte KI-Modelle. Konkret passiert Folgendes, wenn du eine Domain eingibst:</p>
+
+                <p><strong>Phase 1: Domain-Crawling.</strong> Wir rufen deine Startseite ab und parsen den HTML-Quellcode. Dabei extrahieren wir alle JSON-LD-Blöcke, prüfen auf Schema-Typen und durchsuchen den sichtbaren Text sowie die Link-Struktur nach E-E-A-T-Signalen. Das passiert serverseitig über Cheerio – kein headless Browser, kein Overhead.</p>
+
+                <p><strong>Phase 2: Gemini mit Google Grounding.</strong> Drei sequentielle Anfragen an Google Gemini: Bekanntheit, Online-Reputation und externe Erwähnungen. Gemini nutzt dabei die Google-Suche als Datenquelle (Grounding) – es antwortet also nicht aus dem Bauch, sondern basierend auf aktuellen Suchergebnissen.</p>
+
+                <p><strong>Phase 3: ChatGPT Cross-Check.</strong> Drei parallele Anfragen an OpenAI mit Web-Suche: Bekanntheit, Online-Reputation und externe Erwähnungen – dieselben Fragen wie bei Gemini. So entsteht ein fairer Vergleich zwischen beiden KI-Systemen.</p>
+
+                <p><strong>Phase 4: Sentiment-Analyse.</strong> Jede KI-Antwort wird per LLM auf ihr Sentiment geprüft – nicht per Keyword-Matching, sondern durch einen separaten API-Call, der den Kontext versteht. Bei API-Ausfällen greift ein Keyword-Fallback.</p>
+
+                <p>Die Ergebnisse werden für 24 Stunden gecacht, um API-Kosten im Rahmen zu halten. Ein erneuter Check derselben Domain innerhalb dieses Zeitraums liefert das gespeicherte Ergebnis.</p>
+            </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen (FAQ)</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group">
+                        <summary>Was misst der KI-Sichtbarkeits-Check?</summary>
+                        <div class="faq-content">
+                            <p>Das Tool führt einen <strong>Dual-Check</strong> durch: Es fragt live sowohl <strong>Google Gemini</strong> als auch <strong>ChatGPT (OpenAI)</strong> ab. So siehst du sofort, ob du nur in einer oder in beiden KI-Welten als Marke wahrgenommen wirst. Zusätzlich prüfen wir technische Faktoren wie Schema.org und Crawlability. Du bist sichtbar? Dann ist der nächste Schritt, den <a href="ki-traffic-messen.html" title="KI-Traffic messen: So trackst du Besucher von ChatGPT & Co.">KI-Traffic in GA4 zu messen</a>.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Ist das Tool kostenlos?</summary>
+                        <div class="faq-content">
+                            <p>Ja. Die API-Kosten für <strong>Google und OpenAI</strong> übernehme ich. Da ich echte Enterprise-Modelle nutze (keine billigen Mockups), gibt es ein faires Limit von <strong>3 Abfragen pro Tag</strong> pro Nutzer.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Warum variieren die Ergebnisse?</summary>
+                        <div class="faq-content">
+                           <p>Das liegt an der Natur der KIs. <strong>Gemini</strong> nutzt Google Grounding für aktuelle Live-Daten. <strong>ChatGPT</strong> durchsucht das Web über eigene Suchfunktionen. Beide Systeme finden unterschiedliche Quellen und bewerten sie anders. Unser Tool zeigt dir genau diese Unterschiede auf. <em>Hinweis: Um Server-Ressourcen zu schonen, speichern wir das Analyse-Ergebnis einer Domain für 24 Stunden zwischen.</em></p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Warum kennt Gemini mich, aber ChatGPT nicht (oder umgekehrt)?</summary>
+                        <div class="faq-content">
+                            <p>Gemini durchsucht das Web live über Google Grounding – es findet dich, sobald du im Google-Index existierst. ChatGPT durchsucht das Web über eigene Suchfunktionen und greift zusätzlich auf Trainingswissen zurück. Unterschiedliche Ergebnisse sind normal und zeigen, wo du Nachholbedarf hast.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was bedeuten die E-E-A-T-Signale im Ergebnis?</summary>
+                        <div class="faq-content">
+                            <p>E-E-A-T steht für Experience, Expertise, Authoritativeness und Trustworthiness – die Kriterien, nach denen Google und KI-Systeme Vertrauenswürdigkeit bewerten. Unser Tool prüft drei konkrete Signale: Existiert eine Über-uns-Seite? Gibt es ein Impressum oder eine Kontaktseite? Sind Autoren-Informationen hinterlegt? Jedes fehlende Signal kostet dich Punkte – und Sichtbarkeit. Mehr dazu im <a href="https://designare.at/geo-seo" title="GEO: So landest du in KI-Antworten">GEO-Leitfaden</a>.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section class="blog-cta-wrapper">
+                <h2>KI-Sichtbarkeit professionell optimieren?</h2>
+                <p>Der Check zeigt nur den Ist-Zustand. Wenn du Unterstützung bei der Umsetzung der Empfehlungen brauchst – von Schema.org bis <a href="https://designare.at/geo-seo" title="GEO: So landest du in KI-Antworten von ChatGPT & Co.">Content-Strategie</a>:</p>
+                
+                <button id="cta-contact-btn" class="cta-button-blog">
+                    <i class="fa-regular fa-paper-plane"></i> Frag Michael 
+                </button>
+            </section>
+
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js"></script>
+<script>
+(function(){
+  var b=document.getElementById('brand-input'),g=document.getElementById('location-group');
+  if(!b||!g)return;
+  function toggle(){g.style.display=b.value.trim()?'':'none';}
+  b.addEventListener('input',toggle);
+  toggle();
+})();
+document.getElementById('cta-contact-btn')?.addEventListener('click', function() {
+  document.getElementById('contact-modal')?.classList.add('visible');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "at.designare/knowledge",
+  "description": "Knowledge Base von designare.at – Michael Kanda, Komplize für Web & KI aus Wien. Semantische Suche über Webdesign, SEO, GEO, KI-Sichtbarkeit und Michaels Projekte. Gleiche RAG-Pipeline wie die KI-Assistentin Evita.",
+  "version": "1.1.0",
+  "repository": {
+    "url": "https://github.com/michael-kanda/designare",
+    "source": "github"
+  },
+  "websiteUrl": "https://designare.at/mcp-server",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://designare.at/api/mcp"
+    }
+  ]
+}

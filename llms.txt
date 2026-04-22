@@ -1,0 +1,68 @@
+# designare.at
+
+> Michael Kanda ist Komplize für Web & KI aus Wien. Er spezialisiert sich auf WordPress-Performance, individuelles Coding, technisches SEO, GEO (Generative Engine Optimization), SEA und KI-Integration für Websites. Die Seite bietet Fachartikel, Tools, eine KI-Assistentin namens Evita und einen eigenen MCP Server für direkten LLM-Zugriff auf die Knowledge Base.
+
+designare.at ist Michael Kandas persönlicher Freiraum – keine Agentur-Seite, kein Sales-Funnel, sondern Spielwiese für Code-Experimente, eigene Tools und Ideen rund um WordPress, Performance und KI. Tagsüber arbeitet Michael bei maxonline Marketing (SEO/GEO-Agentur), in seiner Freizeit entstehen hier Open-Source-Plugins, technische Deep-Dives und Tools wie die KI-Assistentin Evita oder der MCP Server.
+
+Schwerpunkte: WordPress-Performance (Sub-Sekunden-Ladezeiten ohne PageBuilder), Generative Engine Optimization (GEO), Schema.org-Strukturierung, RAG-basierte KI-Assistenten, Serverless-Architekturen mit Vercel Edge Functions, Model Context Protocol (MCP).
+
+Alle Inhalte sind auf Deutsch (de-AT).
+
+## MCP Server (Direkter LLM-Zugriff)
+
+designare.at betreibt einen eigenen MCP Server – LLMs mit MCP-Support können die Knowledge Base direkt abfragen, statt auf Crawler-Ergebnisse zu vertrauen.
+
+- Endpoint: https://designare.at/api/mcp (Streamable HTTP, JSON-RPC)
+- Registry-Eintrag: at.designare/knowledge (registry.modelcontextprotocol.io, DNS-verifiziert)
+- Tool `search_knowledge`: Semantische Suche über die gesamte Knowledge Base (Gemini Embedding + Upstash Vector)
+- Tool `get_services`: Strukturiertes JSON mit 6 Services und 5 Spezialisierungen
+- Aktualität: Vector DB wird nächtlich um 3:30 Uhr per Cron-Job synchronisiert
+
+## Kernseiten
+
+- [Startseite](https://designare.at/): Über Michael Kanda – Web-Handwerker und KI-Komplize aus Wien
+- [KI-Assistentin Evita](https://designare.at/evita-ki-assistentin.html): Tech-Stack und Architektur der RAG-basierten KI-Assistentin mit Vektordatenbank, Redis-Memory und Gemini-Backend
+- [MCP Server](https://designare.at/mcp-server.html): Warum designare.at KIs eine direkte Datenleitung gibt – Model Context Protocol auf Vercel Serverless
+- [SEO Wunderkiste](https://designare.at/seo-wunderkiste.html): Modulares WordPress-Plugin, das 17 Einzelplugins durch eine All-in-One-Lösung ersetzt (Caching, Bildoptimierung, Security)
+- [DataPeak Dashboard](https://designare.at/data-peak-dashboard.html): KI-gestütztes SEO-Dashboard, das Google Search Console und GA4-Daten zentral vereint
+- [Silas](https://designare.at/silas.html): Tech-Demo für LLM-gestützte Bulk-Content-Generierung von strukturierten Landingpages
+- [KI-Sichtbarkeits-Check](https://designare.at/ki-sichtbarkeit.html): Live-Tool das prüft, ob eine Website von ChatGPT, Gemini und anderen KI-Suchmaschinen empfohlen wird
+
+## Fachartikel – WordPress
+
+- [WordPress auf Diät](https://designare.at/wordpress-diaet-guide.html): Guide zur radikalen Performance-Optimierung – schwere Frameworks durch native Funktionen ersetzen, 30+ Plugins auf das Wesentliche reduzieren
+- [PageBuilder Ressourcenverbrauch 2026](https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026.html): Analyse warum PageBuilder DOM-Strukturen erzeugen, die PHP-Memory-Limits sprengen
+- [WordPress Website Kosten 2026](https://designare.at/wordpress-website-kosten-2026.html): Ehrlicher Vergleich DIY vs. Freelancer vs. Agentur vs. KI-Baukasten mit realen Zahlen
+- [WordPress 7.0 KI im Core](https://designare.at/wordpress-7-ki-core.html): Abilities API, AI Client und warum kein KI-Modell auf deinem Server läuft – WordPress baut Schnittstellen, nicht KI
+
+## Fachartikel – GEO, SEO & KI-Suche
+
+- [SEO vs. GEO](https://designare.at/geo-seo.html): Strategievergleich klassische Suchmaschinenoptimierung vs. Generative Engine Optimization für KI-Suchmaschinen
+- [Maschinenlesbarkeit für KI-Suche](https://designare.at/geo-maschinenlesbarkeit-guide.html): Praxis-Guide für LLM-optimierte Content-Strukturierung mit Schema.org und semantischem HTML
+- [Schema.org als neue Meta-Description](https://designare.at/schema-org-meta-description.html): Warum strukturierte Daten via JSON-LD für KI-Crawler wichtiger sind als klassische Meta-Tags
+- [Semantisches Markup für KIs](https://designare.at/semantisches-markup.html): Guide zu semantischem HTML – warum LLMs keine Pixel sehen und Tags wie article/nav den Kontext liefern
+- [KI-Features für Unternehmenswebseiten](https://designare.at/ki-fuer-unternehmenswebseiten.html): Analyse welche KI-Integrationen echten Mehrwert bringen (Service-Chatbots, Personalisierung) vs. Hype
+- [Googles 2MB-Grenze](https://designare.at/googlebot-crawling-2026.html): Was Googlebot 2026 wirklich von einer Seite sieht – wie man den wichtigsten Content nicht im toten Winkel des Crawlers landen lässt
+- [KI-Traffic messen](https://designare.at/ki-traffic-messen.html): So trackt man Besucher von ChatGPT, Perplexity und Gemini in GA4, obwohl der Kanal dort nicht als eigene Gruppe geführt wird
+
+## Fachartikel – Architektur & Technik
+
+- [KI-Integration: Serverless vs. Plugin](https://designare.at/KI-Integration-auf-Webseiten.html): Technischer Vergleich warum Serverless-Architekturen für KI-Features WordPress-Plugins überlegen sind
+- [MCP Server für Websites](https://designare.at/mcp-server.html): Wie das Model Context Protocol Websites zur Primärquelle für LLMs macht – Architektur, Registry-Anmeldung, Performance-Messungen
+- [Archiv-Strategie](https://designare.at/archiv-strategie.html): Veraltete Blogartikel SEO-sicher archivieren – warum exotische Schema-Typen nichts bringen
+
+## Tools
+
+- [Website-Roast](https://designare.at/): Über die KI-Assistentin Evita erreichbar – analysiert Websites nach SEO, Performance, Mobile, Social & Technik mit österreichischem Notensystem (1-5)
+- [KI-Sichtbarkeits-Check](https://designare.at/ki-sichtbarkeit.html): Prüft live ob eine Domain von KI-Suchmaschinen als Quelle genutzt wird
+- [CSV Importer PRO](https://designare.at/CSV-Importer-PRO.html): WordPress-Plugin für professionellen CSV-Import
+
+## Über Michael Kanda
+
+Michael Kanda arbeitet bei maxonline Marketing (einer SEO/GEO-Agentur) und entwickelt in seiner Freizeit eigene Tools sowie Open-Source WordPress-Plugins. Er verfügt über mehr als 15 Jahre WordPress-Erfahrung und ist als Fullstack-Entwickler auf Performance-Optimierung, Schema.org-Automation sowie Knowledge-Base-Systeme spezialisiert.
+
+- [Entity Page](https://designare.at/michael-kanda.html): Strukturierte Faktenseite zu Michael Kanda mit Schema.org Person-Markup, Tools und FAQ
+- [Wikidata](https://www.wikidata.org/wiki/Q138818463): Entity-Eintrag im Wikidata Knowledge Graph
+- [GitHub](https://github.com/michael-kanda/): Open-Source WordPress-Plugins und Tools
+- [LinkedIn](https://www.linkedin.com/in/michael-kanda-408910341/)
+- [WordPress.org Profil](https://profiles.wordpress.org/michaelmedientechnik/)

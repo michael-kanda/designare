@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <title>WordPress KI im Core: Abilities API (6.9) & AI Client (7.0) | Michael Kanda</title>
+    <meta name="description" content="Die Abilities API ist seit WordPress 6.9 im Core. Der WP AI Client SDK kommt mit 7.0. Was das für Anwender und Entwickler bedeutet.">
+    <meta name="author" content="Michael Kanda">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preload" href="font/poppins-v24-latin-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-700.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="font/poppins-v24-latin-600.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="icon" href="images/favicon.webp" type="image/webp">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
+    
+    <link rel="stylesheet" href="css/core.min.css">
+    <link rel="stylesheet" href="css/article.min.css">
+    
+    <link rel="canonical" href="https://designare.at/wordpress-7-ki-core"/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://designare.at/wordpress-7-ki-core#article",
+      "headline": "WordPress KI im Core: Abilities API (6.9) & AI Client SDK (7.0)",
+      "description": "Die Abilities API ist seit WordPress 6.9 im Core. Der WP AI Client SDK ist für WordPress 7.0 vorgeschlagen. Was das für Anwender und Entwickler bedeutet – technisch korrekt erklärt.",
+      "image": "https://designare.at/images/wp7-ai-dashboard.webp",
+      "datePublished": "2026-02-26",
+      "dateModified": "2026-02-26",
+      "author": {
+        "@type": "Person",
+        "name": "Michael Kanda",
+        "url": "https://designare.at/#michael"
+      },
+     "publisher": {"@type": "Person","name": "Michael Kanda","image": {"@type": "ImageObject","url": "https://designare.at/images/michael-kanda.webp"}},
+      "articleSection": "Künstliche Intelligenz & Webentwicklung",
+      "keywords": [
+        "WordPress 7.0",
+        "WordPress 6.9",
+        "Abilities API",
+        "WP AI Client SDK",
+        "Automatisierung",
+        "KI Content Generation",
+        "MCP Adapter"
+      ],
+      "hasPart": {
+        "@id": "https://designare.at/wordpress-7-ki-core#faqpage"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://designare.at/wordpress-7-ki-core#faqpage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Brauche ich mit WordPress 6.9 / 7.0 noch externe KI-Plugins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Infrastruktur zieht in den Core ein, aber du benötigst weiterhin einen Zugang zu den KI-Modellen selbst – also einen API-Key von OpenAI, Anthropic, Google oder einem anderen Anbieter. Du zahlst direkt für das, was du verbrauchst (Pay-per-Use), sparst dir aber Plugin-Abonnements und profitierst von einer einheitlichen Konfiguration für alle KI-Features auf deiner Website."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Läuft mit WordPress 7.0 ein KI-Modell auf meinem Server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nein. WordPress baut keine KI in den Core ein – es baut die standardisierten Schnittstellen dazu. Dein Server sendet lediglich HTTP-Requests an externe KI-Anbieter (OpenAI, Google, Anthropic). Die eigentliche KI-Rechenarbeit findet auf deren Servern statt. Für deinen Server ist ein KI-Aufruf technisch kaum belastender als das Abrufen eines RSS-Feeds."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann WordPress jetzt von ganz alleine bloggen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, in Kombination mit Automatisierungstools. Die Abilities API (seit WP 6.9 im Core) macht WordPress maschinenlesbar. Du kannst Workflows einrichten, bei denen ein externes Skript (z.B. n8n) aktuelle Daten abruft und WordPress über registrierte Abilities den Befehl gibt, einen Beitragsentwurf zu erstellen. Über den MCP Adapter können KI-Assistenten wie Claude oder ChatGPT direkt mit WordPress interagieren."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was passiert mit meinen alten KI-Plugins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gute Plugin-Entwickler werden ihre Architektur anpassen: Statt eigener HTTP-Clients nutzen sie den nativen AI_Client SDK, statt proprietärer APIs registrieren sie Abilities. Reine Wrapper-Plugins, die nur eine ChatGPT-Schnittstelle in den Editor brachten, werden durch die nativen Funktionen strukturell überflüssig."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Werden die KI-Bilder in der Mediathek gespeichert?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Bildgenerierung ist als Ability geplant. Generierte Bilder sollen direkt in der WordPress-Mediathek gespeichert werden, inklusive automatisch generierter Alt-Texte. Das Bild wird physisch auf deinem Server gehostet – kein externer Hosting-Dienst nötig."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wem gehören die generierten Bilder und Texte?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Generierte Bilder sollen physisch in deiner Mediathek gespeichert werden – du hostest sie selbst. Die Nutzungsrechte hängen vom jeweiligen Anbieter ab, dessen API-Key du konfiguriert hast. Prüfe die Nutzungsbedingungen des gewählten Anbieters (z.B. OpenAI, Google, Anthropic), da diese sich unterscheiden und für kommerzielle Nutzung relevant sind."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist das DSGVO-konform für europäische Websites?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Da alle Prompts und Inhalte an externe US-amerikanische Anbieter gesendet werden, müssen die üblichen Anforderungen für Drittlandübermittlungen erfüllt sein: Verarbeitungsverträge (DPA) mit den Anbietern, Prüfung der Standardvertragsklauseln sowie transparente Information der Nutzer, falls deren Inhalte in Prompts einfließen. WordPress stellt die Infrastruktur bereit – die datenschutzrechtliche Verantwortung liegt beim Seitenbetreiber."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" defer></script>
+    <script type="module" src="js/main.js"></script>
+    <script src="js/analytics-proxy.js" async></script>
+</head>
+
+<body class="dark-mode no-scroll">
+
+    <div id="header-placeholder"></div>
+    <div id="side-menu-placeholder"></div>
+    <div id="modal-container"></div>
+    <div id="particles-js"></div>
+    
+    <main id="blog-main">
+        
+        <article class="blog-article">
+            
+            <header class="article-header">
+                <div id="breadcrumb-placeholder"></div>
+                <h1>WordPress KI im Core: <span class="article-white">Abilities API & AI Client erklärt</span></h1>
+      
+                <div class="article-meta">
+                    <time datetime="2026-02-26">26. Februar 2026</time>
+                    <span class="reading-time"><i aria-hidden="true" class="fa-regular fa-clock"></i> 10 Min. Lesezeit</span>
+                    <address class="author">
+                        Von <a href="index.html#michael" rel="author">Michael Kanda</a>
+                    </address>
+                </div>
+            </header>
+
+            <section class="article-summary" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Das Wichtigste in Kürze</h2>
+                
+                <div class="summary-box">
+                    <div class="summary-content">
+                        <h3>Das Wichtigste in Kürze:</h3>
+                        <ul>
+                            <li><strong>Zwei Releases, ein Ziel:</strong> Die <strong>Abilities API</strong> ist seit WordPress <strong>6.9</strong> (Dezember 2025) im Core. Der <strong>WP AI Client SDK</strong> ist für WordPress <strong>7.0</strong> (April 2026) vorgeschlagen.</li>
+                            <li><strong>Kein LLM auf deinem Server:</strong> WordPress baut keine KI ein – es baut die standardisierten Schnittstellen dazu. Die Rechenarbeit bleibt bei OpenAI, Google und Co.</li>
+                            <li><strong>Der AI Client SDK:</strong> Entwickler greifen über die Klasse <code>AI_Client</code> einheitlich auf Modelle wie Gemini, GPT oder Claude zu – ohne anbieterspezifischen Code.</li>
+                            <li><strong>Abilities API:</strong> Macht WordPress maschinenlesbar für externe Tools (n8n, Make) und KI-Agenten via MCP. Bereits heute in WordPress 6.9 verfügbar.</li>
+                        </ul>
+                    </div>
+
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- PLUGIN CHAOS → CORE: WP 6.8 vs. WP 7.0   -->
+                    <!-- Ersetzt images/wp7-ai-dashboard.webp       -->
+                    <!-- ══════════════════════════════════════════ -->
+                    <div class="summary-image">
+                        <div class="wp-chaos-core" id="wp-chaos-core">
+                            <div class="wpc-frame" id="wpc-frame">
+                                <div class="wpc-topbar">
+                                    <span class="wpc-dot r"></span><span class="wpc-dot y"></span><span class="wpc-dot g"></span>
+                                    <span class="wpc-url">wp-admin/plugins.php</span>
+                                </div>
+                                <div class="wpc-body">
+                                    <!-- BEFORE: Plugin-Chaos -->
+                                    <div class="wpc-before">
+                                        <div class="wpc-plugins">
+                                            <span class="wpc-pill">AI Writer Pro — €29/mo</span>
+                                            <span class="wpc-pill">ChatBot Plus — €19/mo</span>
+                                            <span class="wpc-pill warn">Image AI — VERALTET</span>
+                                            <span class="wpc-pill">GPT SEO Helper — €15/mo</span>
+                                            <span class="wpc-pill warn">Translate AI — KONFLIKT</span>
+                                        </div>
+                                        <div class="wpc-status">&#9888; <span class="red">3 API-Keys</span> in verschiedenen Plugins verstreut</div>
+                                        <div class="wpc-status">&#9888; <span class="red">€63/Monat</span> Plugin-Abos + API-Kosten</div>
+                                        <div class="wpc-bar"><div class="wpc-bar-fill red"></div></div>
+                                        <div class="wpc-bar-label">Server-Last: 87% &middot; 14 HTTP-Clients geladen</div>
+                                        <div class="wpc-bar"><div class="wpc-bar-fill orange"></div></div>
+                                        <div class="wpc-bar-label">Sicherheit: 3 Plugins ohne Update seit 6+ Monaten</div>
+                                        <div class="wpc-before-label">WordPress 6.8 &middot; Plugin-Flickenteppich</div>
+                                    </div>
+                                    <!-- AFTER: Clean Core -->
+                                    <div class="wpc-after">
+                                        <div class="wpc-core-header">
+                                            <div class="wpc-wp-icon">W</div>
+                                            <div>
+                                                <div class="wpc-core-title">KI-Zugangsdaten</div>
+                                                <div class="wpc-core-sub">Zentrale Konfiguration &middot; Ein API-Key für alles</div>
+                                            </div>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">Anbieter</span>
+                                            <span class="wpc-setting-val">Google Gemini &#10003;</span>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">API-Key</span>
+                                            <span class="wpc-setting-val">sk-••••••4f2a &#10003;</span>
+                                        </div>
+                                        <div class="wpc-setting">
+                                            <span class="wpc-setting-label">Modell</span>
+                                            <span class="wpc-setting-val">gemini-2.5-flash &#10003;</span>
+                                        </div>
+                                        <div class="wpc-abilities-title">Registrierte Abilities:</div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">core/generate-text</span>
+                                            <span class="wpc-ability-desc">Textgenerierung im Editor</span>
+                                        </div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">core/generate-image</span>
+                                            <span class="wpc-ability-desc">Bildgenerierung → Mediathek</span>
+                                        </div>
+                                        <div class="wpc-ability">
+                                            <span class="wpc-ability-name">mcp/erstelle-entwurf</span>
+                                            <span class="wpc-ability-desc">Agenten-Zugriff via MCP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wpc-toggle">
+                                <button class="wpc-toggle-btn is-active" data-state="before" type="button">WP 6.8: Chaos</button>
+                                <button class="wpc-toggle-btn" data-state="after" type="button">WP 7.0: Core</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="intro-heading">
+                <h2 id="intro-heading" class="visually-hidden">Einleitung</h2>
+                
+                <p>WordPress – das Fundament von über 40 % aller Websites weltweit – integriert KI nun direkt in das Kernsystem. Damit wird ein Großteil des bisher florierenden KI-Plugin-Marktes auf einen Schlag überflüssig. Bisher glich die KI-Nutzung in WordPress einem <a href="https://designare.at/wordpress-diaet-guide" title="WordPress auf Diät: Plugin-Burnout vermeiden">Flickenteppich</a>: SEO-Texte von Plugin A, Bilder von Plugin B, Chat-Assistenz von Plugin C. Die Folge waren überladene Backends, Sicherheitsrisiken und unübersichtliche <a href="https://designare.at/wordpress-website-kosten-2026" title="WordPress Website Kosten 2026: Der ehrliche Überblick">Abo-Kosten</a>.</p>
+
+                <p>Das ändert sich in zwei Stufen. <strong>WordPress 6.9 (Dezember 2025)</strong> hat mit der Abilities API bereits das Agenten-Interface in den Core gebracht – das Vorgänger-Repository (<a href="https://github.com/Automattic/wp-feature-api" rel="noopener" target="_blank">Automattic/wp-feature-api</a>) wurde archiviert, weil die Abilities API als offizielle Nachfolge-Implementierung in den WordPress Core übernommen wurde. Mit dem geplanten Release von <strong>WordPress 7.0 (April 2026)</strong> soll der WP AI Client SDK folgen – die standardisierte PHP-Abstraktionsschicht zu Sprachmodellen. Zusammen bilden sie das Fundament für native KI-Automatisierung direkt in WordPress.</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i>
+                    <div>
+                        <strong>Hinweis zur Aktualität:</strong>
+                        <p>Dieser Artikel basiert auf den offiziellen Dokumenten des <a href="https://make.wordpress.org/ai/" rel="noopener" target="_blank">WordPress AI Teams (make.wordpress.org/ai)</a> und dem <a href="https://github.com/WordPress/abilities-api" rel="noopener" target="_blank">Abilities API GitHub Repository</a>. Die Abilities API ist seit WordPress 6.9 stabil im Core. Der WP AI Client SDK ist offiziell als <em>„proposed to go into WordPress 7.0"</em> markiert – API-Namen und der finale Lieferzeitpunkt können sich bis zum Release noch ändern. Stand: Februar 2026.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="mechanics-heading">
+                <h2 id="mechanics-heading">Für Anwender: <span class="article-white">Was WP 6.9 und 7.0 out-of-the-box können</span></h2>
+                
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-pen-nib"></i>
+                    <div>
+                        <strong>User Experience:</strong>
+                        <p>Das Dashboard bleibt vertraut, wird aber deutlich mächtiger. Anstatt zwischen ChatGPT, Midjourney und WordPress hin- und herzuspringen, soll die gesamte Content-Erstellung direkt in deinem Editor stattfinden. Voraussetzung: Ein API-Key bei einem KI-Anbieter deiner Wahl.</p>
+                    </div>
+                </div>
+
+                <p>Die neuen Core-Funktionen machen Content-Marketing deutlich effizienter:</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i> Native Textgenerierung & Überarbeitung</dt>
+                    <dd>Im Gutenberg-Editor soll ein KI-Assistent als Standard-Werkzeug verfügbar werden. Du markierst einen Textabschnitt und gibst einen Befehl: <em>„Mache diesen Absatz kürzer und prägnanter"</em> oder lässt dir aus Stichpunkten einen fertigen Artikel entwerfen. Das System nutzt den API-Key, den du zentral in den Einstellungen unter „KI-Zugangsdaten" hinterlegt hast. Eine erste funktionierende Umsetzung – die Titelgenerierung für Beiträge – ist bereits im offiziellen <a href="https://github.com/WordPress/ai" rel="noopener" target="_blank">AI Experiments Plugin</a> verfügbar.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-regular fa-image"></i> Bildgenerierung direkt in der Mediathek</dt>
+                    <dd>Bildgenerierung ist als geplante Ability für das AI Experiments Plugin v0.2.0 gelistet. Das Prinzip: Du öffnest die Mediathek, wählst „Generieren" und tippst einen Prompt. WordPress ruft den konfigurierten Bildanbieter (z.B. DALL-E oder Imagen) ab, speichert das Ergebnis physisch auf deinem Server und soll automatisch Alt-Texte für SEO hinzufügen.</dd>
+                    
+                    <dt><i aria-hidden="true" class="fa-solid fa-language"></i> Automatisierte Mehrsprachigkeit</dt>
+                    <dd>Die KI-Integration im Core öffnet den Weg für Übersetzungs-Workflows direkt im Editor. Ein Plugin, das die Abilities API nutzt, kann Beiträge kontextbewusst übersetzen – wobei Layout und Blöcke erhalten bleiben. Im Gegensatz zu klassischen Übersetzungs-Plugins versteht ein LLM den inhaltlichen Kontext der Seite.</dd>
+                </dl>
+            </section>
+
+            <section aria-labelledby="importance-heading">
+                <h2 id="importance-heading">Unter der Haube für Entwickler: <span class="article-white">Abilities API (6.9) & AI Client SDK (7.0)</span></h2>
+                
+                <div class="tech-box">
+                    <i aria-hidden="true" class="fa-solid fa-server"></i>
+                    <div>
+                        <strong>Architektur:</strong>
+                        <p>WordPress führt in zwei Releases zwei fundamentale Schnittstellen ein. Die <strong>Abilities API</strong> ist seit WordPress 6.9 im Core und macht WordPress maschinenlesbar für autonome Agenten. Der <strong>WP AI Client SDK</strong> – für WordPress 7.0 vorgeschlagen – standardisiert den Zugriff auf externe Sprachmodelle als PHP-Abstraktionsschicht.</p>
+                    </div>
+                </div>
+
+                <p>Wie steuert man diese Features programmatisch an? Hier sind die technischen Säulen:</p>
+
+                <div class="step-guide">
+                    <h3>1. Der WP AI Client SDK (<code>AI_Client</code>) – vorgeschlagen für WP 7.0</h3>
+                    <p>Bisher musstest du für OpenAI, Google Gemini oder Anthropic eigene HTTP-Requests schreiben oder dich auf anbieterspezifische Plugin-Abstraktionen verlassen. Der WP AI Client SDK bringt eine standardisierte Klasse mit, die heute bereits via Composer verfügbar ist und für den WordPress 7.0 Core vorgeschlagen wird. <strong>Hinweis:</strong> Laut den AI-Contributor-Meetings vom Februar 2026 gibt es die Möglichkeit, dass der SDK bei Bedarf auf WordPress 7.1 verschoben wird, falls weitere Iterationszeit nötig ist. Der aktuelle Stand zeigt aber eine klare Absicht, den SDK in 7.0 auszuliefern.</p>
+                    <ul>
+                        <li><strong>Installation (bereits heute):</strong> <code>composer require wordpress/wp-ai-client</code></li>
+                        <li><strong>Vendor-Lock-in beendet:</strong> Du schreibst deinen Code einmal. Der Seitenbetreiber entscheidet in den Backend-Einstellungen unter „KI-Zugangsdaten", welcher Anbieter und welches Modell genutzt werden soll. Dein Plugin-Code muss sich darum nicht kümmern.</li>
+                        <li>
+                            <strong>Einfaches Beispiel:</strong>
+                            <pre><code>use WordPress\AI_Client\AI_Client;
+
+// Einfacher Text-Prompt – Modell wird automatisch gewählt
+$text = AI_Client::prompt( 'Schreibe eine kurze Einleitung über WordPress.' )
+    -&gt;generate_text();</code></pre>
+                        </li>
+                        <li>
+                            <strong>Erweitertes Beispiel mit Optionen:</strong>
+                            <pre><code>use WordPress\AI_Client\AI_Client;
+
+$text = AI_Client::prompt( 'Optimiere diesen SEO-Titel.' )
+    -&gt;using_system_instruction( 'Du bist ein erfahrener SEO-Redakteur.' )
+    -&gt;using_temperature( 0.5 )
+    -&gt;generate_text();</code></pre>
+                        </li>
+                        <li>
+                            <strong>Vor dem Aufrufen prüfen, ob ein passendes Modell verfügbar ist:</strong>
+                            <pre><code>use WordPress\AI_Client\AI_Client;
+
+$prompt = AI_Client::prompt( 'Analysiere diesen Text auf Lesbarkeit.' );
+
+if ( $prompt-&gt;is_supported_for_text_generation() ) {
+    $result = $prompt-&gt;generate_text();
+} else {
+    // Fallback: Feature ausblenden oder Hinweis anzeigen
+}</code></pre>
+                        </li>
+                    </ul>
+                    <p>Der SDK nutzt intern die WordPress HTTP API (<code>wp_remote_request()</code>) – kein anbieterspezifischer cURL-Code nötig. Unter der Haube basiert er auf dem plattformunabhängigen <a href="https://github.com/WordPress/php-ai-client" rel="noopener" target="_blank">PHP AI Client</a>, der gemeinsam mit der PHP-Community entwickelt wird.</p>
+                </div>
+
+                <div class="step-guide">
+                    <h3>2. Die Abilities API – bereits in WordPress 6.9</h3>
+                    <p>Das ist der wahre Gamechanger für Automatisierung – und er ist bereits verfügbar. Die Abilities API (seit WordPress 6.9 im Core) definiert, was dein WordPress tun <em>kann</em>, und teilt dies der Außenwelt maschinenlesbar mit. Sie bringt ein neues funktionales Primitiv in WordPress: eine standardisierte und entdeckbare Art, wie Plugins ihre Funktionen anbieten. <strong>Wichtig:</strong> In WordPress 6.9 wurde nur die serverseitige (PHP) Implementierung ausgeliefert. Mit WordPress 7.0 kommt zusätzlich die <strong>Client-Side Abilities API</strong>, die Abilities auch im Browser standardisiert registrieren und ausführen kann – für noch reichere Workflows direkt im Editor.</p>
+                    <ul>
+                        <li>
+                            <strong>Ability registrieren:</strong>
+                            <pre><code>wp_register_ability( 'mein-plugin/erstelle-entwurf', array(
+    'label'               =&gt; 'Beitragsentwurf erstellen',
+    'category'            =&gt; 'content',
+    'permission_callback' =&gt; function() {
+        return current_user_can( 'edit_posts' );
+    },
+    'execute_callback'        =&gt; 'mein_plugin_erstelle_entwurf_callback',
+    'input_schema'        =&gt; array(
+        'type'       =&gt; 'object',
+        'properties' =&gt; array(
+            'titel'  =&gt; array( 'type' =&gt; 'string' ),
+            'inhalt' =&gt; array( 'type' =&gt; 'string' ),
+        ),
+    ),
+) );</code></pre>
+                        </li>
+                        <li><strong>Function Calling ready:</strong> Abilities haben ein definiertes Input- und Output-Schema im JSON-Format. Ein KI-Modell kann diese Abilities als Werkzeuge (Function Calls) nutzen – die KI weiß dadurch, was sie in WordPress tun <em>kann</em>.</li>
+                        <li><strong>MCP-Integration:</strong> Über den <a href="https://github.com/WordPress/mcp-adapter" rel="noopener" target="_blank">MCP Adapter</a> werden registrierte Abilities direkt für externe KI-Assistenten (wie Claude oder ChatGPT) als Tools verfügbar – mit einem einzigen Meta-Parameter:
+                            <pre><code>wp_register_ability( 'mein-plugin/meine-ability', array(
+    // ...
+    'meta' =&gt; array(
+        'mcp' =&gt; array(
+            'public' =&gt; true, // Pflicht für MCP-Zugriff
+        ),
+    ),
+) );</code></pre>
+                        </li>
+                        <li><strong>Headless &amp; Automatisierung:</strong> Externe Tools wie n8n, Make oder autonome KI-Agenten können die REST API abfragen, sehen die verfügbaren Abilities und können selbstständig Beiträge erstellen, übersetzen oder veröffentlichen.</li>
+                    </ul>
+                </div>
+
+                <div class="step-guide">
+                    <h3>3. Bildgenerierung als geplante Ability</h3>
+                    <p>Auch Bildgenerierung soll als registrierte Ability verfügbar werden. Die Roadmap des AI Experiments Plugins listet Bildgenerierung für Version 0.2.0. Das Prinzip folgt dem generellen Abilities-Muster: Eine registrierte Ability nimmt einen Prompt und eine gewünschte Bildgröße als Input entgegen, ruft den konfigurierten Bildanbieter auf und gibt die <code>attachment_id</code> des gespeicherten Bildes zurück.</p>
+                    <ul>
+                        <li>Das Bild wird physisch auf deinem Server gespeichert – kein externer Hosting-Dienst nötig.</li>
+                        <li>Der exakte Endpunkt und die finale API-Signatur werden mit dem offiziellen Release dokumentiert. Verlasse dich für produktiven Code nicht auf inoffizielle Vorschaupfade.</li>
+                        <li>Perfekt für automatisierte Workflows: Ein n8n-Agent kann Beitragstext generieren <em>und</em> ein passendes Titelbild erstellen lassen – alles über standardisierte Abilities-Endpunkte.</li>
+                    </ul>
+                </div>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
+                    <div>
+                        <strong>Sicherheits-Tipp:</strong>
+                        <p>Bei der Registrierung einer Ability ist der <code>permission_callback</code> nicht optional. Da KI-Agenten autonom handeln, musst du sicherstellen, dass nur authentifizierte Nutzer mit der richtigen Rolle (z.B. <code>edit_posts</code> für Entwürfe, <code>publish_posts</code> für Veröffentlichungen) eine Ability ausführen können. Ohne expliziten Callback wird die Ability standardmäßig nur für Administratoren zugänglich.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="architecture-heading">
+                <h2 id="architecture-heading">Wird WordPress zur Insellösung?</h2>
+                
+                <p>Wenn WordPress KI „in den Core baut", klingt das für manche nach dem nächsten aufgeblähten Monolithen. Tatsächlich ist das Gegenteil der Fall.</p>
+
+                <div class="info-box">
+                    <i aria-hidden="true" class="fa-solid fa-network-wired"></i>
+                    <div>
+                        <strong>Wichtig zu verstehen:</strong>
+                        <p>WordPress baut <em>keine</em> KI in den Core ein – es läuft kein Sprachmodell auf deinem Server. WordPress baut lediglich die <strong>Schnittstellen (APIs)</strong> in den Core ein. WordPress wird dadurch weniger zur Insel, sondern vielmehr zu einem <strong>standardisierten Router</strong>.</p>
+                    </div>
+                </div>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-puzzle-piece"></i> Bisher – Das Insel-Problem</dt>
+                    <dd>Wenn du 5 verschiedene KI-Plugins nutzt, bringt jedes seinen eigenen Code, seinen eigenen API-Client und seine eigene Datenbankstruktur mit. Jedes Plugin kocht sein eigenes Süppchen – ohne gemeinsamen Standard. Das Ergebnis: inkonsistente Fehlerbehandlung, mehrfache API-Keys, <a href="https://designare.at/wordpress-pagebuilder-ressourcenverbrauch-2026" title="Die 512MB-Falle: PageBuilder und Ressourcen-Hunger">aufgeblähte Datenbank</a>.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-arrows-to-circle"></i> Neu – Der Hub-Ansatz</dt>
+                    <dd>WordPress standardisiert nur den „Postboten" (den AI Client). Es sagt: <em>„Egal, wer von außen mit mir reden will (n8n, KI-Agenten via MCP) oder mit wem ich nach außen reden soll (OpenAI, Gemini, Anthropic) – wir nutzen alle dieselbe genormte Tür."</em> Die eigentliche Rechenarbeit – das Durchrechnen neuronaler Netze, das Generieren von Bildern – passiert vollständig auf den Servern der KI-Anbieter.</dd>
+                </dl>
+
+                <h3>Belastet das PHP und den Server?</h3>
+                
+                <p>Hier muss man zwischen zwei grundlegend verschiedenen Problemen unterscheiden, denn die Antworten fallen gegensätzlich aus.</p>
+
+                <dl class="feature-list">
+                    <dt><i aria-hidden="true" class="fa-solid fa-microchip"></i> CPU/RAM-Auslastung – Entwarnung</dt>
+                    <dd>PHP wird durch KI-Aufrufe <em>nicht stark belastet</em>. PHP rechnet keine neuronalen Netze durch und rendert keine Bilder. Es sendet lediglich einen HTTP-Request: Ein paar Kilobyte Prompt-Text gehen raus, eine Textantwort oder eine Bild-URL kommen zurück. Für PHP ist das kaum anstrengender als das Abrufen eines RSS-Feeds. Der WP AI Client SDK nutzt intern <code>wp_remote_request()</code> – die gleiche WordPress-HTTP-API, die auch für externe REST-Aufrufe genutzt wird.</dd>
+
+                    <dt><i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i> PHP-Timeouts – Die echte Herausforderung</dt>
+                    <dd>Hier liegt die eigentliche technische Herausforderung. PHP arbeitet <em>synchron</em>: Wenn du auf „Bild generieren" klickst und der Anbieter 15 Sekunden braucht, bleibt der PHP-Worker in dieser Zeit offen und wartet. Machen das 50 Redakteure gleichzeitig, sind alle PHP-Worker blockiert – die Website bricht zusammen (Error 504 Gateway Timeout).</dd>
+                </dl>
+
+                <aside class="expert-tip">
+                    <i aria-hidden="true" class="fa-solid fa-code"></i>
+                    <div>
+                        <strong>Entwickler-Tipp: Asynchrone Verarbeitung für schwere KI-Aufgaben</strong>
+                        <p>Die Abilities API ist so konzipiert, dass sie hervorragend mit Hintergrundprozessen zusammenarbeitet – ähnlich dem <code>Action Scheduler</code> in WooCommerce. Das korrekte Muster für KI-Aufgaben mit langer Laufzeit:</p>
+                        <ol>
+                            <li>Der API-Befehl geht ein. PHP nimmt den Auftrag an, speichert ihn in der Datenbank und gibt dem Nutzer sofort eine Bestätigung zurück (<em>„Auftrag wird bearbeitet…"</em>). <strong>Die PHP-Verbindung schließt sich direkt wieder.</strong></li>
+                            <li>Ein Hintergrundprozess (WP-Cron oder ein Webhook) führt den eigentlichen API-Call an den KI-Anbieter aus – asynchron und ohne Nutzer-Verbindung.</li>
+                            <li>Das Ergebnis wird via REST API ins System gepusht und dem Nutzer angezeigt.</li>
+                        </ol>
+                        <p>Für einfache Textanpassungen im Editor (kurze Wartezeit, ein Nutzer) ist ein synchroner Aufruf vertretbar. Für Bildgenerierung oder Massen-Automatisierungen ist asynchrone Verarbeitung <strong>zwingend erforderlich</strong>.</p>
+                    </div>
+                </aside>
+            </section>
+
+            <section aria-labelledby="comparison-heading">
+                <h2 id="comparison-heading">Vergleich: Content-Erstellung im Wandel</h2>
+                
+                <p>Der Unterschied zwischen dem bisherigen Plugin-Chaos und der nativen Core-Integration zeigt, warum dieses Update so bedeutend ist. Beachte dabei die zeitliche Staffelung: Die Abilities API ist bereits heute in WordPress 6.9 verfügbar, der AI Client SDK kommt mit 7.0.</p>
+
+                <table class="comparison-table wpki-vs">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="th-wrong">Bisher (WP 6.8 und älter) <i aria-hidden="true" class="fa-solid fa-puzzle-piece"></i></th>
+                            <th scope="col" class="th-correct">WordPress 6.9 / 7.0 <i aria-hidden="true" class="fa-solid fa-check"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Teure Drittanbieter-Plugins für KI nötig</td>
+                            <td>Nativer AI Client SDK (7.0), du zahlst nur die reinen API-Kosten direkt beim Anbieter</td>
+                        </tr>
+                        <tr>
+                            <td>Jedes Plugin verwaltet eigene API-Keys separat</td>
+                            <td>Zentrale Einstellung „KI-Zugangsdaten" im Core versorgt das gesamte System</td>
+                        </tr>
+                        <tr>
+                            <td>Bilder müssen extern generiert und manuell hochgeladen werden</td>
+                            <td>Bildgenerierung als geplante Ability direkt in die WordPress-Mediathek (Roadmap 7.0)</td>
+                        </tr>
+                        <tr>
+                            <td>Automatisierung erfordert individuelle REST-Hacks pro Plugin</td>
+                            <td>Abilities API (6.9, bereits im Core) bietet standardisierte Schnittstellen für KI-Agenten, n8n und MCP</td>
+                        </tr>
+                        <tr>
+                            <td>Kein gemeinsamer Standard: Jedes Plugin definiert seine eigene Public API anders</td>
+                            <td>Abilities sind selbst-dokumentierende, entdeckbare Einheiten mit einheitlichem Input/Output-Schema</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Häufig gestellte Fragen</h2>
+                
+                <div class="faq-accordion">
+                    <details name="faq-group">
+                        <summary>Brauche ich mit WordPress 6.9 / 7.0 noch externe KI-Plugins?</summary>
+                        <div class="faq-content">
+                            <p>Die Infrastruktur zieht in den Core ein, aber du benötigst weiterhin einen Zugang zu den KI-Modellen selbst – also einen API-Key von OpenAI, Anthropic, Google oder einem anderen Anbieter. Du zahlst direkt für das, was du verbrauchst (Pay-per-Use), sparst dir aber Plugin-Abonnements und profitierst von einer einheitlichen Konfiguration für alle KI-Features auf deiner Website.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Läuft mit WordPress 7.0 ein KI-Modell auf meinem Server?</summary>
+                        <div class="faq-content">
+                            <p>Nein. Das ist ein häufiges Missverständnis. WordPress baut keine KI in den Core ein – es baut die standardisierten <em>Schnittstellen</em> dazu. Dein Server sendet lediglich HTTP-Requests an externe KI-Anbieter (OpenAI, Google, Anthropic). Die eigentliche KI-Rechenarbeit findet auf deren Servern statt. Für deinen Server ist ein KI-Aufruf technisch kaum belastender als das Abrufen eines RSS-Feeds.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Kann WordPress jetzt von ganz alleine bloggen?</summary>
+                        <div class="faq-content">
+                            <p>Ja, in Kombination mit Automatisierungstools. Die Abilities API (seit WP 6.9 im Core) macht WordPress maschinenlesbar. Du kannst Workflows einrichten, bei denen ein externes Skript (z.B. n8n) aktuelle Daten abruft und WordPress über registrierte Abilities den Befehl gibt, einen Beitragsentwurf zu erstellen. Über den MCP Adapter können KI-Assistenten wie Claude oder ChatGPT direkt mit WordPress interagieren. Wichtig: Der <code>permission_callback</code> deiner Abilities muss sicherstellen, dass solche Automatisierungen nur mit korrekter Authentifizierung möglich sind.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Was passiert mit meinen alten KI-Plugins?</summary>
+                        <div class="faq-content">
+                            <p>Gute Plugin-Entwickler werden ihre Architektur anpassen: Statt eigener HTTP-Clients nutzen sie den nativen <code>AI_Client</code> SDK, statt proprietärer APIs registrieren sie Abilities. Das macht ihre Plugins schlanker und interoperabler. Reine „Wrapper"-Plugins, die nur eine ChatGPT-Schnittstelle in den Editor brachten, werden durch die nativen Funktionen strukturell überflüssig. Schlanke, modulare Plugins wie die <a href="https://designare.at/seo-wunderkiste" title="SEO Wunderkiste: 17 Module, Null Ballast">SEO Wunderkiste</a> zeigen, wie das Prinzip „nur laden, was du brauchst" schon heute funktioniert.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Werden die KI-Bilder in der Mediathek gespeichert?</summary>
+                        <div class="faq-content">
+                            <p>Ja. Bildgenerierung ist als Ability geplant. Generierte Bilder sollen direkt in der WordPress-Mediathek gespeichert werden, inklusive automatisch generierter Alt-Texte. Das Bild wird physisch auf deinem Server gehostet – kein externer Hosting-Dienst nötig.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Wem gehören die generierten Bilder und Texte?</summary>
+                        <div class="faq-content">
+                            <p>Generierte Bilder sollen physisch in deiner Mediathek (<code>/wp-content/uploads/</code>) gespeichert werden – du hostest sie selbst. Die Nutzungsrechte hängen vom jeweiligen Anbieter ab, dessen API-Key du konfiguriert hast. Prüfe die Nutzungsbedingungen des gewählten Anbieters (z.B. OpenAI, Google, Anthropic), da diese sich unterscheiden und für kommerzielle Nutzung relevant sind.</p>
+                        </div>
+                    </details>
+
+                    <details name="faq-group">
+                        <summary>Ist das DSGVO-konform für europäische Websites?</summary>
+                        <div class="faq-content">
+                            <p>Das ist ein kritischer Punkt für EU-Betreiber. Da alle Prompts und Inhalte an externe US-amerikanische Anbieter (OpenAI, Google, Anthropic) gesendet werden, müssen die üblichen Anforderungen für Drittlandübermittlungen erfüllt sein: Verarbeitungsverträge (DPA) mit den Anbietern, Prüfung der Standardvertragsklauseln sowie transparente Information der Nutzer, falls deren Inhalte in Prompts einfließen. WordPress stellt die Infrastruktur bereit – die datenschutzrechtliche Verantwortung liegt beim Seitenbetreiber.</p>
+                        </div>
+                    </details>
+                </div>
+            </section>
+
+            <section aria-labelledby="conclusion-heading">
+                <h2 id="conclusion-heading">Fazit: <span class="article-white">Infrastruktur für die nächste Generation</span></h2>
+                
+                <p>WordPress löst das Versprechen ein, KI nicht als Spielerei, sondern als echte Infrastruktur zu integrieren. Die Abilities API (WP 6.9) und der WP AI Client SDK (WP 7.0, vorgeschlagen) sind keine Features – sie sind ein neues architektonisches Fundament. WordPress wird vom Werkzeug zum Router: Wer sendet was an wen, und wer darf was tun?</p>
+
+                <div class="key-points">
+                    <h3>Zusammenfassung:</h3>
+                    <ul>
+                        <li><strong>Abilities API (WP 6.9):</strong> Serverseitig bereits im Core. Macht WordPress-Funktionen maschinenlesbar und entdeckbar für KI-Agenten, MCP-Clients und Automatisierungstools. WordPress 7.0 ergänzt die Client-Side Abilities API für Browser-basierte Workflows.</li>
+                        <li><strong>WP AI Client SDK (WP 7.0, vorgeschlagen):</strong> Standardisierter PHP-Zugang zu allen großen KI-Anbietern über eine einheitliche Klasse – ohne Vendor-Lock-in. Laut AI-Contributor-Meetings ist ein Aufschub auf 7.1 möglich, falls mehr Iterationszeit nötig ist.</li>
+                        <li><strong>Kein LLM auf dem Server:</strong> WordPress ist der Router, die KI-Rechenarbeit bleibt bei den Anbietern. Wie eine <a href="https://designare.at/KI-Integration-auf-Webseiten" title="Serverless vs. Plugin: Der Performance-Vergleich">Serverless-Architektur</a> im Vergleich abschneidet, zeigt der Tech-Vergleich.</li>
+                        <li><strong>Sicherheit &amp; DSGVO nicht vergessen:</strong> <code>permission_callback</code> ist Pflicht. Drittlandübermittlungen müssen rechtlich abgesichert sein.</li>
+                        <li><strong>Praxis-Beispiel:</strong> Wie ein KI-Assistent mit RAG, Memory und Function Calling heute schon funktioniert, zeigt <a href="https://designare.at/evita-ki-assistentin" title="Evita: KI-Assistentin mit Gedächtnis & RAG">Evita</a>. Konkrete Anwendungsfälle für Unternehmen gibt es im <a href="https://designare.at/ki-fuer-unternehmenswebseiten" title="KI für KMU: Chatbots, Personalisierung und echter Mehrwert">KI-Webseiten-Guide</a>.</li>
+                    </ul>
+                </div>
+
+                <p>Nutzt du aktuell schon Automatisierungs-Tools wie n8n oder Make in Kombination mit WordPress? Die Abilities API ist heute verfügbar – der richtige Zeitpunkt, um erste Workflows damit aufzubauen und auf den nativen Standard umzustellen, bevor WP 7.0 erscheint.</p>
+            </section>
+
+            <section class="blog-cta-wrapper">
+                <h2>Brauchst du Hilfe bei der KI-Automatisierung?</h2>
+                <p>Die neuen APIs bieten enormes Potential – aber die richtige Implementierung für dein spezifisches Projekt braucht Erfahrung. Du möchtest erste Workflows mit der Abilities API aufbauen, deinen Content-Prozess automatisieren oder dein eigenes Plugin fit für den nativen AI Client SDK machen? Lass uns konkret besprechen, was für dein Setup sinnvoll ist.</p>
+                
+                <button onclick="document.getElementById('contact-modal').classList.add('visible')" class="cta-button-blog">
+                    <i aria-hidden="true" class="fa-solid fa-rocket"></i> Workflow-Analyse anfragen
+                </button>
+            </section>
+            
+            <div id="feedback-placeholder"></div>
+            <div id="related-placeholder"></div>
+        </article>
+
+    </main>
+
+    <div id="footer-placeholder"></div>
+    <script src="js/feedback.js" defer></script>
+
+    <!-- ══════════════════════════════════════════════════ -->
+    <!-- WP KI CORE – Plugin Chaos Toggle JS               -->
+    <!-- ══════════════════════════════════════════════════ -->
+    <script>
+    (function(){
+        var frame=document.getElementById('wpc-frame');
+        var btns=document.querySelectorAll('.wpc-toggle-btn');
+        if(!frame||!btns.length)return;
+        var userClicked=false,timer;
+        function set(isAfter){
+            btns.forEach(function(b){b.classList.remove('is-active');});
+            if(isAfter){frame.classList.add('is-after');btns[1].classList.add('is-active');}
+            else{frame.classList.remove('is-after');btns[0].classList.add('is-active');}
+        }
+        btns.forEach(function(b){b.addEventListener('click',function(){
+            userClicked=true;if(timer)clearInterval(timer);
+            set(b.dataset.state==='after');
+        });});
+        var isAfter=false;
+        timer=setInterval(function(){if(userClicked)return;isAfter=!isAfter;set(isAfter);},5000);
+    })();
+    </script>
+
+</body>
+</html>

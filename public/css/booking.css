@@ -1,0 +1,325 @@
+/* booking.css - Torino Style Redesign */
+
+/* ------------------------- */
+/* 1. Modal Grundstruktur    */
+/* ------------------------- */
+
+#booking-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+    backdrop-filter: blur(5px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 999999 !important;
+    opacity: 1 !important;
+    font-family: 'Poppins', sans-serif;
+}
+
+.booking-modal-content {
+    background: var(--modal-bg);
+    border-radius: 0;
+    border: 1px solid var(--border-color);
+    padding: 0;
+    max-width: 480px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    position: relative;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.booking-modal-header {
+    padding: 24px 30px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.booking-modal-title {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: var(--text-color);
+}
+
+.booking-modal-subtitle {
+    margin: 0;
+    color: var(--text-color-muted);
+    font-size: 0.95rem;
+    font-weight: 300;
+}
+
+.booking-modal-body {
+    padding: 30px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.booking-modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    font-size: 2rem;
+    color: var(--text-color-muted);
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.booking-modal-close-btn:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: none;
+}
+
+/* ------------------------- */
+/* 2. Schritte & Navigation  */
+/* ------------------------- */
+
+.booking-step {
+    display: none;
+}
+
+.booking-step.active {
+    display: block;
+}
+
+.booking-step-title {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    text-align: center;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* ------------------------- */
+/* 3. Slot-Auswahl           */
+/* ------------------------- */
+
+#callback-loading, #no-slots-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-color-muted);
+}
+
+#no-slots-message a {
+    color: var(--accent-color);
+}
+
+#callback-slots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.callback-slot-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px 20px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+}
+
+.callback-slot-button:hover {
+    border-color: var(--accent-color);
+    background: transparent;
+}
+
+.slot-info {
+    flex-grow: 1;
+}
+
+.slot-time {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text-color);
+}
+
+.slot-day {
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    font-weight: 300;
+}
+
+.slot-arrow {
+    font-size: 1.5rem;
+    color: var(--text-color-muted);
+    transition: all 0.3s ease;
+}
+
+.callback-slot-button:hover .slot-arrow {
+    transform: translateX(5px);
+    color: var(--accent-color);
+}
+
+/* ------------------------- */
+/* 4. Kontaktdaten-Formular  */
+/* ------------------------- */
+
+#selected-slot-display {
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 12px;
+    background: rgba(196, 163, 90, 0.1);
+    border: 1px solid var(--accent-color);
+    border-radius: 0;
+    color: var(--accent-color);
+}
+
+.booking-form-group {
+    margin-bottom: 18px;
+}
+
+.booking-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    font-weight: 300;
+}
+
+.booking-form-group input,
+.booking-form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--bg-color-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.booking-form-group input:focus,
+.booking-form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: none;
+}
+
+.booking-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.booking-btn {
+    flex-grow: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.booking-btn.back-btn {
+    background: transparent;
+    color: var(--text-color-muted);
+    border: 1px solid var(--border-color);
+}
+
+.booking-btn.back-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: transparent;
+}
+
+.booking-btn.submit-btn {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    border: 1px solid var(--accent-color);
+}
+
+.booking-btn.submit-btn:hover {
+    background: var(--accent-color-hover);
+    border-color: var(--accent-color-hover);
+}
+
+.booking-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ------------------------- */
+/* 5. Bestätigung            */
+/* ------------------------- */
+
+.confirmation-content {
+    text-align: center;
+}
+
+.confirmation-icon {
+    font-size: 3.5rem;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+.confirmation-title {
+    font-size: 1.4rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+}
+
+#confirmation-details {
+    margin: 25px 0;
+    padding: 20px;
+    background: var(--bg-color-secondary);
+    border-radius: 0;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    color: var(--text-color-muted);
+    line-height: 1.7;
+}
+
+#confirmation-details strong {
+    color: var(--text-color);
+}
+
+.confirmation-subtext {
+    color: var(--text-color-muted);
+    margin-bottom: 25px;
+    font-weight: 300;
+}
+
+.booking-btn.confirm-close-btn {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    width: 100%;
+    border: 1px solid var(--accent-color);
+}
+
+.booking-btn.confirm-close-btn:hover {
+    background: var(--accent-color-hover);
+    border-color: var(--accent-color-hover);
+}

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Import Pro - Einstellungen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: #f0f0f1;
+            padding: 20px;
+            color: #3c434a;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .csv-dashboard-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        
+        .csv-dashboard-header h1 {
+            font-size: 32px;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: #1d2327;
+        }
+        
+        .csv-dashboard-header p {
+            color: #646970;
+            font-size: 14px;
+        }
+        
+        .csv-settings-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .csv-import-box.settings-box {
+            background: #fff;
+            border: 1px solid #c3c4c7;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .csv-import-box.settings-box:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .csv-import-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #23282d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            background: #2271b1;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .step-number.completed {
+            background: #00a32a;
+        }
+        
+        .step-number.active {
+            background: #f56e28;
+        }
+        
+        .step-icon {
+            font-size: 24px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #00a32a;
+            border: 1px solid #00a32a;
+        }
+        
+        .status-active {
+            background: #d5e5ff;
+            color: #135e96;
+            border: 1px solid #72aee6;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #d63638;
+            border: 1px solid #d63638;
+        }
+        
+        .form-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .form-table th {
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 10px 10px 0;
+            width: 140px;
+            vertical-align: top;
+        }
+        
+        .form-table td {
+            padding: 10px 0;
+        }
+        
+        .form-table input[type="text"],
+        .form-table input[type="url"],
+        .form-table input[type="number"],
+        .form-table select,
+        .form-table textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 5px 8px;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .form-table select {
+            height: 32px;
+        }
+        
+        .form-table .description {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #646970;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f6f7f7;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            color: #2c3338;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .button:hover {
+            background: #f0f0f1;
+            border-color: #8c8f94;
+        }
+        
+        .button-primary {
+            background: #2271b1;
+            border-color: #2271b1;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #135e96;
+            border-color: #135e96;
+        }
+        
+        .button-large {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .test-results-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            min-height: 50px;
+            font-size: 13px;
+        }
+        
+        .test-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .csv-dashboard-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            text-align: center;
+        }
+        
+        .success-notice {
+            background: #d4edda;
+            border-left: 4px solid #00a32a;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .success-notice h3 {
+            margin: 0 0 10px 0;
+            color: #00a32a;
+        }
+        
+        .sample-data-container {
+            max-height: 200px;
+            overflow: auto;
+            border: 1px solid #c3c4c7;
+            border-radius: 3px;
+            margin-top: 15px;
+            background: white;
+        }
+        
+        .sample-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .sample-data-table th {
+            background: #f6f7f7;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #e1e1e1;
+            position: sticky;
+            top: 0;
+        }
+        
+        .sample-data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .info-message {
+            background: #f0f6fc;
+            border-left: 4px solid #72aee6;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 3px 3px 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="csv-dashboard-header">
+            <h1>⚙️ CSV Import Einstellungen</h1>
+            <p>Konfigurieren Sie alle Aspekte des CSV-Imports für optimale Ergebnisse</p>
+        </div>
+
+        <div class="success-notice">
+            <h3>✅ Einstellungen gespeichert!</h3>
+            <p>Ihre Einstellungen wurden gespeichert. Sie können jetzt mit dem Import beginnen.</p>
+            <a href="#" class="button button-primary button-large" style="background: #00a32a; border-color: #00a32a;">
+                🚀 Zum Import-Dashboard
+            </a>
+        </div>
+
+        <form method="post" action="">
+            <div class="csv-settings-dashboard">
+                <!-- Box 1: Basis-Konfiguration -->
+                <div class="csv-import-box settings-box">
+                    <h3>
+                        <span class="step-number completed">1</span>
+                        <span class="step-icon">📋</span>
+                        Basis-Konfiguration
+                    </h3>
+                    <span class="status-indicator status-success">✅ Grundeinstellungen</span>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row"><label>Template-Post ID</label></th>
+                                <td>
+                                    <input type="number" value="2547" class="small-text">
+                                    <p class="description">
+                                        ✅ <strong>"Landing Page Template"</strong> (ID: 2547)<br>
+                                        <small>Status: publish | Typ: page</small>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Page Builder</label></th>
+                                <td>
+                                    <select>
+                                        <option>Gutenberg (Standard)</option>
+                                        <option selected>Elementor</option>
+                                        <option>WPBakery</option>
+                                        <option>Breakdance</option>
+                                        <option>Enfold</option>
+                                    </select>
+                                    <p class="description">Editor für das Template</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Post-Typ</label></th>
+                                <td>
+                                    <select>
+                                        <option>Beitrag</option>
+                                        <option selected>Seite</option>
+                                        <option>Portfolio</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Post-Status</label></th>
+                                <td>
+                                    <select>
+                                        <option selected>Entwurf</option>
+                                        <option>Veröffentlicht</option>
+                                        <option>Privat</option>
+                                        <option>Ausstehend</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Box 2: CSV-Quellen -->
+                <div class="csv-import-box settings-box">
+                    <h3>
+                        <span class="step-number completed">2</span>
+                        <span class="step-icon">🔗</span>
+                        CSV-Quellen
+                    </h3>
+                    <span class="status-indicator status-success">✅ Quellen konfiguriert</span>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row"><label>Dropbox CSV-URL</label></th>
+                                <td>
+                                    <input type="url" value="https://www.dropbox.com/s/abc123/landingpages.csv?dl=1" placeholder="https://www.dropbox.com/s/...?dl=1">
+                                    <p class="description">Direkt-Download-Link. Muss mit `?dl=1` enden.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Lokaler CSV-Pfad</label></th>
+                                <td>
+                                    <input type="text" value="data/landingpages.csv">
+                                    <p class="description">
+                                        Pfad: <code>/var/www/html/data/landingpages.csv</code><br>
+                                        <span style="color:green;">✅ Datei gefunden (2.4 MB, geändert: 2025-08-23 14:32:15)</span>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>CSV-Trennzeichen</label></th>
+                                <td>
+                                    <input type="text" value="auto" class="small-text">
+                                    <p class="description">Standard: <code>auto</code> für automatische Erkennung.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Box 3: Medien-Einstellungen -->
+                <div class="csv-import-box settings-box">
+                    <h3>
+                        <span class="step-number completed">3</span>
+                        <span class="step-icon">🖼️</span>
+                        Medien-Einstellungen
+                    </h3>
+                    <span class="status-indicator status-active">⚙️ Medien-Konfiguration</span>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row"><label>Bildquelle</label></th>
+                                <td>
+                                    <select>
+                                        <option selected>WordPress-Mediathek</option>
+                                        <option>Lokaler Ordner</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Lokaler Bild-Ordner</label></th>
+                                <td>
+                                    <input type="text" value="wp-content/uploads/csv-import-images/">
+                                    <p class="description">
+                                        Pfad relativ zum WordPress-Root.<br>
+                                        <span style="color:green;">✅ Ordner existiert (247 Dateien)</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Box 4: SEO & Erweitert -->
+                <div class="csv-import-box settings-box">
+                    <h3>
+                        <span class="step-number completed">4</span>
+                        <span class="step-icon">🎯</span>
+                        SEO & Erweitert
+                    </h3>
+                    <span class="status-indicator status-active">🎯 SEO-Einstellungen</span>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row"><label>SEO-Plugin</label></th>
+                                <td>
+                                    <select>
+                                        <option>Keins / Manuell</option>
+                                        <option>All in One SEO</option>
+                                        <option selected>Yoast SEO</option>
+                                        <option>Rank Math</option>
+                                    </select>
+                                    <p class="description">Wähle dein aktives SEO-Plugin</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label>Erforderliche Spalten</label></th>
+                                <td>
+                                    <textarea rows="3">post_title
+post_name</textarea>
+                                    <p class="description">Eine Spalte pro Zeile</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Duplikate</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" checked> Duplikate überspringen (basierend auf Post-Titel)
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Suchmaschinen</th>
+                                <td>
+                                    <label>
+                                        <input type="checkbox"> Alle importierten Posts auf "noindex" setzen
+                                    </label>
+                                    <p class="description">Verhindert, dass Suchmaschinen diese Seiten indizieren. Nützlich für reine Landingpages.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>

@@ -1,0 +1,166 @@
+/* ============================================================
+   FEEDBACK-STYLE.CSS - TORINO STYLE
+   Styles für Bewertungen und Social Share
+   ============================================================ */
+
+.feedback-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 4rem 0 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.feedback-title {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+/* Rating Buttons */
+.rating-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.rating-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 0.5rem 1.2rem;
+    color: var(--text-color-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.rating-btn:hover {
+    transform: none;
+    border-color: var(--accent-color);
+}
+
+.rating-btn.positive:hover { 
+    color: #51cf66; 
+    border-color: #51cf66; 
+    background: transparent; 
+}
+
+.rating-btn.neutral:hover { 
+    color: var(--accent-color); 
+    border-color: var(--accent-color); 
+    background: rgba(196, 163, 90, 0.1); 
+}
+
+.rating-btn.negative:hover { 
+    color: #ff6b6b; 
+    border-color: #ff6b6b; 
+    background: transparent; 
+}
+
+.rating-btn:disabled {
+    cursor: default;
+}
+
+/* Ratio Bar (Visualisierung) */
+.rating-ratio-bar {
+    height: 3px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 0.5rem;
+    background-color: var(--border-color);
+    border-radius: 0;
+    display: flex;
+    overflow: hidden;
+}
+
+.ratio-segment { height: 100%; }
+.ratio-segment.pos { background-color: #51cf66; }
+.ratio-segment.neu { background-color: var(--accent-color); opacity: 0.7; }
+.ratio-segment.neg { background-color: #ff6b6b; }
+
+.rating-labels {
+    font-size: 0.75rem;
+    color: var(--text-color-muted);
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Feedback Message Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-message {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Share Section */
+.share-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color-subtle);
+}
+
+.share-label {
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    margin-right: 5px;
+    font-weight: 300;
+}
+
+.share-icon {
+    color: var(--text-color-muted);
+    font-size: 1.1rem;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    padding: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-icon:hover {
+    opacity: 1;
+    transform: none;
+    color: var(--accent-color);
+}
+
+/* Mobile Anpassung */
+@media (max-width: 480px) {
+    .rating-buttons {
+        gap: 0.5rem;
+    }
+    
+    .rating-btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .share-container {
+        gap: 10px;
+    }
+}

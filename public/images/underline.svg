@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 12" preserveAspectRatio="none">
+  <filter id="frayed-edges">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" result="warp"/>
+    <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="3" in="SourceGraphic" in2="warp"/>
+  </filter>
+  
+  <path d="M 5 7 C 50 12, 150 2, 195 7" filter="url(#frayed-edges)"/>
+</svg>

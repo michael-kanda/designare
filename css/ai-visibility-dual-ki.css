@@ -1,0 +1,550 @@
+ /* ================================================
+   KI-VERGLEICH: Engine Badges & Table Styles
+   Append to css/ai-visibility.css
+   ================================================ */
+
+/* Engine Badges */
+.engine-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+}
+
+.engine-gemini {
+    background: #4285f4;
+    color: #fff;
+}
+
+.engine-chatgpt {
+    background: #10a37f;
+    color: #fff;
+}
+
+/* Mini-Badge for Score Breakdown */
+.breakdown-engine {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.breakdown-engine.engine-gemini {
+    background: #4285f4;
+}
+
+.breakdown-engine.engine-chatgpt {
+    background: #10a37f;
+}
+
+/* Score engines info line */
+.score-engines {
+    font-size: 0.85rem;
+    color: var(--text-muted, #999);
+    margin-top: 4px;
+}
+
+/* Comparison table hover */
+.result-section table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* h3 with engine badge */
+h3 .engine-badge {
+    margin-right: 8px;
+    font-size: 0.8rem;
+    padding: 3px 12px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .engine-badge {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+    }
+}
+
+/* Mobile engine labels: hidden on desktop */
+.mobile-label {
+    display: none;
+}
+
+/* Mobile: Comparison Table → Card Layout */
+@media (max-width: 600px) {
+    .comparison-table-wrapper {
+        overflow-x: visible;
+    }
+
+    .comparison-table thead {
+        display: none;
+    }
+
+    .comparison-table,
+    .comparison-table tbody,
+    .comparison-table tr,
+    .comparison-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .comparison-table tbody tr {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        padding: 14px 16px;
+    }
+
+    .comparison-table tbody tr td:first-child {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 0 0 10px 0 !important;
+        margin-bottom: 6px;
+    }
+
+    .comparison-td {
+        text-align: left !important;
+        padding: 8px 0 4px 0 !important;
+        border-bottom: none !important;
+    }
+
+    .comparison-td[data-engine="chatgpt"] {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        margin-top: 4px;
+        padding-top: 8px !important;
+    }
+
+    .comparison-td br {
+        display: none;
+    }
+
+    /* Show mobile labels */
+    .mobile-label {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        color: #fff;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .mobile-label.engine-gemini {
+        background: #4285f4;
+    }
+
+    .mobile-label.engine-chatgpt {
+        background: #10a37f;
+    }
+}
+
+/* ================================================
+   TEST RESPONSE: Kompakte, saubere Darstellung
+   ================================================ */
+.test-response {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+.test-response p {
+    margin: 0 0 0.75em 0;
+}
+
+.test-response p:last-child {
+    margin-bottom: 0;
+}
+
+.test-response ul.ai-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5em 0;
+}
+
+.test-response ul.ai-list li {
+    position: relative;
+    padding: 0.35em 0 0.35em 1.2em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    line-height: 1.5;
+}
+
+.test-response ul.ai-list li:last-child {
+    border-bottom: none;
+}
+
+.test-response ul.ai-list li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: #c4a35a;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.test-response strong {
+    color: #c4a35a;
+    font-weight: 600;
+}
+
+.test-response br + br {
+    display: block;
+    content: '';
+    margin-top: 0.4em;
+}
+
+
+/* =================================================================
+   ai-visibility-fixes.css
+   Ersetzt alle Inline-Styles die aus ai-visibility.js entfernt wurden.
+   Einbinden NACH ai-visibility-dual-ki.css
+   ================================================================= */
+
+/* -----------------------------------------------------------------
+   STATUS PILLS (ersetzt statusPill() Inline-Styles)
+   ----------------------------------------------------------------- */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-pill i {
+    font-size: 0.7rem;
+}
+
+.status-mentioned {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.status-not-mentioned {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.status-none {
+    color: #555;
+}
+
+/* -----------------------------------------------------------------
+   SENTIMENT INDICATORS (ersetzt sentimentDot() Inline-Styles)
+   ----------------------------------------------------------------- */
+.sentiment-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.sentiment-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.sentiment-indicator.sentiment-positiv { color: #22c55e; }
+.sentiment-indicator.sentiment-positiv .sentiment-dot { background: #22c55e; }
+
+.sentiment-indicator.sentiment-neutral { color: #f59e0b; }
+.sentiment-indicator.sentiment-neutral .sentiment-dot { background: #f59e0b; }
+
+.sentiment-indicator.sentiment-negativ { color: #ef4444; }
+.sentiment-indicator.sentiment-negativ .sentiment-dot { background: #ef4444; }
+
+.sentiment-indicator.sentiment-fehler { color: #666; }
+.sentiment-indicator.sentiment-fehler .sentiment-dot { background: #666; }
+
+/* -----------------------------------------------------------------
+   COMPARISON TABLE (ersetzt die thStyle/tdStyle Inline-Styles)
+   ----------------------------------------------------------------- */
+.comparison-table-wrapper {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.comparison-table thead tr {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.comparison-th,
+.comparison-th-left {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 400;
+    color: #999;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.comparison-th { text-align: center; }
+.comparison-th-left { text-align: left; }
+
+.comparison-td,
+.comparison-td-left {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comparison-td { text-align: center; }
+
+.comparison-td-left {
+    text-align: left;
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.comparison-icon {
+    color: #c4a35a;
+    margin-right: 6px;
+    width: 16px;
+}
+
+.comparison-na {
+    color: #555;
+    font-size: 0.8rem;
+}
+
+/* -----------------------------------------------------------------
+   ENGINE LOGOS (in Vergleichstabelle)
+   ----------------------------------------------------------------- */
+.engine-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.engine-logo-badge {
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.engine-logo-badge.engine-gemini { background: #4285f4; }
+.engine-logo-badge.engine-chatgpt { background: #10a37f; }
+
+/* -----------------------------------------------------------------
+   CHATGPT INSIGHT BOXES (ersetzt die Inline-Style divs)
+   ----------------------------------------------------------------- */
+.chatgpt-insight-negative,
+.chatgpt-insight-positive {
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.chatgpt-insight-negative {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+}
+
+.chatgpt-insight-negative strong {
+    color: #ef4444;
+}
+
+.chatgpt-insight-positive {
+    background: rgba(34, 197, 94, 0.08);
+    border-left: 3px solid #22c55e;
+}
+
+.chatgpt-insight-positive strong {
+    color: #22c55e;
+}
+
+
+/* =================================================================
+   MIGRATED FROM INLINE <style> IN ki-sichtbarkeit.html
+   Alle Regeln die ursprünglich page-spezifisch inline standen.
+   ================================================================= */
+
+/* --- Test-Item: Neutral / Fehlend (blauer Kreis mit Minus) --------- */
+.test-item.neutral-mentioned summary .test-status i {
+    color: #3b82f6;
+}
+
+.test-item.neutral-mentioned {
+    border-left-color: #3b82f6;
+}
+
+.test-sentiment.sentiment-fehlend,
+.test-sentiment.sentiment-neutral {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+/* --- Verdict Box --------------------------------------------------- */
+.verdict-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--accent-color, #f59e0b);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+}
+
+.verdict-box h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.verdict-box p {
+    margin: 0;
+    font-size: 15px;
+    color: #ccc;
+    line-height: 1.6;
+}
+
+/* --- Engine-Karten (Score-Breakdown pro KI) ----------------------- */
+.engine-cards-row {
+    display: flex;
+    gap: 12px;
+}
+
+.engine-detail-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.engine-detail-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.engine-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.engine-range-note {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* --- Engine Check Rows (✓/✗ je Testkategorie) --------------------- */
+.engine-check-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 15px;
+}
+
+.engine-check-label {
+    color: #aaa;
+}
+
+.engine-weight {
+    font-size: 13px;
+    color: #666;
+    margin-left: 4px;
+}
+
+.engine-check-icon.found {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.engine-check-icon.notfound {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* --- Empfehlungen mit Nummer + Potenzial -------------------------- */
+.recommendation-card {
+    display: flex !important;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.rec-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.rec-content {
+    flex: 1;
+}
+
+.rec-potential {
+    display: inline-block;
+    font-size: 14px;
+    color: #22c55e;
+    margin-top: 4px;
+}
+
+.rec-potential i {
+    margin-right: 4px;
+}
+
+/* --- Score-Range Schriftgröße (Override) -------------------------- */
+.score-value .score-number {
+    font-size: 22px;
+}
+
+.score-value .score-max {
+    display: none;
+}
+
+/* --- Responsive --------------------------------------------------- */
+@media (max-width: 600px) {
+    .engine-cards-row {
+        flex-direction: column;
+    }
+}

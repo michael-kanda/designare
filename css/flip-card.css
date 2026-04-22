@@ -1,0 +1,918 @@
+/* ============================================================
+   FLIP CARD STYLESHEET - SEMANTIC VERSION
+   Logik: Grid-Overlay (Auto-Höhe basierend auf Inhalt)
+   Keine internen Scrollbalken mehr.
+   ============================================================ */
+
+/* ===================
+   1. HERO OVERRIDE
+   Damit der Hero mit der Flip-Card wachsen kann
+   DYNAMISCH: padding-top skaliert mit Viewport-Höhe
+   =================== */
+
+#hero:has(.flip-container) {
+    align-items: flex-start !important;
+    /* DYNAMISCH: 8vh = 8% der Viewport-Höhe, begrenzt zwischen 35px und 120px */
+    padding-top: clamp(35px, 8vh, 120px) !important; 
+    padding-bottom: clamp(40px, 6vh, 80px) !important;
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+}
+
+#hero section.flip-container {
+    display: flex;
+    justify-content: center !important;
+    align-items: flex-start;
+    min-height: unset;
+    height: auto;
+    padding: 0 20px;
+}
+
+/* ===================
+   2. FLIP CONTAINER & FLIPPER
+   =================== */
+
+.flip-container {
+    perspective: 1400px;
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.flipper {
+    width: 100%;
+    min-height: 50vh;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr; 
+    align-items: start; 
+    justify-items: center;
+}
+
+.flip-container.flipped .flipper {
+    transform: rotateY(180deg);
+}
+
+/* ===================
+   3. CARD FACES
+   =================== */
+
+.front-face,
+.back-face {
+    grid-area: 1 / 1 / 2 / 2;
+    width: 100%;
+    height: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    transform-style: preserve-3d;
+}
+
+.front-face {
+    z-index: 2;
+    transform: rotateY(0deg);
+    align-items: center; 
+    justify-content: flex-start; 
+    align-self: start;
+}
+
+.back-face {
+    z-index: 1;
+    transform: rotateY(180deg);
+    justify-content: flex-start;
+}
+
+/* ===================
+   4. STARTSEITE (#view-main)
+   DYNAMISCH: Abstand skaliert mit Viewport-Höhe
+   =================== */
+
+#view-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* DYNAMISCH: 5vh = 5% der Viewport-Höhe, begrenzt zwischen 0px und 80px */
+    margin-top: clamp(0px, 5vh, 80px); 
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#view-main .profile-picture,
+#view-main h1,
+#view-main .subtitle,
+#view-main .ai-container {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#view-main > * {
+    max-width: 500px;
+    width: 100%;
+}
+
+#view-main .profile-picture {
+    width: 200px;
+    max-width: 200px;
+}
+
+.info-btn-wrapper {
+    width: 100%;
+    margin-top: 15px;
+    position: relative;
+    z-index: 10;
+}
+
+#flip-info-btn {
+    margin-top: 12px;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+#flip-info-btn:hover {
+    background-color: var(--accent-color) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 5px 15px rgba(211, 154, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+/* ===================
+   5. FLIP PANEL CONTENT
+   =================== */
+
+.flip-panel {
+    overflow: visible !important; 
+}
+
+.flip-panel-content {
+    width: 100%;
+    max-width: 1200px;
+    box-sizing: border-box;
+    position: relative; 
+    top: -30px;             
+    padding: 20px 2rem;
+    margin: 0 auto;     
+    text-align: left;
+    background: transparent; 
+}
+
+/* ===================
+   6. EVITA VIEW (#view-third)
+   =================== */
+
+#view-third {
+    display: none;
+    width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* WICHTIG: Wenn JS display:flex/block setzt */
+#view-third[style] {
+    height: auto !important;
+    overflow: visible !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ===================
+   7. TYPOGRAPHY & IMAGES
+   =================== */
+
+.flip-panel h2 {
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    font-size: 2rem;
+    text-align: left;
+}
+
+.flip-header-white {
+    color: var(--text-color) !important; 
+}
+
+.flip-panel p,
+.flip-panel ul li {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.flip-panel ul {
+    list-style-type: square;
+    list-style-position: inside;
+    padding: 0;
+    margin: 10px 0 15px 0;
+}
+
+.evita-grid-wrapper {
+    width: 100%;
+    text-align: left;
+}
+
+.evita-image-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.evita-image-block img {
+    height: auto;
+    display: block;
+    width: 100%;
+    aspect-ratio: attr(width) / attr(height);
+}
+
+.evita-text-middle a,
+.evita-text-middle a:visited,
+.evita-text-middle a:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ===================
+   8. DESKTOP GRID LAYOUT
+   =================== */
+
+@media (min-width: 769px) {
+    .evita-grid-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        grid-template-rows: auto auto;
+        gap: 30px;
+        align-items: start;
+    }
+
+    .evita-desktop-group {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+    }
+
+    .evita-image-block {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-end;
+        align-self: start;
+    }
+
+    .evita-text-bottom {
+        grid-column: 1 / 3;
+        grid-row: 2 / 3;
+    }
+}
+
+/* ===================
+   9. BUTTONS (Navigation Back/Evita)
+   =================== */
+
+.flip-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+    width: 100%;
+    flex-direction: row !important;
+}
+
+.flip-btn-style {
+    background: transparent;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    border-radius: 7px;
+    font-size: 1rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0 10px;
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1; 
+    width: auto;
+    min-width: 0;
+    text-decoration: none;
+    pointer-events: auto;
+}
+
+.flip-btn-style:hover {
+    background-color: var(--accent-color) !important;
+    color: #fff !important;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(252, 181, 0, 0.3);
+}
+
+/* ===================
+   10. MOBILE RESPONSIVE
+   DYNAMISCH: Auch auf Mobile skaliert der Abstand mit
+   =================== */
+
+@media (max-width: 768px) {
+    
+    #hero:has(.flip-container) {
+        /* DYNAMISCH: 6vh auf Mobile, begrenzt zwischen 25px und 60px */
+        padding-top: clamp(25px, 6vh, 60px) !important;
+        height: auto !important;
+        min-height: 100vh;
+    }
+
+    /* DYNAMISCH: #view-main margin-top für Mobile */
+    #view-main {
+        margin-top: clamp(0px, 3vh, 40px);
+    }
+
+    .flipper {
+        min-height: 50vh; 
+    }
+
+    .evita-grid-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .evita-desktop-group { display: contents; }
+    .evita-text-top { order: 1; }
+    
+    .evita-image-block {
+        order: 2;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+
+    .evita-image-block img {
+        width: 60%;
+        max-width: 200px;
+        margin: 0;
+    }
+
+    .evita-text-middle { order: 3; }
+    .evita-text-bottom { order: 4; }
+
+    .flip-controls {
+        flex-direction: column !important;
+        margin-top: 20px;
+        gap: 12px;
+    }
+
+    .flip-btn-style {
+        width: 100%;
+        padding: 12px 20px;
+        min-height: 50px;
+        height: auto;
+        font-size: 1rem;
+    }
+    
+    .flip-panel-content {
+        padding: 10px 1.5rem 40px 1.5rem;
+    }
+
+    .flip-panel h2 { font-size: 1.35rem; margin-bottom: 15px; white-space: nowrap; }
+}
+
+/* ===================
+   11. EXTRA SMALL SCREENS
+   =================== */
+
+@media (max-width: 400px) {
+    .flip-panel-content { padding: 12px 1rem; }
+    .flip-panel h2 { font-size: 1.2rem; }
+    .evita-image-block img { width: 50%; max-width: 150px; }
+}
+
+/* ============================================================
+   LIGHT MODE ANPASSUNGEN FÜR FLIP CARDS
+   ============================================================ */
+
+body.light-mode .flipper {
+    color: #333333 !important;
+}
+
+body.light-mode .evita-text-top,
+body.light-mode .evita-text-middle,
+body.light-mode .evita-text-bottom,
+body.light-mode .flipper h2,
+body.light-mode .flipper h3,
+body.light-mode .flipper ul,
+body.light-mode .flipper li,
+body.light-mode .flip-header-white,
+body.light-mode .flipper li::before,
+body.light-mode .flipper li i,
+body.light-mode .flipper p {
+    color: #333333 !important;
+}
+
+/* ============================================================
+   EXPERT FAQ STYLES
+   ============================================================ */
+
+.expert-faq-wrapper {
+    width: 100%;
+    margin-top: 30px;
+    border-top: 1px solid var(--border-color-subtle);
+    grid-column: 1 / -1; 
+}
+
+details[name="expert-faq"] {
+    border-bottom: 1px solid var(--border-color-subtle);
+    transition: border-color 0.3s ease;
+}
+
+details[name="expert-faq"] summary {
+    padding: 16px 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+
+details[name="expert-faq"] summary:hover {
+    color: var(--accent-color);
+}
+
+details[name="expert-faq"] summary::after {
+    content: '\f078';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.75rem;
+    color: var(--text-color-subtle);
+    transition: transform 0.3s ease, color 0.3s ease;
+    margin-left: 10px;
+}
+
+details[name="expert-faq"][open] summary::after {
+    transform: rotate(180deg);
+    color: var(--accent-color);
+}
+
+details[name="expert-faq"] summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-content {
+    padding-bottom: 20px;
+    padding-right: 20px;
+    animation: fadeIn 0.4s ease;
+}
+
+.faq-content p {
+    font-size: 0.9rem !important;
+    line-height: 1.6;
+    color: var(--text-color-muted);
+    margin-bottom: 0 !important;
+}
+
+.faq-content code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: var(--accent-color);
+}
+
+.faq-link {
+    display: inline-block;
+    margin-left: 6px;
+    color: var(--accent-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.faq-link:hover {
+    transform: translateX(4px);
+    text-decoration: none;
+}
+
+/* ============================================================
+   TECH-TERMINAL STYLES
+   ============================================================ */
+
+.tech-terminal-wrapper {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+    width: 100%;
+}
+
+.terminal-header-bar {
+    background-color: #2d2d2d;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.terminal-controls {
+    display: flex;
+    gap: 6px;
+    margin-right: 15px;
+}
+
+.control-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.control-dot.red { background-color: #ff5f56; }
+.control-dot.yellow { background-color: #ffbd2e; }
+.control-dot.green { background-color: #27c93f; }
+
+.terminal-title-text {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+.terminal-body-content {
+    padding: 20px;
+}
+
+.tech-fact-item {
+    margin-bottom: 20px;
+    border-left: 2px solid #333;
+    padding-left: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.tech-fact-item:hover {
+    border-left-color: var(--accent-color);
+}
+
+.tech-fact-item:last-child {
+    margin-bottom: 0;
+}
+
+.prompt-sign {
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-right: 8px;
+    float: left;
+}
+
+.cmd-text {
+    color: #a9b7c6;
+    font-size: 0.85rem;
+    margin-bottom: 5px !important;
+    display: block;
+}
+
+.output-text {
+    color: #e0e0e0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem !important;
+    line-height: 1.5;
+    margin-left: 20px;
+    margin-bottom: 0 !important;
+    display: block;
+}
+
+.output-text strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.terminal-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: var(--accent-color);
+    text-decoration: none;
+    background: rgba(196, 163, 90, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.terminal-link:hover {
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 10px rgba(196, 163, 90, 0.4);
+    transform: translateX(5px);
+}
+
+/* ============================================================
+   SECTION SEPARATOR TITLES
+   ============================================================ */
+
+.section-separator-title {
+    grid-column: 1 / -1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-color);
+    opacity: 0.9;
+}
+
+.section-separator-title::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--accent-color), transparent);
+    margin-left: 15px;
+    opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+    .section-separator-title {
+        margin-top: 30px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================================
+   HELPER CLASSES
+   ============================================================ */
+
+.flip-cta-text {
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+}
+
+/* ============================================================
+   FACTS CARD
+   ============================================================ */
+
+.facts-card {
+    margin-top: 15px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--accent-color);
+    font-size: 0.9rem !important;
+    line-height: 1.6;
+    width: 100%;
+    text-align: left;
+}
+
+.facts-card-label {
+    font-size: 0.8rem !important;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent-color);
+    margin-bottom: 5px !important;
+    font-weight: 600;
+}
+
+.facts-card-content {
+    color: var(--text-color-muted);
+    margin-bottom: 0 !important;
+    font-size: 0.85rem !important;
+}
+
+body.light-mode .facts-card {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+@media (max-width: 768px) {
+    .facts-card {
+        margin-top: 12px;
+        padding: 10px 12px;
+        max-width: 300px;
+    }
+}
+
+
+* ===================
+   1. STANDARD BLOCKQUOTE
+   Für einfache Zitate ohne Quellenangabe
+   =================== */
+
+blockquote {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1.5rem 1.5rem 1.25rem 2.5rem;  /* Mehr Platz oben und links für das Symbol */
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--accent-color);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text-color);
+    line-height: 1.7;
+    overflow: visible;  /* Sicherstellen dass nichts abgeschnitten wird */
+}
+
+blockquote::before {
+    content: '"';
+    position: absolute;
+    top: 8px;           /* Innerhalb des Containers, nicht negativ */
+    left: 12px;
+    font-size: 2.5rem;  /* Etwas kleiner für bessere Proportionen */
+    font-family: Georgia, serif;
+    color: var(--accent-color);
+    opacity: 0.4;
+    line-height: 1;
+    pointer-events: none;
+}
+
+blockquote p {
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+blockquote p:not(:last-child) {
+    margin-bottom: 0.75rem;
+}
+
+/* ===================
+   1b. CITE INNERHALB BLOCKQUOTE
+   Alternative: <blockquote><p>...</p><cite>...</cite></blockquote>
+   =================== */
+
+blockquote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-style: normal;
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+}
+
+blockquote cite::before {
+    content: '— ';
+    color: var(--accent-color);
+}
+
+/* ===================
+   2. FIGURE + BLOCKQUOTE (mit Quellenangabe)
+   Für Zitate mit Autor/Quelle
+   =================== */
+
+figure:has(blockquote) {
+    margin: 2rem 0;
+    padding: 0;
+}
+
+figure blockquote {
+    margin-bottom: 0;
+    border-radius: 0 8px 0 0;
+}
+
+figure figcaption {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid var(--accent-color);
+    border-radius: 0 0 8px 0;
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    font-style: normal;
+}
+
+figure figcaption cite {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--accent-color);
+}
+
+/* Trennstrich vor dem Autor */
+figure figcaption::before {
+    content: none;
+}
+
+/* ===================
+   3. INLINE-ZITAT <q>
+   Für kurze Zitate im Fließtext
+   =================== */
+
+q {
+    quotes: '„' '"' '‚' ''';  /* Deutsche Anführungszeichen */
+    font-style: italic;
+    color: var(--text-color);
+}
+
+q::before {
+    content: open-quote;
+    color: var(--accent-color);
+}
+
+q::after {
+    content: close-quote;
+    color: var(--accent-color);
+}
+
+/* Verschachtelte Zitate */
+q q::before {
+    content: '‚';
+}
+
+q q::after {
+    content: ''';
+}
+
+/* ===================
+   4. PULL-QUOTE VARIANTE
+   Für hervorgehobene Zitate (optional)
+   =================== */
+
+blockquote.pull-quote {
+    border-left: none;
+    border-top: 2px solid var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: transparent;
+    font-size: 1.15rem;
+}
+
+blockquote.pull-quote::before {
+    position: static;
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: -0.5rem;
+    opacity: 0.5;
+}
+
+blockquote.pull-quote::after {
+    content: '"';
+    display: block;
+    font-size: 2.5rem;
+    font-family: Georgia, serif;
+    color: var(--accent-color);
+    opacity: 0.5;
+    margin-top: -0.5rem;
+    line-height: 1;
+}
+
+/* ===================
+   5. RESPONSIVE ANPASSUNGEN
+   =================== */
+
+@media (max-width: 768px) {
+    blockquote {
+        margin: 1rem 0;
+        padding: 1.25rem 1rem 1rem 2rem;
+        font-size: 0.95rem;
+    }
+
+    blockquote::before {
+        font-size: 2rem;
+        top: 6px;
+        left: 8px;
+    }
+
+    figure figcaption {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    blockquote.pull-quote {
+        padding: 1.5rem 1rem;
+        font-size: 1rem;
+    }
+}

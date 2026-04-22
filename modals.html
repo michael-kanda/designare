@@ -1,0 +1,107 @@
+<div id="contact-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="close-modal" class="close-button">&times;</button>
+        <h2>Frag Michael!</h2>
+        <form id="contact-form-inner">
+            <input type="text" name="name" placeholder="Dein Name (oder Künstlername):" required>
+            <input type="email" name="email" placeholder="Deine E-Mail (Anti-Spam-Zone!)" required>
+            <input type="text" name="_subject" placeholder="Worum geht's? (Bitte kein KI-Drama)">
+            <textarea name="message" placeholder="Deine Botschaft an mich (und Evita):" rows="5" required></textarea>
+
+            <!-- Honeypot: Unsichtbar für Menschen, Bots füllen es aus und werden dadurch erkannt. NICHT entfernen! -->
+            <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+                <label for="website">Website (bitte leer lassen)</label>
+                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="privacy-checkbox">
+                <input type="checkbox" name="privacy" id="privacy" required>
+                <label for="privacy">Michael darf meine Nachricht lesen und Evita darf alles verarbeiten, was sie versteht. (Details im Datenschutz)</label>
+            </div>
+            <button type="submit" class="cta-button">Ab die Post!</button>
+        </form>
+        <div id="contact-success-message" class="contact-success-hidden">
+            <!-- Animated SVG Checkmark -->
+            <div class="success-checkmark">
+                <svg viewBox="0 0 52 52" class="checkmark-svg" width="20" height="20">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h2 class="success-title">Zack, ist raus!</h2>
+            <p class="success-close-wrapper">
+                <a href="#" id="close-success-message" class="cta-button"> Deine Nachricht hat Evitas Spam-Radar überlebt – Glückwunsch!<br>
+                Michael antwortet schneller als du „KI-Drama" sagen kannst.</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="cookie-info-lightbox" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Hinweis zu Cookies</h2>
+        <p class="cookie-info-text">Wir backen hier nur Cookies, die unsere Website am Laufen halten. Reine Technik, kein Schnickschnack!</p>
+        <div class="cookie-lightbox-buttons">
+            <a href="datenschutz.html" id="privacy-policy-link-button" class="lightbox-button">Datenschutzerklärung</a>
+            <button id="acknowledge-cookie-lightbox" class="lightbox-button">Alles klar</button>
+        </div>
+    </div>
+</div>
+
+<div id="legal-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="close-legal-modal" class="close-button">&times;</button>
+        <div id="legal-modal-content-area"></div>
+    </div>
+</div>
+
+<div id="ai-response-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="close-ai-response-modal-top" class="close-button">&times;</button>
+        
+        <div id="ai-chat-history">
+            </div>
+
+        <form id="ai-chat-form" autocomplete="off">
+            <input type="text" 
+                   id="ai-chat-input" 
+                   placeholder="Frag Evita..." 
+                   autocomplete="off" 
+                   required
+                   data-chat-input="true">
+            <button type="submit" aria-label="Senden">
+                <i class="fa-regular fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="debug-booking-trigger" style="position: fixed; bottom: 80px; right: 20px; z-index: 9999; display: none;">
+    <button onclick="window.debugBookingLaunch && window.debugBookingLaunch()" 
+            style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+        🔧 Test Booking
+    </button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Modal-Ereignis-Setup wird geladen...');
+    
+    // Zeige Debug-Button in Entwicklungsumgebung
+    if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1') || window.location.search.includes('debug=true')) {
+        const debugButton = document.getElementById('debug-booking-trigger');
+        if (debugButton) {
+            debugButton.style.display = 'block';
+        }
+    }
+    
+    // HINWEIS: Der Chat-Handler wird vollständig von ai-form.js gesteuert.
+    // Dieser Backup-Handler ist NICHT mehr nötig und wurde entfernt,
+    // da er Konflikte mit dem Haupt-Handler verursachte (Page Reload).
+    // 
+    // Falls ai-form.js nicht lädt, wird der Chat einfach nicht funktionieren,
+    // was besser ist als ein Page-Reload der die UX zerstört.
+    
+    console.log('✅ Modal-Events bereit (Chat wird von ai-form.js gesteuert)');
+});
+</script>

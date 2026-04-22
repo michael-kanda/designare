@@ -1,0 +1,82 @@
+/* ══════════════════════════════════════════════════
+   CRAWL-ANIM.CSS
+   Googlebot Crawling 2026 – Interactive Widgets
+   ══════════════════════════════════════════════════ */
+
+/* ── Crawl Limits Table – Mobile Override ── */
+/* Removes the default "Falsch:/Richtig:" prefixes from blog-style.css
+   because this is an info table, not a wrong/right comparison. */
+.crawl-limits-table .comparison-table td:first-child {
+    background-color: rgba(196,163,90,.06);
+    border-bottom: none;
+}
+.crawl-limits-table .comparison-table td:first-child::before,
+.crawl-limits-table .comparison-table td:last-child::before {
+    content: none;
+}
+.crawl-limits-table .comparison-table td:last-child {
+    padding-top: .5rem;
+}
+
+
+/* ── Crawl Byte Meter ── */
+.cb-meter{max-width:400px;width:100%;font-family:'Poppins',sans-serif;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.08);border-radius:6px;overflow:hidden;font-size:.85rem}
+.cb-header{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.cb-title{color:rgba(255,255,255,.6);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.cb-live{display:flex;align-items:center;gap:5px;font-size:.7rem;color:rgba(255,255,255,.4)}
+.cb-live-dot{width:6px;height:6px;border-radius:50%;background:#51cf66;animation:cbPulse 1.8s infinite}
+@keyframes cbPulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.cb-body{padding:1rem}
+.cb-url-bar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:6px 10px;margin-bottom:1rem;font-size:.72rem;color:rgba(255,255,255,.5);overflow:hidden;white-space:nowrap}
+.cb-url-icon{flex-shrink:0;color:#c4a35a}
+
+.cb-bar-wrap{position:relative;height:28px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:6px;overflow:hidden}
+.cb-bar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.7rem;font-weight:600;color:#fff;min-width:40px}
+.cb-bar-fill.green{background:linear-gradient(90deg,rgba(81,207,102,.25),rgba(81,207,102,.55))}
+.cb-bar-fill.amber{background:linear-gradient(90deg,rgba(255,193,7,.25),rgba(255,193,7,.55))}
+.cb-bar-fill.red{background:linear-gradient(90deg,rgba(255,107,107,.25),rgba(255,107,107,.55))}
+.cb-bar-label{display:flex;justify-content:space-between;font-size:.68rem;color:rgba(255,255,255,.35);margin-bottom:12px}
+
+.cb-cutoff{position:absolute;right:0;top:0;height:100%;width:2px;background:repeating-linear-gradient(180deg,#ff6b6b 0,#ff6b6b 4px,transparent 4px,transparent 8px)}
+.cb-cutoff-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.6rem;color:#ff6b6b;font-weight:600;white-space:nowrap}
+
+.cb-divider{height:1px;background:rgba(255,255,255,.06);margin:10px 0}
+.cb-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:.78rem}
+.cb-stat-label{color:rgba(255,255,255,.5)}
+.cb-stat-val{font-weight:500}
+.cb-stat-val.green{color:#51cf66}
+.cb-stat-val.red{color:#ff6b6b}
+.cb-stat-val.amber{color:#ffc107}
+
+.cb-toggle{display:flex;border-top:1px solid rgba(255,255,255,.06)}
+.cb-toggle-btn{flex:1;padding:9px;border:none;background:transparent;color:rgba(255,255,255,.4);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .25s}
+.cb-toggle-btn:first-child{border-right:1px solid rgba(255,255,255,.06)}
+.cb-toggle-btn.is-active{color:#c4a35a;background:rgba(196,163,90,.08)}
+.cb-toggle-btn:hover:not(.is-active){color:rgba(255,255,255,.6)}
+
+.cb-section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#c4a35a;margin:8px 0 6px;opacity:.7}
+.cb-verdict{text-align:center;padding:8px;font-size:.75rem;border-radius:3px;margin-top:8px}
+.cb-verdict.ok{background:rgba(81,207,102,.08);color:#51cf66;border:1px solid rgba(81,207,102,.15)}
+.cb-verdict.warn{background:rgba(255,193,7,.08);color:#ffc107;border:1px solid rgba(255,193,7,.15)}
+.cb-verdict.danger{background:rgba(255,107,107,.08);color:#ff6b6b;border:1px solid rgba(255,107,107,.15)}
+
+
+/* ── Crawl Flow Diagram ── */
+.cf-flow{display:flex;flex-direction:column;gap:0;margin:2rem 0;font-family:'Poppins',sans-serif;font-size:.85rem}
+.cf-step{display:flex;align-items:stretch;gap:1rem;position:relative}
+.cf-step-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:36px}
+.cf-step-dot{width:12px;height:12px;border-radius:50%;border:2px solid #c4a35a;background:transparent;flex-shrink:0;z-index:1;transition:background .3s}
+.cf-step:hover .cf-step-dot{background:#c4a35a}
+.cf-step-connector{flex:1;width:2px;background:rgba(196,163,90,.2)}
+.cf-step:last-child .cf-step-connector{display:none}
+.cf-step-content{flex:1;padding-bottom:1.5rem}
+.cf-step-title{font-weight:600;color:#c4a35a;margin-bottom:.3rem;font-size:.95rem}
+.cf-step-desc{color:rgba(255,255,255,.7);line-height:1.6;font-weight:300}
+.cf-step-desc code{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:.15em .4em;border-radius:0;font-size:.85em;color:#c4a35a}
+
+@media(max-width:600px){
+    .cf-step{gap:.7rem}
+    .cf-step-line{width:28px}
+    .cf-step-title{font-size:.88rem}
+}
