@@ -142,6 +142,7 @@ export default async function handler(req, res) {
     let domainAnalysis = {
       hasSchema: false,
       schemaTypes: [],
+      valuableTypes: [],
       valuableSchemaCount: 0,
       hasAboutPage: false,
       hasContactPage: false,
@@ -218,10 +219,12 @@ export default async function handler(req, res) {
           } catch {}
         });
 
-        // Hochwertige Schema-Typen zählen
+        // Hochwertige Schema-Typen erkennen (Array merken, damit das Frontend
+        // wertvolle von neutralen Typen visuell unterscheiden kann)
         const schemaLower = domainAnalysis.schemaTypes.map(t => String(t).toLowerCase());
-        domainAnalysis.valuableSchemaCount = [...new Set(schemaLower)]
-          .filter(t => VALUABLE_SCHEMA_TYPES.has(t)).length;
+        const uniqueLower = [...new Set(schemaLower)];
+        domainAnalysis.valuableTypes = uniqueLower.filter(t => VALUABLE_SCHEMA_TYPES.has(t));
+        domainAnalysis.valuableSchemaCount = domainAnalysis.valuableTypes.length;
 
         const allHrefs = [];
         $('a[href]').each((_, el) => allHrefs.push($(el).attr('href').toLowerCase()));
