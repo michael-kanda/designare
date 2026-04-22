@@ -87,5 +87,12 @@ function buildSilas() {
         .pipe(dest('public/css'));
 }
 
+// Fonts: Binaerdateien 1:1 kopieren (KEIN Minify!)
+// encoding: false ist PFLICHT, sonst werden .woff2/.ttf als Text gelesen und beschaedigt.
+function buildFonts() {
+    return src('css/fonts/**/*.{woff,woff2,ttf,otf,eot}', { allowEmpty: true, encoding: false })
+        .pipe(dest('public/css/fonts'));
+}
+
 // Alle Tasks parallel ausfuehren
-export default parallel(buildCore, buildHome, buildArticle, buildSilas);
+export default parallel(buildCore, buildHome, buildArticle, buildSilas, buildFonts);
