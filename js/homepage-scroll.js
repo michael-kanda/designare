@@ -6,6 +6,8 @@
 
 (function() {
     'use strict';
+    const DEBUG = false;
+    const log = (...args) => { if (DEBUG) console.log(...args); };
     
     // DOM Elemente
     const flipContainer = document.querySelector('.flip-container');
@@ -15,10 +17,12 @@
     
     // State für Input-Focus
     let isAiInputFocused = false;
+    let lastScrollMode = null; // 'enabled' | 'disabled'
+    let lastFooterVisible = null;
     
     // Nur auf der Startseite mit Flip-Container ausführen
     if (!flipContainer || !hero) {
-        console.log('[Scroll] Keine Flip-Container gefunden, Script beendet');
+        log('[Scroll] Keine Flip-Container gefunden, Script beendet');
         return;
     }
     
@@ -59,14 +63,16 @@
     function setFooterVisibility(visible) {
         const footer = document.querySelector('footer');
         if (!footer) return;
+        if (lastFooterVisible === visible) return;
         
         if (visible) {
             footer.classList.remove('ai-input-hide');
-            console.log('[Scroll] Footer SICHTBAR');
+            log('[Scroll] Footer SICHTBAR');
         } else {
             footer.classList.add('ai-input-hide');
-            console.log('[Scroll] Footer VERSTECKT');
+            log('[Scroll] Footer VERSTECKT');
         }
+        lastFooterVisible = visible;
     }
     
     /**
@@ -76,7 +82,7 @@
         const flipped = isFlipped();
         const evitaVisible = isViewThirdVisible();
         
-        console.log('[Scroll] Update:', { flipped, evitaVisible, isAiInputFocused, isMobile: isMobile() });
+        log('[Scroll] Update:', { flipped, evitaVisible, isAiInputFocused, isMobile: isMobile() });
         
         // ✅ Wenn ai-question fokussiert ist UND mobile → Scrollen erlauben + Footer verstecken
         if (isAiInputFocused && isMobile()) {
@@ -84,7 +90,8 @@
             body.classList.add('homepage-scroll-enabled');
             body.classList.add('ai-input-focused');
             setFooterVisibility(false); // Footer verstecken
-            console.log('[Scroll] → Scroll ENABLED (AI Input fokussiert auf Mobile)');
+            if (lastScrollMode !== 'enabled') log('[Scroll] → Scroll ENABLED (AI Input fokussiert auf Mobile)');
+            lastScrollMode = 'enabled';
             return;
         }
         
@@ -95,12 +102,14 @@
         if (flipped || evitaVisible) {
             body.classList.remove('homepage-no-scroll');
             body.classList.add('homepage-scroll-enabled');
-            console.log('[Scroll] → Scroll ENABLED');
+            if (lastScrollMode !== 'enabled') log('[Scroll] → Scroll ENABLED');
+            lastScrollMode = 'enabled';
         } else {
             body.classList.add('homepage-no-scroll');
             body.classList.remove('homepage-scroll-enabled');
             window.scrollTo(0, 0);
-            console.log('[Scroll] → Scroll DISABLED');
+            if (lastScrollMode !== 'disabled') log('[Scroll] → Scroll DISABLED');
+            lastScrollMode = 'disabled';
         }
     }
     
@@ -115,11 +124,11 @@
             return;
         }
         
-        console.log('[Scroll] AI-Question Input gefunden, setze Focus-Listener');
+        log('[Scroll] AI-Question Input gefunden, setze Focus-Listener');
         
         // Focus Event
         aiQuestion.addEventListener('focus', () => {
-            console.log('[Scroll] ai-question FOKUSSIERT');
+            log('[Scroll] ai-question FOKUSSIERT');
             isAiInputFocused = true;
             
             if (isMobile()) {
@@ -148,7 +157,7 @@
         
         // Blur Event
         aiQuestion.addEventListener('blur', () => {
-            console.log('[Scroll] ai-question BLUR');
+            log('[Scroll] ai-question BLUR');
             isAiInputFocused = false;
             
             setTimeout(() => {
@@ -203,7 +212,7 @@
     const flipObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.attributeName === 'class') {
-                console.log('[Scroll] Flip class changed');
+                log('[Scroll] Flip class changed');
                 updateScrollState();
             }
         });
@@ -219,7 +228,7 @@
         const viewThirdObserver = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
-                    console.log('[Scroll] Evita style/class changed');
+                    log('[Scroll] Evita style/class changed');
                     setTimeout(updateScrollState, 50);
                 }
             });
@@ -253,6 +262,6 @@
         updateScrollState();
     };
     
-    console.log('[Scroll] Homepage-Scroll.js initialisiert (mit AI-Input + Footer Fix)');
+    log('[Scroll] Homepage-Scroll.js initialisiert (mit AI-Input + Footer Fix)');
     
 })();
