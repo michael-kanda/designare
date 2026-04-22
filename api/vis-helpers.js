@@ -19,9 +19,17 @@ export const EXCLUDED_DOMAINS = [
 ];
 
 export const VALUABLE_SCHEMA_TYPES = new Set([
-  'faqpage', 'howto', 'article', 'newsarticle', 'blogposting',
+  // Content
+  'faqpage', 'howto',
+  'article', 'newsarticle', 'blogposting', 'techarticle', 'scholarlyarticle',
+  // Commerce
   'product', 'service', 'review', 'aggregaterating',
-  'localbusiness', 'organization', 'person', 'breadcrumblist',
+  // Business / Entity
+  'organization', 'person', 'breadcrumblist',
+  // LocalBusiness + häufige Subtypen (schema.org/LocalBusiness)
+  'localbusiness', 'professionalservice',
+  'restaurant', 'store',
+  'medicalbusiness', 'homeandconstructionbusiness',
 ]);
 
 // Token-Signierung mit Fallback falls Secret fehlt
