@@ -3,6 +3,12 @@
 // Protokoll: MCP Spec 2025-03-26 (JSON-RPC 2.0 über HTTP)
 //
 // ═══════════════════════════════════════════════════════════════
+// CHANGELOG v1.2.0 (HEAD-Support & HTTP-Hygiene)
+// ═══════════════════════════════════════════════════════════════
+//   ✓ HEAD /api/mcp: Liveness-Probe ohne Body (200 statt 405)
+//   ✓ 405-Responses liefern korrekten Allow-Header
+//   ✓ CORS Allow-Methods um HEAD erweitert
+//
 // CHANGELOG v1.1.0 (Spec-Compliance Hardening)
 // ═══════════════════════════════════════════════════════════════
 //   ✓ initialize: Version-Negotiation mit Client-protocolVersion
@@ -12,8 +18,9 @@
 //   ✓ CORS vereinheitlicht auf "*" (cache-freundlicher als Origin-Reflection)
 //   ✓ Defensive Notification-Erkennung: id=undefined|null → keine Antwort
 //
-// Endpoint: POST /api/mcp (Streamable HTTP)
-//           GET  /api/mcp (Health Check / Server-Info)
+// Endpoint: POST   /api/mcp (Streamable HTTP – JSON-RPC Messages)
+//           GET    /api/mcp (Health Check / Server-Info)
+//           HEAD   /api/mcp (Liveness-Probe, kein Body)
 //           DELETE /api/mcp (Session Cleanup – stateless no-op)
 //
 // Tools:
@@ -24,11 +31,16 @@ import { checkRateLimit } from '../lib/rate-limiter.js';
 import { MCP_SERVER_INFO, MCP_TOOLS, executeToolCall } from '../lib/mcp-config.js';
 
 // ═══════════════════════════════════════════════════════════════
+// Konstanten
+// ═══════════════════════════════════════════════════════════════
+const ALLOWED_METHODS = 'GET, HEAD, POST, DELETE, OPTIONS';
+
+// ═══════════════════════════════════════════════════════════════
 // CORS Headers
 // ═══════════════════════════════════════════════════════════════
 function setCorsHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', ALLOWED_METHODS);
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id, Authorization');
   res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id');
   res.setHeader('Access-Control-Max-Age', '86400');
@@ -169,6 +181,15 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // ── HEAD (Liveness-Probe / Discovery ohne Body) ──
+  // Manche MCP-Clients (u. a. python-httpx-basierte) schicken HEAD
+  // vor dem eigentlichen POST, um zu prüfen ob der Endpoint lebt.
+  // Muss laut HTTP-Spec die gleichen Header wie GET liefern, aber keinen Body.
+  if (req.method === 'HEAD') {
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).end();
+  }
+
   // ── GET (Health Check / Server Discovery) ──
   if (req.method === 'GET') {
     return res.status(200).json({
@@ -187,6 +208,7 @@ export default async function handler(req, res) {
 
   // ── Nur POST ab hier ──
   if (req.method !== 'POST') {
+    res.setHeader('Allow', ALLOWED_METHODS);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
