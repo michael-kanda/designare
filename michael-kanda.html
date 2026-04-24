@@ -336,6 +336,11 @@
     z-index: 1;
   }
 
+  /* Global: no underline on any link */
+  a, a:hover, a:focus, a:active, a:visited {
+    text-decoration: none;
+  }
+
   /* Top bar */
   .topbar {
     display: flex;
@@ -578,7 +583,7 @@
   }
 
   .tool .link::after { content: " →"; }
-  .tool .link:hover { text-decoration: underline; }
+  .tool .link:hover { opacity: 0.7; }
 
   /* FAQ */
   .faq {
@@ -632,6 +637,16 @@
     font-size: 14px;
     line-height: 1.7;
     max-width: 70ch;
+  }
+
+  .faq .answer a {
+    color: #7FD996;
+    text-decoration: none;
+  }
+
+  .faq .answer a:hover {
+    color: #7FD996;
+    text-decoration: none;
   }
 
   /* Relationships */
@@ -1005,10 +1020,9 @@
     <div>
       <span class="prompt">$</span>
       last-updated: <time datetime="2026-04-19">2026-04-19</time>
-      · single source of truth for <span itemprop="name" style="color:var(--text-muted)">Michael Kanda</span>
+      · single source of truth for <span itemprop="name" style="color:var(--text-muted)"> <a href="https://designare.at/">Michael Kanda</a></span>
     </div>
     <div class="footer-links">
-      <a href="https://designare.at/">home</a>
       <a href="https://github.com/michael-kanda/" rel="me">github</a>
       <a href="https://www.linkedin.com/in/michael-kanda-408910341/" rel="me">linkedin</a>
       <a href="https://profiles.wordpress.org/michaelmedientechnik/" rel="me">wp.org</a>
