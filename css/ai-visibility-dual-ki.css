@@ -793,3 +793,203 @@ input.email-report-input:active {
         font-size: 12.5px;
     }
 }
+
+/* =================================================================
+   AI HERO — BOT + HOLOGRAMM-DISPLAY-VARIANTE
+   Wird durch zusätzliche Klasse `.ai-hero-bot` aktiviert.
+   Überschreibt die Layout-Regeln aus ai-hero-eyes.css, OHNE die
+   Augen-Animationen (glowPulse, scanRotate, outlineFade, lid-Animation)
+   anzutasten. Sicherstellen: ai-hero-eyes.css muss vor dieser Datei
+   geladen werden, sonst greifen die Overrides nicht.
+   ================================================================= */
+
+.ai-hero.ai-hero-bot {
+    /* Starre 480px-Höhe wegnehmen — Inhalt definiert die Höhe */
+    height: auto;
+    min-height: 460px;
+    padding: 40px 0;
+    /* Default flex-direction: column bleibt, weil wir bot-stage UND cta-hint
+       untereinander wollen */
+    gap: 24px;
+}
+
+.ai-hero-bot .bot-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 760px;
+    padding: 0 16px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ── Bot-Bild (links) ───────────────────────────────────────────── */
+.ai-hero-bot .bot-image-wrap {
+    flex-shrink: 0;
+    width: 200px;
+    opacity: 0;
+    animation: heroReveal 0.8s ease forwards 0.4s;
+}
+
+.ai-hero-bot .bot-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* Sanfter blauer Glow, damit der Bot vom Display "angeleuchtet" wirkt */
+    filter: drop-shadow(0 0 22px rgba(66, 133, 244, 0.18));
+}
+
+/* ── Hologramm-Display (rechts) ─────────────────────────────────── */
+.ai-hero-bot .holo-display {
+    flex: 1;
+    max-width: 460px;
+    position: relative;
+    padding: 32px 28px 26px;
+    background: linear-gradient(135deg, rgba(66, 133, 244, 0.07), rgba(16, 163, 127, 0.07));
+    border: 1px solid rgba(120, 180, 255, 0.22);
+    border-radius: 12px;
+    box-shadow:
+        0 0 40px rgba(66, 133, 244, 0.10) inset,
+        0 0 30px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    animation: heroReveal 0.8s ease forwards 0.6s;
+}
+
+/* "Verbindungs-Beam" zwischen Bot und Display */
+.ai-hero-bot .holo-display::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 50%;
+    width: 18px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--accent-color, #c4a35a));
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: heroReveal 0.6s ease forwards 1.4s;
+}
+.ai-hero-bot .holo-display::after {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: calc(50% - 3px);
+    width: 6px;
+    height: 6px;
+    background: var(--accent-color, #c4a35a);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(196, 163, 90, 0.7);
+    opacity: 0;
+    animation:
+        heroReveal 0.6s ease forwards 1.4s,
+        beamPulse 2.4s ease-in-out infinite 2s;
+}
+
+@keyframes beamPulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50%      { transform: scale(1.4); opacity: 1; }
+}
+
+/* ── Sci-Fi-Eckklammern am Display ──────────────────────────────── */
+.ai-hero-bot .holo-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--accent-color, #c4a35a);
+    opacity: 0;
+    animation: heroReveal 0.6s ease forwards 1.0s;
+}
+.ai-hero-bot .holo-corner-tl { top: 8px;    left: 8px;    border-right: none; border-bottom: none; }
+.ai-hero-bot .holo-corner-tr { top: 8px;    right: 8px;   border-left: none;  border-bottom: none; }
+.ai-hero-bot .holo-corner-bl { bottom: 8px; left: 8px;    border-right: none; border-top: none;    }
+.ai-hero-bot .holo-corner-br { bottom: 8px; right: 8px;   border-left: none;  border-top: none;    }
+
+/* ── Display-Header ─────────────────────────────────────────────── */
+.ai-hero-bot .holo-header {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: rgba(120, 180, 255, 0.55);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    opacity: 0;
+    animation: heroReveal 0.6s ease forwards 1.0s;
+}
+
+/* ── Eyes innen anpassen — kompakter im Display ─────────────────── */
+.ai-hero-bot .eyes-container {
+    gap: 36px;
+    /* In der Bot-Variante bleibt eyes-container natürlich Inhalt des Displays;
+       absolute z-Layering aus dem Original braucht's hier nicht mehr */
+}
+
+.ai-hero-bot .ai-eye {
+    width: 130px;
+    height: 130px;
+}
+
+/* Eye-Connector-Breite an die kleinere Lücke anpassen (32px statt 60px) */
+.ai-hero-bot .eye-connector {
+    width: 32px;
+}
+
+/* Eye-Labels: weniger Abstand, weil Display-Padding den Raum schon definiert */
+.ai-hero-bot .eye-label {
+    bottom: -32px;
+    font-size: 0.85rem;
+    letter-spacing: 2.5px;
+}
+
+/* ── Frage-Text im Display (Typewriter sitzt drin) ──────────────── */
+.ai-hero-bot .hero-text {
+    margin-top: 56px;   /* Platz für Eye-Labels darüber */
+    text-align: center;
+    /* z-index aus dem Original-CSS bleibt erhalten */
+}
+
+.ai-hero-bot .hero-tagline {
+    font-size: 1rem;
+    padding: 0;
+}
+
+/* ── CTA-Hint sitzt jetzt UNTER Bot+Display, nicht im hero-text ── */
+.ai-hero-bot > .hero-cta-hint {
+    margin-top: 0;
+}
+
+/* ── MOBILE: Bot weg, Display zentriert ─────────────────────────── */
+@media (max-width: 768px) {
+    .ai-hero-bot .bot-image-wrap {
+        display: none;
+    }
+    .ai-hero-bot .holo-display::before,
+    .ai-hero-bot .holo-display::after {
+        display: none;
+    }
+    .ai-hero-bot .holo-display {
+        max-width: 100%;
+    }
+}
+
+/* Ganz schmale Screens: Display-Padding etwas runter, Eyes greifen
+   die Sizes aus dem Original-CSS (95x95 ab ≤400px). */
+@media (max-width: 480px) {
+    .ai-hero-bot .holo-display {
+        padding: 28px 18px 22px;
+    }
+    .ai-hero-bot .eyes-container {
+        gap: 18px;
+    }
+    .ai-hero-bot .ai-eye {
+        width: 100px;
+        height: 100px;
+    }
+    .ai-hero-bot .hero-text {
+        margin-top: 44px;
+    }
+    .ai-hero-bot .hero-tagline {
+        font-size: 0.9rem;
+    }
+}
