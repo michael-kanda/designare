@@ -651,12 +651,32 @@ input.email-report-input:active {
     gap: 18px;
 }
 
-.breakdown-item {
-    /* Header darüber wird im JS entfernt — alte Header-Reste defensiv ausblenden */
+/* ── Header oberhalb des Balkens: Kategorie + Punkte ──
+   Wird auf Desktop unsichtbar, weil dort die Labels im Balken sitzen.
+   Auf Mobile (≤600px) wird er sichtbar — siehe Media-Query weiter unten. */
+.breakdown-header {
+    display: none;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    gap: 12px;
+    font-size: 14px;
 }
 
-.breakdown-item .breakdown-header {
-    display: none;
+.breakdown-header .breakdown-label {
+    color: #ddd;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.breakdown-header .breakdown-points {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
 }
 
 .breakdown-bar {
@@ -750,16 +770,26 @@ input.email-report-input:active {
     line-height: 1.55;
 }
 
-@media (max-width: 480px) {
-    .breakdown-bar {
-        height: 36px;
+@media (max-width: 600px) {
+    /* Auf Mobile sind die Balken oft zu schmal für lesbares Layout im Balken
+       (z.B. 9/35 = 26% bei 340px Viewport). Stattdessen rendern wir
+       Kategorie + Score ÜBER dem Balken — der Balken ist dann rein visuell. */
+    .breakdown-header {
+        display: flex;
     }
-    .breakdown-fill,
+    .breakdown-fill-label,
+    .breakdown-fill-points,
     .breakdown-bar[data-tiny="1"]::after {
-        font-size: 13px;
-        padding-left: 12px;
+        display: none;
     }
-    .breakdown-fill {
-        padding-right: 18px;
+    .breakdown-bar {
+        height: 14px;
+    }
+    .breakdown-fill[data-low="1"] {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+    .breakdown-detail {
+        font-size: 12.5px;
     }
 }
