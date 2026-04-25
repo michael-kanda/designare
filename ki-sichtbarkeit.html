@@ -156,75 +156,96 @@
                 </div>
             </header>
 
-            <!-- Hero: Dual AI Eye Animation -->
-            <section class="ai-hero" id="aiHero" aria-label="KI-Sichtbarkeits-Animation">
-                <div class="eyes-container">
+            <!-- Hero: Bot mit Hologramm-Display (Eyes-Animation drin) -->
+            <section class="ai-hero ai-hero-bot" id="aiHero" aria-label="KI-Sichtbarkeits-Animation">
+                <div class="bot-stage">
 
-                    <!-- Gemini Eye -->
-                    <div class="ai-eye eye-gemini" id="eyeGemini">
-                        <div class="eye-glow"></div>
-                        <svg class="eye-svg" viewBox="0 0 160 160">
-                            <defs>
-                                <radialGradient id="irisGemini" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#6ab1ff" />
-                                    <stop offset="100%" stop-color="#1a5ecf" />
-                                </radialGradient>
-                                <clipPath id="lidClipGemini">
-                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
-                                </clipPath>
-                            </defs>
-                            <g clip-path="url(#lidClipGemini)">
-                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
-                                <g class="iris" id="irisGemini">
-                                    <circle cx="80" cy="80" r="28" fill="url(#irisGemini)" />
-                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
-                                    <circle class="pupil" cx="80" cy="80" r="11" />
-                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
-                                </g>
-                            </g>
-                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
-                        </svg>
-                        <span class="eye-label">Gemini</span>
+                    <!-- Bot-Bild: auf Mobile via CSS ausgeblendet -->
+                    <div class="bot-image-wrap" aria-hidden="true">
+                        <img src="images/ki-sichtbarkeits-check.webp" alt="" class="bot-image" loading="eager" />
                     </div>
 
-                    <!-- Connector -->
-                    <div class="eye-connector">
-                        <div class="connector-line"></div>
-                        <div class="connector-dot"></div>
+                    <!-- Hologramm-Display: enthält die Augen + die Frage -->
+                    <div class="holo-display">
+                        <span class="holo-corner holo-corner-tl" aria-hidden="true"></span>
+                        <span class="holo-corner holo-corner-tr" aria-hidden="true"></span>
+                        <span class="holo-corner holo-corner-bl" aria-hidden="true"></span>
+                        <span class="holo-corner holo-corner-br" aria-hidden="true"></span>
+
+                        <div class="holo-header" aria-hidden="true">⟨ KI-Sichtbarkeits-Scan ⟩</div>
+
+                        <div class="eyes-container">
+
+                            <!-- Gemini Eye -->
+                            <div class="ai-eye eye-gemini" id="eyeGemini">
+                                <div class="eye-glow"></div>
+                                <svg class="eye-svg" viewBox="0 0 160 160">
+                                    <defs>
+                                        <radialGradient id="irisGemini" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stop-color="#6ab1ff" />
+                                            <stop offset="100%" stop-color="#1a5ecf" />
+                                        </radialGradient>
+                                        <clipPath id="lidClipGemini">
+                                            <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                        </clipPath>
+                                    </defs>
+                                    <g clip-path="url(#lidClipGemini)">
+                                        <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                        <g class="iris" id="irisGemini">
+                                            <circle cx="80" cy="80" r="28" fill="url(#irisGemini)" />
+                                            <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                            <circle class="pupil" cx="80" cy="80" r="11" />
+                                            <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                        </g>
+                                    </g>
+                                    <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                                </svg>
+                                <span class="eye-label">Gemini</span>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="eye-connector">
+                                <div class="connector-line"></div>
+                                <div class="connector-dot"></div>
+                            </div>
+
+                            <!-- ChatGPT Eye -->
+                            <div class="ai-eye eye-chatgpt" id="eyeChatgpt">
+                                <div class="eye-glow"></div>
+                                <svg class="eye-svg" viewBox="0 0 160 160">
+                                    <defs>
+                                        <radialGradient id="irisChatgpt" cx="50%" cy="50%" r="50%">
+                                            <stop offset="0%" stop-color="#34d399" />
+                                            <stop offset="100%" stop-color="#047857" />
+                                        </radialGradient>
+                                        <clipPath id="lidClipChatgpt">
+                                            <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
+                                        </clipPath>
+                                    </defs>
+                                    <g clip-path="url(#lidClipChatgpt)">
+                                        <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
+                                        <g class="iris" id="irisChatgpt">
+                                            <circle cx="80" cy="80" r="28" fill="url(#irisChatgpt)" />
+                                            <circle class="scan-ring" cx="80" cy="80" r="22" />
+                                            <circle class="pupil" cx="80" cy="80" r="11" />
+                                            <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
+                                        </g>
+                                    </g>
+                                    <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
+                                </svg>
+                                <span class="eye-label">ChatGPT</span>
+                            </div>
+                        </div>
+
+                        <div class="hero-text">
+                            <p class="hero-tagline"><span id="typewriter"></span><span class="typewriter-cursor">|</span></p>
+                        </div>
                     </div>
 
-                    <!-- ChatGPT Eye -->
-                    <div class="ai-eye eye-chatgpt" id="eyeChatgpt">
-                        <div class="eye-glow"></div>
-                        <svg class="eye-svg" viewBox="0 0 160 160">
-                            <defs>
-                                <radialGradient id="irisChatgpt" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#34d399" />
-                                    <stop offset="100%" stop-color="#047857" />
-                                </radialGradient>
-                                <clipPath id="lidClipChatgpt">
-                                    <ellipse class="lid-ellipse" cx="80" cy="80" rx="58" ry="0" />
-                                </clipPath>
-                            </defs>
-                            <g clip-path="url(#lidClipChatgpt)">
-                                <ellipse cx="80" cy="80" rx="58" ry="42" fill="#1a1a24" />
-                                <g class="iris" id="irisChatgpt">
-                                    <circle cx="80" cy="80" r="28" fill="url(#irisChatgpt)" />
-                                    <circle class="scan-ring" cx="80" cy="80" r="22" />
-                                    <circle class="pupil" cx="80" cy="80" r="11" />
-                                    <ellipse class="eye-highlight" cx="72" cy="73" rx="5" ry="4" />
-                                </g>
-                            </g>
-                            <ellipse class="eye-outline" cx="80" cy="80" rx="58" ry="42" />
-                        </svg>
-                        <span class="eye-label">ChatGPT</span>
-                    </div>
                 </div>
 
-                <div class="hero-text">
-                    <p class="hero-tagline"><span id="typewriter"></span><span class="typewriter-cursor">|</span></p>
-                    <p class="hero-cta-hint" id="ctaHint">Jetzt prüfen <span class="arrow">↓</span></p>
-                </div>
+                <!-- CTA-Hint: bleibt unter Bot+Display -->
+                <p class="hero-cta-hint" id="ctaHint">Jetzt prüfen <span class="arrow">↓</span></p>
             </section>
 
                         <section aria-labelledby="tool-heading" class="ai-visibility-tool">
