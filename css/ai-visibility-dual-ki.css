@@ -814,37 +814,44 @@ input.email-report-input:active {
 }
 
 .ai-hero-bot .bot-stage {
-    display: flex;
+    /* Grid 1/3 + 2/3, füllt die Container-Breite */
+    display: grid;
+    grid-template-columns: 1fr 2fr;
     align-items: center;
-    justify-content: center;
-    gap: 24px;
+    gap: 32px;
     width: 100%;
-    max-width: 760px;
-    padding: 0 16px;
+    max-width: 1100px;
+    padding: 0 24px;
     position: relative;
     z-index: 2;
 }
 
-/* ── Bot-Bild (links) ───────────────────────────────────────────── */
+/* ── Bot-Bild (links, 1/3) ──────────────────────────────────────── */
 .ai-hero-bot .bot-image-wrap {
-    flex-shrink: 0;
-    width: 200px;
+    /* Cell füllen, Bild darin horizontal zentriert */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     opacity: 0;
     animation: heroReveal 0.8s ease forwards 0.4s;
 }
 
 .ai-hero-bot .bot-image {
+    /* Größer als bisher (war 200px). Höhe folgt auto über Aspect-Ratio. */
     width: 100%;
+    max-width: 340px;
     height: auto;
     display: block;
     /* Sanfter blauer Glow, damit der Bot vom Display "angeleuchtet" wirkt */
     filter: drop-shadow(0 0 22px rgba(66, 133, 244, 0.18));
 }
 
-/* ── Hologramm-Display (rechts) ─────────────────────────────────── */
+/* ── Hologramm-Display (rechts, 2/3) ───────────────────────────── */
 .ai-hero-bot .holo-display {
-    flex: 1;
-    max-width: 460px;
+    /* Füllt die 2/3-Spalte komplett, kein max-width mehr */
+    width: 100%;
+    max-width: none;
     position: relative;
     padding: 32px 28px 26px;
     background: linear-gradient(135deg, rgba(66, 133, 244, 0.07), rgba(16, 163, 127, 0.07));
@@ -961,6 +968,13 @@ input.email-report-input:active {
 
 /* ── MOBILE: Bot weg, Display zentriert ─────────────────────────── */
 @media (max-width: 768px) {
+    .ai-hero-bot .bot-stage {
+        /* Single-Column Grid (Bot wird ausgeblendet, Display fluet die volle Breite) */
+        grid-template-columns: 1fr;
+        gap: 0;
+        max-width: 100%;
+        padding: 0 16px;
+    }
     .ai-hero-bot .bot-image-wrap {
         display: none;
     }
