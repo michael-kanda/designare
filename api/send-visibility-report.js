@@ -357,6 +357,20 @@ function buildEmailHtml(cachedResult, cleanDomain, cleanBrand, industry) {
       </table>
     </td></tr>
 
+    <tr><td style="padding:24px 32px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fffcf5;border-left:3px solid #c4a35a;border-radius:0 8px 8px 0;">
+        <tr>
+          <td style="padding:14px 18px;vertical-align:top;width:32px;font-size:20px;line-height:1;">💡</td>
+          <td style="padding:14px 18px 14px 0;">
+            <div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:4px;">Wichtig zu wissen</div>
+            <div style="font-size:13px;color:#555;line-height:1.55;">
+              KI-Antworten sind nicht deterministisch – sie variieren bei jeder Anfrage leicht. Dieser Test ist eine <strong style="color:#1a1a1a;">Momentaufnahme</strong>. Für ein aussagekräftiges Bild empfiehlt es sich, den Check mehrfach über einen Zeitraum durchzuführen.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+
     <tr><td style="padding:28px 32px;">
       <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:16px;">Score-Zusammensetzung</div>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${breakdownRows}</table>
@@ -393,7 +407,7 @@ function buildEmailHtml(cachedResult, cleanDomain, cleanBrand, industry) {
     </td></tr>
 
     ${competitorHtml ? `<tr><td style="padding:0 32px 24px;">
-      <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:10px;">Konkurrenten in KI-Antworten</div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:10px;">Alternativen in KI-Antworten</div>
       <div>${competitorHtml}</div>
     </td></tr>` : ''}
 
