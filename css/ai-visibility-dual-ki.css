@@ -927,9 +927,12 @@ input.email-report-input:active {
 
 /* ── Eyes innen anpassen — kompakter im Display ─────────────────── */
 .ai-hero-bot .eyes-container {
+    /* Im Display ist eyes-container 100% breit. Inhalt MUSS zentriert
+       werden, sonst kleben die Augen links und der absolut positionierte
+       connector-dot landet bei "50% Display-Breite" — also irgendwo rechts
+       neben den Augen statt dazwischen. */
+    justify-content: center;
     gap: 36px;
-    /* In der Bot-Variante bleibt eyes-container natürlich Inhalt des Displays;
-       absolute z-Layering aus dem Original braucht's hier nicht mehr */
 }
 
 .ai-hero-bot .ai-eye {
@@ -949,11 +952,10 @@ input.email-report-input:active {
     letter-spacing: 2.5px;
 }
 
-/* ── Frage-Text im Display (Typewriter sitzt drin) ──────────────── */
+/* ── Frage-Text + CTA im Display ────────────────────────────────── */
 .ai-hero-bot .hero-text {
     margin-top: 56px;   /* Platz für Eye-Labels darüber */
     text-align: center;
-    /* z-index aus dem Original-CSS bleibt erhalten */
 }
 
 .ai-hero-bot .hero-tagline {
@@ -961,9 +963,9 @@ input.email-report-input:active {
     padding: 0;
 }
 
-/* ── CTA-Hint sitzt jetzt UNTER Bot+Display, nicht im hero-text ── */
-.ai-hero-bot > .hero-cta-hint {
-    margin-top: 0;
+/* CTA-Hint sitzt jetzt wieder direkt unter der Frage, im Display */
+.ai-hero-bot .hero-cta-hint {
+    margin-top: 18px;
 }
 
 /* ── MOBILE: Bot weg, Display zentriert ─────────────────────────── */
