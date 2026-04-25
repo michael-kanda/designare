@@ -1,4 +1,4 @@
- /* ================================================
+/* ================================================
    KI-VERGLEICH: Engine Badges & Table Styles
    Append to css/ai-visibility.css
    ================================================ */
@@ -306,7 +306,7 @@ h3 .engine-badge {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: 400;
     color: #999;
-    font-size: 0.8rem;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -445,7 +445,7 @@ h3 .engine-badge {
 }
 
 .engine-detail-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 10px;
     display: flex;
@@ -473,7 +473,7 @@ h3 .engine-badge {
     justify-content: space-between;
     align-items: center;
     padding: 5px 0;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .engine-check-label {
@@ -481,9 +481,14 @@ h3 .engine-badge {
 }
 
 .engine-weight {
-    font-size: 13px;
+    font-size: 14px;
     color: #666;
     margin-left: 4px;
+}
+
+.engine-check-icon {
+    font-size: 0.95em;
+    line-height: 1;
 }
 
 .engine-check-icon.found {
@@ -547,4 +552,58 @@ h3 .engine-badge {
     .engine-cards-row {
         flex-direction: column;
     }
+}
+
+/* =================================================================
+   FORM FIELD BORDERS — alle Zustände gleich (#C4A35A)
+   Hohe Spezifität + !important, weil Basis-Regeln in core.min.css
+   stehen können.
+   ================================================================= */
+.form-input,
+input.form-input,
+.email-report-input,
+input.email-report-input,
+input.form-input.email-report-input {
+    border-color: #C4A35A !important;
+}
+
+.form-input:hover,
+.form-input:focus,
+.form-input:focus-visible,
+.form-input:active,
+.form-input:not(:placeholder-shown),
+.email-report-input:hover,
+.email-report-input:focus,
+.email-report-input:focus-visible,
+.email-report-input:active,
+.email-report-input:not(:placeholder-shown),
+input.form-input:hover,
+input.form-input:focus,
+input.form-input:focus-visible,
+input.form-input:active,
+input.email-report-input:hover,
+input.email-report-input:focus,
+input.email-report-input:focus-visible,
+input.email-report-input:active {
+    border-color: #C4A35A !important;
+    outline-color: #C4A35A !important;
+}
+
+/* Browser-Validierungs-Outlines (Chrome/Safari) abfangen */
+.form-input:invalid,
+.form-input:valid,
+.email-report-input:invalid,
+.email-report-input:valid {
+    border-color: #C4A35A !important;
+}
+
+/* =================================================================
+   RESULT FOOTER — Schriftgrößen
+   ================================================================= */
+.result-footer p {
+    font-size: 15px;
+}
+
+.result-footer .disclaimer {
+    font-size: 14px;
 }
