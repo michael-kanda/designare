@@ -29,6 +29,12 @@ import {
   incrementEmailRecipientLimit,
   acquireIdempotencyLock,
 } from './email-recipient-limit.js';
+// Wichtig: GLEICHE Sanitization wie in ai-visibility-check.js, sonst kommt
+// beim Cache-Key-Rebau ein anderer Hash raus → Token-Mismatch.
+import {
+  validateAndCleanDomain,
+  sanitizeIndustry,
+} from './vis-domain-detection.js';
 
 const redis = Redis.fromEnv();
 
@@ -108,10 +114,20 @@ export default async function handler(req, res) {
     }
 
     // ── Cache-Key rekonstruieren (muss exakt zur Check-Route passen) ──
-    const cleanBrand    = brandName?.trim() || null;
-    const cleanStandort = standort?.trim() || null;
-    const cleanIndustry = industry?.trim() || null;
-    const cleanDomain   = rawDomain?.trim()?.toLowerCase() || null;
+    // GLEICHE Sanitization-Pipeline wie in ai-visibility-check.js,
+    // sonst weicht der Hash ab und der Token wird abgelehnt.
+    const cleanBrand    = sanitizeIndustry(brandName);
+    const cleanStandort = sanitizeIndustry(standort);
+    const cleanIndustry = sanitizeIndustry(industry);
+
+    let cleanDomain = null;
+    if (rawDomain?.trim()) {
+      const v = validateAndCleanDomain(rawDomain);
+      if (!v.valid) {
+        return res.status(400).json({ success: false, message: v.error });
+      }
+      cleanDomain = v.domain;
+    }
 
     const brandSuffix    = cleanBrand    ? `:${cleanBrand.toLowerCase().replace(/\s+/g, '-')}` : '';
     const locationSuffix = cleanStandort ? `:${cleanStandort.toLowerCase().replace(/\s+/g, '-')}` : '';
