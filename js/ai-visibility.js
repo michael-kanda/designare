@@ -458,15 +458,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="engine-detail-name"><span class="engine-dot" style="background:#4285f4"></span> Gemini</div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Bekanntheit <span class="engine-weight">60%</span></span>
-                                <span class="engine-check-icon ${ed.gemini.knowledge ? 'found' : 'notfound'}">${ed.gemini.knowledge ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.gemini.knowledge ? 'found' : 'notfound'}">${ed.gemini.knowledge ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Erwähnungen <span class="engine-weight">25%</span></span>
-                                <span class="engine-check-icon ${ed.gemini.mentions ? 'found' : 'notfound'}">${ed.gemini.mentions ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.gemini.mentions ? 'found' : 'notfound'}">${ed.gemini.mentions ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Reputation <span class="engine-weight">15%</span></span>
-                                <span class="engine-check-icon ${ed.gemini.reviews ? 'found' : 'notfound'}">${ed.gemini.reviews ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.gemini.reviews ? 'found' : 'notfound'}">${ed.gemini.reviews ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                         </div>
                         ${ed.chatgpt ? `
@@ -474,15 +474,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="engine-detail-name"><span class="engine-dot" style="background:#10a37f"></span> ChatGPT</div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Bekanntheit <span class="engine-weight">60%</span></span>
-                                <span class="engine-check-icon ${ed.chatgpt.knowledge ? 'found' : 'notfound'}">${ed.chatgpt.knowledge ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.chatgpt.knowledge ? 'found' : 'notfound'}">${ed.chatgpt.knowledge ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Erwähnungen <span class="engine-weight">25%</span></span>
-                                <span class="engine-check-icon ${ed.chatgpt.mentions ? 'found' : 'notfound'}">${ed.chatgpt.mentions ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.chatgpt.mentions ? 'found' : 'notfound'}">${ed.chatgpt.mentions ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                             <div class="engine-check-row">
                                 <span class="engine-check-label">Reputation <span class="engine-weight">15%</span></span>
-                                <span class="engine-check-icon ${ed.chatgpt.reviews ? 'found' : 'notfound'}">${ed.chatgpt.reviews ? '✓' : '✗'}</span>
+                                <span class="engine-check-icon ${ed.chatgpt.reviews ? 'found' : 'notfound'}">${ed.chatgpt.reviews ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}</span>
                             </div>
                         </div>
                         ` : ''}
@@ -775,8 +775,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const chatgptInsightText = chatgptKnown 
                 ? 'ChatGPT findet dein Unternehmen. Du bist auch für ChatGPT-Nutzer sichtbar.'
                 : data.hasDomain 
-                    ? 'ChatGPT findet deine Domain nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur deine Konkurrenten. Mehr externe Erwähnungen und strukturierte Daten können helfen.'
-                    : 'ChatGPT findet diesen Namen nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur deine Konkurrenten. Mehr externe Erwähnungen, eine eigene Website und strukturierte Daten können helfen.';
+                    ? 'ChatGPT findet deine Domain nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur Alternativen. Mehr externe Erwähnungen und strukturierte Daten können helfen.'
+                    : 'ChatGPT findet diesen Namen nicht. Nutzer von ChatGPT sehen bei Branchenanfragen nur Alternativen. Mehr externe Erwähnungen, eine eigene Website und strukturierte Daten können helfen.';
 
             html += `
                 <div class="result-section">
@@ -823,7 +823,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (competitors.length > 0) {
             html += `
                 <div class="result-section">
-                    <h3><i class="fa-solid fa-users"></i> Konkurrenten in KI-Antworten</h3>
+                    <h3><i class="fa-solid fa-users"></i> Alternativen in KI-Antworten</h3>
                     <p class="section-intro">Diese Domains werden statt deiner erwähnt:</p>
                     <div class="competitors-list">
                         ${competitors.map(c => `
