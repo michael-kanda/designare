@@ -840,7 +840,7 @@ input.email-report-input:active {
 .ai-hero-bot .bot-image {
     /* Größer als bisher (war 200px). Höhe folgt auto über Aspect-Ratio. */
     width: 100%;
-    max-width: 340px;
+    max-width: 300px;
     height: auto;
     display: block;
     /* Sanfter blauer Glow, damit der Bot vom Display "angeleuchtet" wirkt */
