@@ -533,6 +533,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         const lowAttr = isTiny ? 'data-low="1"' : '';
                         return `
                             <div class="breakdown-item">
+                                <div class="breakdown-header">
+                                    <span class="breakdown-label">${esc(item.category)}</span>
+                                    <span class="breakdown-points">${points}/${maxPoints}</span>
+                                </div>
                                 <div class="breakdown-bar" style="--bar-color: ${barColor}; --fill-pct: ${fillPct}%;" ${labelAttr}>
                                     <div class="breakdown-fill" ${lowAttr}>
                                         ${isTiny ? '' : `
