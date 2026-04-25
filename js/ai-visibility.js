@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="result-section">
                     <h3><i class="fa-solid fa-users"></i> Alternativen in KI-Antworten</h3>
-                    <p class="section-intro">Diese Domains werden statt deiner erwähnt:</p>
+                    <p class="section-intro">${data.hasDomain ? 'Diese Domains werden statt deiner erwähnt:' : 'Diese Domains tauchen in den KI-Antworten zu diesem Namen auf:'}</p>
                     <div class="competitors-list">
                         ${competitors.map(c => `
                             <a href="${safeHref('https://' + c)}" target="_blank" rel="noopener noreferrer" class="competitor-link">
