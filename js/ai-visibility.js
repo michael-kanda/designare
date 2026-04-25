@@ -413,9 +413,22 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="result-section score-section">
                 <div class="score-ring-container">
                     <svg class="score-ring" viewBox="0 0 120 120">
-                        <circle class="score-ring-bg" cx="60" cy="60" r="54" />
-                        <circle class="score-ring-progress" cx="60" cy="60" r="54" 
-                            style="stroke: ${scoreColor}; stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};" />
+                        <defs>
+                            <mask id="score-segment-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120">
+                                <!-- Schwarz=verborgen, Weiß=sichtbar. Der gestrichelte weiße Ring
+                                     legt fest, an welchen 24 Stellen die darunterliegenden Ringe
+                                     durchscheinen — dazwischen werden sie ausmaskiert. -->
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="white"
+                                        stroke-width="13" stroke-dasharray="12.137 2"
+                                        transform="rotate(-90 60 60)" />
+                            </mask>
+                        </defs>
+                        <g mask="url(#score-segment-mask)">
+                            <circle class="score-ring-bg" cx="60" cy="60" r="54" />
+                            <circle class="score-ring-progress" cx="60" cy="60" r="54"
+                                data-target-offset="${offset}"
+                                style="stroke: ${scoreColor}; stroke-dashoffset: ${circumference};" />
+                        </g>
                     </svg>
                     <div class="score-value">
                         <span class="score-number">${scoreMin}–${scoreMax}</span>
@@ -493,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // =================================================================
-        // SCORE-ZUSAMMENSETZUNG (kompakter)
+        // SCORE-ZUSAMMENSETZUNG (Chevron-Bars mit Labels innen)
         // =================================================================
         html += `
             <div class="result-section">
@@ -502,24 +515,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${score.breakdown.map(item => {
                         const points = parseInt(item.points) || 0;
                         const maxPoints = parseInt(item.maxPoints) || 1;
-                        const fillWidth = Math.min(100, (points / maxPoints) * 100);
-                        const fillColor = fillWidth >= 70 ? '#22c55e' : fillWidth >= 40 ? '#f59e0b' : '#ef4444';
+                        const fillPct = Math.min(100, Math.max(0, (points / maxPoints) * 100));
                         const categoryColors = {
                             'Gemini Sichtbarkeit': '#4285f4',
                             'ChatGPT Sichtbarkeit': '#10a37f',
                             'Technische Authority': '#8b5cf6',
                             'Online-Reputation': '#f59e0b'
                         };
-                        const barColor = categoryColors[item.category] || fillColor;
-                        
+                        const barColor = categoryColors[item.category] || '#c4a35a';
+                        // Wenn der Balken zu schmal für lesbares Text-Layout ist, rendern wir
+                        // ein Ghost-Label (data-tiny) auf dem grauen Track + den farbigen Stub
+                        // ohne Chevron (data-low).
+                        const isTiny = fillPct < 22;
+                        const labelAttr = isTiny
+                            ? `data-tiny="1" data-label="${esc(item.category)}     ${points}/${maxPoints}"`
+                            : '';
+                        const lowAttr = isTiny ? 'data-low="1"' : '';
                         return `
                             <div class="breakdown-item">
-                                <div class="breakdown-header">
-                                    <span class="breakdown-label">${esc(item.category)}</span>
-                                    <span class="breakdown-points" style="color: ${fillColor}">${points}/${maxPoints}</span>
-                                </div>
-                                <div class="breakdown-bar">
-                                    <div class="breakdown-fill" style="width: ${fillWidth}%; background: linear-gradient(90deg, ${barColor}88, ${barColor})"></div>
+                                <div class="breakdown-bar" style="--bar-color: ${barColor}; --fill-pct: ${fillPct}%;" ${labelAttr}>
+                                    <div class="breakdown-fill" ${lowAttr}>
+                                        ${isTiny ? '' : `
+                                            <span class="breakdown-fill-label">${esc(item.category)}</span>
+                                            <span class="breakdown-fill-points">${points}/${maxPoints}</span>
+                                        `}
+                                    </div>
                                 </div>
                                 <p class="breakdown-detail">${esc(item.detail)}</p>
                             </div>
@@ -904,9 +924,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         resultsContainer.innerHTML = html;
 
-        // Animate score ring
+        // Animate score ring + breakdown bars
         setTimeout(() => {
-            document.querySelector('.score-ring-progress')?.classList.add('animated');
+            const ring = document.querySelector('.score-ring-progress');
+            if (ring) {
+                ring.classList.add('animated');
+                // Transition fires, weil dashoffset von "circumference" (versteckt) auf target wechselt
+                ring.style.strokeDashoffset = ring.dataset.targetOffset;
+            }
+            // Bars werden gestaffelt animiert (jeweils 80ms später als der Vorgänger)
+            document.querySelectorAll('.breakdown-fill').forEach((el, i) => {
+                setTimeout(() => el.classList.add('animated'), i * 80);
+            });
         }, 100);
 
         resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
