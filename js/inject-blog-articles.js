@@ -102,6 +102,21 @@ async function extractArticle(filePath) {
 // =================================================================
 // HTML- und Schema-Generierung
 // =================================================================
+function generateFaqCard(article) {
+    return `
+                <a href="${article.slug}.html" class="faq-card">
+                    <div class="faq-card-icon">
+                        <i class="${article.icon}" aria-hidden="true"></i>
+                    </div>
+                    <div class="faq-card-content">
+                        <span class="faq-card-category">${article.category}</span>
+                        <h2>${article.question}</h2>
+                        <p>${article.answer}</p>
+                        <span class="faq-card-link">Zur Antwort <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </a>`;
+}
+
 function generateItemListSchema(articles) {
     return articles.map((article, idx) => ({
         "@type": "ListItem",
@@ -115,6 +130,7 @@ function generateItemListSchema(articles) {
         }
     }));
 }
+
 // =================================================================
 // Haupt-Logik
 // =================================================================
@@ -153,7 +169,7 @@ async function injectBlogArticles() {
 
         // 4. Section-HTML generieren
         const faqHtml = `
-            <section class="faq-cards-section" aria-label="Häufige Fragen">
+            <section class="faq-cards-section" aria-label="Artikel-Übersicht">
                 <div class="faq-cards-grid">
 ${articles.map(generateFaqCard).join('\n')}
                 </div>
@@ -173,8 +189,8 @@ ${articles.map(generateFaqCard).join('\n')}
         placeholder.html(faqHtml); // Wrapper bleibt → idempotent
         console.log('   ✅ FAQ-Cards injiziert');
 
-        // 6. Schema.org FAQPage aktualisieren
-     $('script[type="application/ld+json"]').each((_, el) => {
+        // 6. Schema.org ItemList aktualisieren
+        $('script[type="application/ld+json"]').each((_, el) => {
             try {
                 const schema = JSON.parse($(el).html());
                 if (!schema['@graph']) return;
