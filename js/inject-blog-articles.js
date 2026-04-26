@@ -112,7 +112,7 @@ function generateFaqCard(article) {
                         <span class="faq-card-category">${article.category}</span>
                         <h2>${article.question}</h2>
                         <p>${article.answer}</p>
-                        <span class="faq-card-link">Zur Antwort <i class="fa-solid fa-arrow-right"></i></span>
+                        <span class="faq-card-link">Weiterlesen <i class="fa-solid fa-arrow-right"></i></span>
                     </div>
                 </a>`;
 }
