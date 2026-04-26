@@ -596,6 +596,7 @@ input.email-report-input:active {
 .email-report-input:invalid,
 .email-report-input:valid {
     border-color: #C4A35A !important;
+    border-radius: 6px !important;
 }
 
 /* =================================================================
