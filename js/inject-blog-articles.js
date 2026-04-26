@@ -1,5 +1,5 @@
 // js/inject-blog-articles.js
-// Automatische FAQ-Card-Injektion für blog.html
+// Automatische Artikel-Card-Injektion für blog.html
 // Single Source of Truth: Schema.org JSON-LD in den Artikel-HTML-Dateien selbst.
 // Keine articles-db.json mehr nötig.
 //
@@ -100,16 +100,42 @@ async function extractArticle(filePath) {
 }
 
 // =================================================================
+// Datum-Helper
+// =================================================================
+function formatDate(isoDate) {
+    if (!isoDate) return null;
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function getDateInfo(article) {
+    const mod = article.dateModified;
+    const pub = article.datePublished;
+    if (mod && mod !== pub) return { iso: mod, text: formatDate(mod), label: 'Aktualisiert' };
+    if (pub)                return { iso: pub, text: formatDate(pub), label: 'Veröffentlicht' };
+    return null;
+}
+
+// =================================================================
 // HTML- und Schema-Generierung
 // =================================================================
 function generateFaqCard(article) {
+    const date = getDateInfo(article);
+    const dateHtml = date
+        ? `<time class="faq-card-date" datetime="${date.iso}" title="${date.label} am ${date.text}">${date.text}</time>`
+        : '';
+
     return `
                 <a href="${article.slug}.html" class="faq-card">
                     <div class="faq-card-icon">
                         <i class="${article.icon}" aria-hidden="true"></i>
                     </div>
                     <div class="faq-card-content">
-                        <span class="faq-card-category">${article.category}</span>
+                        <div class="faq-card-meta">
+                            <span class="faq-card-category">${article.category}</span>
+                            ${dateHtml}
+                        </div>
                         <h2>${article.question}</h2>
                         <p>${article.answer}</p>
                         <span class="faq-card-link">Weiterlesen <i class="fa-solid fa-arrow-right"></i></span>
@@ -118,17 +144,23 @@ function generateFaqCard(article) {
 }
 
 function generateItemListSchema(articles) {
-    return articles.map((article, idx) => ({
-        "@type": "ListItem",
-        "position": idx + 1,
-        "url": `https://designare.at/${article.slug}.html`,
-        "item": {
+    return articles.map((article, idx) => {
+        const item = {
             "@type": "TechArticle",
-            "headline": article.question,
+            "headline":    article.question,
             "description": article.answer,
-            "url": `https://designare.at/${article.slug}.html`
-        }
-    }));
+            "url":         `https://designare.at/${article.slug}.html`
+        };
+        if (article.datePublished) item.datePublished = article.datePublished;
+        if (article.dateModified)  item.dateModified  = article.dateModified;
+
+        return {
+            "@type":    "ListItem",
+            "position": idx + 1,
+            "url":      `https://designare.at/${article.slug}.html`,
+            item
+        };
+    });
 }
 
 // =================================================================
@@ -164,7 +196,11 @@ async function injectBlogArticles() {
             return a.slug.localeCompare(b.slug);
         });
 
-        articles.forEach(a => console.log(`   • [${a.category.padEnd(11)}] ${a.slug}`));
+        articles.forEach(a => {
+            const date = getDateInfo(a);
+            const dateStr = date ? `(${date.text})` : '(–)';
+            console.log(`   • [${a.category.padEnd(11)}] ${a.slug.padEnd(40)} ${dateStr}`);
+        });
         console.log('');
 
         // 4. Section-HTML generieren
@@ -187,7 +223,7 @@ ${articles.map(generateFaqCard).join('\n')}
             process.exit(1);
         }
         placeholder.html(faqHtml); // Wrapper bleibt → idempotent
-        console.log('   ✅ FAQ-Cards injiziert');
+        console.log('   ✅ Artikel-Cards injiziert');
 
         // 6. Schema.org ItemList aktualisieren
         $('script[type="application/ld+json"]').each((_, el) => {
