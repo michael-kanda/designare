@@ -1010,4 +1010,9 @@ input.email-report-input:active {
     .ai-hero-bot .hero-tagline {
         font-size: 0.9rem;
     }
+   
+   .ai-hero-bot .holo-header {
+    font-size: 0.7rem;
+}
+
 }
