@@ -1143,13 +1143,29 @@ color: var(--text-color);
     min-width: 0;
 }
 
+.faq-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+.faq-card-date {
+    font-size: 0.7rem;
+    color: var(--text-color-muted, #999);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    opacity: 0.7;
+}
+
 .faq-card-category {
     display: inline-block;
     font-size: 0.7rem;
     color: var(--accent-color, #c4a35a);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0;
     opacity: 0.8;
 }
 
