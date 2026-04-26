@@ -102,32 +102,19 @@ async function extractArticle(filePath) {
 // =================================================================
 // HTML- und Schema-Generierung
 // =================================================================
-function generateFaqCard(article) {
-    return `
-                <a href="${article.slug}.html" class="faq-card">
-                    <div class="faq-card-icon">
-                        <i class="${article.icon}" aria-hidden="true"></i>
-                    </div>
-                    <div class="faq-card-content">
-                        <span class="faq-card-category">${article.category}</span>
-                        <h2>${article.question}</h2>
-                        <p>${article.answer}</p>
-                        <span class="faq-card-link">Zur Antwort <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </a>`;
-}
-
-function generateFaqSchema(articles) {
-    return articles.map(article => ({
-        "@type": "Question",
-        "name": article.question,
-        "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `${article.answer} <a href="https://designare.at/${article.slug}.html">Mehr erfahren</a>`
+function generateItemListSchema(articles) {
+    return articles.map((article, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "url": `https://designare.at/${article.slug}.html`,
+        "item": {
+            "@type": "TechArticle",
+            "headline": article.question,
+            "description": article.answer,
+            "url": `https://designare.at/${article.slug}.html`
         }
     }));
 }
-
 // =================================================================
 // Haupt-Logik
 // =================================================================
@@ -187,15 +174,15 @@ ${articles.map(generateFaqCard).join('\n')}
         console.log('   ✅ FAQ-Cards injiziert');
 
         // 6. Schema.org FAQPage aktualisieren
-        $('script[type="application/ld+json"]').each((_, el) => {
+     $('script[type="application/ld+json"]').each((_, el) => {
             try {
                 const schema = JSON.parse($(el).html());
                 if (!schema['@graph']) return;
-                const faqIndex = schema['@graph'].findIndex(item => item['@type'] === 'FAQPage');
-                if (faqIndex === -1) return;
-                schema['@graph'][faqIndex].mainEntity = generateFaqSchema(articles);
+                const listIndex = schema['@graph'].findIndex(item => item['@type'] === 'ItemList');
+                if (listIndex === -1) return;
+                schema['@graph'][listIndex].itemListElement = generateItemListSchema(articles);
                 $(el).html(JSON.stringify(schema, null, 2));
-                console.log('   ✅ Schema.org FAQPage aktualisiert');
+                console.log('   ✅ Schema.org ItemList aktualisiert');
             } catch { /* ungültiges JSON-LD ignorieren */ }
         });
 
