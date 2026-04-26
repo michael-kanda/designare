@@ -587,6 +587,7 @@ input.email-report-input:focus-visible,
 input.email-report-input:active {
     border-color: #C4A35A !important;
     outline-color: #C4A35A !important;
+    border-radius: 6px !important;
 }
 
 /* Browser-Validierungs-Outlines (Chrome/Safari) abfangen */
