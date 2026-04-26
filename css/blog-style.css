@@ -222,6 +222,10 @@ html {
     scroll-margin-top: 100px;
 }
 
+.blog-overview.blog-article h2 {
+    padding-top: 20px;
+}
+
 .blog-article h3 {
     font-size: 1.4rem;
     font-weight: 700;
