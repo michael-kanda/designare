@@ -916,9 +916,9 @@ input.email-report-input:active {
 .ai-hero-bot .holo-header {
     text-align: center;
     font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 1rem;
     letter-spacing: 3px;
-    color: rgba(120, 180, 255, 0.55);
+    color: rgba(120, 180, 255, 0.45);
     text-transform: uppercase;
     margin-bottom: 18px;
     opacity: 0;
